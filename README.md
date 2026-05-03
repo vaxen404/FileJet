@@ -1,75 +1,45 @@
-# Nuxt Minimal Starter
+# ⚡ FileJet
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+FileJet, Nuxt 3 altyapısı üzerinde geliştirilmiş; güvenlik, hız ve tip güvenliğini (type-safety) odağına alan profesyonel bir bulut yönetim ekosistemidir.
 
-## Setup
+## 🛡️ Güvenlik ve Mimari
 
-Make sure to install dependencies:
+- Projenin kalbinde, verileri savunmasız bırakmayan modern mühendislik yaklaşımları yer alır:
 
-```bash
-# npm
-npm install
+- Argon2 Hashing: Kullanıcı şifreleri, endüstri standardı Argon2 algoritması ile sunucu tarafında asimetrik olarak korunur.
 
-# pnpm
-pnpm install
+- Dual-Layer Middleware: Yetkilendirme süreçleri hem istemci (Client) hem de sunucu (Server) tarafında çift katmanlı bir koruma ile yönetilir.
 
-# yarn
-yarn install
+- Zod Validation: Tüm I/O trafiği, Zod şemaları ile valide edilerek runtime hataları ve veri kirliliği önlenir.
 
-# bun
-bun install
-```
+## 🏗️ Teknik Katmanlar
 
-## Development Server
+- Sürdürülebilir bir geliştirme için modüler bir yapı tercih edilmiştir:
 
-Start the development server on `http://localhost:3000`:
+- Plugin System: Uygulama önyükleme sırasında global entegrasyonlar asenkron olarak ayağa kalkar.
 
-```bash
-# npm
-npm run dev
+- Pinia State: Uygulama durumu, atomik parçalara bölünmüş merkezi bir Source of Truth üzerinden yönetilir.
 
-# pnpm
-pnpm dev
+- Advanced Utils: Şifreleme mantığından dosya sistemi operasyonlarına kadar tüm "business logic" izole edilmiş utils katmanında barındırılır.
 
-# yarn
-yarn dev
+## 💻 Stack
 
-# bun
-bun run dev
-```
+- Frontend: Nuxt 3 (Vue 3 Composition API)
 
-## Production
+- Styling: Tailwind CSS
 
-Build the application for production:
+- State: Pinia
 
-```bash
-# npm
-npm run build
+- Server: Nitro Engine
 
-# pnpm
-pnpm build
+## 📂 Proje Yapısı
 
-# yarn
-yarn build
+- app/ — UI, Middleware & Plugins
 
-# bun
-bun run build
-```
+- server/ — API Routes & Argon2 Logic
 
-Locally preview production build:
+- stores/ — Pinia State Management
 
-```bash
-# npm
-npm run preview
+- utils/ — Cross-platform Schemas & Helpers
 
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## vaxen404 tarafından modern standartlarla geliştirildi.
