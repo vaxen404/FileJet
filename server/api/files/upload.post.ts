@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
       throw new Error('Eksik veri: dosya veya kullanıcı bilgisi yok')
     }
 
-    const storageDir = join(process.cwd(), 'data', 'uploads')
+    const storageDir = join(process.cwd(), 'public', 'uploads')
     await fs.mkdir(storageDir, { recursive: true });
 
     const uniqueFilename = `${Date.now()}-${file.filename}`
