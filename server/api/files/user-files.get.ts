@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const username = query.username
 
-    const DB_PATH = join(process.cwd(), 'data', 'users.json')
+    const storageDir = join(process.cwd(), 'public', 'uploads')
 
     try{
         const data = await fs.readFile(DB_PATH, 'utf-8')
