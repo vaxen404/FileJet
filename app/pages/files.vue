@@ -55,18 +55,29 @@ const downloadFile = (storedName) => {
 
 const copyFileToClipboard = async (storedName) => {
   try {
-    const response = await fetch(`/uploads/${storedName}`)
-    const blob = await response.blob()
-
-    const data = [new ClipboardItem({ [blob.type]: blob })]
+    const response = await fetch(`/uploads/${storedName}`);
+    if (!response.ok) throw new Error('Dosya alınamadı');
     
-    await navigator.clipboard.write(data)
-    alert('Dosya panoya kopyalandı! İstediğiniz yere (Discord, WhatsApp vb.) yapıştırabilirsiniz.')
+    const blob = await response.blob();
+
+    let type = blob.type;
+    
+    if (storedName.match(/\.(jpg|jpeg)$/i)) {
+      type = 'image/jpeg';
+    } else if (storedName.match(/\.png$/i)) {
+      type = 'image/png';
+    }
+
+    const data = [new ClipboardItem({ [type]: blob })];
+    await navigator.clipboard.write(data);
+    
+    alert('Dosya panoya kopyalandı!');
   } catch (err) {
-    console.error('Kopyalama başarısız:', err)
-    alert('Bu dosya tipi doğrudan kopyalamayı desteklemiyor olabilir. Lütfen indirmeyi deneyin.')
+    console.error('Kopyalama hatası ayrıntısı:', err);
+    
+    alert('Kopyalama başarısız. Tarayıcı bu formatı panoya yazılmasına izin vermiyor olabilir.');
   }
-}
+};
 
 const deleteFile = async (fileId, storedName) => {
   if (!confirm(`Silmek istediğine emin misin?`)) return
