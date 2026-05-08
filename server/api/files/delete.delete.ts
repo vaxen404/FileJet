@@ -3,10 +3,10 @@ import { join } from 'path'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { fileId, storedName, username } = body
+  const { fileId, fileName, username } = body 
 
   try {
-    const filePath = join(process.cwd(), 'data', 'uploads', storedName)
+    const filePath = join(process.cwd(), 'public', 'uploads', fileName)
     
     await fs.unlink(filePath).catch(() => console.log("Dosya klasörde bulunamadı, sadece DB'den siliniyor"))
 
@@ -16,7 +16,6 @@ export default defineEventHandler(async (event) => {
 
     if (userIndex !== -1) {
       users[userIndex].files = users[userIndex].files.filter((f: any) => f.id !== fileId)
-      
       await fs.writeFile(DB_PATH, JSON.stringify(users, null, 2))
       return { success: true }
     }
