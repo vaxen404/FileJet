@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const storageDir = join(process.cwd(), 'data', 'uploads')
+    await fs.mkdir(storageDir, { recursive: true });
 
     const uniqueFilename = `${Date.now()}-${file.filename}`
     const filePath = join(storageDir, uniqueFilename)
