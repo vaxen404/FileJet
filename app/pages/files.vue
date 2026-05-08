@@ -53,10 +53,19 @@ const downloadFile = (storedName) => {
   link.click()
 }
 
-const copyFileToClipboard = (storedName) => {
-  const url = `${window.location.origin}/uploads/${storedName}`
-  navigator.clipboard.writeText(url)
-  alert('Dosya linki kopyalandı!')
+const copyFileToClipboard = async (storedName) => {
+  try {
+    const response = await fetch(`/uploads/${storedName}`)
+    const blob = await response.blob()
+
+    const data = [new ClipboardItem({ [blob.type]: blob })]
+    
+    await navigator.clipboard.write(data)
+    alert('Dosya panoya kopyalandı! İstediğiniz yere (Discord, WhatsApp vb.) yapıştırabilirsiniz.')
+  } catch (err) {
+    console.error('Kopyalama başarısız:', err)
+    alert('Bu dosya tipi doğrudan kopyalamayı desteklemiyor olabilir. Lütfen indirmeyi deneyin.')
+  }
 }
 
 const deleteFile = async (fileId, storedName) => {
