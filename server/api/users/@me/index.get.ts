@@ -17,13 +17,13 @@ export default defineEventHandler(async (event) => {
                 id: session.userId
             },
             select: {
-        id: true,
-        username: true,
-        email: true,
-        storage_limit: true,
-        storage_used: true,
-        created_at: true
-    }
+                id: true,
+                username: true,
+                email: true,
+                storage_limit: true,
+                storage_used: true,
+                created_at: true
+            }
         })
     
         if (!user) {

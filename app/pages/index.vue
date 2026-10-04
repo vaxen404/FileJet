@@ -4,5 +4,5 @@
 
 <script setup lang="ts">
 const currentUser = useAuthUser();
-await navigateTo(currentUser.value ? '/dashboard' : '/login');
+await navigateTo(currentUser.value ? '/home' : '/login');
 </script>
