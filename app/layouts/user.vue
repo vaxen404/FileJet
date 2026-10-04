@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import Sidebar from '~/components/layout/Sidebar.vue'
+import HeaderBar from '~/components/layout/HeaderBar.vue'
 const route = useRoute()
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
-    '/dashboard': 'Dashboard',
+    '/home': 'Dashboard',
     '/files': 'Files',
     '/folders': 'Folders',
     '/notes': 'Notes',
@@ -18,7 +20,7 @@ const pageTitle = computed(() => {
 })
 
 const contentClass = computed(() => ({
-  'dashboard-content': true,
+  'user-content': true,
   'files-content': route.path === '/files',
   'folders-content': route.path === '/folders'
 }))
@@ -26,10 +28,10 @@ const contentClass = computed(() => ({
 </script>
 
 <template>
-  <div class="dashboard-layout">
+  <div class="user-layout">
     <Sidebar />
 
-    <div class="dashboard-main">
+    <div class="user-main">
       <HeaderBar :title="pageTitle" />
 
       <main :class="contentClass">
@@ -54,7 +56,7 @@ body {
 </style>
 
 <style scoped>
-.dashboard-layout {
+.user-layout {
   display: flex;
   gap: 1.25rem;
 
@@ -67,7 +69,7 @@ body {
   color: white;
 }
 
-.dashboard-main {
+.user-main {
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -77,7 +79,7 @@ body {
   gap: 1.25rem;
 }
 
-.dashboard-content {
+.user-content {
   flex: 1;
   min-height: 0;
 

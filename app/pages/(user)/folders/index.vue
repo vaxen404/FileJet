@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import SearchBox from '~/components/SearchBox.vue';
-import ViewSwitcher from '~/components/ViewSwitcher.vue'
+import SearchBox from '~/components/ui/SearchBox.vue';
+import ViewSwitcher from '~/components/ui/ViewSwitcher.vue'
 import UploadButton from '~/components/ui/UploadButton.vue'
-import ItemMenu from '~/components/ItemMenu.vue'
+import ItemMenu from '~/components/ui/ItemMenu.vue'
+import Pagination from '~/components/ui/Pagination.vue';
+import DataView from '~/components/ui/DataView.vue';
 
 definePageMeta({
     middleware: 'auth',
-    layout: 'dashboard'
+    layout: 'user'
 })
 
 const { toastMessage, toastType, showToast, openToast } = useToast()
@@ -125,8 +127,16 @@ const openFolder = (folder: any) => {
     console.log('Open:', folder.name);
 }
 
+const downloadFolder = (folder: any) => {
+    console.log('Download:', folder.name);
+}
+
 const renameFolder = (folder: any) => {
     console.log('Rename:', folder.name);
+}
+
+const favoriteFolder = (folder: any) => {
+    console.log('Favorite:', folder.name);
 }
 
 const deleteFolder = (folder: any) => {
@@ -149,29 +159,8 @@ const paginatedFolders = computed(() => {
     return filteredFolders.value.slice(start, end)
 })
 
-const visiblePages = computed(() => {
-    const total = totalPages.value
-    const current = currentPage.value
-
-    if (total <= 4) {
-        return Array.from({ length: total}, (_, i) => i + 1)
-    }
-
-    if (current <= 3) {
-        return [1, 2, 3, 4, '...']
-    }
-
-    if (current >= total - 2) {
-        return ['...', total - 3, total - 2, total - 1, total]
-    }
-
-    return [
-        '...',
-        current - 1,
-        current,
-        current + 1,
-        '...'
-    ]
+watch(searchQuery, () => {
+    currentPage.value = 1
 })
 </script>
 
@@ -179,180 +168,158 @@ const visiblePages = computed(() => {
     <div class="folders-page">
         <div class="folders-header">
             <div class="folders-toolbar">
-                <SearchBox 
+                <SearchBox
                     v-model="searchQuery"
                     placeholder="Search folders..."
                 />
 
                 <div class="toolbar-actions">
                     <ViewSwitcher v-model="viewMode" />
-                    <UploadButton text="Upload" mode="folder" @folder="handleFolders"/>
-                </div>
-            </div>
-        </div>
 
-        <div
-            v-if="viewMode === 'list'"
-            class="folders-table-wrapper"
-            :class="{ 'drag-active': isDragging }"
-            @dragover.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
-            @drop.prevent="handleDrop"
-        >
-            <div class="table-scroll">
-                <table class="folders-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                <input 
-                                    type="checkbox" 
-                                    class="folder-checkbox"
-                                    :checked="allSelected"
-                                    @change="toggleSelectAll"
-                                >
-                            </th>
-
-                            <th>
-                                <div class="name-header">
-                                    Name
-                                    <Icon name="solar:sort-vertical-linear" class="sort-icon" />
-                                </div>
-                            </th>
-
-                            <th>Type</th>
-                            <th>Items</th>
-                            <th>Modified</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    
-                    <tbody>
-                        <tr
-                            v-for="(folder, index) in paginatedFolders"
-                            :key="index"
-                        >
-                            <td>
-                                <input 
-                                    type="checkbox" 
-                                    class="folder-checkbox"
-                                    :value="folder.name"
-                                    v-model="selectedFolders"
-                                >
-                            </td>
-
-                            <td>
-                                <div class="folder-name">
-                                    <div class="folder-icon">
-                                        <Icon :name="folder.iconName" />
-                                    </div>
-
-                                    <div class="folder-info">
-                                        <strong>{{ folder.name }}</strong>
-                                        <span>{{ folder.items }} • {{ folder.time }}</span>
-                                    </div>
-                                </div>
-                            </td>
-
-                            <td>{{ folder.type }}</td>
-                            <td>{{ folder.items }}</td>
-                            <td>{{ folder.modified }}</td>
-
-                            <td>
-                                <ItemMenu 
-                                    type="folder"
-                                    @open="openFolder(folder)"
-                                    @rename="renameFolder(folder)"
-                                    @delete="deleteFolder(folder)"
-                                />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div 
-            v-else
-            class="folders-grid"
-            :class="{ 'drag-active': isDragging }"
-            @dragover.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
-            @drop.prevent="handleDrop"
-        >
-            <div 
-                v-for="(folder, index) in paginatedFolders"
-                :key="index"
-                class="folder-card"
-            >
-                <div class="folder-card-top">
-                    <div class="folder-card-icon">
-                        <Icon :name="folder.iconName" />
-                    </div>
-
-                    <ItemMenu 
-                        type="folder"
-                        @open="openFolder(folder)"
-                        @rename="renameFolder(folder)"
-                        @delete="deleteFolder(folder)"
+                    <UploadButton
+                        text="Upload"
+                        mode="folder"
+                        @folder="handleFolders"
                     />
                 </div>
-
-                <div class="folder-card-info">
-                    <strong>{{ folder.name }}</strong>
-                    <span>{{ folder.type }}</span>
-                </div>
-
-                <div class="folder-card-bottom">
-                    <span>{{ folder.items }} Items</span>
-                    <span>{{ folder.time }}</span>
-                </div>
             </div>
         </div>
 
-        <div 
-            class="pagination"
-            :class="{ 'grid-pagination': viewMode === 'grid' }"
+        <DataView
+            :view-mode="viewMode"
+            :is-dragging="isDragging"
+            drop-text="Drop folders to upload"
+            @dragover="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop="handleDrop"
         >
-            <button
-                class="page-button"
-                type="button"
-                :disabled="currentPage === 1"
-                @click="currentPage--"
-            >
-                <Icon name="solar:alt-arrow-left-linear" />
-            </button>
+            <template #list>
+                <div class="table-scroll">
+                    <table class="folders-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input
+                                        type="checkbox"
+                                        class="folder-checkbox"
+                                        :checked="allSelected"
+                                        @change="toggleSelectAll"
+                                    >
+                                </th>
 
-            <template
-                v-for="(page, index) in visiblePages"
-                :key="index"
-            >
-                <span
-                    v-if="page === '...'"
-                    class="page-dots"
-                >
-                    ...
-                </span>
+                                <th>
+                                    <div class="name-header">
+                                        Name
+                                        <Icon
+                                            name="solar:sort-vertical-linear"
+                                            class="sort-icon"
+                                        />
+                                    </div>
+                                </th>
 
-                <button 
-                    v-else
-                    class="page-button"
-                    :class="{ active: currentPage === page }"
-                    type="button"
-                    @click="currentPage = Number(page)"
-                >
-                    {{ page }}
-                </button>
+                                <th>Type</th>
+                                <th>Items</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr
+                                v-for="(folder, index) in paginatedFolders"
+                                :key="index"
+                            >
+                                <td>
+                                    <input
+                                        v-model="selectedFolders"
+                                        type="checkbox"
+                                        class="folder-checkbox"
+                                        :value="folder.name"
+                                    >
+                                </td>
+
+                                <td>
+                                    <div class="folder-name">
+                                        <div class="folder-icon">
+                                            <Icon :name="folder.iconName" />
+                                        </div>
+
+                                        <div class="folder-info">
+                                            <strong>{{ folder.name }}</strong>
+                                            <span>
+                                                {{ folder.items }} • {{ folder.time }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>{{ folder.type }}</td>
+                                <td>{{ folder.items }}</td>
+                                <td>{{ folder.modified }}</td>
+
+                                <td>
+                                    <ItemMenu
+                                        type="folder"
+                                        :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                                        @open="openFolder(folder)"
+                                        @download="downloadFolder(folder)"
+                                        @rename="renameFolder(folder)"
+                                        @favorite="favoriteFolder(folder)"
+                                        @delete="deleteFolder(folder)"
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </template>
 
-            <button
-                class="page-button"
-                type="button"
-                :disabled="currentPage === totalPages"
-                @click="currentPage++"
-            >
-                <Icon name="solar:alt-arrow-right-linear" />
-            </button>
-        </div>
+            <template #grid>
+                <div
+                    v-for="(folder, index) in paginatedFolders"
+                    :key="index"
+                    class="folder-card"
+                >
+                    <div class="folder-card-top">
+                        <div class="folder-card-icon">
+                            <Icon :name="folder.iconName" />
+                        </div>
+
+                        <ItemMenu
+                            type="folder"
+                            :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                            @open="openFolder(folder)"
+                            @download="downloadFolder(folder)"
+                            @rename="renameFolder(folder)"
+                            @favorite="favoriteFolder(folder)"
+                            @delete="deleteFolder(folder)"
+                        />
+                    </div>
+
+                    <div class="folder-card-info">
+                        <strong>{{ folder.name }}</strong>
+                        <span>{{ folder.type }}</span>
+                    </div>
+
+                    <div class="folder-card-bottom">
+                        <span>{{ folder.items }} Items</span>
+                        <span>{{ folder.time }}</span>
+                    </div>
+                </div>
+            </template>
+        </DataView>
+
+        <Pagination
+            v-model="currentPage"
+            :total-pages="totalPages"
+            :view-mode="viewMode"
+        />
+
+        <Toast
+            :show="showToast"
+            :message="toastMessage"
+            :type="toastType"
+        />
     </div>
 </template>
 
@@ -402,53 +369,6 @@ const visiblePages = computed(() => {
     align-items: center;
 
     gap: 1rem;
-}
-
-.folders-table-wrapper {
-    position: relative;
-    
-    flex: 1;
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-top-left-radius: 0.625rem;
-    border-top-right-radius: 0.625rem;
-
-    overflow: hidden;
-
-    box-sizing: border-box;
-}
-
-.folders-table-wrapper.drag-active::after {
-    content: 'Drop folders to upload';
-
-    position: absolute;
-
-    inset: 0;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    background: #121214e0;
-
-    border: 2px dashed #5a5aff;
-    border-radius: 0.8rem;
-
-    color: white;
-
-    font-size: 1.2rem;
-    font-weight: 600;
-
-    z-index: 20;
-
-    pointer-events: none;
 }
 
 .table-scroll {
@@ -633,135 +553,6 @@ const visiblePages = computed(() => {
     font-size: 0.75rem;
 
     white-space: nowrap;
-}
-
-.pagination {
-    height: 4rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    gap: 0.45rem;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-bottom-left-radius: 0.625rem;
-    border-bottom-right-radius: 0.625rem;
-}
-
-.grid-pagination {
-    height: 3.5rem;
-
-    background: transparent;
-
-    border: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-
-    margin-top: 0.75rem;
-}
-
-.page-button {
-    width: 2.2rem;
-    height: 2.2rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #1a1a1d;
-
-    color: #a8a8b0;
-
-    border: 1px solid #29292e;
-    border-radius: 0.5rem;
-
-    font-size: 0.82rem;
-    font-weight: 500;
-
-    cursor: pointer;
-}
-
-.page-button:hover:not(:disabled) {
-    background: #242429;
-
-    color: #ffffff;
-
-    border-color: #3c47be;
-}
-
-.page-button.active {
-    background: #3c47be;
-    color: #ffffff;
-    border-color: #3c47be;
-}
-
-.page-button:disabled {
-    opacity: 0.35;
-
-    cursor: default;
-}
-
-.page-dots {
-    min-width: 1.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #898991;
-}
-
-.folders-grid {
-    position: relative;
-
-    flex: 1;
-    min-height: 0;
-
-    display: grid;
-
-    grid-template-columns: repeat(5, 1fr);
-
-    align-content: start;
-
-    gap: 1rem;
-
-    overflow-y: auto;
-}
-
-.folders-grid.drag-active::after {
-    content: 'Drop folders to upload';
-
-    position: absolute;
-    inset: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #121214e0;
-
-    border: 2px dashed #5a5aff;
-    border-radius: 0.8rem;
-
-    color: white;
-
-    font-size: 1.2rem;
-    font-weight: 600;
-
-    z-index: 20;
-
-    pointer-events: none;
-}
-
-@media (max-width: 1500px) {
-    .folders-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
 }
 
 .folder-card {

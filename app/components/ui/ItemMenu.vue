@@ -1,23 +1,50 @@
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core'
-defineProps<{
-    type: 'file' | 'folder'
-}>()
+
+type Action =
+    | 'open'
+    | 'rename'
+    | 'edit'
+    | 'download'
+    | 'favorite'
+    | 'delete'
+
+const props = withDefaults(
+    defineProps<{
+        type: 'file' | 'folder' | 'note'
+        actions?: Action[]
+    }>(),
+    {
+        actions: () => [
+            'open',
+            'rename',
+            'download',
+            'favorite',
+            'delete'
+        ]
+    }
+)
 
 const emit = defineEmits<{
-    open: [],
-    rename: [],
-    download: [],
-    favorite: [],
+    open: []
+    rename: []
+    edit: []
+    download: []
+    favorite: []
     delete: []
 }>()
 
 const isOpen = ref(false)
 const menuRef = ref<HTMLElement | null>(null)
 
-const actions = {
+const hasAction = (action: Action) => {
+    return props.actions.includes(action)
+}
+
+const actionHandlers = {
     open: () => emit('open'),
     rename: () => emit('rename'),
+    edit: () => emit('edit'),
     download: () => emit('download'),
     favorite: () => emit('favorite'),
     delete: () => emit('delete')
@@ -27,15 +54,14 @@ const toggleMenu = () => {
     isOpen.value = !isOpen.value
 }
 
-const handleAction = (action: keyof typeof actions) => {
-    actions[action]()
+const handleAction = (action: Action) => {
+    actionHandlers[action]()
     isOpen.value = false
 }
 
 onClickOutside(menuRef, () => {
     isOpen.value = false
 })
-
 </script>
 
 <template>
@@ -53,15 +79,24 @@ onClickOutside(menuRef, () => {
             class="menu-dropdown"
         >
             <button
+                v-if="hasAction('open')"
                 type="button"
                 class="menu-item"
                 @click="handleAction('open')"
             >
-                <Icon name="solar:folder-open-bold" />
+                <Icon
+                    :name="type === 'folder'
+                        ? 'solar:folder-open-bold'
+                        : type === 'note'
+                            ? 'solar:notebook-bold'
+                            : 'solar:document-bold'"
+                />
+
                 Open
             </button>
 
             <button
+                v-if="hasAction('rename')"
                 type="button"
                 class="menu-item"
                 @click="handleAction('rename')"
@@ -71,7 +106,17 @@ onClickOutside(menuRef, () => {
             </button>
 
             <button
-                v-if="type === 'file'"
+                v-if="hasAction('edit')"
+                type="button"
+                class="menu-item"
+                @click="handleAction('edit')"
+            >
+                <Icon name="solar:pen-bold" />
+                Edit
+            </button>
+
+            <button
+                v-if="hasAction('download')"
                 type="button"
                 class="menu-item"
                 @click="handleAction('download')"
@@ -81,6 +126,7 @@ onClickOutside(menuRef, () => {
             </button>
 
             <button
+                v-if="hasAction('favorite')"
                 type="button"
                 class="menu-item"
                 @click="handleAction('favorite')"
@@ -90,6 +136,7 @@ onClickOutside(menuRef, () => {
             </button>
 
             <button
+                v-if="hasAction('delete')"
                 type="button"
                 class="menu-item danger"
                 @click="handleAction('delete')"
@@ -116,17 +163,20 @@ onClickOutside(menuRef, () => {
     justify-content: center;
 
     background: transparent;
-
     color: #a8a8b0;
 
     border: none;
     border-radius: 0.45rem;
 
-    font-size: 1.1rem;
-
     transform: rotate(90deg);
 
+    font-size: 1.1rem;
+
     cursor: pointer;
+}
+
+.menu-trigger :deep(svg) {
+    transform: rotate(90deg);
 }
 
 .menu-trigger:hover {
@@ -137,8 +187,8 @@ onClickOutside(menuRef, () => {
 .menu-dropdown {
     position: absolute;
 
-    top: calc(100% + 0.4rem);
-    right: 0;
+    top: calc(100% - 0.5rem);
+    right: 1.625rem;
 
     width: 10rem;
 
@@ -162,12 +212,12 @@ onClickOutside(menuRef, () => {
 
     display: flex;
     align-items: center;
+
     gap: 0.6rem;
 
     padding: 0.65rem 0.7rem;
 
     background: transparent;
-
     color: #d5d5da;
 
     border: none;

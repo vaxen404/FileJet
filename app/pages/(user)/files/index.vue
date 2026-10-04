@@ -2,11 +2,13 @@
 import SearchBox from '~/components/ui/SearchBox.vue'
 import ViewSwitcher from '~/components/ui/ViewSwitcher.vue'
 import UploadButton from '~/components/ui/UploadButton.vue'
-import { f } from 'vue-router/dist/index-D7ja2BKs.js'
+import ItemMenu from '~/components/ui/ItemMenu.vue'
+import Pagination from '~/components/ui/Pagination.vue'
+import DataView from '~/components/ui/DataView.vue'
 
 definePageMeta({
     middleware: 'auth',
-    layout: 'dashboard'
+    layout: 'user'
 })
 
 const { toastMessage, toastType, showToast, openToast } = useToast()
@@ -99,366 +101,6 @@ const files = ref([
     time: '12 minutes ago',
     size: '842 KB',
     modified: 'Oct 2, 2026 16:44'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 18:12'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 18:02'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 13:14'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 12:48'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 12:22'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 11:55'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 21:40'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 20:18'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 2, 2026 19:03'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 18:27'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 16:44'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 18:12'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 18:02'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 13:14'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 12:48'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 12:22'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 11:55'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 21:40'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 20:18'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 2, 2026 19:03'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 18:27'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 16:44'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 18:12'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 18:02'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 13:14'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 12:48'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 12:22'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 11:55'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 21:40'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 20:18'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 2, 2026 19:03'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 18:27'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 16:44'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 18:12'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 18:02'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 13:14'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 12:48'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 12:22'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 11:55'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 21:40'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 20:18'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 2, 2026 19:03'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 18:27'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 16:44'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 2, 2026 15:09'
   }
 ])
 
@@ -533,6 +175,10 @@ const downloadFile = (file: any) => {
     console.log("Download:", file.name);
 }
 
+const favoriteFile = (file: any) => {
+    console.log("Favorite:", file.name);
+}
+
 const deleteFile = (file: any) => {
     console.log('Delete:', file.name);
 }
@@ -554,29 +200,8 @@ const paginatedFiles = computed(() => {
     return filteredFiles.value.slice(start, end)
 })
 
-const visiblePages = computed(() => {
-    const total = totalPages.value
-    const current = currentPage.value
-
-    if (total <= 4) {
-        return Array.from({ length: total }, (_, i) => i + 1)
-    }
-
-    if (current <= 3) {
-        return [1, 2, 3, 4, '...']
-    }
-
-    if (current >= total - 2) {
-        return ['...', total - 3, total - 2, total - 1, total]
-    }
-
-    return [
-        '...',
-        current - 1,
-        current,
-        current + 1,
-        '...'
-    ]
+watch([searchQuery, activeCategory], () => {
+    currentPage.value = 1
 })
 
 </script>
@@ -648,166 +273,134 @@ const visiblePages = computed(() => {
             </div>
         </div>
 
-        <div
-            v-if="viewMode === 'list'"
-            class="files-table-wrapper"
-            :class="{ 'drag-active': isDragging }"
-            @dragover.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
-            @drop.prevent="handleDrop"
+        <DataView
+            :view-mode="viewMode"
+            :is-dragging="isDragging"
+            drop-text="Drop files to upload"
+            @dragover="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop="handleDrop"
         >
-            <div class="table-scroll">
-                <table class="files-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                <input 
-                                    type="checkbox" 
-                                    class="file-checkbox"
-                                    :checked="allSelected"
-                                    @change="toggleSelectAll"
-                                >
-                            </th>
+            <template #list>
+                <div class="table-scroll">
+                    <table class="files-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        :checked="allSelected"
+                                        @change="toggleSelectAll"
+                                    >
+                                </th>
 
-                            <th>
-                                <div class="name-header">
-                                    Name
-                                    <Icon name="solar:sort-vertical-linear" class="sort-icon" />
-                                </div>
-                            </th>
-
-                            <th>Type</th>
-                            <th>Size</th>
-                            <th>Modified</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr
-                            v-for="(file, index) in paginatedFiles"
-                            :key="index"
-                        >
-                            <td>
-                                <input 
-                                    type="checkbox" 
-                                    class="file-checkbox"
-                                    :value="file.name"
-                                    v-model="selectedFiles"
-                                >
-                            </td>
-
-                            <td>
-                                <div class="file-name">
-                                    <div class="file-icon">
-                                        <Icon :name="file.iconName" />
+                                <th>
+                                    <div class="name-header">
+                                        Name
+                                        <Icon
+                                            name="solar:sort-vertical-linear"
+                                            class="sort-icon"
+                                        />
                                     </div>
+                                </th>
 
-                                    <div class="file-info">
-                                        <strong>{{ file.name }}</strong>
-                                        <span>{{ file.type }} • {{ file.time }}</span>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr
+                                v-for="(file, index) in paginatedFiles"
+                                :key="index"
+                            >
+                                <td>
+                                    <input
+                                        v-model="selectedFiles"
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        :value="file.name"
+                                    >
+                                </td>
+
+                                <td>
+                                    <div class="file-name">
+                                        <div class="file-icon">
+                                            <Icon :name="file.iconName" />
+                                        </div>
+
+                                        <div class="file-info">
+                                            <strong>{{ file.name }}</strong>
+                                            <span>
+                                                {{ file.size }} • {{ file.time }}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
+                                </td>
 
-                            <td>{{ file.type }}</td>
-                            <td>{{ file.size }}</td>
-                            <td>{{ file.modified }}</td>
+                                <td>{{ file.type }}</td>
+                                <td>{{ file.size }}</td>
+                                <td>{{ file.modified }}</td>
 
-                            <td>
-                                <ItemMenu 
-                                    type="file"
-                                    @open="openFile(file)"
-                                    @rename="renameFile(file)"
-                                    @download="downloadFile(file)"
-                                    @delete="deleteFile(file)"
-                                />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div
-            v-else
-            class="files-grid"
-        >
-            <div
-                v-for="(file, index) in paginatedFiles"
-                :key="index"
-                class="file-card"
-            >
-                <div class="file-card-top">
-                    <div class="file-card-icon">
-                        <Icon :name="file.iconName" />
-                    </div>
-                    
-                    <ItemMenu 
-                        type="file"
-                        @open="openFile(file)"
-                        @rename="renameFile(file)"
-                        @download="downloadFile(file)"
-                        @delete="deleteFile(file)"
-                    />
+                                <td>
+                                    <ItemMenu
+                                        type="file"
+                                        @open="openFile(file)"
+                                        @download="downloadFile(file)"
+                                        @rename="renameFile(file)"
+                                        @favorite="favoriteFile(file)"
+                                        @delete="deleteFile(file)"
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                    
-                <div class="file-card-info">
-                    <strong>{{ file.name }}</strong>
-                    <span>{{ file.type }}</span>
-                </div>
-                
-                <div class="file-card-bottom">
-                    <span>{{ file.size }}</span>
-                    <span>{{ file.time }}</span>
-                </div>
-            </div>
-        </div>
-
-        <div 
-            class="pagination"
-            :class="{ 'grid-pagination': viewMode === 'grid' }"
-        >
-            <button
-                class="page-button"
-                type="button"
-                :disabled="currentPage === 1"
-                @click="currentPage--"
-            >
-                <Icon name="solar:alt-arrow-left-linear" />
-            </button>
-
-            <template
-                v-for="(page, index) in visiblePages"
-                :key="index"
-            >
-                <span
-                    v-if="page === '...'"
-                    class="page-dots"
-                >
-                    ...
-                </span>
-
-                <button
-                    v-else
-                    class="page-button"
-                    :class="{ active: currentPage === page }"
-                    type="button"
-                    @click="currentPage = Number(page)"
-                >
-                    {{ page }}
-                </button>
             </template>
 
-            <button
-                class="page-button"
-                type="button"
-                :disabled="currentPage === totalPages"
-                @click="currentPage++"
-            >
-                <Icon name="solar:alt-arrow-right-linear" />
-            </button>
-        </div>
+            <template #grid>
+                <div
+                    v-for="(file, index) in paginatedFiles"
+                    :key="index"
+                    class="file-card"
+                >
+                    <div class="file-card-top">
+                        <div class="file-card-icon">
+                            <Icon :name="file.iconName" />
+                        </div>
+
+                        <ItemMenu
+                            type="file"
+                            @open="openFile(file)"
+                            @download="downloadFile(file)"
+                            @rename="renameFile(file)"
+                            @favorite="favoriteFile(file)"
+                            @delete="deleteFile(file)"
+                        />
+                    </div>
+
+                    <div class="file-card-info">
+                        <strong>{{ file.name }}</strong>
+                        <span>{{ file.type }}</span>
+                    </div>
+
+                    <div class="file-card-bottom">
+                        <span>{{ file.size }} Items</span>
+                        <span>{{ file.time }}</span>
+                    </div>
+                </div>
+            </template>
+        </DataView>
+
+        <Pagination
+            v-model="currentPage"
+            :total-pages="totalPages"
+            :view-mode="viewMode"
+        />
+
     </div>
 </template>
 
@@ -907,53 +500,6 @@ const visiblePages = computed(() => {
     background: #3c47be;
 
     border-color: #3c47be;
-}
-
-.files-table-wrapper {
-    position: relative;
-
-    flex: 1;
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-top-left-radius: 0.625rem;
-    border-top-right-radius: 0.625rem;
-
-    overflow: hidden;
-
-    box-sizing: border-box;
-}
-
-.files-table-wrapper.drag-active::after {
-    content: 'Drop files to upload';
-
-    position: absolute;
-
-    inset: 0;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    background: #121214e0;
-
-    border: 2px dashed #5a5aff;
-    border-radius: 0.8rem;
-
-    color: white;
-
-    font-size: 1.2rem;
-    font-weight: 600;
-
-    z-index: 20;
-
-    pointer-events: none;
 }
 
 .table-scroll {
@@ -1139,120 +685,6 @@ const visiblePages = computed(() => {
     font-size: 0.75rem;
 
     white-space: nowrap;
-}
-
-.file-menu {
-    background: transparent;
-
-    border: none;
-
-    color: #a8a8b0;
-
-    font-size: 1.1rem;
-
-    transform: rotate(90deg);
-}
-
-.pagination {
-    height: 4rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    gap: 0.45rem;
-
-    background: #1a1a1d;
-
-    border-top: 1px solid #29292e;
-    border-bottom-left-radius: 0.625rem;
-    border-bottom-right-radius: 0.625rem;
-}
-
-.grid-pagination {
-    height: 3.5rem;
-
-    background: transparent;
-
-    border-top: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-
-    margin-top: 0.75rem;
-}
-
-.page-button {
-    width: 2.2rem;
-    height: 2.2rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #1a1a1d;
-
-    color: #a8a8b0;
-
-    border: 1px solid #29292e;
-    border-radius: 0.5rem;
-
-    font-size: 0.82rem;
-    font-weight: 500;
-
-    cursor: pointer;
-}
-
-.page-button:hover:not(:disabled) {
-    background: #242429;
-
-    color: #ffffff;
-}
-
-.page-button.active {
-    background: #3c47be;
-
-    color: #ffffff;
-
-    border-color: #3c47be;
-}
-
-.page-button:disabled {
-    opacity: 0.35;
-
-    cursor: default;
-}
-
-.page-dots {
-    min-width: 1.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #898991;
-}
-
-.files-grid {
-    flex: 1;
-    min-height: 0;
-    
-    display: grid;
-
-    grid-template-columns: repeat(5, 1fr);
-
-    align-content: start;
-
-    gap: 1rem;
-
-    overflow-y: auto;
-}
-
-@media (max-width: 1500px) {
-    .files-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
 }
 
 .file-card {
