@@ -5,7 +5,7 @@ const isView = ref(false)
 
 const currentUser = useAuthUser()
 
-const { toastMessage, toastType, showToast, openToast } = useToast()
+const { openToast } = useToast()
 
 const handleLogin = async () => {
     try {
@@ -34,12 +34,6 @@ const handleLogin = async () => {
 
 <template>
     <div class="login-page">
-        <Toast
-            :show="showToast"
-            :message="toastMessage"
-            :type="toastType"
-        />
-
         <div class="login-card">
             <h2>Login</h2>
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Toast from '~/components/ui/Toast.vue'
+
 const { toastMessage, toastType, showToast } = useToast()
 </script>
 

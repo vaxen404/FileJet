@@ -11,7 +11,7 @@ definePageMeta({
     layout: 'user'
 })
 
-const { toastMessage, toastType, showToast, openToast } = useToast()
+const { openToast } = useToast()
 
 const folders = ref([
     {
@@ -315,11 +315,6 @@ watch(searchQuery, () => {
             :view-mode="viewMode"
         />
 
-        <Toast
-            :show="showToast"
-            :message="toastMessage"
-            :type="toastType"
-        />
     </div>
 </template>
 

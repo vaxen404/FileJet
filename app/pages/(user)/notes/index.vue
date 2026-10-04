@@ -170,7 +170,7 @@ watch([searchQuery, activeCategory], () => {
 
                 <div class="toolbar-actions">
                     <ViewSwitcher v-model="viewMode" />
-                    <UploadButton text="Upload" mode="file" @folder="handleNoteUpload"/>
+                    <UploadButton text="Upload" mode="file" @files="handleNoteUpload"/>
 
 
                     <button
