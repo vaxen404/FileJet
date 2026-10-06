@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
                 message: 'Geçersiz oturum.'  
             })
         }
-    
+
         return {
             id: user.id,
             username: user.username,

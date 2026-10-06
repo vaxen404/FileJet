@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { loginSchema } from '~/schemas/auth'
+
 const username = ref('')
 const password = ref('')
 const isView = ref(false)
@@ -8,6 +10,20 @@ const currentUser = useAuthUser()
 const { openToast } = useToast()
 
 const handleLogin = async () => {
+    const result = loginSchema.safeParse({
+        username: username.value,
+        password: password.value
+    })
+
+    if (!result.success) {
+        openToast(
+            result.error.issues[0]?.message || 'Geçersiz bilgiler.',
+            'error'
+        )
+
+        return
+    }
+
     try {
         const response = await $fetch('/api/auth/login', {
             method: 'POST',
@@ -21,7 +37,7 @@ const handleLogin = async () => {
 
         openToast('Logged in successfully', 'success')   
 
-        await navigateTo('/dashboard')
+        await navigateTo('/home')
     } catch (e: any) {
         openToast(
             e.data?.message || 'Login failed',
@@ -45,7 +61,7 @@ const handleLogin = async () => {
             <div class="form-group">
                 <label>Password<i>*</i></label>
                 <div class="input-box">
-                    <input :type=" isView ? 'text' : 'password'" v-model="password">
+                    <input :type=" isView ? 'text' : 'password'" @keyup.enter="handleLogin"  v-model="password">
                     <button v-if="password.length > 0" @click="isView = !isView" class="password-icon">
                         <Icon 
                             :name=" isView ? 'lucide:eye' : 'lucide:eye-closed'"    

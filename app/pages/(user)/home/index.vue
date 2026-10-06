@@ -4,103 +4,36 @@ definePageMeta({
   layout: 'user'
 })
 
-const files = ref([
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB'
-  }
-])
+import { getFileIcon, getFileType, formatFileSize, formatFileTime} from "~/utils/fileType"
 
-const folder = ref([])
-const notes = ref([])
+const { openToast } = useToast()
 
-const storageUsed = ref(0)
-const storageLimit = ref(0)
-const storageTop = ref(40)
+const { user, files, folders, notes, error, fetchAll } = useUser()
+
+await fetchAll()
+
+console.log(user.value?.storageLimit);
+
+if (error.value) {
+  openToast(error.value, 'error')
+}
+
+const recentFiles = files.value.slice(0, 12)
+
+const storagePercent = computed(() => {
+  const used = Number(user.value?.storageUsed ?? 0)
+  const limit = Number(user.value?.storageLimit ?? 0)
+
+  if (limit === 0) return 0
+
+  return ((used / limit) * 100).toFixed(2)
+})
+
 const imagesSize = ref(0)
 const documentsSize = ref(0)
 const videosSize = ref(0)
 const othersSize = ref(0)
+
 </script>
 
 <template>
@@ -123,7 +56,7 @@ const othersSize = ref(0)
         </div>
 
         <div class="stat-info">
-          <strong>{{ folder.length }}</strong>
+          <strong>{{ folders.length }}</strong>
           <span>Folders</span>
         </div>
       </div>
@@ -153,24 +86,47 @@ const othersSize = ref(0)
           </div>
 
           <div class="files-list">
+            <div
+                v-if="files.length === 0"
+                class="empty-files"
+            >
+                <div class="empty-files-icon">
+                    <Icon name="solar:file-bold" size="3rem" />
+                </div>
+
+              <strong>No files yet</strong>
+
+              <span>
+                  Your recent files will appear here.
+              </span>
+
+              <NuxtLink
+                  to="/files"
+                  class="empty-files-link"
+              >
+                  Open Files
+                  <Icon name="solar:arrow-right-linear" />
+              </NuxtLink>
+            </div>
             <div 
-              v-for="(file, index) in files"
+              v-else
+              v-for="(file, index) in recentFiles"
               :key="index"
               class="file-main"
             >
               <div class="file-left">
                 <div class="file-icon">
-                  <Icon :name="file.iconName" />
+                  <Icon :name="getFileIcon(file.mime_type)" />
                 </div>
   
                 <div class="file-info">
                   <strong>{{ file.name }}</strong>
-                  <span>{{ file.type }} • {{ file.time }}</span>
+                  <span>{{ getFileType(file.name) }} • {{ formatFileTime(file.created_at) }}</span>
                 </div>
               </div>
 
               <div class="file-right">
-                <span class="file-size">{{ file.size }}</span>
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
 
                 <button class="file-menu" type="button">
                   <Icon name="solar:menu-dots-bold" class="vertical-dots" />
@@ -189,21 +145,20 @@ const othersSize = ref(0)
 
           <div class="storage-content">
             <div class="storage-top">
-              <strong>{{ storageTop }}%</strong>
+              <strong>{{ storagePercent }}%</strong>
 
               <span>
-                <b>{{ storageUsed }} GB</b> / {{ storageLimit }} GB
+                <b>{{ formatFileSize(user?.storageUsed ?? 0) }}</b> / {{ formatFileSize(user?.storageLimit ?? 0) }}
               </span>
             </div>
           
-
             <meter 
               class="storage-meter"
               min="0"
               max="100"
-              :value="storageTop"
+              :value="storagePercent"
             >
-              {{ storageTop }}%
+              {{ storagePercent }}%
             </meter>
 
             <div class="storage-types">
@@ -796,4 +751,53 @@ const othersSize = ref(0)
 
     border: 1px solid #7138c2;
   }
+
+.empty-files {
+    flex: 1;
+    min-height: 12rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.45rem;
+    color: #898991;
+    text-align: center;
+}
+
+.empty-files-icon {
+    width: 3.2rem;
+    height: 3.2rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #6f74ff;
+}
+
+.empty-files strong {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f5f5f5;
+}
+
+.empty-files span {
+    font-size: 0.825rem;
+    color: #898991;
+}
+
+.empty-files-link {
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #767cff;
+    font-size: 0.825rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.empty-files-link:hover {
+    color: #9297ff;
+}
 </style>
