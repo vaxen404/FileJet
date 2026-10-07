@@ -25,6 +25,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@iconify-json/solar": "^1.2.13",
     "@prisma/cli-engine": "^0.6.2",
     "@types/node": "^26.6.4",
     "prisma": "^7.10.0"

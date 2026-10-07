@@ -53,6 +53,8 @@ interface NotesResponse {
 }
 
 export const useUser = () => {
+    const requestFetch = useRequestFetch()
+
     const user = useState<UserData | null>('user-data', () => null)
     const files = useState<FileData[]>('user-files', () => [])
     const folders = useState<FolderData[]>('user-folders', () => [])
@@ -63,7 +65,7 @@ export const useUser = () => {
 
     const fetchUser = async () => {
         try {
-            const data = await $fetch<UserData>('/api/users/@me')
+            const data = await requestFetch<UserData>('/api/users/@me')
             user.value = data
         } catch (err: any) {
             error.value = err.data?.message || 'Kullanıcı bilgileri alınamadı.'
@@ -72,7 +74,7 @@ export const useUser = () => {
 
     const fetchFiles = async () => {
         try {
-            const data = await $fetch<FilesResponse>('/api/files')
+            const data = await requestFetch<FilesResponse>('/api/files')
             files.value = data.files
         } catch (err: any) {
             error.value = err.data?.message || 'Dosyalar alınamadı.'
@@ -81,7 +83,7 @@ export const useUser = () => {
 
     const fetchFolders = async () => {
         try {
-            const data = await $fetch<FoldersResponse>('/api/folders')
+            const data = await requestFetch<FoldersResponse>('/api/folders')
             folders.value = data.folders
         } catch (err: any) {
             error.value = err.data?.message || 'Klasörler alınamadı.'
@@ -90,7 +92,7 @@ export const useUser = () => {
 
     const fetchNotes = async () => {
         try {
-            const data = await $fetch<NotesResponse>('/api/notes')
+            const data = await requestFetch<NotesResponse>('/api/notes')
             notes.value = data.notes
         } catch (err: any) {
             error.value = err.data?.message || 'Notlar alınamadı.'

@@ -239,6 +239,14 @@ watch([searchQuery, activeCategory], () => {
             @dragleave="isDragging = false"
             @drop="handleDrop"
         >
+            <template v-if="notes.length === 0" #empty>
+                <div class="empty-state">
+                    <Icon name="solar:notebook-linear" size="2.5rem" class="empty-state-icon" />
+                    <strong>No notes yet</strong>
+                    <span class="empty-state-description">Create your first note to get started.</span>
+                </div>
+            </template>
+
             <template #list>
                 <div class="table-scroll">
                     <table class="notes-table">

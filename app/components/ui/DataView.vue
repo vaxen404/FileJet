@@ -2,6 +2,7 @@
 defineProps<{
     viewMode: 'list' | 'grid'
     isDragging?: boolean
+    isLoading?: boolean
     dropText?: string
 }>()
 
@@ -17,13 +18,30 @@ const emit = defineEmits<{
         class="data-view"
         :class="[
             viewMode === 'list' ? 'list-view' : 'grid-view',
-            { 'drag-active': isDragging }
+            { 
+                'drag-active': isDragging,
+                'empty-view': $slots.empty && !isLoading,
+                'loading-view': isLoading
+            }
         ]"
         @dragover.prevent="emit('dragover')"
         @dragleave.prevent="emit('dragleave')"
         @drop.prevent="emit('drop', $event)"
     >
-        <slot :name="viewMode" />
+        <slot
+            v-if="isLoading"
+            name="loading"
+        />
+
+        <slot
+            v-else-if="$slots.empty"
+            name="empty"
+        />
+
+        <slot
+            v-else
+            :name="viewMode"
+        />
 
         <div
             v-if="isDragging"
@@ -63,6 +81,59 @@ const emit = defineEmits<{
     gap: 1rem;
 
     overflow-y: auto;
+}
+
+.empty-view,
+.loading-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.data-view :deep(.empty-state) {
+    width: 100%;
+    min-height: 12rem;
+
+    padding: 2rem 1rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.45rem;
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
+
+.data-view :deep(.empty-state-icon) {
+    display: block;
+    flex-shrink: 0;
+
+    margin-bottom: 0.5rem;
+
+    color: #8b7cff;
+
+    font-size: 2.5rem;
+}
+
+.data-view :deep(.empty-state-folder-icon) {
+    color: #5da9ff;
+}
+
+.data-view :deep(.empty-state strong) {
+    color: #f5f5f5;
+
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.data-view :deep(.empty-state-description) {
+    color: #898991;
+
+    font-size: 0.825rem;
 }
 
 .drop-overlay {

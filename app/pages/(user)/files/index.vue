@@ -5,6 +5,7 @@ import UploadButton from '~/components/ui/UploadButton.vue'
 import ItemMenu from '~/components/ui/ItemMenu.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import DataView from '~/components/ui/DataView.vue'
+import { getFileIcon, getFileType, formatFileSize, formatFileTime} from "~/utils/fileType"
 
 definePageMeta({
     middleware: 'auth',
@@ -13,96 +14,21 @@ definePageMeta({
 
 const { toastMessage, toastType, showToast, openToast } = useToast()
 
-const files = ref([
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 18:12'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 18:02'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 13:14'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 3, 2026 12:48'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 3, 2026 12:22'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 3, 2026 11:55'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 21:40'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 20:18'
-  },
-  {
-    name: 'archive.zip',
-    iconName: 'lucide:archive',
-    type: 'Compressed',
-    time: '5 hours ago',
-    size: '4.8 MB',
-    modified: 'Oct 2, 2026 19:03'
-  },
-  {
-    name: 'image.png',
-    iconName: 'lucide:image',
-    type: 'Images',
-    time: '2 minutes ago',
-    size: '1.2 MB',
-    modified: 'Oct 2, 2026 18:27'
-  },
-  {
-    name: 'document.pdf',
-    iconName: 'lucide:file-text',
-    type: 'Documents',
-    time: '12 minutes ago',
-    size: '842 KB',
-    modified: 'Oct 2, 2026 16:44'
-  }
-])
+const {
+    isLoading,
+    uploadProgress,
+    uploadFiles,
+    deleteFile,
+    renameFile
+} = useFileActions()
+
+const { files, error, fetchAll } = useUser()
+
+await fetchAll()
+
+if (error.value) {
+  openToast(error.value, 'error')
+}
 
 const searchQuery = ref('')
 const viewMode = ref<'list' | 'grid'>('list')
@@ -110,21 +36,29 @@ const activeCategory = ref('All')
 
 const isDragging = ref(false)
 
-const handleDrop = (event: DragEvent) => {
+
+const handleDrop = async (event: DragEvent) => {
     isDragging.value = false
     
     const droppedFiles = event.dataTransfer?.files
     
-    if (!droppedFiles) return
-    
-    openToast('File uploaded successfully.', 'success')
+    if (!droppedFiles?.length) return
+
+    try {
+        await uploadFiles(droppedFiles)
+        await fetchAll()
+
+        openToast('File uploaded successfully.', 'success')
+    } catch {
+        openToast('File upload failed.', 'error')
+    }
 }
 
 const filteredFiles = computed(() => {
     return files.value.filter(file => {
         const matchesCategory = 
             activeCategory.value === 'All' || 
-            file.type === activeCategory.value
+            getFileType(file.name) === activeCategory.value
 
         const matchesSearch = 
             file.name
@@ -140,7 +74,7 @@ const selectedFiles = ref<string[]>([])
 const allSelected = computed(() => {
     return paginatedFiles.value.length > 0 &&
         paginatedFiles.value.every(file => {
-           return selectedFiles.value.includes(file.name)
+           return selectedFiles.value.includes(file.id)
         })
 })
 
@@ -148,27 +82,30 @@ const toggleSelectAll = (event: Event) => {
     const checked = (event.target as HTMLInputElement).checked
 
     if (checked) {
-        selectedFiles.value = paginatedFiles.value.map(file => file.name)
+        selectedFiles.value = paginatedFiles.value.map(file => file.id)
     } else {
         selectedFiles.value = []
     }
 }
 
-const handleFiles = (files: FileList) => {
+const handleFiles = async (files: FileList) => {
     if (!files.length) {
         openToast('Please select a file', 'error')
         return
     }
 
-    openToast('File selected successfully', 'success')
+    try {
+        await uploadFiles(files)
+        await fetchAll()
+
+        openToast('File uploaded successfully.', 'success')
+    } catch {
+        openToast('File upload failed.', 'error')
+    }
 }
 
 const openFile = (file: any) => {
     console.log('Open:', file.name);
-}
-
-const renameFile = (file: any) => {
-    console.log('Rename:', file.name);
 }
 
 const downloadFile = (file: any) => {
@@ -177,10 +114,6 @@ const downloadFile = (file: any) => {
 
 const favoriteFile = (file: any) => {
     console.log("Favorite:", file.name);
-}
-
-const deleteFile = (file: any) => {
-    console.log('Delete:', file.name);
 }
 
 const currentPage = ref(1)
@@ -276,11 +209,33 @@ watch([searchQuery, activeCategory], () => {
         <DataView
             :view-mode="viewMode"
             :is-dragging="isDragging"
+            :is-loading="isLoading"
             drop-text="Drop files to upload"
             @dragover="isDragging = true"
             @dragleave="isDragging = false"
             @drop="handleDrop"
         >
+            <template #loading>
+                <div class="upload-loading">
+                    <span>{{ uploadProgress }}%</span>
+
+                    <div class="upload-progress">
+                        <div
+                            class="upload-progress-bar"
+                            :style="{ width: `${uploadProgress}%` }"
+                        ></div>
+                    </div>
+                </div>
+            </template>
+
+            <template v-if="!isLoading && files.length === 0" #empty>
+                <div class="empty-state">
+                    <Icon name="solar:file-bold" size="2.5rem" class="empty-state-icon" />
+                    <strong>No files yet</strong>
+                    <span class="empty-state-description">Upload your first file to get started.</span>
+                </div>
+            </template>
+
             <template #list>
                 <div class="table-scroll">
                     <table class="files-table">
@@ -314,36 +269,37 @@ watch([searchQuery, activeCategory], () => {
 
                         <tbody>
                             <tr
-                                v-for="(file, index) in paginatedFiles"
-                                :key="index"
+                                v-for="file in paginatedFiles"
+                                :key="file.id"
+                                :class="{ selected: selectedFiles.includes(file.id) }"
                             >
                                 <td>
                                     <input
                                         v-model="selectedFiles"
                                         type="checkbox"
                                         class="file-checkbox"
-                                        :value="file.name"
+                                        :value="file.id"
                                     >
                                 </td>
 
                                 <td>
                                     <div class="file-name">
                                         <div class="file-icon">
-                                            <Icon :name="file.iconName" />
+                                            <Icon :name="getFileIcon(file.mime_type)" />
                                         </div>
 
                                         <div class="file-info">
                                             <strong>{{ file.name }}</strong>
                                             <span>
-                                                {{ file.size }} • {{ file.time }}
+                                                {{ formatFileSize(file.size) }} • {{ formatFileTime(file.created_at) }}
                                             </span>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td>{{ file.type }}</td>
-                                <td>{{ file.size }}</td>
-                                <td>{{ file.modified }}</td>
+                                <td>{{ file.mime_type }}</td>
+                                <td>{{ formatFileSize(file.size) }}</td>
+                                <td>{{ formatFileTime(file.updated_at) }}</td>
 
                                 <td>
                                     <ItemMenu
@@ -352,7 +308,7 @@ watch([searchQuery, activeCategory], () => {
                                         @download="downloadFile(file)"
                                         @rename="renameFile(file)"
                                         @favorite="favoriteFile(file)"
-                                        @delete="deleteFile(file)"
+                                        @delete="deleteFile(file.id)"
                                     />
                                 </td>
                             </tr>
@@ -363,13 +319,13 @@ watch([searchQuery, activeCategory], () => {
 
             <template #grid>
                 <div
-                    v-for="(file, index) in paginatedFiles"
-                    :key="index"
+                    v-for="file in paginatedFiles"
+                    :key="file.id"
                     class="file-card"
                 >
                     <div class="file-card-top">
                         <div class="file-card-icon">
-                            <Icon :name="file.iconName" />
+                            <Icon :name="getFileIcon(file.mime_type)" />
                         </div>
 
                         <ItemMenu
@@ -378,18 +334,18 @@ watch([searchQuery, activeCategory], () => {
                             @download="downloadFile(file)"
                             @rename="renameFile(file)"
                             @favorite="favoriteFile(file)"
-                            @delete="deleteFile(file)"
+                            @delete="deleteFile(file.id)"
                         />
                     </div>
 
                     <div class="file-card-info">
                         <strong>{{ file.name }}</strong>
-                        <span>{{ file.type }}</span>
+                        <span>{{ file.mime_type }}</span>
                     </div>
 
                     <div class="file-card-bottom">
-                        <span>{{ file.size }} Items</span>
-                        <span>{{ file.time }}</span>
+                        <span>{{ formatFileSize(file.size) }}</span>
+                        <span>{{ formatFileTime(file.created_at) }}</span>
                     </div>
                 </div>
             </template>
@@ -557,6 +513,29 @@ watch([searchQuery, activeCategory], () => {
     color: #b5b5bd;
 
     font-size: 0.85rem;
+}
+
+.files-table tbody tr {
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.files-table tbody tr.selected {
+    background: #242642;
+}
+
+.files-table tbody tr.selected:hover {
+    background: #292c4d;
+}
+
+.files-table tbody tr.selected .file-icon {
+    background: #343c8f;
+    color: #ffffff;
+}
+
+.files-table tbody tr.selected td {
+    color: #d1d2e5;
 }
 
 .files-table tbody tr:hover {
@@ -762,5 +741,48 @@ watch([searchQuery, activeCategory], () => {
     color: #898991;
 
     font-size: 0.75rem;
+}
+
+.upload-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.8rem;
+
+    background: rgba(18, 18, 20, 0.92);
+
+    color: #ffffff;
+}
+
+.upload-loading > span {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.upload-progress {
+    width: 16rem;
+    height: 0.5rem;
+
+    background: #29292e;
+
+    border-radius: 999px;
+
+    overflow: hidden;
+}
+
+.upload-progress-bar {
+    height: 100%;
+
+    background: #3c47be;
+
+    border-radius: 999px;
+
+    transition: width 0.15s ease;
 }
 </style>

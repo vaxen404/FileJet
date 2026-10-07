@@ -12,8 +12,6 @@ const { user, files, folders, notes, error, fetchAll } = useUser()
 
 await fetchAll()
 
-console.log(user.value?.storageLimit);
-
 if (error.value) {
   openToast(error.value, 'error')
 }
@@ -85,54 +83,55 @@ const othersSize = ref(0)
             </NuxtLink>
           </div>
 
-          <div class="files-list">
+          <div class="files-list" :class="{ 'files-list-empty': files.length === 0 }">
             <div
-                v-if="files.length === 0"
-                class="empty-files"
+              v-if="files.length === 0"
+              class="empty-files"
             >
-                <div class="empty-files-icon">
-                    <Icon name="solar:file-bold" size="3rem" />
-                </div>
+              <div class="empty-files-icon">
+                <Icon name="solar:file-bold" size="3rem" />
+              </div>
 
               <strong>No files yet</strong>
 
               <span>
-                  Your recent files will appear here.
+                Your recent files will appear here.
               </span>
 
               <NuxtLink
-                  to="/files"
-                  class="empty-files-link"
+                to="/files"
+                class="empty-files-link"
               >
-                  Open Files
-                  <Icon name="solar:arrow-right-linear" />
+                Open Files
+                <Icon name="solar:arrow-right-linear" />
               </NuxtLink>
             </div>
-            <div 
-              v-else
-              v-for="(file, index) in recentFiles"
-              :key="index"
-              class="file-main"
-            >
-              <div class="file-left">
-                <div class="file-icon">
-                  <Icon :name="getFileIcon(file.mime_type)" />
+            <template v-else>
+              <div
+                v-for="file in recentFiles"
+                :key="file.id"
+                class="file-main"
+              >
+                <div class="file-left">
+                  <div class="file-icon">
+                    <Icon :name="getFileIcon(file.mime_type)" />
+                  </div>
+
+                  <div class="file-info">
+                    <strong>{{ file.name }}</strong>
+                    <span>{{ getFileType(file.name) }} • {{ formatFileTime(file.created_at) }}</span>
+                  </div>
                 </div>
-  
-                <div class="file-info">
-                  <strong>{{ file.name }}</strong>
-                  <span>{{ getFileType(file.name) }} • {{ formatFileTime(file.created_at) }}</span>
+
+                <div class="file-right">
+                  <span class="file-size">{{ formatFileSize(file.size) }}</span>
+
+                  <button class="file-menu" type="button">
+                    <Icon name="solar:menu-dots-bold" class="vertical-dots" />
+                  </button>
                 </div>
               </div>
-
-              <div class="file-right">
-                <span class="file-size">{{ formatFileSize(file.size) }}</span>
-
-                <button class="file-menu" type="button">
-                  <Icon name="solar:menu-dots-bold" class="vertical-dots" />
-                </button>
-              </div>
-            </div>
+            </template>
           </div>
         </div>
       </div>
@@ -751,6 +750,11 @@ const othersSize = ref(0)
 
     border: 1px solid #7138c2;
   }
+
+.files-list-empty {
+    display: flex;
+    flex-direction: column;
+}
 
 .empty-files {
     flex: 1;

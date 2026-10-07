@@ -193,6 +193,14 @@ watch(searchQuery, () => {
             @dragleave="isDragging = false"
             @drop="handleDrop"
         >
+            <template v-if="folders.length === 0" #empty>
+                <div class="empty-state">
+                    <Icon name="solar:folder-linear" size="2.5rem" class="empty-state-icon empty-state-folder-icon" />
+                    <strong>No folders yet</strong>
+                    <span class="empty-state-description">Create your first folder to organize your files.</span>
+                </div>
+            </template>
+
             <template #list>
                 <div class="table-scroll">
                     <table class="folders-table">

@@ -25,7 +25,7 @@ const handleLogin = async () => {
     }
 
     try {
-        const response = await $fetch('/api/auth/login', {
+        await $fetch('/api/auth/login', {
             method: 'POST',
             body: {
                 username: username.value,
@@ -33,7 +33,9 @@ const handleLogin = async () => {
             }
         })
 
-        currentUser.value = response.user
+        const user = await $fetch('/api/users/@me')
+
+        currentUser.value = user
 
         openToast('Logged in successfully', 'success')   
 
