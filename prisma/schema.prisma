@@ -15,9 +15,11 @@ model users {
   storage_limit BigInt?   @default(10485760)
   storage_used  BigInt?   @default(0)
   created_at    DateTime? @default(now()) @db.Timestamp(6)
-  files         files[]
-  folders       folders[]
-  notes         notes[]
+
+  files     files[]
+  folders   folders[]
+  notes     notes[]
+  favorites favorites[]
 }
 
 model files {
@@ -31,8 +33,10 @@ model files {
   storage_key   String
   created_at    DateTime? @default(now()) @db.Timestamp(6)
   updated_at    DateTime? @default(now()) @db.Timestamp(6)
-  folders       folders?  @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_folder")
-  users         users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_user")
+
+  folders   folders?    @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_folder")
+  users     users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_user")
+  favorites favorites[]
 }
 
 model folders {
@@ -42,11 +46,13 @@ model folders {
   name             String    @db.VarChar(255)
   created_at       DateTime? @default(now()) @db.Timestamp(6)
   updated_at       DateTime? @default(now()) @db.Timestamp(6)
-  files            files[]
-  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_folders_user")
-  folders          folders?  @relation("foldersTofolders", fields: [parent_folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_parent_folder")
-  other_folders    folders[] @relation("foldersTofolders")
-  notes            notes[]
+
+  files         files[]
+  users         users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_folders_user")
+  folders       folders?    @relation("foldersTofolders", fields: [parent_folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_parent_folder")
+  other_folders folders[]   @relation("foldersTofolders")
+  notes         notes[]
+  favorites     favorites[]
 }
 
 model notes {
@@ -58,6 +64,22 @@ model notes {
   size       BigInt    @default(0)
   created_at DateTime? @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
-  folders    folders?  @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notes_folder")
-  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notes_user")
+
+  folders   folders?    @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notes_folder")
+  users     users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notes_user")
+  favorites favorites[]
+}
+
+model favorites {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  file_id    String?   @db.Uuid
+  folder_id  String?   @db.Uuid
+  note_id    String?   @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+
+  users   users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  files   files?   @relation(fields: [file_id], references: [id], onDelete: Cascade)
+  folders folders? @relation(fields: [folder_id], references: [id], onDelete: Cascade)
+  notes   notes?   @relation(fields: [note_id], references: [id], onDelete: Cascade)
 }

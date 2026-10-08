@@ -34,7 +34,10 @@ const handleLogout = async () => {
         <div class="menu-section">
             <span class="menu-title">MAIN MENU</span>
 
-            <NuxtLink to="/home">
+            <NuxtLink
+                to="/home"
+                :class="{ active: route.path === '/home'}"
+            >
                 <Icon
                     class="menu-icon"
                     :name="route.path === '/home'
@@ -44,7 +47,10 @@ const handleLogout = async () => {
                 Home
             </NuxtLink>
 
-            <NuxtLink to="/files">
+            <NuxtLink
+                to="/files"
+                :class="{ active: route.path === '/files'}"
+            >
                 <Icon
                     class="menu-icon"
                     :name="route.path === '/files'
@@ -54,7 +60,10 @@ const handleLogout = async () => {
                 Files
             </NuxtLink>
 
-            <NuxtLink to="/folders">
+            <NuxtLink
+                to="/folders"
+                :class="{ active: route.path === '/folders'}"
+            >
                 <Icon
                     class="menu-icon"
                     :name="route.path === '/folders'
@@ -64,7 +73,10 @@ const handleLogout = async () => {
                 Folders
             </NuxtLink>
 
-            <NuxtLink to="/notes">
+            <NuxtLink
+                to="/notes"
+                :class="{ active: route.path === '/notes'}"
+            >
                 <Icon
                     class="menu-icon"
                     :name="route.path === '/notes'
@@ -78,17 +90,23 @@ const handleLogout = async () => {
         <div class="menu-section">
             <span class="menu-title">OTHERS</span>
 
-            <NuxtLink to="/favorites">
-                <Icon
-                    class="menu-icon"
-                    :name="route.path === '/favorites'
-                        ? 'solar:star-bold'
-                        : 'solar:star-outline'"
-                />
-                Favorites
-            </NuxtLink>
+                <NuxtLink
+                    :class="{ active: route.path === '/favorites'}"
+                    to="/favorites"
+                >
+                    <Icon
+                        class="menu-icon"
+                        :name="route.path === '/favorites'
+                            ? 'solar:star-bold'
+                            : 'solar:star-outline'"
+                    />
+                    Favorites
+                 </NuxtLink>
 
-            <NuxtLink to="/shared">
+            <NuxtLink
+                to="/shared"
+                :class="{ active: route.path === '/shared'}"
+            >
                 <Icon
                     class="menu-icon"
                     :name="route.path === '/shared'
@@ -98,7 +116,10 @@ const handleLogout = async () => {
                 Shared
             </NuxtLink>
 
-            <NuxtLink to="/trash">
+            <NuxtLink
+                to="/trash"
+                :class="{ active: route.path === '/trash'}"
+            >
                 <Icon
                     class="menu-icon"
                     :name="route.path === '/trash'
@@ -112,25 +133,31 @@ const handleLogout = async () => {
         <div class="menu-section">
             <span class="menu-title">SETTINGS</span>
 
-            <NuxtLink to="/settings/preferences">
-                <Icon
-                    class="menu-icon"
-                    :name="route.path === '/settings/preferences'
-                        ? 'solar:settings-bold'
-                        : 'solar:settings-linear'"
-                />
-                Preferences
-            </NuxtLink>
+                <NuxtLink
+                    :class="{ active: route.path === '/settings/preferences'}"
+                    to="/settings/preferences"
+                >
+                    <Icon
+                        class="menu-icon"
+                        :name="route.path === '/settings/preferences'
+                            ? 'solar:settings-bold'
+                            : 'solar:settings-linear'"
+                    />
+                    Preferences
+                </NuxtLink>
 
-            <NuxtLink to="/settings/personalization">
-                <Icon
-                    class="menu-icon"
-                    :name="route.path === '/settings/personalization'
-                        ? 'solar:palette-bold'
-                        : 'solar:palette-linear'"
-                />
-                Personalization
-            </NuxtLink>
+                <NuxtLink
+                    :class="{ active: route.path === '/settings/personalization'}"
+                    to="/settings/personalization"
+                >
+                    <Icon
+                        class="menu-icon"
+                        :name="route.path === '/settings/personalization'
+                            ? 'solar:palette-bold'
+                            : 'solar:palette-linear'"
+                    />
+                    Personalization
+                </NuxtLink>
 
             <button 
                 class="logout-btn" 
@@ -236,7 +263,7 @@ const handleLogout = async () => {
     background: #252529;
 }
 
-.menu-section a.router-link-active {
+.menu-section a.active {
     background: #5a5aff;
     color: white;
     font-weight: 700;

@@ -23,9 +23,9 @@ export default defineEventHandler(async (event) => {
         })
     
         return {
-            files: files.map((file) => ({
+            files: files.map(file => ({
                 ...file,
-                size: file.size.toString()
+                size: Number(file.size)
             }))
         }
     } catch (err: any) {

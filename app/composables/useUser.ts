@@ -40,6 +40,15 @@ interface NoteData {
     updated_at: string | null
 }
 
+interface FavoriteData {
+    id: string
+    user_id: string
+    file_id: string | null
+    folder_id: string | null
+    note_id: string | null
+    created_at: string | null
+}
+
 interface FilesResponse {
     files: FileData[]
 }
@@ -52,6 +61,10 @@ interface NotesResponse {
     notes: NoteData[]
 }
 
+interface FavoritesResponse {
+    favorites: FavoriteData[]
+}
+
 export const useUser = () => {
     const requestFetch = useRequestFetch()
 
@@ -59,6 +72,7 @@ export const useUser = () => {
     const files = useState<FileData[]>('user-files', () => [])
     const folders = useState<FolderData[]>('user-folders', () => [])
     const notes = useState<NoteData[]>('user-notes', () => [])
+    const favorites = useState<FavoriteData[]>('user-favorites', () => [])
 
     const pending = useState<boolean>('user-pending', () => false)
     const error = useState<string | null>('user-error', () => null)
@@ -99,6 +113,15 @@ export const useUser = () => {
         }
     }
 
+    const fetchFavorites = async () => {
+        try {
+            const data = await requestFetch<FavoritesResponse>('/api/favorites')
+            favorites.value = data.favorites
+        } catch (err: any) {
+            error.value = err.data?.message || 'Favoriler alınamadı.'
+        }
+    }
+
     const fetchAll = async () => {
         pending.value = true
         error.value = null
@@ -107,7 +130,8 @@ export const useUser = () => {
             fetchUser(),
             fetchFiles(),
             fetchFolders(),
-            fetchNotes()
+            fetchNotes(),
+            fetchFavorites()
         ])
 
         pending.value = false
@@ -118,12 +142,14 @@ export const useUser = () => {
         files,
         folders,
         notes,
+        favorites,
         pending,
         error,
         fetchUser,
         fetchFiles,
         fetchFolders,
         fetchNotes,
+        fetchFavorites,
         fetchAll
     }
 }

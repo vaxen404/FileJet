@@ -1,7 +1,7 @@
-import { prisma } from '~~/server/utils/prisma'
-import { getAuthSession } from '~~/server/utils/auth'
-import { throwError } from '~~/server/utils/error'
-import { getFileParts, getTotalUploadSize, saveFileToStorage } from '~~/server/utils/files'
+import { prisma } from "~~/server/utils/prisma"
+import { getAuthSession } from "~~/server/utils/auth"
+import { throwError } from "~~/server/utils/error"
+import { getFileParts, getTotalUploadSize, saveFileToStorage } from "~~/server/utils/files";
 
 export default defineEventHandler(async (event) => {
     try {
@@ -11,7 +11,9 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'Oturum açmanız gerek.')
         }
 
-        const formData = await readMultipartFormData(event)
+        enforceRateLimit(event, `files-upload:${session.userId}`, 10, 60 * 1000 )
+
+        const formData = await readMultipartFormData(event) ?? []
 
         if (!formData || !formData.length) {
             throwError(400, 'Dosya bulunamadı.')
@@ -25,6 +27,20 @@ export default defineEventHandler(async (event) => {
 
         if (fileParts.length > 6) {
             throwError(400, 'Aynı anda en fazla 6 dosya yükleyebilirsiniz.')
+        }
+
+        for (const part of fileParts) {
+            const existingFile = await prisma.files.findFirst({
+                where: {
+                    user_id: session.userId,
+                    folder_id: null,
+                    original_name: part.filename
+                }
+            })
+
+            if (existingFile) {
+                throwError(409, `${part.filename} adlı dosya zaten var.`)
+            }
         }
 
         const user = await prisma.users.findUnique({
@@ -41,10 +57,10 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'Geçersiz oturum.')
         }
 
-        const totalUploadSize = BigInt(getTotalUploadSize(fileParts))
+        const totalUploadSize = getTotalUploadSize(fileParts)
 
-        const storageUsed = user.storage_used ?? BigInt(0)
-        const storageLimit = user.storage_limit ?? BigInt(0)
+        const storageUsed = Number(user.storage_used ?? 0 )
+        const storageLimit = Number(user.storage_limit ?? 0 )
         const remainingStorage = storageLimit - storageUsed
 
         if (totalUploadSize > remainingStorage) {
@@ -54,8 +70,8 @@ export default defineEventHandler(async (event) => {
         const uploadedFiles = []
 
         for (const part of fileParts) {
-            const { storageKey } = await saveFileToStorage(session.userId, part)
-
+            const { safeName, storageKey } = await saveFileToStorage(session.userId, part)
+            
             const file = await prisma.files.create({
                 data: {
                     user_id: session.userId,
@@ -63,14 +79,14 @@ export default defineEventHandler(async (event) => {
                     name: part.filename,
                     original_name: part.filename,
                     mime_type: part.type ?? null,
-                    size: BigInt(part.data.length),
+                    size: Number(part.data.length),
                     storage_key: storageKey
                 }
             })
 
             uploadedFiles.push({
                 ...file,
-                size: file.size.toString()
+                size: Number(file.size)
             })
         }
 
@@ -80,7 +96,7 @@ export default defineEventHandler(async (event) => {
             },
             data: {
                 storage_used: {
-                    increment: totalUploadSize
+                    increment: BigInt(totalUploadSize)
                 }
             }
         })

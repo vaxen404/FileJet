@@ -1,11 +1,4 @@
 <script setup lang="ts">
-import SearchBox from '~/components/ui/SearchBox.vue';
-import ViewSwitcher from '~/components/ui/ViewSwitcher.vue'
-import UploadButton from '~/components/ui/UploadButton.vue'
-import ItemMenu from '~/components/ui/ItemMenu.vue'
-import Pagination from '~/components/ui/Pagination.vue';
-import DataView from '~/components/ui/DataView.vue';
-
 definePageMeta({
     middleware: 'auth',
     layout: 'user'

@@ -22,7 +22,9 @@ const pageTitle = computed(() => {
 const contentClass = computed(() => ({
   'user-content': true,
   'files-content': route.path === '/files',
-  'folders-content': route.path === '/folders'
+  'folders-content': route.path === '/folders',
+  'notes-content': route.path === '/notes',
+  'favorites-content': route.path === '/favorites'
 }))
 
 </script>
@@ -89,7 +91,9 @@ body {
 }
 
 .files-content,
-.folders-content {
+.folders-content,
+.notes-content,
+.favorites-content {
   padding: 0;
   overflow: hidden;
 }

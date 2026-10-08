@@ -61,3 +61,8 @@ export type folders = Prisma.foldersModel
  * 
  */
 export type notes = Prisma.notesModel
+/**
+ * Model favorites
+ * 
+ */
+export type favorites = Prisma.favoritesModel

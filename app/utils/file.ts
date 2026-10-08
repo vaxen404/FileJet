@@ -37,6 +37,32 @@ export const getFileType = (fileName: string) => {
     return extension?.toUpperCase() ?? 'FILE'
 }
 
+export const getFileCategory = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase()
+
+    if (!extension) {
+        return 'All'
+    }
+
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(extension)) {
+        return 'Images'
+    }
+
+    if (['pdf', 'doc', 'docx', 'txt'].includes(extension)) {
+        return 'Documents'
+    }
+
+    if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(extension)) {
+        return 'Videos'
+    }
+
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+        return 'Compressed'
+    }
+
+    return 'Others'
+}
+
 export const formatFileSize = (bytes: number | string) => {
     const size = Number(bytes)
 

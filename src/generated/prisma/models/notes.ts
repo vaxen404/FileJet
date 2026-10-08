@@ -242,6 +242,7 @@ export type notesWhereInput = {
   updated_at?: Prisma.DateTimeNullableFilter<"notes"> | Date | string | null
   folders?: Prisma.XOR<Prisma.FoldersNullableScalarRelationFilter, Prisma.foldersWhereInput> | null
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  favorites?: Prisma.FavoritesListRelationFilter
 }
 
 export type notesOrderByWithRelationInput = {
@@ -255,6 +256,7 @@ export type notesOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   folders?: Prisma.foldersOrderByWithRelationInput
   users?: Prisma.usersOrderByWithRelationInput
+  favorites?: Prisma.favoritesOrderByRelationAggregateInput
 }
 
 export type notesWhereUniqueInput = Prisma.AtLeast<{
@@ -271,6 +273,7 @@ export type notesWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeNullableFilter<"notes"> | Date | string | null
   folders?: Prisma.XOR<Prisma.FoldersNullableScalarRelationFilter, Prisma.foldersWhereInput> | null
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  favorites?: Prisma.FavoritesListRelationFilter
 }, "id">
 
 export type notesOrderByWithAggregationInput = {
@@ -312,6 +315,7 @@ export type notesCreateInput = {
   updated_at?: Date | string | null
   folders?: Prisma.foldersCreateNestedOneWithoutNotesInput
   users: Prisma.usersCreateNestedOneWithoutNotesInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutNotesInput
 }
 
 export type notesUncheckedCreateInput = {
@@ -323,6 +327,7 @@ export type notesUncheckedCreateInput = {
   size?: bigint | number
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutNotesInput
 }
 
 export type notesUpdateInput = {
@@ -334,6 +339,7 @@ export type notesUpdateInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   folders?: Prisma.foldersUpdateOneWithoutNotesNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutNotesNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutNotesNestedInput
 }
 
 export type notesUncheckedUpdateInput = {
@@ -345,6 +351,7 @@ export type notesUncheckedUpdateInput = {
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutNotesNestedInput
 }
 
 export type notesCreateManyInput = {
@@ -427,6 +434,11 @@ export type notesMinOrderByAggregateInput = {
 
 export type notesSumOrderByAggregateInput = {
   size?: Prisma.SortOrder
+}
+
+export type NotesNullableScalarRelationFilter = {
+  is?: Prisma.notesWhereInput | null
+  isNot?: Prisma.notesWhereInput | null
 }
 
 export type notesCreateNestedManyWithoutUsersInput = {
@@ -513,6 +525,22 @@ export type notesUncheckedUpdateManyWithoutFoldersNestedInput = {
   deleteMany?: Prisma.notesScalarWhereInput | Prisma.notesScalarWhereInput[]
 }
 
+export type notesCreateNestedOneWithoutFavoritesInput = {
+  create?: Prisma.XOR<Prisma.notesCreateWithoutFavoritesInput, Prisma.notesUncheckedCreateWithoutFavoritesInput>
+  connectOrCreate?: Prisma.notesCreateOrConnectWithoutFavoritesInput
+  connect?: Prisma.notesWhereUniqueInput
+}
+
+export type notesUpdateOneWithoutFavoritesNestedInput = {
+  create?: Prisma.XOR<Prisma.notesCreateWithoutFavoritesInput, Prisma.notesUncheckedCreateWithoutFavoritesInput>
+  connectOrCreate?: Prisma.notesCreateOrConnectWithoutFavoritesInput
+  upsert?: Prisma.notesUpsertWithoutFavoritesInput
+  disconnect?: Prisma.notesWhereInput | boolean
+  delete?: Prisma.notesWhereInput | boolean
+  connect?: Prisma.notesWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.notesUpdateToOneWithWhereWithoutFavoritesInput, Prisma.notesUpdateWithoutFavoritesInput>, Prisma.notesUncheckedUpdateWithoutFavoritesInput>
+}
+
 export type notesCreateWithoutUsersInput = {
   id?: string
   title: string
@@ -521,6 +549,7 @@ export type notesCreateWithoutUsersInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   folders?: Prisma.foldersCreateNestedOneWithoutNotesInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutNotesInput
 }
 
 export type notesUncheckedCreateWithoutUsersInput = {
@@ -531,6 +560,7 @@ export type notesUncheckedCreateWithoutUsersInput = {
   size?: bigint | number
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutNotesInput
 }
 
 export type notesCreateOrConnectWithoutUsersInput = {
@@ -581,6 +611,7 @@ export type notesCreateWithoutFoldersInput = {
   created_at?: Date | string | null
   updated_at?: Date | string | null
   users: Prisma.usersCreateNestedOneWithoutNotesInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutNotesInput
 }
 
 export type notesUncheckedCreateWithoutFoldersInput = {
@@ -591,6 +622,7 @@ export type notesUncheckedCreateWithoutFoldersInput = {
   size?: bigint | number
   created_at?: Date | string | null
   updated_at?: Date | string | null
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutNotesInput
 }
 
 export type notesCreateOrConnectWithoutFoldersInput = {
@@ -619,6 +651,66 @@ export type notesUpdateManyWithWhereWithoutFoldersInput = {
   data: Prisma.XOR<Prisma.notesUpdateManyMutationInput, Prisma.notesUncheckedUpdateManyWithoutFoldersInput>
 }
 
+export type notesCreateWithoutFavoritesInput = {
+  id?: string
+  title: string
+  content?: string
+  size?: bigint | number
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  folders?: Prisma.foldersCreateNestedOneWithoutNotesInput
+  users: Prisma.usersCreateNestedOneWithoutNotesInput
+}
+
+export type notesUncheckedCreateWithoutFavoritesInput = {
+  id?: string
+  user_id: string
+  folder_id?: string | null
+  title: string
+  content?: string
+  size?: bigint | number
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+}
+
+export type notesCreateOrConnectWithoutFavoritesInput = {
+  where: Prisma.notesWhereUniqueInput
+  create: Prisma.XOR<Prisma.notesCreateWithoutFavoritesInput, Prisma.notesUncheckedCreateWithoutFavoritesInput>
+}
+
+export type notesUpsertWithoutFavoritesInput = {
+  update: Prisma.XOR<Prisma.notesUpdateWithoutFavoritesInput, Prisma.notesUncheckedUpdateWithoutFavoritesInput>
+  create: Prisma.XOR<Prisma.notesCreateWithoutFavoritesInput, Prisma.notesUncheckedCreateWithoutFavoritesInput>
+  where?: Prisma.notesWhereInput
+}
+
+export type notesUpdateToOneWithWhereWithoutFavoritesInput = {
+  where?: Prisma.notesWhereInput
+  data: Prisma.XOR<Prisma.notesUpdateWithoutFavoritesInput, Prisma.notesUncheckedUpdateWithoutFavoritesInput>
+}
+
+export type notesUpdateWithoutFavoritesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  folders?: Prisma.foldersUpdateOneWithoutNotesNestedInput
+  users?: Prisma.usersUpdateOneRequiredWithoutNotesNestedInput
+}
+
+export type notesUncheckedUpdateWithoutFavoritesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  folder_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 export type notesCreateManyUsersInput = {
   id?: string
   folder_id?: string | null
@@ -637,6 +729,7 @@ export type notesUpdateWithoutUsersInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   folders?: Prisma.foldersUpdateOneWithoutNotesNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutNotesNestedInput
 }
 
 export type notesUncheckedUpdateWithoutUsersInput = {
@@ -647,6 +740,7 @@ export type notesUncheckedUpdateWithoutUsersInput = {
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutNotesNestedInput
 }
 
 export type notesUncheckedUpdateManyWithoutUsersInput = {
@@ -677,6 +771,7 @@ export type notesUpdateWithoutFoldersInput = {
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   users?: Prisma.usersUpdateOneRequiredWithoutNotesNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutNotesNestedInput
 }
 
 export type notesUncheckedUpdateWithoutFoldersInput = {
@@ -687,6 +782,7 @@ export type notesUncheckedUpdateWithoutFoldersInput = {
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutNotesNestedInput
 }
 
 export type notesUncheckedUpdateManyWithoutFoldersInput = {
@@ -700,6 +796,35 @@ export type notesUncheckedUpdateManyWithoutFoldersInput = {
 }
 
 
+/**
+ * Count Type NotesCountOutputType
+ */
+
+export type NotesCountOutputType = {
+  favorites: number
+}
+
+export type NotesCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  favorites?: boolean | NotesCountOutputTypeCountFavoritesArgs
+}
+
+/**
+ * NotesCountOutputType without action
+ */
+export type NotesCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NotesCountOutputType
+   */
+  select?: Prisma.NotesCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * NotesCountOutputType without action
+ */
+export type NotesCountOutputTypeCountFavoritesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.favoritesWhereInput
+}
+
 
 export type notesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -712,6 +837,8 @@ export type notesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   updated_at?: boolean
   folders?: boolean | Prisma.notes$foldersArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  favorites?: boolean | Prisma.notes$favoritesArgs<ExtArgs>
+  _count?: boolean | Prisma.NotesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["notes"]>
 
 export type notesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -755,6 +882,8 @@ export type notesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
 export type notesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   folders?: boolean | Prisma.notes$foldersArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  favorites?: boolean | Prisma.notes$favoritesArgs<ExtArgs>
+  _count?: boolean | Prisma.NotesCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type notesIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   folders?: boolean | Prisma.notes$foldersArgs<ExtArgs>
@@ -770,6 +899,7 @@ export type $notesPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     folders: Prisma.$foldersPayload<ExtArgs> | null
     users: Prisma.$usersPayload<ExtArgs>
+    favorites: Prisma.$favoritesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1176,6 +1306,7 @@ export interface Prisma__notesClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   folders<T extends Prisma.notes$foldersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.notes$foldersArgs<ExtArgs>>): Prisma.Prisma__foldersClient<runtime.Types.Result.GetResult<Prisma.$foldersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   users<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  favorites<T extends Prisma.notes$favoritesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.notes$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$favoritesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1630,6 +1761,30 @@ export type notes$foldersArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   include?: Prisma.foldersInclude<ExtArgs> | null
   where?: Prisma.foldersWhereInput
+}
+
+/**
+ * notes.favorites
+ */
+export type notes$favoritesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the favorites
+   */
+  select?: Prisma.favoritesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the favorites
+   */
+  omit?: Prisma.favoritesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.favoritesInclude<ExtArgs> | null
+  where?: Prisma.favoritesWhereInput
+  orderBy?: Prisma.favoritesOrderByWithRelationInput | Prisma.favoritesOrderByWithRelationInput[]
+  cursor?: Prisma.favoritesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FavoritesScalarFieldEnum | Prisma.FavoritesScalarFieldEnum[]
 }
 
 /**

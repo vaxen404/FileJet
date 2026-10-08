@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
         const { fileId } = await readBody(event)
 
         if (!fileId) {
-            throwError(400, 'Dosya ID gerekli')
+            throwError(400, 'Missing data.')
         }
 
         const file = await prisma.files.findFirst({
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
         })
 
         if (!file) {
-            throwError(404, 'Dosya bulunamadı.')
+            throwError(404, 'File not found.')
         }
 
         const filePath = join(

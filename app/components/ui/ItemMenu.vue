@@ -13,6 +13,7 @@ const props = withDefaults(
     defineProps<{
         type: 'file' | 'folder' | 'note'
         actions?: Action[]
+        isFavorite?: boolean
     }>(),
     {
         actions: () => [
@@ -21,7 +22,8 @@ const props = withDefaults(
             'download',
             'favorite',
             'delete'
-        ]
+        ],
+        isFavorite: false
     }
 )
 
@@ -131,8 +133,13 @@ onClickOutside(menuRef, () => {
                 class="menu-item"
                 @click="handleAction('favorite')"
             >
-                <Icon name="solar:star-bold" />
-                Add to Favorites
+                <Icon
+                    :name="isFavorite
+                        ? 'solar:star-bold'
+                        : 'solar:star-linear'"
+                />
+
+                {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
             </button>
 
             <button
@@ -190,7 +197,7 @@ onClickOutside(menuRef, () => {
     top: calc(100% - 0.5rem);
     right: 1.625rem;
 
-    width: 10rem;
+    width: 11rem;
 
     padding: 0.35rem;
 
@@ -213,9 +220,9 @@ onClickOutside(menuRef, () => {
     display: flex;
     align-items: center;
 
-    gap: 0.6rem;
+    gap: 0.45rem;
 
-    padding: 0.65rem 0.7rem;
+    padding: 0.6rem;
 
     background: transparent;
     color: #d5d5da;
@@ -223,11 +230,12 @@ onClickOutside(menuRef, () => {
     border: none;
     border-radius: 0.45rem;
 
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 
     cursor: pointer;
 
     text-align: left;
+    white-space: nowrap;
 }
 
 .menu-item:hover {

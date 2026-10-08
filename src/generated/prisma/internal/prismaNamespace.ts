@@ -400,7 +400,8 @@ export const ModelName = {
   users: 'users',
   files: 'files',
   folders: 'folders',
-  notes: 'notes'
+  notes: 'notes',
+  favorites: 'favorites'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "files" | "folders" | "notes"
+    modelProps: "users" | "files" | "folders" | "notes" | "favorites"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -716,6 +717,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    favorites: {
+      payload: Prisma.$favoritesPayload<ExtArgs>
+      fields: Prisma.favoritesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.favoritesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.favoritesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>
+        }
+        findFirst: {
+          args: Prisma.favoritesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.favoritesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>
+        }
+        findMany: {
+          args: Prisma.favoritesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>[]
+        }
+        create: {
+          args: Prisma.favoritesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>
+        }
+        createMany: {
+          args: Prisma.favoritesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.favoritesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>[]
+        }
+        delete: {
+          args: Prisma.favoritesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>
+        }
+        update: {
+          args: Prisma.favoritesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>
+        }
+        deleteMany: {
+          args: Prisma.favoritesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.favoritesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.favoritesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>[]
+        }
+        upsert: {
+          args: Prisma.favoritesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$favoritesPayload>
+        }
+        aggregate: {
+          args: Prisma.FavoritesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFavorites>
+        }
+        groupBy: {
+          args: Prisma.favoritesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FavoritesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.favoritesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FavoritesCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -808,6 +883,18 @@ export const NotesScalarFieldEnum = {
 } as const
 
 export type NotesScalarFieldEnum = (typeof NotesScalarFieldEnum)[keyof typeof NotesScalarFieldEnum]
+
+
+export const FavoritesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  file_id: 'file_id',
+  folder_id: 'folder_id',
+  note_id: 'note_id',
+  created_at: 'created_at'
+} as const
+
+export type FavoritesScalarFieldEnum = (typeof FavoritesScalarFieldEnum)[keyof typeof FavoritesScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1064,6 +1151,7 @@ export type GlobalOmitConfig = {
   files?: Prisma.filesOmit
   folders?: Prisma.foldersOmit
   notes?: Prisma.notesOmit
+  favorites?: Prisma.favoritesOmit
 }
 
 /* Types for Logging */

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
     middleware: 'auth',
-    layout: 'dashboard'
+    layout: 'user'
 })
+
+const fileId = 12146798840
 </script>
 
 <template></template>

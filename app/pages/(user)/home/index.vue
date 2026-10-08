@@ -4,7 +4,7 @@ definePageMeta({
   layout: 'user'
 })
 
-import { getFileIcon, getFileType, formatFileSize, formatFileTime} from "~/utils/fileType"
+import { getFileIcon, getFileType, formatFileSize, formatFileTime} from "~/utils/file"
 
 const { openToast } = useToast()
 

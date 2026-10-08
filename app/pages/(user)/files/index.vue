@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import SearchBox from '~/components/ui/SearchBox.vue'
-import ViewSwitcher from '~/components/ui/ViewSwitcher.vue'
-import UploadButton from '~/components/ui/UploadButton.vue'
-import ItemMenu from '~/components/ui/ItemMenu.vue'
-import Pagination from '~/components/ui/Pagination.vue'
-import DataView from '~/components/ui/DataView.vue'
-import { getFileIcon, getFileType, formatFileSize, formatFileTime} from "~/utils/fileType"
+import { getFileIcon, getFileType, getFileCategory,formatFileSize, formatFileTime} from "~/utils/file"
 
 definePageMeta({
     middleware: 'auth',
@@ -19,15 +13,18 @@ const {
     uploadProgress,
     uploadFiles,
     deleteFile,
-    renameFile
+    renameFile,
+    downloadFile,
 } = useFileActions()
 
-const { files, error, fetchAll } = useUser()
+const { addFavorite, removeFavorite } = useFavoriteActions()
+
+const { files, favorites, error, fetchAll } = useUser()
 
 await fetchAll()
 
 if (error.value) {
-  openToast(error.value, 'error')
+openToast(error.value, 'error')
 }
 
 const searchQuery = ref('')
@@ -36,6 +33,22 @@ const activeCategory = ref('All')
 
 const isDragging = ref(false)
 
+const editingFileId = ref<string | null>(null)
+const editingFileName = ref('')
+
+const startRename = async (file: any) => {
+    editingFileId.value = file.id
+    editingFileName.value = file.name
+    
+    await nextTick()
+
+    const input = document.querySelector(
+        `[data-file-id="${file.id}"]`
+    ) as HTMLInputElement | null
+
+    input?.focus()
+    input?.select()
+}
 
 const handleDrop = async (event: DragEvent) => {
     isDragging.value = false
@@ -58,7 +71,7 @@ const filteredFiles = computed(() => {
     return files.value.filter(file => {
         const matchesCategory = 
             activeCategory.value === 'All' || 
-            getFileType(file.name) === activeCategory.value
+            getFileCategory(file.original_name) === activeCategory.value
 
         const matchesSearch = 
             file.name
@@ -69,12 +82,47 @@ const filteredFiles = computed(() => {
     })
 })
 
+const sortMode = ref<
+    'newest' |
+    'oldest' |
+    'name-asc' |
+    'name-desc'
+>('newest')
+
+const sortedFiles = computed(() => {
+    const files = [...filteredFiles.value]
+
+    if (sortMode.value === 'newest') {
+        return files.sort((a, b) => {
+            return new Date(b.created_at ?? 0).getTime() -
+                new Date(a.created_at ?? 0).getTime()
+        })
+    }
+
+    if (sortMode.value === 'oldest') {
+        return files.sort((a, b) => {
+            return new Date(a.created_at ?? 0).getTime() -
+                new Date(b.created_at ?? 0).getTime()
+        })
+    }
+
+    if (sortMode.value === 'name-asc') {
+        return files.sort((a, b) => {
+            return getItemName(a).localeCompare(getItemName(b))
+        })
+    }
+
+    return files.sort((a, b) => {
+        return getItemName(b).localeCompare(getItemName(a))
+    })
+})
+
 const selectedFiles = ref<string[]>([])
 
 const allSelected = computed(() => {
     return paginatedFiles.value.length > 0 &&
         paginatedFiles.value.every(file => {
-           return selectedFiles.value.includes(file.id)
+        return selectedFiles.value.includes(file.id)
         })
 })
 
@@ -108,12 +156,69 @@ const openFile = (file: any) => {
     console.log('Open:', file.name);
 }
 
-const downloadFile = (file: any) => {
-    console.log("Download:", file.name);
+const saveRename = async (file: any) => {
+    const newName = editingFileName.value?.trim()
+    
+    if (!newName || newName === file.name) {
+        editingFileId.value = null
+        return
+    }
+    
+    try {
+        await renameFile(file.id, newName)
+        await fetchAll()
+        
+        editingFileId.value = null
+
+        openToast('File renamed successfully', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || 'File could not be renamed.',
+            'error'
+        )
+    }
 }
 
-const favoriteFile = (file: any) => {
-    console.log("Favorite:", file.name);
+const handleDelete = async (fileId: any) => {
+    try {
+        await deleteFile(fileId)
+        await fetchAll()
+        
+        openToast('File deleted successfully.', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || 'File could not be deleted.',
+            'error'
+        )
+    }   
+}
+
+const isFileFavorite = (fileId: string) => {
+    return favorites.value.some(favorite => {
+        return favorite.file_id === fileId
+    })
+}
+
+const handleFavorite = async (file: any) => {
+    try {
+        if (isFileFavorite(file.id)) {
+            await removeFavorite(file.id, 'file')
+            await fetchAll()
+
+            openToast('File removed from favorites.', 'success')
+            return
+        }
+
+        await addFavorite(file.id, 'file')
+        await fetchAll()
+        
+        openToast('File favorited successfully.', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || 'File could not be favorited',
+            'error'
+        )
+    }
 }
 
 const currentPage = ref(1)
@@ -121,19 +226,18 @@ const itemsPerPage = computed(() => {
     return viewMode.value === 'list' ? 12 : 20
 })
 
-
 const totalPages = computed(() => {
-    return Math.ceil(filteredFiles.value.length / itemsPerPage.value)
+    return Math.ceil(sortedFiles.value.length / itemsPerPage.value)
 })
 
 const paginatedFiles = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value
     const end = start + itemsPerPage.value
 
-    return filteredFiles.value.slice(start, end)
+    return sortedFiles.value.slice(start, end)
 })
 
-watch([searchQuery, activeCategory], () => {
+watch([searchQuery, activeCategory, viewMode], () => {
     currentPage.value = 1
 })
 
@@ -155,54 +259,58 @@ watch([searchQuery, activeCategory], () => {
                 </div>
             </div>
 
-            <div class="file-filters">
-                <button
-                    class="filter-btn"
-                    :class="{ active: activeCategory === 'All'}"
-                    @click="activeCategory = 'All'"
-                >
-                    All
-                </button>
+            <div class="files-subtoolbar">
+                <div class="file-filters">
+                    <button
+                        class="filter-btn"
+                        :class="{ active: activeCategory === 'All'}"
+                        @click="activeCategory = 'All'"
+                    >
+                        All
+                    </button>
+    
+                    <button
+                        class="filter-btn"
+                        :class="{ active: activeCategory === 'Images'}"
+                        @click="activeCategory = 'Images'"
+                    >
+                        Images
+                    </button>
+    
+                    <button
+                        class="filter-btn"
+                        :class="{ active: activeCategory === 'Documents'}"
+                        @click="activeCategory = 'Documents'"
+                    >
+                        Documents
+                    </button>
+    
+                    <button
+                        class="filter-btn"
+                        :class="{ active: activeCategory === 'Videos'}"
+                        @click="activeCategory = 'Videos'"
+                    >
+                        Videos
+                    </button>
+    
+                    <button
+                        class="filter-btn"
+                        :class="{ active: activeCategory === 'Compressed'}"
+                        @click="activeCategory = 'Compressed'"
+                    >
+                        Compressed
+                    </button>
+    
+                    <button
+                        class="filter-btn"
+                        :class="{ active: activeCategory === 'Others'}"
+                        @click="activeCategory = 'Others'"
+                    >
+                        Others
+                    </button>
+                </div>
 
-                <button
-                    class="filter-btn"
-                    :class="{ active: activeCategory === 'Images'}"
-                    @click="activeCategory = 'Images'"
-                >
-                    Images
-                </button>
-
-                <button
-                    class="filter-btn"
-                    :class="{ active: activeCategory === 'Documents'}"
-                    @click="activeCategory = 'Documents'"
-                >
-                    Documents
-                </button>
-
-                <button
-                    class="filter-btn"
-                    :class="{ active: activeCategory === 'Videos'}"
-                    @click="activeCategory = 'Videos'"
-                >
-                    Videos
-                </button>
-
-                <button
-                    class="filter-btn"
-                    :class="{ active: activeCategory === 'Compressed'}"
-                    @click="activeCategory = 'Compressed'"
-                >
-                    Compressed
-                </button>
-
-                <button
-                    class="filter-btn"
-                    :class="{ active: activeCategory === 'Others'}"
-                    @click="activeCategory = 'Others'"
-                >
-                    Others
-                </button>
+                <SortDropdown v-model="sortMode" /> 
             </div>
         </div>
 
@@ -289,7 +397,17 @@ watch([searchQuery, activeCategory], () => {
                                         </div>
 
                                         <div class="file-info">
-                                            <strong>{{ file.name }}</strong>
+                                            <input 
+                                                type="text" 
+                                                class="name-input" 
+                                                :data-file-id="file.id"
+                                                :class="{ active: editingFileId === file.id}"
+                                                :value="editingFileId === file.id ? editingFileName : file.name"
+                                                :disabled="editingFileId !== file.id"
+                                                @input="editingFileName = ($event.target as HTMLInputElement).value"
+                                                @keyup.enter="saveRename(file)"
+                                                @blur="editingFileId === file.id && saveRename(file)"
+                                            >
                                             <span>
                                                 {{ formatFileSize(file.size) }} • {{ formatFileTime(file.created_at) }}
                                             </span>
@@ -297,18 +415,19 @@ watch([searchQuery, activeCategory], () => {
                                     </div>
                                 </td>
 
-                                <td>{{ file.mime_type }}</td>
+                                <td>{{ getFileType(file.original_name) }}</td>
                                 <td>{{ formatFileSize(file.size) }}</td>
                                 <td>{{ formatFileTime(file.updated_at) }}</td>
 
                                 <td>
                                     <ItemMenu
                                         type="file"
+                                        :is-favorite="isFileFavorite(file.id)"
                                         @open="openFile(file)"
-                                        @download="downloadFile(file)"
-                                        @rename="renameFile(file)"
-                                        @favorite="favoriteFile(file)"
-                                        @delete="deleteFile(file.id)"
+                                        @download="downloadFile(file.id)"
+                                        @rename="startRename(file)"
+                                        @favorite="handleFavorite(file)"
+                                        @delete="handleDelete(file.id)"
                                     />
                                 </td>
                             </tr>
@@ -330,16 +449,27 @@ watch([searchQuery, activeCategory], () => {
 
                         <ItemMenu
                             type="file"
+                            :is-favorite="isFileFavorite(file.id)"
                             @open="openFile(file)"
-                            @download="downloadFile(file)"
-                            @rename="renameFile(file)"
-                            @favorite="favoriteFile(file)"
-                            @delete="deleteFile(file.id)"
+                            @download="downloadFile(file.id)"
+                            @rename="startRename(file)"
+                            @favorite="handleFavorite(file)"
+                            @delete="handleDelete(file.id)"
                         />
                     </div>
 
                     <div class="file-card-info">
-                        <strong>{{ file.name }}</strong>
+                        <input 
+                            type="text" 
+                            class="name-input" 
+                            :data-file-id="file.id"
+                            :class="{ active: editingFileId === file.id}"
+                            :value="editingFileId === file.id ? editingFileName : file.name"
+                            :disabled="editingFileId !== file.id"
+                            @input="editingFileName = ($event.target as HTMLInputElement).value"
+                            @keyup.enter="saveRename(file)"
+                            @blur="editingFileId === file.id && saveRename(file)"
+                        >
                         <span>{{ file.mime_type }}</span>
                     </div>
 
@@ -406,6 +536,14 @@ watch([searchQuery, activeCategory], () => {
     align-items: center;
 
     gap: 1rem;
+}
+
+.files-subtoolbar {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: space-between;
 }
 
 .file-filters {
@@ -649,13 +787,27 @@ watch([searchQuery, activeCategory], () => {
     min-width: 0;
 }
 
-.file-info strong {
+.name-input {
+    width: 32rem;
     color: #ffffff;
 
+    background: transparent;
+
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+
+    
     font-size: 0.9rem;
     font-weight: 600;
 
     white-space: nowrap;
+    
+    outline: none;
+}
+
+.name-input.active {
+    padding: 0.2rem 0.4rem;
+    border-color: #3c47be;
 }
 
 .file-info span {

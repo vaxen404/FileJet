@@ -195,6 +195,7 @@ export type foldersWhereInput = {
   folders?: Prisma.XOR<Prisma.FoldersNullableScalarRelationFilter, Prisma.foldersWhereInput> | null
   other_folders?: Prisma.FoldersListRelationFilter
   notes?: Prisma.NotesListRelationFilter
+  favorites?: Prisma.FavoritesListRelationFilter
 }
 
 export type foldersOrderByWithRelationInput = {
@@ -209,6 +210,7 @@ export type foldersOrderByWithRelationInput = {
   folders?: Prisma.foldersOrderByWithRelationInput
   other_folders?: Prisma.foldersOrderByRelationAggregateInput
   notes?: Prisma.notesOrderByRelationAggregateInput
+  favorites?: Prisma.favoritesOrderByRelationAggregateInput
 }
 
 export type foldersWhereUniqueInput = Prisma.AtLeast<{
@@ -226,6 +228,7 @@ export type foldersWhereUniqueInput = Prisma.AtLeast<{
   folders?: Prisma.XOR<Prisma.FoldersNullableScalarRelationFilter, Prisma.foldersWhereInput> | null
   other_folders?: Prisma.FoldersListRelationFilter
   notes?: Prisma.NotesListRelationFilter
+  favorites?: Prisma.FavoritesListRelationFilter
 }, "id">
 
 export type foldersOrderByWithAggregationInput = {
@@ -262,6 +265,7 @@ export type foldersCreateInput = {
   folders?: Prisma.foldersCreateNestedOneWithoutOther_foldersInput
   other_folders?: Prisma.foldersCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersUncheckedCreateInput = {
@@ -274,6 +278,7 @@ export type foldersUncheckedCreateInput = {
   files?: Prisma.filesUncheckedCreateNestedManyWithoutFoldersInput
   other_folders?: Prisma.foldersUncheckedCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersUpdateInput = {
@@ -286,6 +291,7 @@ export type foldersUpdateInput = {
   folders?: Prisma.foldersUpdateOneWithoutOther_foldersNestedInput
   other_folders?: Prisma.foldersUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateInput = {
@@ -298,6 +304,7 @@ export type foldersUncheckedUpdateInput = {
   files?: Prisma.filesUncheckedUpdateManyWithoutFoldersNestedInput
   other_folders?: Prisma.foldersUncheckedUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersCreateManyInput = {
@@ -499,6 +506,22 @@ export type foldersUpdateOneWithoutNotesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.foldersUpdateToOneWithWhereWithoutNotesInput, Prisma.foldersUpdateWithoutNotesInput>, Prisma.foldersUncheckedUpdateWithoutNotesInput>
 }
 
+export type foldersCreateNestedOneWithoutFavoritesInput = {
+  create?: Prisma.XOR<Prisma.foldersCreateWithoutFavoritesInput, Prisma.foldersUncheckedCreateWithoutFavoritesInput>
+  connectOrCreate?: Prisma.foldersCreateOrConnectWithoutFavoritesInput
+  connect?: Prisma.foldersWhereUniqueInput
+}
+
+export type foldersUpdateOneWithoutFavoritesNestedInput = {
+  create?: Prisma.XOR<Prisma.foldersCreateWithoutFavoritesInput, Prisma.foldersUncheckedCreateWithoutFavoritesInput>
+  connectOrCreate?: Prisma.foldersCreateOrConnectWithoutFavoritesInput
+  upsert?: Prisma.foldersUpsertWithoutFavoritesInput
+  disconnect?: Prisma.foldersWhereInput | boolean
+  delete?: Prisma.foldersWhereInput | boolean
+  connect?: Prisma.foldersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.foldersUpdateToOneWithWhereWithoutFavoritesInput, Prisma.foldersUpdateWithoutFavoritesInput>, Prisma.foldersUncheckedUpdateWithoutFavoritesInput>
+}
+
 export type foldersCreateWithoutUsersInput = {
   id?: string
   name: string
@@ -508,6 +531,7 @@ export type foldersCreateWithoutUsersInput = {
   folders?: Prisma.foldersCreateNestedOneWithoutOther_foldersInput
   other_folders?: Prisma.foldersCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersUncheckedCreateWithoutUsersInput = {
@@ -519,6 +543,7 @@ export type foldersUncheckedCreateWithoutUsersInput = {
   files?: Prisma.filesUncheckedCreateNestedManyWithoutFoldersInput
   other_folders?: Prisma.foldersUncheckedCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersCreateOrConnectWithoutUsersInput = {
@@ -568,6 +593,7 @@ export type foldersCreateWithoutFilesInput = {
   folders?: Prisma.foldersCreateNestedOneWithoutOther_foldersInput
   other_folders?: Prisma.foldersCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersUncheckedCreateWithoutFilesInput = {
@@ -579,6 +605,7 @@ export type foldersUncheckedCreateWithoutFilesInput = {
   updated_at?: Date | string | null
   other_folders?: Prisma.foldersUncheckedCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersCreateOrConnectWithoutFilesInput = {
@@ -606,6 +633,7 @@ export type foldersUpdateWithoutFilesInput = {
   folders?: Prisma.foldersUpdateOneWithoutOther_foldersNestedInput
   other_folders?: Prisma.foldersUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateWithoutFilesInput = {
@@ -617,6 +645,7 @@ export type foldersUncheckedUpdateWithoutFilesInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   other_folders?: Prisma.foldersUncheckedUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersCreateWithoutOther_foldersInput = {
@@ -628,6 +657,7 @@ export type foldersCreateWithoutOther_foldersInput = {
   users: Prisma.usersCreateNestedOneWithoutFoldersInput
   folders?: Prisma.foldersCreateNestedOneWithoutOther_foldersInput
   notes?: Prisma.notesCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersUncheckedCreateWithoutOther_foldersInput = {
@@ -639,6 +669,7 @@ export type foldersUncheckedCreateWithoutOther_foldersInput = {
   updated_at?: Date | string | null
   files?: Prisma.filesUncheckedCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersCreateOrConnectWithoutOther_foldersInput = {
@@ -655,6 +686,7 @@ export type foldersCreateWithoutFoldersInput = {
   users: Prisma.usersCreateNestedOneWithoutFoldersInput
   other_folders?: Prisma.foldersCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersUncheckedCreateWithoutFoldersInput = {
@@ -666,6 +698,7 @@ export type foldersUncheckedCreateWithoutFoldersInput = {
   files?: Prisma.filesUncheckedCreateNestedManyWithoutFoldersInput
   other_folders?: Prisma.foldersUncheckedCreateNestedManyWithoutFoldersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersCreateOrConnectWithoutFoldersInput = {
@@ -698,6 +731,7 @@ export type foldersUpdateWithoutOther_foldersInput = {
   users?: Prisma.usersUpdateOneRequiredWithoutFoldersNestedInput
   folders?: Prisma.foldersUpdateOneWithoutOther_foldersNestedInput
   notes?: Prisma.notesUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateWithoutOther_foldersInput = {
@@ -709,6 +743,7 @@ export type foldersUncheckedUpdateWithoutOther_foldersInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   files?: Prisma.filesUncheckedUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUpsertWithWhereUniqueWithoutFoldersInput = {
@@ -736,6 +771,7 @@ export type foldersCreateWithoutNotesInput = {
   users: Prisma.usersCreateNestedOneWithoutFoldersInput
   folders?: Prisma.foldersCreateNestedOneWithoutOther_foldersInput
   other_folders?: Prisma.foldersCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersUncheckedCreateWithoutNotesInput = {
@@ -747,6 +783,7 @@ export type foldersUncheckedCreateWithoutNotesInput = {
   updated_at?: Date | string | null
   files?: Prisma.filesUncheckedCreateNestedManyWithoutFoldersInput
   other_folders?: Prisma.foldersUncheckedCreateNestedManyWithoutFoldersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutFoldersInput
 }
 
 export type foldersCreateOrConnectWithoutNotesInput = {
@@ -774,6 +811,7 @@ export type foldersUpdateWithoutNotesInput = {
   users?: Prisma.usersUpdateOneRequiredWithoutFoldersNestedInput
   folders?: Prisma.foldersUpdateOneWithoutOther_foldersNestedInput
   other_folders?: Prisma.foldersUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateWithoutNotesInput = {
@@ -785,6 +823,71 @@ export type foldersUncheckedUpdateWithoutNotesInput = {
   updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   files?: Prisma.filesUncheckedUpdateManyWithoutFoldersNestedInput
   other_folders?: Prisma.foldersUncheckedUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutFoldersNestedInput
+}
+
+export type foldersCreateWithoutFavoritesInput = {
+  id?: string
+  name: string
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  files?: Prisma.filesCreateNestedManyWithoutFoldersInput
+  users: Prisma.usersCreateNestedOneWithoutFoldersInput
+  folders?: Prisma.foldersCreateNestedOneWithoutOther_foldersInput
+  other_folders?: Prisma.foldersCreateNestedManyWithoutFoldersInput
+  notes?: Prisma.notesCreateNestedManyWithoutFoldersInput
+}
+
+export type foldersUncheckedCreateWithoutFavoritesInput = {
+  id?: string
+  user_id: string
+  parent_folder_id?: string | null
+  name: string
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  files?: Prisma.filesUncheckedCreateNestedManyWithoutFoldersInput
+  other_folders?: Prisma.foldersUncheckedCreateNestedManyWithoutFoldersInput
+  notes?: Prisma.notesUncheckedCreateNestedManyWithoutFoldersInput
+}
+
+export type foldersCreateOrConnectWithoutFavoritesInput = {
+  where: Prisma.foldersWhereUniqueInput
+  create: Prisma.XOR<Prisma.foldersCreateWithoutFavoritesInput, Prisma.foldersUncheckedCreateWithoutFavoritesInput>
+}
+
+export type foldersUpsertWithoutFavoritesInput = {
+  update: Prisma.XOR<Prisma.foldersUpdateWithoutFavoritesInput, Prisma.foldersUncheckedUpdateWithoutFavoritesInput>
+  create: Prisma.XOR<Prisma.foldersCreateWithoutFavoritesInput, Prisma.foldersUncheckedCreateWithoutFavoritesInput>
+  where?: Prisma.foldersWhereInput
+}
+
+export type foldersUpdateToOneWithWhereWithoutFavoritesInput = {
+  where?: Prisma.foldersWhereInput
+  data: Prisma.XOR<Prisma.foldersUpdateWithoutFavoritesInput, Prisma.foldersUncheckedUpdateWithoutFavoritesInput>
+}
+
+export type foldersUpdateWithoutFavoritesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  files?: Prisma.filesUpdateManyWithoutFoldersNestedInput
+  users?: Prisma.usersUpdateOneRequiredWithoutFoldersNestedInput
+  folders?: Prisma.foldersUpdateOneWithoutOther_foldersNestedInput
+  other_folders?: Prisma.foldersUpdateManyWithoutFoldersNestedInput
+  notes?: Prisma.notesUpdateManyWithoutFoldersNestedInput
+}
+
+export type foldersUncheckedUpdateWithoutFavoritesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  parent_folder_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  files?: Prisma.filesUncheckedUpdateManyWithoutFoldersNestedInput
+  other_folders?: Prisma.foldersUncheckedUpdateManyWithoutFoldersNestedInput
+  notes?: Prisma.notesUncheckedUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersCreateManyUsersInput = {
@@ -804,6 +907,7 @@ export type foldersUpdateWithoutUsersInput = {
   folders?: Prisma.foldersUpdateOneWithoutOther_foldersNestedInput
   other_folders?: Prisma.foldersUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateWithoutUsersInput = {
@@ -815,6 +919,7 @@ export type foldersUncheckedUpdateWithoutUsersInput = {
   files?: Prisma.filesUncheckedUpdateManyWithoutFoldersNestedInput
   other_folders?: Prisma.foldersUncheckedUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateManyWithoutUsersInput = {
@@ -842,6 +947,7 @@ export type foldersUpdateWithoutFoldersInput = {
   users?: Prisma.usersUpdateOneRequiredWithoutFoldersNestedInput
   other_folders?: Prisma.foldersUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateWithoutFoldersInput = {
@@ -853,6 +959,7 @@ export type foldersUncheckedUpdateWithoutFoldersInput = {
   files?: Prisma.filesUncheckedUpdateManyWithoutFoldersNestedInput
   other_folders?: Prisma.foldersUncheckedUpdateManyWithoutFoldersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutFoldersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutFoldersNestedInput
 }
 
 export type foldersUncheckedUpdateManyWithoutFoldersInput = {
@@ -872,12 +979,14 @@ export type FoldersCountOutputType = {
   files: number
   other_folders: number
   notes: number
+  favorites: number
 }
 
 export type FoldersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   files?: boolean | FoldersCountOutputTypeCountFilesArgs
   other_folders?: boolean | FoldersCountOutputTypeCountOther_foldersArgs
   notes?: boolean | FoldersCountOutputTypeCountNotesArgs
+  favorites?: boolean | FoldersCountOutputTypeCountFavoritesArgs
 }
 
 /**
@@ -911,6 +1020,13 @@ export type FoldersCountOutputTypeCountNotesArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.notesWhereInput
 }
 
+/**
+ * FoldersCountOutputType without action
+ */
+export type FoldersCountOutputTypeCountFavoritesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.favoritesWhereInput
+}
+
 
 export type foldersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -924,6 +1040,7 @@ export type foldersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   folders?: boolean | Prisma.folders$foldersArgs<ExtArgs>
   other_folders?: boolean | Prisma.folders$other_foldersArgs<ExtArgs>
   notes?: boolean | Prisma.folders$notesArgs<ExtArgs>
+  favorites?: boolean | Prisma.folders$favoritesArgs<ExtArgs>
   _count?: boolean | Prisma.FoldersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["folders"]>
 
@@ -965,6 +1082,7 @@ export type foldersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   folders?: boolean | Prisma.folders$foldersArgs<ExtArgs>
   other_folders?: boolean | Prisma.folders$other_foldersArgs<ExtArgs>
   notes?: boolean | Prisma.folders$notesArgs<ExtArgs>
+  favorites?: boolean | Prisma.folders$favoritesArgs<ExtArgs>
   _count?: boolean | Prisma.FoldersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type foldersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -984,6 +1102,7 @@ export type $foldersPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     folders: Prisma.$foldersPayload<ExtArgs> | null
     other_folders: Prisma.$foldersPayload<ExtArgs>[]
     notes: Prisma.$notesPayload<ExtArgs>[]
+    favorites: Prisma.$favoritesPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1391,6 +1510,7 @@ export interface Prisma__foldersClient<T, Null = never, ExtArgs extends runtime.
   folders<T extends Prisma.folders$foldersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.folders$foldersArgs<ExtArgs>>): Prisma.Prisma__foldersClient<runtime.Types.Result.GetResult<Prisma.$foldersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   other_folders<T extends Prisma.folders$other_foldersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.folders$other_foldersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$foldersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notes<T extends Prisma.folders$notesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.folders$notesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$notesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  favorites<T extends Prisma.folders$favoritesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.folders$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$favoritesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1915,6 +2035,30 @@ export type folders$notesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.NotesScalarFieldEnum | Prisma.NotesScalarFieldEnum[]
+}
+
+/**
+ * folders.favorites
+ */
+export type folders$favoritesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the favorites
+   */
+  select?: Prisma.favoritesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the favorites
+   */
+  omit?: Prisma.favoritesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.favoritesInclude<ExtArgs> | null
+  where?: Prisma.favoritesWhereInput
+  orderBy?: Prisma.favoritesOrderByWithRelationInput | Prisma.favoritesOrderByWithRelationInput[]
+  cursor?: Prisma.favoritesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FavoritesScalarFieldEnum | Prisma.FavoritesScalarFieldEnum[]
 }
 
 /**
