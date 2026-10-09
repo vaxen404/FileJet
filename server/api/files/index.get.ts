@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
                 message: 'Oturum açmanız gerekiyor.'
             })
         }
-    
+
         const files = await prisma.files.findMany({
             where: {
                 user_id: session.userId,

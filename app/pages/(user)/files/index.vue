@@ -110,7 +110,7 @@ const handleFiles = async (files: FileList) => {
 }
 
 const openFile = (file: any) => {
-    console.log('Open:', file.name);
+    navigateTo(`/files/${file.id}`)
 }
 
 const saveRename = async (file: any) => {

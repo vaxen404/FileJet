@@ -338,6 +338,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
                                         :is-favorite="true"
                                         @rename="startRename(item)"
                                         @delete="handleRemove(item)"
+                                        @download="handleDownload(item)"
                                     />
                                 </td>
                             </tr>
@@ -363,6 +364,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
                             :is-favorite="true"
                             @rename="startRename(item)"
                             @delete="handleRemove(item)"
+                            @download="handleDownload(item)"
                         />
                     </div>
 
