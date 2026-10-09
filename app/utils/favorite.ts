@@ -34,11 +34,11 @@ export const getItemActions = (item: any) => {
     const type = getItemType(item)
 
     if (type === 'file') {
-        return ['open', 'download', 'favorite', 'delete'] as const
+        return ['open', 'rename', 'download', 'delete'] as const
     }
 
     if (type === 'folder') {
-        return ['open', 'favorite', 'delete'] as const
+        return ['open', 'rename', 'delete'] as const
     }
 
     return ['open', 'edit', 'favorite', 'delete'] as const

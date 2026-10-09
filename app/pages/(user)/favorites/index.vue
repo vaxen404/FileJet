@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { formatFileSize } from '~/utils/file'
+definePageMeta({
+    middleware: 'auth',
+    layout: 'user'
+})
 
 import {
     getItemIcon,
@@ -10,14 +13,11 @@ import {
     formatTime
 } from '~/utils/favorite'
 
-definePageMeta({
-    middleware: 'auth',
-    layout: 'user'
-})
-
 const { toastMessage, toastType, showToast, openToast } = useToast()
 
 const { addFavorite, removeFavorite } = useFavoriteActions()
+
+const { renameFile, downloadFile } = useFileActions()
 
 const { favorites, error, fetchAll } = useUser()
 
@@ -55,35 +55,11 @@ const sortMode = ref<
     'name-desc'
 >('newest')
 
-const sortedFavorites = computed(() => {
-    const items = [...filteredFavorites.value]
+const { sortedItems: sortedFavorites } = useSort(
+    filteredFavorites, sortMode, item => getItemName(item), item => item.created_at
+)
 
-    if (sortMode.value === 'newest') {
-        return items.sort((a, b) => {
-            return new Date(b.created_at ?? 0).getTime() -
-                new Date(a.created_at ?? 0).getTime()
-        })
-    }
-
-    if (sortMode.value === 'oldest') {
-        return items.sort((a, b) => {
-            return new Date(a.created_at ?? 0).getTime() -
-                new Date(b.created_at ?? 0).getTime()
-        })
-    }
-
-    if (sortMode.value === 'name-asc') {
-        return items.sort((a, b) => {
-            return getItemName(a).localeCompare(getItemName(b))
-        })
-    }
-
-    return items.sort((a, b) => {
-        return getItemName(b).localeCompare(getItemName(a))
-    })
-})
-
-const handleFavorite = async (item: any) => {
+const handleRemove = async (item: any) => {
     try {
         const type = getItemType(item)
         const itemId = getItemId(item)
@@ -100,16 +76,97 @@ const handleFavorite = async (item: any) => {
     }
 }
 
+const editingItemId = ref<string | null>(null)
+const editingItemName = ref('')
+
+const startRename = async (item: any) => {
+    editingItemId.value = item.id
+    editingItemName.value = getItemName(item)
+    
+    await nextTick()
+
+    const input = document.querySelector(
+        `[data-file-id="${item.id}"]`
+    ) as HTMLInputElement | null
+
+    input?.focus()
+    input?.select()
+}
+
+const renameItem = async (
+    itemId: string,
+    itemType: 'file' | 'folder' | 'note',
+    newName: string
+) => {
+    if (itemType === 'file') {
+        await renameFile(itemId, newName)
+        return
+    }
+
+    // if (itemType === 'folder') {
+    //     await renameFolder(itemId, newName)
+    //     return
+    // }
+
+    // await renameNote(itemId, newName)
+}
+
+const saveRename = async (item: any) => {
+    const newName = editingItemName.value.trim()
+
+    if (!newName || newName === getItemName(item)) {
+        editingItemId.value = null
+        return
+    }
+
+    try {
+        const type = getItemType(item)
+        const itemId = getItemId(item)
+
+        await renameItem(itemId, type, newName)
+        await fetchAll()
+
+        editingItemId.value = null
+
+        openToast('Item renamed successfully', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || 'Item could not be renamed.',
+            'error'
+        )
+    }
+}
+
+const handleDownload = (item: any) => {
+    const type = getItemType(item)
+    const itemId = getItemId(item)
+
+    if (type === 'file') {
+        downloadFile(itemId)
+        return
+    }
+
+    // if (type === 'note') {
+    //     downloadNote(itemId)
+    //     return
+    // }
+
+    // if (type === 'folder') {
+    //     downloadFolder(itemId)
+    //     return
+    // }
+}
+
 const itemsPerPage = computed(() => {
     return viewMode.value === 'list' ? 12 : 20
 })
 
-const { currentPage, totalPages, paginatedItems: paginatedFiles } = usePagination(
+const { currentPage, totalPages, paginatedItems } = usePagination(
     sortedFavorites,
     itemsPerPage
 )
 
-const { selectedItems: selectedFavorites, allSelected, toggleSelectAll } = useSelection(paginatedFiles) 
+const { selectedItems: selectedFavorites, allSelected, toggleSelectAll } = useSelection(paginatedItems) 
 
 type FavoriteResource = (typeof favorites.value)[number] & {
     files?: { size?: number | string | null } | null
@@ -242,7 +299,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
                         <tbody>
                             <tr
-                                v-for="item in paginatedFiles"
+                                v-for="item in paginatedItems"
                                 :key="item.id"
                                 :class="{ selected: selectedFavorites.includes(item.id) }"
                             >
@@ -257,18 +314,17 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
                                 </td>
 
                                 <td>
-                                    <div class="favorite-name">
-                                        <div class="favorite-icon">
-                                            <Icon :name="getItemIcon(item)" />
-                                        </div>
-
-                                        <div class="favorite-info">
-                                            <strong>{{ getItemName(item) }}</strong>
-                                            <span>
-                                                {{ getItemSize(item) }} • {{ formatTime(item.created_at) }}
-                                            </span>
-                                        </div>
-                                    </div>
+                                    <input 
+                                        type="text" 
+                                        class="name-input" 
+                                        :data-file-id="item.id"
+                                        :class="{ active: editingItemId === item.id}"
+                                        :value="editingItemId === item.id ? editingItemName : getItemName(item)"
+                                        :disabled="editingItemId !== item.id"
+                                        @input="editingItemName = ($event.target as HTMLInputElement).value"
+                                        @keyup.enter="saveRename(item)"
+                                        @blur="editingItemId === item.id && saveRename(item)"
+                                    >
                                 </td>
 
                                 <td class="favorite-type">{{ getItemType(item) }}</td>
@@ -280,7 +336,8 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
                                         :type="getItemType(item)"
                                         :actions="[...getItemActions(item)]"
                                         :is-favorite="true"
-                                        @favorite="handleFavorite(item)"
+                                        @rename="startRename(item)"
+                                        @delete="handleRemove(item)"
                                     />
                                 </td>
                             </tr>
@@ -291,7 +348,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
             <template #grid>
                 <div
-                    v-for="item in paginatedFiles"
+                    v-for="item in paginatedItems"
                     :key="item.id"
                     class="favorite-card"
                 >
@@ -304,12 +361,23 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
                             :type="getItemType(item)"
                             :actions="[...getItemActions(item)]"
                             :is-favorite="true"
-                            @favorite="handleFavorite(item)"
+                            @rename="startRename(item)"
+                            @delete="handleRemove(item)"
                         />
                     </div>
 
                     <div class="favorite-card-info">
-                        <strong>{{ getItemName(item) }}</strong>
+                        <input 
+                            type="text" 
+                            class="name-input" 
+                            :data-file-id="item.id"
+                            :class="{ active: editingItemId === item.id}"
+                            :value="editingItemId === item.id ? editingItemName : getItemName(item)"
+                            :disabled="editingItemId !== item.id"
+                            @input="editingItemName = ($event.target as HTMLInputElement).value"
+                            @keyup.enter="saveRename(item)"
+                            @blur="editingItemId === item.id && saveRename(item)"
+                        >
                         <span class="favorite-type">{{ getItemType(item) }}</span>
                     </div>
 
@@ -586,12 +654,28 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     font-size: 1rem;
 }
 
-.favorite-name {
-    display: flex;
+.name-input {
+    width: 32rem;
+    color: #ffffff;
 
-    align-items: center;
+    background: transparent;
 
-    gap: 0.8rem;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+
+    
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    white-space: nowrap;
+    
+    outline: none;
+}
+
+.name-input.active {
+    background: #1f1f23;
+    border-color: #3c47be;
+    padding: 0.45rem 0.6rem;
 }
 
 .favorite-icon {

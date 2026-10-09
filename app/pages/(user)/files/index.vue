@@ -89,52 +89,9 @@ const sortMode = ref<
     'name-desc'
 >('newest')
 
-const sortedFiles = computed(() => {
-    const files = [...filteredFiles.value]
-
-    if (sortMode.value === 'newest') {
-        return files.sort((a, b) => {
-            return new Date(b.created_at ?? 0).getTime() -
-                new Date(a.created_at ?? 0).getTime()
-        })
-    }
-
-    if (sortMode.value === 'oldest') {
-        return files.sort((a, b) => {
-            return new Date(a.created_at ?? 0).getTime() -
-                new Date(b.created_at ?? 0).getTime()
-        })
-    }
-
-    if (sortMode.value === 'name-asc') {
-        return files.sort((a, b) => {
-            return getItemName(a).localeCompare(getItemName(b))
-        })
-    }
-
-    return files.sort((a, b) => {
-        return getItemName(b).localeCompare(getItemName(a))
-    })
-})
-
-const selectedFiles = ref<string[]>([])
-
-const allSelected = computed(() => {
-    return paginatedFiles.value.length > 0 &&
-        paginatedFiles.value.every(file => {
-        return selectedFiles.value.includes(file.id)
-        })
-})
-
-const toggleSelectAll = (event: Event) => {
-    const checked = (event.target as HTMLInputElement).checked
-
-    if (checked) {
-        selectedFiles.value = paginatedFiles.value.map(file => file.id)
-    } else {
-        selectedFiles.value = []
-    }
-}
+const { sortedItems: sortedFiles } = useSort(
+    filteredFiles, sortMode, file => file.name, file => file.created_at
+)
 
 const handleFiles = async (files: FileList) => {
     if (!files.length) {
@@ -221,21 +178,16 @@ const handleFavorite = async (file: any) => {
     }
 }
 
-const currentPage = ref(1)
 const itemsPerPage = computed(() => {
     return viewMode.value === 'list' ? 12 : 20
 })
 
-const totalPages = computed(() => {
-    return Math.ceil(sortedFiles.value.length / itemsPerPage.value)
-})
+const { currentPage, totalPages, paginatedItems: paginatedFiles} = usePagination(
+    sortedFiles,
+    itemsPerPage
+)
 
-const paginatedFiles = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value
-    const end = start + itemsPerPage.value
-
-    return sortedFiles.value.slice(start, end)
-})
+const { selectedItems: selectedFiles, allSelected, toggleSelectAll } = useSelection(paginatedFiles)
 
 watch([searchQuery, activeCategory, viewMode], () => {
     currentPage.value = 1
