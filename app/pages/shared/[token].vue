@@ -1,7 +1,8 @@
+
 <script setup lang="ts">
 const route = useRoute()
 
-const token = computed(() => route.params.token as string )
+const token = computed(() => route.params.token as string)
 
 interface SharedResponse {
     type: 'file' | 'folder' | 'note'
@@ -14,7 +15,7 @@ const sharedUrl = computed(() => {
 })
 
 const { data: sharedItem, error } = await useFetch<SharedResponse>(
-    sharedUrl   
+    sharedUrl
 )
 
 const isImage = computed(() => {
@@ -47,6 +48,59 @@ const itemName = computed(() => {
     return sharedItem.value.item.name
 })
 
+const isDownloadOnly = computed(() => {
+    return sharedItem.value?.type === 'file' &&
+        !isImage.value &&
+        !isText.value &&
+        !isPdf.value &&
+        !isVideo.value
+})
+
+const downloadUrl = computed(() => {
+    return `/api/shared/${token.value}/download`
+})
+
+const isDownloading = ref(false)
+const downloadError = ref(false)
+const downloadedToken = ref<string | null>(null)
+
+const autoDownload = () => {
+    if (!import.meta.client) return
+    if (!isDownloadOnly.value) return
+    if (isDownloading.value) return
+    if (downloadedToken.value === token.value) return
+
+    isDownloading.value = true
+    downloadError.value = false
+    downloadedToken.value = token.value
+
+    const link = document.createElement('a')
+
+    link.href = downloadUrl.value
+    link.download = itemName.value
+
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+
+    isDownloading.value = false
+}
+
+watch(
+    [token, isDownloadOnly],
+    () => {
+        if (isDownloadOnly.value) {
+            autoDownload()
+        }
+    },
+    { immediate: true }
+)
+
+const manualDownload = () => {
+    downloadedToken.value = null
+    autoDownload()
+}
+
 const textContent = ref('')
 const textPreviewError = ref(false)
 
@@ -60,16 +114,13 @@ const loadTextPreview = async () => {
         textContent.value = await $fetch<string>(
             `/api/shared/${token.value}/preview`
         )
-    } catch (err: any) {
+    } catch {
         textPreviewError.value = true
     }
 }
 
 watch(
-    [
-        token,
-        isText
-    ],
+    [token, isText],
     () => {
         loadTextPreview()
     },
@@ -81,7 +132,7 @@ watch(
 
 <template>
     <div class="shared-page">
-        <div v-if="error">
+        <div v-if="error" class="error-message">
             {{
                 error.statusCode === 404
                     ? 'Shared item not found.'
@@ -112,8 +163,8 @@ watch(
                 >
 
                 <template v-else-if="isText">
-                    <div v-if="textPreviewError">
-                        Text preview could not be loaded
+                    <div v-if="textPreviewError" class="error-message">
+                        Text preview could not be loaded.
                     </div>
 
                     <pre
@@ -121,7 +172,6 @@ watch(
                         class="text-preview"
                     >{{ textContent }}</pre>
                 </template>
-
 
                 <iframe
                     v-else-if="isPdf"
@@ -137,8 +187,31 @@ watch(
                     preload="metadata"
                 />
 
-                <div v-else>
-                    This file cannot be previewed.
+                <div v-else class="download-message">
+                    <div class="download-icon">
+                        <Icon
+                            name="solar:download-bold"
+                            size="2.5rem"
+                        />
+                    </div>
+
+                    <h2>Downloading file...</h2>
+
+                    <p>
+                        Your download should start automatically.
+                    </p>
+
+                    <button
+                        class="download-btn"
+                        @click="manualDownload"
+                    >
+                        <Icon
+                            name="solar:download-linear"
+                            size="1.2rem"
+                        />
+
+                        Download manually
+                    </button>
                 </div>
             </div>
 
@@ -185,6 +258,7 @@ watch(
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
 .shared-by {
@@ -231,5 +305,87 @@ watch(
     object-fit: contain;
     border-radius: 0.6rem;
     background: #000;
+}
+
+.download-message {
+    min-height: 26rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    text-align: center;
+}
+
+.download-icon {
+    width: 6rem;
+    height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #282354;
+    color: #8b7cff;
+    border-radius: 1.2rem;
+}
+
+.download-message h2 {
+    margin: 0.5rem 0 0;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.download-message p {
+    margin: 0;
+    color: #898991;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    margin-top: 0.75rem;
+    padding: 0.8rem 1.4rem;
+    color: #ffffff;
+    background: #3c47be;
+    border: 1px solid #4f5bdf;
+    border-radius: 0.6rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.download-btn:hover {
+    background: #505cf0;
+}
+
+.error-message {
+    padding: 1rem;
+    color: #ef6666;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    .shared-page {
+        padding: 0.4rem;
+    }
+
+    .header-bar {
+        padding: 1rem;
+    }
+
+    .download-message {
+        min-height: 20rem;
+        padding: 1rem;
+    }
+
+    .download-message h2 {
+        font-size: 1.1rem;
+    }
 }
 </style>

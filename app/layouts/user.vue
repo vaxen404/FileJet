@@ -34,7 +34,7 @@ const contentClass = computed(() => ({
     <Sidebar />
 
     <div class="user-main">
-      <HeaderBar :title="pageTitle" />
+      <HeaderBar :title="pageTitle" class="user-header" />
 
       <main :class="contentClass">
         <slot />
@@ -88,6 +88,23 @@ body {
   padding: 0rem;
 
   overflow: auto;
+}
+
+.user-header {
+  flex-shrink: 0;
+}
+
+.files-content,
+.folders-content,
+.notes-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
 }
 
 .home-content {

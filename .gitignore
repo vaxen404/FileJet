@@ -17,6 +17,8 @@ storage/
 logs
 *.log
 
+/scripts/
+
 # Misc
 .DS_Store
 .fleet

@@ -1,83 +1,112 @@
 
 export const useFileActions = () => {
-    const isLoading = ref(false)
-    
-    const uploadProgress = ref(0)
     const activeRequests = ref(0)
+    const activeUploads = ref(0)
+    const activeDeletes = ref(0)
+    const uploads = reactive(new Map<symbol, { loaded: number, total: number | null }>())
+
+    const isLoading = computed(() => activeRequests.value > 0)
+    const isUploading = computed(() => activeUploads.value > 0)
+    const isDeleting = computed(() => activeDeletes.value > 0)
+    const uploadProgress = computed(() => {
+        let loaded = 0
+        let total = 0
+
+        for (const upload of uploads.values()) {
+            if (upload.total === null) return null
+
+            loaded += upload.loaded
+            total += upload.total
+        }
+
+        return total > 0 ? Math.round((loaded / total) * 100) : null
+    })
 
     const startLoading = () => {
         activeRequests.value++
-        isLoading.value = true
     }
 
     const stopLoading = () => {
         activeRequests.value = Math.max(0, activeRequests.value - 1)
-        isLoading.value = activeRequests.value > 0
     }
 
-    const uploadFiles = (files: FileList | File[]) => {
-        return new Promise<void>((resolve, reject) => {
+    const uploadFiles = async (
+        files: FileList | File[],
+        onSuccess?: () => Promise<void>
+    ) => {
+        const uploadId = Symbol()
+
+        if (!activeUploads.value) uploads.clear()
+
+        uploads.set(uploadId, { loaded: 0, total: null })
+        activeUploads.value++
+        startLoading()
+
+        let uploaded = false
+
+        try {
             const formData = new FormData()
 
             Array.from(files).forEach((file) => {
                 formData.append('files', file)
             })
 
-            startLoading()
-            uploadProgress.value = 0
+            await new Promise<void>((resolve, reject) => {
+                const xhr = new XMLHttpRequest()
 
-            const xhr = new XMLHttpRequest()
-
-            xhr.open('POST', '/api/files/add')
-            xhr.responseType = 'json'
-            xhr.setRequestHeader('Accept', 'application/json')
-
-            xhr.upload.onprogress = (event) => {
-                if (!event.lengthComputable) return
-
-                uploadProgress.value = Math.round(
-                    (event.loaded / event.total) * 100
-                )
-            }
-
-            xhr.onload = () => {
-                stopLoading()
-
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    uploadProgress.value = 100
-                    resolve()
-                    return
+                xhr.upload.onprogress = (event) => {
+                    uploads.set(uploadId, {
+                        loaded: event.loaded,
+                        total: event.lengthComputable && event.total > 0 ? event.total : null
+                    })
                 }
 
-                const message =
-                    xhr.response?.message ||
-                    xhr.response?.data?.message ||
-                    xhr.response?.statusMessage ||
-                    'File upload failed'
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve()
+                        return
+                    }
 
-                reject(new Error(message))
-            }
+                    const message =
+                        xhr.response?.message ||
+                        xhr.response?.data?.message ||
+                        xhr.response?.statusMessage ||
+                        'File upload failed'
 
-            xhr.onerror = () => {
-                stopLoading()
-                reject(new Error('File upload failed'))
-            }
+                    reject(new Error(message))
+                }
 
-            xhr.onabort = () => {
-                stopLoading()
-                reject(new Error('File upload cancelled'))
-            }
+                xhr.onerror = () => {
+                    reject(new Error('File upload failed'))
+                }
 
-            try {
+                xhr.onabort = () => {
+                    reject(new Error('File upload cancelled'))
+                }
+
+                xhr.ontimeout = () => {
+                    reject(new Error('File upload timed out'))
+                }
+
+                xhr.open('POST', '/api/files/add')
+                xhr.responseType = 'json'
+                xhr.setRequestHeader('Accept', 'application/json')
                 xhr.send(formData)
-            } catch (error) {
-                stopLoading()
-                reject(error)
-            }
-        })
+            })
+
+            uploaded = true
+            await onSuccess?.()
+        } finally {
+            if (!uploaded) uploads.delete(uploadId)
+
+            activeUploads.value--
+            if (!activeUploads.value) uploads.clear()
+            stopLoading()
+        }
     }
 
-    const deleteFile = async (fileId: string) => {
+    const deleteFile = async (fileId: string, onSuccess?: () => Promise<void>) => {
+        activeDeletes.value++
         startLoading()
 
         try {
@@ -87,7 +116,9 @@ export const useFileActions = () => {
                     fileId
                 }
             })
+            await onSuccess?.()
         } finally {
+            activeDeletes.value--
             stopLoading()
         }
     }
@@ -124,6 +155,8 @@ export const useFileActions = () => {
 
     return {
         isLoading,
+        isUploading,
+        isDeleting,
         uploadProgress,
         uploadFiles,
         deleteFile,

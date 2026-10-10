@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 withDefaults(
     defineProps<{
@@ -38,8 +39,14 @@ withDefaults(
     gap: 1rem;
 }
 
-.preview-side,
+.previewable-side,
 .details-side {
     min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .details-view.with-preview {
+        grid-template-columns: 1fr;
+    }
 }
 </style>

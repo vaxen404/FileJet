@@ -16,6 +16,7 @@ const emit = defineEmits<{
 <template>
     <div
         class="data-view"
+        :aria-busy="isLoading"
         :class="[
             viewMode === 'list' ? 'list-view' : 'grid-view',
             { 
@@ -57,6 +58,7 @@ const emit = defineEmits<{
     position: relative;
 
     flex: 1;
+    min-width: 0;
     min-height: 0;
 }
 

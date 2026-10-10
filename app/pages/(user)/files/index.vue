@@ -10,6 +10,8 @@ const { toastMessage, toastType, showToast, openToast } = useToast()
 
 const {
     isLoading,
+    isUploading,
+    isDeleting,
     uploadProgress,
     uploadFiles,
     deleteFile,
@@ -58,8 +60,7 @@ const handleDrop = async (event: DragEvent) => {
     if (!droppedFiles?.length) return
 
     try {
-        await uploadFiles(droppedFiles)
-        await fetchAll()
+        await uploadFiles(droppedFiles, fetchAll)
 
         openToast('File uploaded successfully.', 'success')
     } catch {
@@ -100,8 +101,7 @@ const handleFiles = async (files: FileList) => {
     }
 
     try {
-        await uploadFiles(files)
-        await fetchAll()
+        await uploadFiles(files, fetchAll)
 
         openToast('File uploaded successfully.', 'success')
     } catch {
@@ -138,8 +138,7 @@ const saveRename = async (file: any) => {
 
 const handleDelete = async (fileId: any) => {
     try {
-        await deleteFile(fileId)
-        await fetchAll()
+        await deleteFile(fileId, fetchAll)
         
         openToast('File deleted successfully.', 'success')
     } catch (err: any) {
@@ -276,14 +275,21 @@ watch([searchQuery, activeCategory, viewMode], () => {
             @drop="handleDrop"
         >
             <template #loading>
-                <div class="upload-loading">
-                    <span>{{ uploadProgress }}%</span>
+                <div class="upload-loading" role="status" aria-live="polite">
+                    <template v-if="isUploading && uploadProgress !== null">
+                        <span>{{ uploadProgress }}%</span>
 
-                    <div class="upload-progress">
-                        <div
-                            class="upload-progress-bar"
-                            :style="{ width: `${uploadProgress}%` }"
-                        ></div>
+                        <div class="upload-progress">
+                            <div
+                                class="upload-progress-bar"
+                                :style="{ width: `${uploadProgress}%` }"
+                            ></div>
+                        </div>
+                    </template>
+
+                    <div v-if="isDeleting || !isUploading || uploadProgress === null" class="operation-loading">
+                        <span class="loading-spinner" aria-hidden="true"></span>
+                        <span>{{ isDeleting ? 'Deleting files...' : isUploading ? 'Uploading files...' : 'Updating file...' }}</span>
                     </div>
                 </div>
             </template>
@@ -445,7 +451,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
 <style scoped>
 .files-page {
     width: 100%;
-    height: 100%;
+    flex: 1;
     min-height: 0;
 
     padding: 0.4rem 0.5rem;
@@ -867,6 +873,28 @@ watch([searchQuery, activeCategory, viewMode], () => {
 .upload-loading > span {
     font-size: 1rem;
     font-weight: 600;
+}
+
+.operation-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #29292e;
+    border-top-color: #3c47be;
+    border-radius: 50%;
+    animation: loading-spin 0.8s linear infinite;
+}
+
+@keyframes loading-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .upload-progress {

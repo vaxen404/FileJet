@@ -107,6 +107,7 @@ const goToPage = (page: number) => {
 <style scoped>
 .pagination {
     height: 3.5rem;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
