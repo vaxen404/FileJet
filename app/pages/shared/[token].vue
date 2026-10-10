@@ -32,6 +32,11 @@ const isPdf = computed(() => {
         sharedItem.value.item.mime_type === 'application/pdf'
 })
 
+const isVideo = computed(() => {
+    return sharedItem.value?.type === 'file' &&
+        sharedItem.value.item.mime_type?.startsWith('video/')
+})
+
 const itemName = computed(() => {
     if (!sharedItem.value) return ''
 
@@ -124,6 +129,14 @@ watch(
                     :src="`/api/shared/${token}/preview`"
                 />
 
+                <video
+                    v-else-if="isVideo"
+                    class="video-preview"
+                    :src="`/api/shared/${token}/preview`"
+                    controls
+                    preload="metadata"
+                />
+
                 <div v-else>
                     This file cannot be previewed.
                 </div>
@@ -210,5 +223,13 @@ watch(
     white-space: pre-wrap;
     word-break: break-word;
     font-family: monospace;
+}
+
+.video-preview {
+    width: 100%;
+    max-height: calc(100dvh - 7rem);
+    object-fit: contain;
+    border-radius: 0.6rem;
+    background: #000;
 }
 </style>
