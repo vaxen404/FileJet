@@ -5,7 +5,7 @@ import { setAuthSession } from '~~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
     try {
-        enforceRateLimit(event, 'auth-login', 5, 15 * 60 * 1000)
+        enforceRateLimit(event, 'auth-login', 10, 10 * 60 * 1000)
 
         const { username, password } = await readBody(event)
 
