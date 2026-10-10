@@ -16,10 +16,11 @@ model users {
   storage_used  BigInt?   @default(0)
   created_at    DateTime? @default(now()) @db.Timestamp(6)
 
-  files     files[]
-  folders   folders[]
-  notes     notes[]
-  favorites favorites[]
+  files        files[]
+  folders      folders[]
+  notes        notes[]
+  favorites    favorites[]
+  shared_items shared_items[]
 }
 
 model files {
@@ -82,4 +83,17 @@ model favorites {
   files   files?   @relation(fields: [file_id], references: [id], onDelete: Cascade)
   folders folders? @relation(fields: [folder_id], references: [id], onDelete: Cascade)
   notes   notes?   @relation(fields: [note_id], references: [id], onDelete: Cascade)
+}
+
+model shared_items {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  item_id    String   @db.Uuid
+  item_type  String   @db.VarChar(20)
+  token      String   @unique @db.VarChar(120)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  users users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, item_type, item_id])
 }

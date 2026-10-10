@@ -20,7 +20,7 @@ const pageTitle = computed(() => {
 })
 
 const contentClass = computed(() => ({
-  'user-content': true,
+  'home-content': route.path === '/home',
   'files-content': route.path === '/files',
   'folders-content': route.path === '/folders',
   'notes-content': route.path === '/notes',
@@ -85,16 +85,15 @@ body {
   flex: 1;
   min-height: 0;
 
-  padding: 2rem;
+  padding: 0rem;
 
   overflow: auto;
 }
 
-.files-content,
-.folders-content,
-.notes-content,
-.favorites-content {
-  padding: 0;
+.home-content {
+  padding: 0.5rem;
   overflow: hidden;
 }
+
+
 </style>

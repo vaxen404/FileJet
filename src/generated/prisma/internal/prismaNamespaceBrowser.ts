@@ -55,7 +55,8 @@ export const ModelName = {
   files: 'files',
   folders: 'folders',
   notes: 'notes',
-  favorites: 'favorites'
+  favorites: 'favorites',
+  shared_items: 'shared_items'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -139,6 +140,18 @@ export const FavoritesScalarFieldEnum = {
 } as const
 
 export type FavoritesScalarFieldEnum = (typeof FavoritesScalarFieldEnum)[keyof typeof FavoritesScalarFieldEnum]
+
+
+export const Shared_itemsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  item_id: 'item_id',
+  item_type: 'item_type',
+  token: 'token',
+  created_at: 'created_at'
+} as const
+
+export type Shared_itemsScalarFieldEnum = (typeof Shared_itemsScalarFieldEnum)[keyof typeof Shared_itemsScalarFieldEnum]
 
 
 export const SortOrder = {

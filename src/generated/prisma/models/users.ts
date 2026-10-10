@@ -240,6 +240,7 @@ export type usersWhereInput = {
   folders?: Prisma.FoldersListRelationFilter
   notes?: Prisma.NotesListRelationFilter
   favorites?: Prisma.FavoritesListRelationFilter
+  shared_items?: Prisma.Shared_itemsListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -254,6 +255,7 @@ export type usersOrderByWithRelationInput = {
   folders?: Prisma.foldersOrderByRelationAggregateInput
   notes?: Prisma.notesOrderByRelationAggregateInput
   favorites?: Prisma.favoritesOrderByRelationAggregateInput
+  shared_items?: Prisma.shared_itemsOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -271,6 +273,7 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   folders?: Prisma.FoldersListRelationFilter
   notes?: Prisma.NotesListRelationFilter
   favorites?: Prisma.FavoritesListRelationFilter
+  shared_items?: Prisma.Shared_itemsListRelationFilter
 }, "id" | "username" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -313,6 +316,7 @@ export type usersCreateInput = {
   folders?: Prisma.foldersCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -327,6 +331,7 @@ export type usersUncheckedCreateInput = {
   folders?: Prisma.foldersUncheckedCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersUpdateInput = {
@@ -341,6 +346,7 @@ export type usersUpdateInput = {
   folders?: Prisma.foldersUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -355,6 +361,7 @@ export type usersUncheckedUpdateInput = {
   folders?: Prisma.foldersUncheckedUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -508,6 +515,20 @@ export type usersUpdateOneRequiredWithoutFavoritesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutFavoritesInput, Prisma.usersUpdateWithoutFavoritesInput>, Prisma.usersUncheckedUpdateWithoutFavoritesInput>
 }
 
+export type usersCreateNestedOneWithoutShared_itemsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutShared_itemsInput, Prisma.usersUncheckedCreateWithoutShared_itemsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutShared_itemsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutShared_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutShared_itemsInput, Prisma.usersUncheckedCreateWithoutShared_itemsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutShared_itemsInput
+  upsert?: Prisma.usersUpsertWithoutShared_itemsInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutShared_itemsInput, Prisma.usersUpdateWithoutShared_itemsInput>, Prisma.usersUncheckedUpdateWithoutShared_itemsInput>
+}
+
 export type usersCreateWithoutFilesInput = {
   id?: string
   username: string
@@ -519,6 +540,7 @@ export type usersCreateWithoutFilesInput = {
   folders?: Prisma.foldersCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutFilesInput = {
@@ -532,6 +554,7 @@ export type usersUncheckedCreateWithoutFilesInput = {
   folders?: Prisma.foldersUncheckedCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutFilesInput = {
@@ -561,6 +584,7 @@ export type usersUpdateWithoutFilesInput = {
   folders?: Prisma.foldersUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutFilesInput = {
@@ -574,6 +598,7 @@ export type usersUncheckedUpdateWithoutFilesInput = {
   folders?: Prisma.foldersUncheckedUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutFoldersInput = {
@@ -587,6 +612,7 @@ export type usersCreateWithoutFoldersInput = {
   files?: Prisma.filesCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutFoldersInput = {
@@ -600,6 +626,7 @@ export type usersUncheckedCreateWithoutFoldersInput = {
   files?: Prisma.filesUncheckedCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutFoldersInput = {
@@ -629,6 +656,7 @@ export type usersUpdateWithoutFoldersInput = {
   files?: Prisma.filesUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutFoldersInput = {
@@ -642,6 +670,7 @@ export type usersUncheckedUpdateWithoutFoldersInput = {
   files?: Prisma.filesUncheckedUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutNotesInput = {
@@ -655,6 +684,7 @@ export type usersCreateWithoutNotesInput = {
   files?: Prisma.filesCreateNestedManyWithoutUsersInput
   folders?: Prisma.foldersCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutNotesInput = {
@@ -668,6 +698,7 @@ export type usersUncheckedCreateWithoutNotesInput = {
   files?: Prisma.filesUncheckedCreateNestedManyWithoutUsersInput
   folders?: Prisma.foldersUncheckedCreateNestedManyWithoutUsersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutNotesInput = {
@@ -697,6 +728,7 @@ export type usersUpdateWithoutNotesInput = {
   files?: Prisma.filesUpdateManyWithoutUsersNestedInput
   folders?: Prisma.foldersUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutNotesInput = {
@@ -710,6 +742,7 @@ export type usersUncheckedUpdateWithoutNotesInput = {
   files?: Prisma.filesUncheckedUpdateManyWithoutUsersNestedInput
   folders?: Prisma.foldersUncheckedUpdateManyWithoutUsersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutFavoritesInput = {
@@ -723,6 +756,7 @@ export type usersCreateWithoutFavoritesInput = {
   files?: Prisma.filesCreateNestedManyWithoutUsersInput
   folders?: Prisma.foldersCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutFavoritesInput = {
@@ -736,6 +770,7 @@ export type usersUncheckedCreateWithoutFavoritesInput = {
   files?: Prisma.filesUncheckedCreateNestedManyWithoutUsersInput
   folders?: Prisma.foldersUncheckedCreateNestedManyWithoutUsersInput
   notes?: Prisma.notesUncheckedCreateNestedManyWithoutUsersInput
+  shared_items?: Prisma.shared_itemsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutFavoritesInput = {
@@ -765,6 +800,7 @@ export type usersUpdateWithoutFavoritesInput = {
   files?: Prisma.filesUpdateManyWithoutUsersNestedInput
   folders?: Prisma.foldersUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutFavoritesInput = {
@@ -778,6 +814,79 @@ export type usersUncheckedUpdateWithoutFavoritesInput = {
   files?: Prisma.filesUncheckedUpdateManyWithoutUsersNestedInput
   folders?: Prisma.foldersUncheckedUpdateManyWithoutUsersNestedInput
   notes?: Prisma.notesUncheckedUpdateManyWithoutUsersNestedInput
+  shared_items?: Prisma.shared_itemsUncheckedUpdateManyWithoutUsersNestedInput
+}
+
+export type usersCreateWithoutShared_itemsInput = {
+  id?: string
+  username: string
+  email?: string | null
+  password_hash: string
+  storage_limit?: bigint | number | null
+  storage_used?: bigint | number | null
+  created_at?: Date | string | null
+  files?: Prisma.filesCreateNestedManyWithoutUsersInput
+  folders?: Prisma.foldersCreateNestedManyWithoutUsersInput
+  notes?: Prisma.notesCreateNestedManyWithoutUsersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutUsersInput
+}
+
+export type usersUncheckedCreateWithoutShared_itemsInput = {
+  id?: string
+  username: string
+  email?: string | null
+  password_hash: string
+  storage_limit?: bigint | number | null
+  storage_used?: bigint | number | null
+  created_at?: Date | string | null
+  files?: Prisma.filesUncheckedCreateNestedManyWithoutUsersInput
+  folders?: Prisma.foldersUncheckedCreateNestedManyWithoutUsersInput
+  notes?: Prisma.notesUncheckedCreateNestedManyWithoutUsersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutUsersInput
+}
+
+export type usersCreateOrConnectWithoutShared_itemsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutShared_itemsInput, Prisma.usersUncheckedCreateWithoutShared_itemsInput>
+}
+
+export type usersUpsertWithoutShared_itemsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutShared_itemsInput, Prisma.usersUncheckedUpdateWithoutShared_itemsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutShared_itemsInput, Prisma.usersUncheckedCreateWithoutShared_itemsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutShared_itemsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutShared_itemsInput, Prisma.usersUncheckedUpdateWithoutShared_itemsInput>
+}
+
+export type usersUpdateWithoutShared_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  storage_limit?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  storage_used?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  files?: Prisma.filesUpdateManyWithoutUsersNestedInput
+  folders?: Prisma.foldersUpdateManyWithoutUsersNestedInput
+  notes?: Prisma.notesUpdateManyWithoutUsersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutUsersNestedInput
+}
+
+export type usersUncheckedUpdateWithoutShared_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  storage_limit?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  storage_used?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  files?: Prisma.filesUncheckedUpdateManyWithoutUsersNestedInput
+  folders?: Prisma.foldersUncheckedUpdateManyWithoutUsersNestedInput
+  notes?: Prisma.notesUncheckedUpdateManyWithoutUsersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 
@@ -790,6 +899,7 @@ export type UsersCountOutputType = {
   folders: number
   notes: number
   favorites: number
+  shared_items: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -797,6 +907,7 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   folders?: boolean | UsersCountOutputTypeCountFoldersArgs
   notes?: boolean | UsersCountOutputTypeCountNotesArgs
   favorites?: boolean | UsersCountOutputTypeCountFavoritesArgs
+  shared_items?: boolean | UsersCountOutputTypeCountShared_itemsArgs
 }
 
 /**
@@ -837,6 +948,13 @@ export type UsersCountOutputTypeCountFavoritesArgs<ExtArgs extends runtime.Types
   where?: Prisma.favoritesWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountShared_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.shared_itemsWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -850,6 +968,7 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   folders?: boolean | Prisma.users$foldersArgs<ExtArgs>
   notes?: boolean | Prisma.users$notesArgs<ExtArgs>
   favorites?: boolean | Prisma.users$favoritesArgs<ExtArgs>
+  shared_items?: boolean | Prisma.users$shared_itemsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -889,6 +1008,7 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   folders?: boolean | Prisma.users$foldersArgs<ExtArgs>
   notes?: boolean | Prisma.users$notesArgs<ExtArgs>
   favorites?: boolean | Prisma.users$favoritesArgs<ExtArgs>
+  shared_items?: boolean | Prisma.users$shared_itemsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -901,6 +1021,7 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     folders: Prisma.$foldersPayload<ExtArgs>[]
     notes: Prisma.$notesPayload<ExtArgs>[]
     favorites: Prisma.$favoritesPayload<ExtArgs>[]
+    shared_items: Prisma.$shared_itemsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1308,6 +1429,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   folders<T extends Prisma.users$foldersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$foldersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$foldersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notes<T extends Prisma.users$notesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$notesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$notesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   favorites<T extends Prisma.users$favoritesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$favoritesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  shared_items<T extends Prisma.users$shared_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$shared_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$shared_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1830,6 +1952,30 @@ export type users$favoritesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.FavoritesScalarFieldEnum | Prisma.FavoritesScalarFieldEnum[]
+}
+
+/**
+ * users.shared_items
+ */
+export type users$shared_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the shared_items
+   */
+  select?: Prisma.shared_itemsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the shared_items
+   */
+  omit?: Prisma.shared_itemsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.shared_itemsInclude<ExtArgs> | null
+  where?: Prisma.shared_itemsWhereInput
+  orderBy?: Prisma.shared_itemsOrderByWithRelationInput | Prisma.shared_itemsOrderByWithRelationInput[]
+  cursor?: Prisma.shared_itemsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Shared_itemsScalarFieldEnum | Prisma.Shared_itemsScalarFieldEnum[]
 }
 
 /**

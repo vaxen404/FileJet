@@ -1,0 +1,177 @@
+import { randomUUID } from "node:crypto";
+import { prisma } from "~~/server/utils/prisma"
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+
+export default defineEventHandler(async (event) => {
+    try {
+        const session = getAuthSession(event)
+
+        if (!session) {
+            throwError(401, 'You need to be logged in.')
+        }
+
+        enforceRateLimit(
+            event,
+            `shared-create:${session.userId}`,
+            10,
+            60 * 1000
+        )
+
+        const { itemId, itemType } = await readBody(event)
+
+        if (!itemId || !itemType) {
+            throwError(400, 'Missing data.')
+        }
+
+        if (!['file', 'folder', 'note'].includes(itemType)) {
+            throwError(400, 'Invalid item type.')
+        }
+
+        if (itemType === 'file') {
+            const file = await prisma.files.findFirst({
+                where: {
+                    id: itemId,
+                    user_id: session.userId
+                }
+            })
+
+            if (!file) {
+                throwError(404, 'File not found.')
+            }
+        }
+
+        if (itemType === 'folder') {
+            const folder = await prisma.folders.findFirst({
+                where: {
+                    id: itemId,
+                    user_id: session.userId
+                }
+            })
+
+            if (!folder) {
+                throwError(404, 'Folder not found.')
+            }
+        }
+
+        if (itemType === 'note') {
+            const note = await prisma.notes.findFirst({
+                where: {
+                    id: itemId,
+                    user_id: session.userId
+                }
+            })
+
+            if (!note) {
+                throwError(404, 'Note not found.')
+            }
+        }
+
+        const origin = getRequestURL(event).origin
+
+        const existing = await prisma.shared_items.findFirst({
+            where: {
+                user_id: session.userId,
+                item_id: itemId,
+                item_type: itemType
+            }
+        })
+
+        if (existing) {
+            return {
+                url: `${origin}/shared/${existing.token}`
+            }
+        }
+
+        let retries = 3
+
+        while (retries > 0) {
+            try {
+                const result = await prisma.$transaction(
+                    async (tx) => {
+                        const existing = await tx.shared_items.findFirst({
+                            where: {
+                                user_id: session.userId,
+                                item_id: itemId,
+                                item_type: itemType
+                            }
+                        })
+
+                        if (existing) {
+                            return existing
+                        }
+
+                        const shareCount = await tx.shared_items.count({
+                            where: {
+                                user_id: session.userId
+                            }
+                        })
+
+                        if (shareCount >= 20) {
+                            throwError(
+                                429,
+                                'You have reached the maximum number of active share links.'
+                            )
+                        }
+
+                        return await tx.shared_items.create({
+                            data: {
+                                user_id: session.userId,
+                                item_id: itemId,
+                                item_type: itemType,
+                                token: randomUUID()
+                            }
+                        })
+                    },
+                    {
+                        isolationLevel: 'Serializable'
+                    }
+                )
+
+                return {
+                    url: `${origin}/shared/${result.token}`
+                }
+            } catch (err: any) {
+                if (err.statusCode) throw err
+
+                if (err.code === 'P2002') {
+                    const existing = await prisma.shared_items.findFirst({
+                        where: {
+                            user_id: session.userId,
+                            item_id: itemId,
+                            item_type: itemType
+                        }
+                    })
+
+                    if (existing) {
+                        return {
+                            url: `${origin}/shared/${existing.token}`
+                        }
+                    }
+                }
+
+                if (err.code === 'P2034') {
+                    retries--
+
+                    if (retries > 0) {
+                        continue
+                    }
+                }
+
+                throw err
+            }
+        }
+
+        throwError(
+            500,
+            'Could not create the share link.'
+        )
+    } catch (err: any) {
+        if (err.statusCode) throw err
+
+        throwError(
+            500,
+            'An error occurred while creating the share link.'
+        )
+    }
+})

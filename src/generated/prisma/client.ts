@@ -66,3 +66,8 @@ export type notes = Prisma.notesModel
  * 
  */
 export type favorites = Prisma.favoritesModel
+/**
+ * Model shared_items
+ * 
+ */
+export type shared_items = Prisma.shared_itemsModel

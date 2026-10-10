@@ -34,7 +34,7 @@ withDefaults(
 
 .details-view.with-preview {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 26rem;
+    grid-template-columns: minmax(0, 1fr) 28rem;
     gap: 1rem;
 }
 

@@ -401,7 +401,8 @@ export const ModelName = {
   files: 'files',
   folders: 'folders',
   notes: 'notes',
-  favorites: 'favorites'
+  favorites: 'favorites',
+  shared_items: 'shared_items'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "files" | "folders" | "notes" | "favorites"
+    modelProps: "users" | "files" | "folders" | "notes" | "favorites" | "shared_items"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -791,6 +792,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    shared_items: {
+      payload: Prisma.$shared_itemsPayload<ExtArgs>
+      fields: Prisma.shared_itemsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.shared_itemsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.shared_itemsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>
+        }
+        findFirst: {
+          args: Prisma.shared_itemsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.shared_itemsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>
+        }
+        findMany: {
+          args: Prisma.shared_itemsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>[]
+        }
+        create: {
+          args: Prisma.shared_itemsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>
+        }
+        createMany: {
+          args: Prisma.shared_itemsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.shared_itemsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>[]
+        }
+        delete: {
+          args: Prisma.shared_itemsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>
+        }
+        update: {
+          args: Prisma.shared_itemsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>
+        }
+        deleteMany: {
+          args: Prisma.shared_itemsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.shared_itemsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.shared_itemsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>[]
+        }
+        upsert: {
+          args: Prisma.shared_itemsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shared_itemsPayload>
+        }
+        aggregate: {
+          args: Prisma.Shared_itemsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShared_items>
+        }
+        groupBy: {
+          args: Prisma.shared_itemsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Shared_itemsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.shared_itemsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Shared_itemsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -895,6 +970,18 @@ export const FavoritesScalarFieldEnum = {
 } as const
 
 export type FavoritesScalarFieldEnum = (typeof FavoritesScalarFieldEnum)[keyof typeof FavoritesScalarFieldEnum]
+
+
+export const Shared_itemsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  item_id: 'item_id',
+  item_type: 'item_type',
+  token: 'token',
+  created_at: 'created_at'
+} as const
+
+export type Shared_itemsScalarFieldEnum = (typeof Shared_itemsScalarFieldEnum)[keyof typeof Shared_itemsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1152,6 +1239,7 @@ export type GlobalOmitConfig = {
   folders?: Prisma.foldersOmit
   notes?: Prisma.notesOmit
   favorites?: Prisma.favoritesOmit
+  shared_items?: Prisma.shared_itemsOmit
 }
 
 /* Types for Logging */

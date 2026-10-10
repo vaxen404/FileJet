@@ -79,6 +79,7 @@ onMounted(async () => {
         `/api/files/preview?fileId=${file.value.id}`
     )
 })
+
 </script>
 
 <template>
@@ -108,72 +109,87 @@ onMounted(async () => {
             </template>
 
             <template #details>
-                <div class="details-actions">
-                    <button class="actions-btn download">
-                        <Icon name="solar:download-bold" />
-                        Download
-                    </button>
-
-                    <button class="actions-btn">
-                        <Icon name="solar:pen-bold" />
-                        Rename
-                    </button>
-
-                    <button class="actions-btn">
-                        <Icon name="solar:star-linear" />
-                        Favorite
-                    </button>
-
-                    <button class="actions-btn delete">
-                        <Icon name="solar:trash-bin-trash-bold" />
-                        Delete
-                    </button>
-                </div>
-
-                <div class="details-info">
-                    <div 
-                        class="details-card"
-                        :class="{ 'no-preview': !isPreviewable }"
-                    >
-                        <div class="info-title">
-                            <Icon name="solar:info-circle-bold" />
-                            File Information
-                        </div>
-    
+                <DetailsPanel
+                    :item-id="fileId"
+                    item-type="file"
+                    :actions="[
+                        'download',
+                        'rename',
+                        'favorite',
+                        'delete'
+                    ]"
+                >
+                    <template #info>
                         <div class="info-row">
-                            <span class="info-label">Name</span>
-                            <span class="info-value">{{ file?.name }}</span>
+                            <span class="info-label">
+                                Name
+                            </span>
+
+                            <span class="info-value">
+                                {{ file?.name }}
+                            </span>
                         </div>
-    
+
                         <div class="info-row">
-                            <span class="info-label">Type</span>
-                            <span class="info-value">{{ getFileType(file?.mime_type ?? '') }}</span>
+                            <span class="info-label">
+                                Type
+                            </span>
+
+                            <span class="info-value">
+                                {{ getFileType(file?.original_name ?? '') }}
+                            </span>
                         </div>
-    
+
                         <div class="info-row">
-                            <span class="info-label">Created</span>
-                            <span class="info-value">{{ formatFileTime(file?.created_at ?? '') }}</span>
+                            <span class="info-label">
+                                Size
+                            </span>
+
+                            <span class="info-value">
+                                {{ formatFileSize(file?.size ?? 0) }}
+                            </span>
                         </div>
-    
+
                         <div class="info-row">
-                            <span class="info-label">Modified</span>
-                            <span class="info-value">{{ formatFileTime(file?.updated_at ?? '') }}</span>
+                            <span class="info-label">
+                                Created
+                            </span>
+
+                            <span class="info-value">
+                                {{ formatFileTime(file?.created_at ?? '') }}
+                            </span>
                         </div>
-    
-                        <div v-if="isImage" class="info-row">
-                            <span class="info-label">Dimensions</span>
+
+                        <div class="info-row">
+                            <span class="info-label">
+                                Modified
+                            </span>
+
+                            <span class="info-value">
+                                {{ formatFileTime(file?.updated_at ?? '') }}
+                            </span>
+                        </div>
+
+                        <div
+                            v-if="isImage"
+                            class="info-row"
+                        >
+                            <span class="info-label">
+                                Dimensions
+                            </span>
+
                             <span class="info-value">
                                 <template v-if="imageDimensions">
                                     {{ imageDimensions.width }} × {{ imageDimensions.height }}
                                 </template>
-    
+
                                 <template v-else>
                                     -
                                 </template>
                             </span>
                         </div>
-                    </div>
-                </div>
+                    </template>
+                </DetailsPanel>       
             </template>
         </DetailsView>
     </div>
@@ -185,8 +201,7 @@ onMounted(async () => {
     height: 100%;
 }
 
-.preview-card,
-.details-card {
+.preview-card {
     background: #1a1a1d;
 
     border: 1px solid #29292e;
@@ -256,155 +271,6 @@ onMounted(async () => {
     border-radius: 0.6rem;
 }
 
-.details-card {
-    width: 100%;
-
-    padding: 1rem;
-
-    box-sizing: border-box;
-}
-
-.details-card.no-preview {
-    min-height: 36rem;
-}
-
-.file-summary {
-    display: flex;
-    align-items: center;
-
-    gap: 1rem;
-
-    padding: 1rem;
-
-    margin-bottom: 1rem;
-
-    background: #151518;
-
-    border: 1px solid #29292e;
-    border-radius: 0.65rem;
-}
-
-.file-summary-icon {
-    width: 3.5rem;
-    height: 3.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    background: #29215c;
-    color: #8b7cff;
-
-    border-radius: 0.65rem;
-
-    font-size: 1.5rem;
-}
-
-.file-summary-text {
-    min-width: 0;
-}
-
-.file-summary-text h2 {
-    margin: 0 0 0.3rem;
-
-    color: #ffffff;
-
-    font-size: 1rem;
-    font-weight: 600;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.file-summary-text span {
-    color: #898991;
-
-    font-size: 0.8rem;
-}
-
-.details-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 0.6rem;
-
-    margin-bottom: 1rem;
-}
-
-.actions-btn {
-    height: 2.6rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 0.45rem;
-
-    background: #242429;
-    color: #d5d5da;
-
-    border: 1px solid #303036;
-    border-radius: 0.5rem;
-
-    font-family: Inter, sans-serif;
-    font-size: 0.82rem;
-    font-weight: 500;
-
-    cursor: pointer;
-}
-
-.actions-btn:hover {
-    background: #2a2a2f;
-    color: #ffffff;
-}
-
-.actions-btn.download {
-    background: #3c47be;
-    color: #ffffff;
-
-    border-color: #3c47be;
-}
-
-.actions-btn.download:hover {
-    background: #4652d1;
-}
-
-.actions-btn.delete {
-    color: #ff6b6b;
-}
-
-.actions-btn.delete:hover {
-    background: #3a2024;
-}
-
-.details-info {
-    background: #151518;
-
-    border: 1px solid #29292e;
-    border-radius: 0.65rem;
-
-    overflow: hidden;
-}
-
-.info-title {
-    display: flex;
-    align-items: center;
-
-    gap: 0.45rem;
-
-    padding: 1rem;
-
-    color: #ffffff;
-
-    border-bottom: 1px solid #29292e;
-
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
 .info-row {
     display: flex;
     align-items: center;
@@ -414,7 +280,6 @@ onMounted(async () => {
 
     padding: 0.85rem 1rem;
 
-    border-bottom: 1px solid #29292e;
 }
 
 .info-row:last-child {
@@ -440,4 +305,5 @@ onMounted(async () => {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 </style>
