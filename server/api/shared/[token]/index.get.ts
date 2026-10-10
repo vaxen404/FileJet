@@ -9,6 +9,8 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Share token is required.')
         }
 
+        enforceRateLimit(event, `shared-public:${token}`, 60, 60 * 1000)
+
         const sharedItem = await prisma.shared_items.findUnique({
             where: {
                 token

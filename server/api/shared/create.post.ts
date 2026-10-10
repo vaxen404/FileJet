@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -18,12 +19,22 @@ export default defineEventHandler(async (event) => {
             60 * 1000
         )
 
-        const { itemId, itemType } = await readBody(event)
+        const body = await readBody(event)
 
-        if (!itemId || !itemType) {
-            throwError(400, 'Missing data.')
+        if (!body || typeof body !== 'object') {
+            throwError(400, 'Invalid request body.')
         }
 
+        const { itemId, itemType } = body
+        
+        if (typeof itemId !== 'string' || typeof itemType !== 'string') {
+            throwError(400, 'Invalid data.')
+        }
+
+        if (!isUuid(itemId)) {
+            throwError(400, 'Invalid item ID.')
+        }
+        
         if (!['file', 'folder', 'note'].includes(itemType)) {
             throwError(400, 'Invalid item type.')
         }

@@ -16,7 +16,7 @@ export function enforceRateLimit(
     const now = Date.now()
 
     const ip =
-        getRequestIP(event, { xForwardedFor: true }) ||
+        getRequestIP(event) ||
         'unknown'
 
     const bucketKey = `${key}:${ip}`
@@ -27,6 +27,7 @@ export function enforceRateLimit(
             count: 1,
             resetAt: now + windowMs
         })
+
         return
     }
 

@@ -13,8 +13,15 @@ const {
 
 const shareLink = ref<string | null>(null)
 const copied = ref(false)
+const isLoading = ref(false)
+
+let requestId = 0
 
 const loadShareLink = async () => {
+    const currentRequest = ++requestId
+    const currentItemId = props.itemId
+    const currentItemType = props.itemType
+
     shareLink.value = null
     copied.value = false
 
@@ -28,8 +35,19 @@ const loadShareLink = async () => {
             }
         })
 
+        if (currentRequest !== requestId) return
+
+        if (
+            props.itemId !== currentItemId ||
+            props.itemType !== currentItemType
+        ) {
+            return
+        }
+
         shareLink.value = response.url
     } catch (err: any) {
+        if (currentRequest !== requestId) return
+
         openToast(
             err.data?.message || 'Could not load share link.',
             'error'
@@ -38,7 +56,15 @@ const loadShareLink = async () => {
 }
 
 const createShareLink = async () => {
+    if (isLoading.value) return
+
+    const currentRequest = ++requestId
+    const currentItemId = props.itemId
+    const currentItemType = props.itemType
+
     try {
+        isLoading.value = true
+
         const response = await $fetch<{
             url: string
         }>('/api/shared/create', {
@@ -48,6 +74,15 @@ const createShareLink = async () => {
                 itemType: props.itemType
             }
         })
+
+        if (currentRequest !== requestId) return
+
+        if (
+            props.itemId !== currentItemId ||
+            props.itemType !== currentItemType
+        ) {
+            return
+        }
 
         shareLink.value = response.url
         copied.value = false
@@ -61,11 +96,22 @@ const createShareLink = async () => {
             err.data?.message || 'Could not create share link.',
             'error'
         )
+    } finally {
+        if (currentRequest === requestId) {
+            isLoading.value = false
+        }
     }
 }
 
 const removeShareLink = async () => {
+    if (isLoading.value) return
+
+    const currentRequest = ++requestId
+    const currentItemId = props.itemId
+    const currentItemType = props.itemType
+
     try {
+        isLoading.value = true
         await $fetch('/api/shared/remove', {
             method: 'POST',
             body: {
@@ -73,6 +119,15 @@ const removeShareLink = async () => {
                 itemType: props.itemType
             }
         })
+
+        if (currentRequest !== requestId) return
+
+        if (
+            props.itemId !== currentItemId ||
+            props.itemType !== currentItemType
+        ) {
+            return
+        }
 
         shareLink.value = null
         copied.value = false
@@ -82,10 +137,16 @@ const removeShareLink = async () => {
             'success'
         )
     } catch (err: any) {
+        if (currentRequest !== requestId) return
+
         openToast(
             err.data?.message || 'Could not remove share link.',
             'error'
         )
+    } finally {
+        if (currentRequest === requestId) {
+            isLoading.value = false
+        }
     }
 }
 
@@ -121,6 +182,8 @@ watch(
         props.itemType
     ],
     () => {
+        requestId++
+        isLoading.value = false
         loadShareLink()
     },
     {
@@ -143,6 +206,7 @@ watch(
 
             <button
                 class="create-share-btn"
+                :disabled="isLoading"
                 @click="createShareLink"
             >
                 <Icon name="solar:link-circle-bold" />
@@ -176,6 +240,7 @@ watch(
 
             <button
                 class="remove-share-btn"
+                :disabled="isLoading"
                 @click="removeShareLink"
             >
                 <Icon name="solar:trash-bin-trash-linear" />

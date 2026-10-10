@@ -1,7 +1,7 @@
-import { createReadStream } from "node:fs";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { prisma } from "~~/server/utils/prisma"
+import { createReadStream } from "node:fs";
+import { readFile, access } from "node:fs/promises";
+import { join } from "node:path";
 import { throwError } from "~~/server/utils/error"
 
 export default defineEventHandler(async (event) => {
@@ -11,6 +11,8 @@ export default defineEventHandler(async (event) => {
         if (!token) {
             throwError(400, 'Share token is required.')
         }
+
+        enforceRateLimit(event, `shared-preview:${token}`, 120, 60 * 1000)
 
         const sharedItem = await prisma.shared_items.findUnique({
             where: {
@@ -46,6 +48,12 @@ export default defineEventHandler(async (event) => {
             file.storage_key
         )
 
+        try {
+            await access(filePath)
+        } catch {
+            throwError(404, 'Stored file not found.')
+        }
+
         if (file.mime_type.startsWith('text/')) {
             const content = await readFile(
                 filePath,
@@ -55,13 +63,26 @@ export default defineEventHandler(async (event) => {
             setHeader(
                 event,
                 'Content-Type',
-                `${file.mime_type}; charset=utf-8`
+                'text/plain; charset=utf-8'
+            )
+
+            setHeader(
+                event,
+                'X-Content-Type-Options',
+                'nosniff'
             )
 
             return content
         }
 
-        const isImage = file.mime_type.startsWith('image/')
+        const allowedImages = [
+            'image/png',
+            'image/jpeg',
+            'image/webp',
+            'image/gif'
+        ]
+
+        const isImage = allowedImages.includes(file.mime_type)
         const isPdf = file.mime_type === 'application/pdf'
 
         if (!isImage && !isPdf) {
@@ -76,14 +97,23 @@ export default defineEventHandler(async (event) => {
 
         setHeader(
             event,
+            'X-Content-Type-Options',
+            'nosniff'
+        )
+
+
+        setHeader(
+            event,
             'Content-Disposition',
             `inline; filename*=UTF-8''${encodeURIComponent(file.original_name)}`
         )
 
-        return sendStream(
+        await sendStream(
             event,
             createReadStream(filePath)
         )
+
+        return
     } catch (err: any) {
         if (err.statusCode) throw err
 

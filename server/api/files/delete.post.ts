@@ -1,6 +1,7 @@
 import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
+import { isUuid } from "~~/server/utils/validation"
 import { join } from "node:path"
 import { unlink } from "node:fs/promises"
 
@@ -14,10 +15,20 @@ export default defineEventHandler(async (event) => {
 
         enforceRateLimit(event, `files-delete:${session.userId}`, 10, 60 * 1000)
 
-        const { fileId } = await readBody(event)
+        const body = await readBody(event)
 
-        if (!fileId) {
-            throwError(400, 'Missing data.')
+        if (!body || typeof body !== 'object') {
+            throwError(400, 'Invalid request body.')
+        }
+
+        const { fileId } = body
+
+        if (typeof fileId !== 'string') {
+            throwError(400, 'Invalid file ID.')
+        }
+
+        if (!isUuid(fileId)) {
+            throwError(400, 'Invalid file ID.')
         }
 
         const file = await prisma.files.findFirst({
@@ -39,22 +50,33 @@ export default defineEventHandler(async (event) => {
 
         await unlink(filePath)
 
-        await prisma.files.delete({
-            where: {
-                id: file.id
-            }
-        })
-
-        await prisma.users.update({
-            where: {
-                id: session.userId
-            },
-            data: {
-                storage_used: {
-                    decrement: file.size
+        await prisma.$transaction([
+            prisma.shared_items.deleteMany({
+                where: {
+                    user_id: session.userId,
+                    item_id: file.id,
+                    item_type: 'file'
                 }
-            }
-        })
+            }),
+
+            prisma.files.delete({
+                where: {
+                    id: file.id
+                }
+            }),
+
+            prisma.users.update({
+                where: {
+                    id: session.userId
+                },
+                data: {
+                    storage_used: {
+                        decrement: file.size
+                    }
+                }
+            })
+        ])
+
 
         return {
             success: true
