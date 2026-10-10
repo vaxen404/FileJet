@@ -60,6 +60,8 @@ export default defineEventHandler(async (event) => {
         }
 
     } catch (err: any) {
+        console.error('[AUTH LOGIN ERROR]', err)
+        
         if (err.statusCode) throw err
 
         throw createError({
