@@ -1,6 +1,6 @@
 import { prisma } from "~~/server/utils/prisma"
 import { createReadStream } from "node:fs";
-import { readFile, access } from "node:fs/promises";
+import { readFile, access, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { throwError } from "~~/server/utils/error"
 
@@ -84,8 +84,9 @@ export default defineEventHandler(async (event) => {
 
         const isImage = allowedImages.includes(file.mime_type)
         const isPdf = file.mime_type === 'application/pdf'
+        const isVideo = file.mime_type.startsWith('video/')
 
-        if (!isImage && !isPdf) {
+        if (!isImage && !isPdf && !isVideo) {
             throwError(415, 'File preview is not supported.')
         }
 
@@ -107,6 +108,57 @@ export default defineEventHandler(async (event) => {
             'Content-Disposition',
             `inline; filename*=UTF-8''${encodeURIComponent(file.original_name)}`
         )
+
+        if (isVideo) {
+            const { size } = await stat(filePath)
+            const range = getHeader(event, 'range')
+            
+            setHeader(event, 'Accept-Ranges', 'bytes')
+
+            if (range) {
+                const match = /^bytes=(\d*)-(\d*)$/.exec(range)
+
+                if (!match || (!match[1] && !match[2])) {
+                    setResponseStatus(event, 416)
+                    setHeader(event, 'Content-Range', `bytes */${size}`)
+                    return
+                }
+
+                const isSuffix = match[1] === ''
+                const start = isSuffix
+                    ? Math.max(0, size - Number(match[2]))
+                    : Number(match[1])
+
+                const end = isSuffix
+                    ? size - 1
+                    : match[2]
+                        ? Math.min(Number(match[2]), size - 1)
+                        : size - 1
+
+                if (
+                    !Number.isSafeInteger(start) ||
+                    !Number.isSafeInteger(end) ||
+                    start >= size ||
+                    end >= size ||
+                    start > end
+                ) {
+                    setResponseStatus(event, 416)
+                    setHeader(event, 'Content-Range', `bytes */${size}`)
+                    return
+                }
+
+                setResponseStatus(event, 206)
+                setHeader(event, 'Content-Range', `bytes ${start}-${end}/${size}`)
+                setHeader(event, 'Content-Length', end - start + 1)
+
+                return sendStream(
+                    event,
+                    createReadStream(filePath, { start, end })
+                )
+            }
+
+            setHeader(event, 'Content-Length', size)
+        }
 
         await sendStream(
             event,

@@ -10,8 +10,6 @@ type SessionPayload = {
 }
 
 function getSessionSecret() {
-    console.log('AUTH_SECRET exists:', !!process.env.AUTH_SECRET)
-    console.log('AUTH_SECRET length:', process.env.AUTH_SECRET?.length)
     const secret = process.env.AUTH_SECRET
 
     if (!secret || secret.length < 32) {
