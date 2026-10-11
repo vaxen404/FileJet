@@ -253,7 +253,10 @@ watch(
                     class="video-preview"
                     :src="`/api/shared/${token}/preview`"
                     controls
-                    preload="metadata"
+                    autoplay
+                    muted
+                    playsinline
+                    preload="auto"
                 />
 
                 <div v-else class="download-message">
