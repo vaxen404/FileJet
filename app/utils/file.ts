@@ -1,3 +1,9 @@
+export const canCopyFile = (mimeType: string | null | undefined, fileName = '') => {
+    if (fileName.trim().toLowerCase().endsWith('.exe')) return false
+
+    return /^(text|image)\//.test(mimeType?.toLowerCase() ?? '')
+}
+
 export const getFileIcon = (mimeType: string | null) => {
     if (!mimeType) return 'solar:file-bold'
 

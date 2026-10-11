@@ -4,6 +4,7 @@ import { onClickOutside } from '@vueuse/core'
 type Action =
     | 'open'
     | 'rename'
+    | 'copy'
     | 'edit'
     | 'download'
     | 'favorite'
@@ -14,22 +15,26 @@ const props = withDefaults(
         type: 'file' | 'folder' | 'note'
         actions?: Action[]
         isFavorite?: boolean
+        canCopy?: boolean
     }>(),
     {
         actions: () => [
             'open',
             'rename',
+            'copy',
             'download',
             'favorite',
             'delete'
         ],
-        isFavorite: false
+        isFavorite: false,
+        canCopy: false
     }
 )
 
 const emit = defineEmits<{
     open: []
     rename: []
+    copy: []
     edit: []
     download: []
     favorite: []
@@ -38,6 +43,116 @@ const emit = defineEmits<{
 
 const isOpen = ref(false)
 const menuRef = ref<HTMLElement | null>(null)
+const dropdownRef = ref<HTMLElement | null>(null)
+const menuPosition = ref<Record<string, string>>({ visibility: 'hidden' })
+
+const updatePosition = () => {
+    if (!isOpen.value || !menuRef.value || !dropdownRef.value) return
+
+    const trigger = menuRef.value.getBoundingClientRect()
+    const dropdown = dropdownRef.value
+    const viewport = window.visualViewport
+    const viewportTop = viewport?.offsetTop ?? 0
+    const viewportLeft = viewport?.offsetLeft ?? 0
+    const viewportHeight = viewport?.height ?? window.innerHeight
+    const viewportWidth = viewport?.width ?? window.innerWidth
+    const viewportBottom = viewportTop + viewportHeight
+    const viewportRight = viewportLeft + viewportWidth
+
+    if (trigger.bottom <= viewportTop || trigger.top >= viewportBottom || trigger.right <= viewportLeft || trigger.left >= viewportRight) {
+        isOpen.value = false
+        return
+    }
+
+    const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+    const edge = rootFontSize * 0.5
+    const style = getComputedStyle(dropdown)
+    const verticalBorder = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
+    const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+    const horizontalSpace = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
+    const maxWidth = `${Math.max(0, viewportWidth - edge * 2 - horizontalSpace)}px`
+
+    dropdown.style.maxWidth = maxWidth
+
+    const width = dropdown.getBoundingClientRect().width
+    const height = dropdown.scrollHeight + verticalBorder
+    const below = Math.max(0, viewportBottom - edge - (trigger.bottom - edge))
+    const above = Math.max(0, trigger.top + edge - viewportTop - edge)
+    const opensUp = height > below && above > below
+    const availableHeight = opensUp ? above : below
+    const visibleHeight = Math.min(height, availableHeight)
+    const top = opensUp ? trigger.top + edge - visibleHeight : trigger.bottom - edge
+    const left = Math.min(
+        Math.max(viewportLeft + edge, trigger.right - rootFontSize * 1.625 - width),
+        viewportRight - edge - width
+    )
+
+    menuPosition.value = {
+        top: `${Math.max(viewportTop + edge, top)}px`,
+        left: `${left}px`,
+        maxWidth,
+        maxHeight: `${Math.max(0, availableHeight - verticalBorder - verticalPadding)}px`,
+        visibility: 'visible'
+    }
+}
+
+watch(isOpen, async (open, _, onCleanup) => {
+    if (!open) return
+
+    menuPosition.value = { visibility: 'hidden' }
+    let cancelled = false
+    let frame: number | null = null
+    let observer: ResizeObserver | null = null
+    let visibilityObserver: IntersectionObserver | null = null
+    const viewport = window.visualViewport
+    const schedulePosition = () => {
+        if (frame !== null) return
+
+        frame = window.requestAnimationFrame(() => {
+            frame = null
+            updatePosition()
+        })
+    }
+    const handleKeydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') isOpen.value = false
+    }
+
+    window.addEventListener('scroll', schedulePosition, true)
+    window.addEventListener('resize', schedulePosition)
+    window.addEventListener('keydown', handleKeydown)
+    viewport?.addEventListener('scroll', schedulePosition)
+    viewport?.addEventListener('resize', schedulePosition)
+
+    onCleanup(() => {
+        cancelled = true
+        if (frame !== null) window.cancelAnimationFrame(frame)
+        observer?.disconnect()
+        visibilityObserver?.disconnect()
+        window.removeEventListener('scroll', schedulePosition, true)
+        window.removeEventListener('resize', schedulePosition)
+        window.removeEventListener('keydown', handleKeydown)
+        viewport?.removeEventListener('scroll', schedulePosition)
+        viewport?.removeEventListener('resize', schedulePosition)
+    })
+
+    await nextTick()
+    if (cancelled || !isOpen.value) return
+
+    updatePosition()
+
+    if (typeof ResizeObserver !== 'undefined' && dropdownRef.value) {
+        observer = new ResizeObserver(schedulePosition)
+        observer.observe(dropdownRef.value)
+        if (menuRef.value) observer.observe(menuRef.value)
+    }
+
+    if (typeof IntersectionObserver !== 'undefined' && menuRef.value) {
+        visibilityObserver = new IntersectionObserver(([entry]) => {
+            if (entry && !entry.isIntersecting) isOpen.value = false
+        })
+        visibilityObserver.observe(menuRef.value)
+    }
+})
 
 const hasAction = (action: Action) => {
     return props.actions.includes(action)
@@ -46,6 +161,7 @@ const hasAction = (action: Action) => {
 const actionHandlers = {
     open: () => emit('open'),
     rename: () => emit('rename'),
+    copy: () => emit('copy'),
     edit: () => emit('edit'),
     download: () => emit('download'),
     favorite: () => emit('favorite'),
@@ -61,9 +177,9 @@ const handleAction = (action: Action) => {
     isOpen.value = false
 }
 
-onClickOutside(menuRef, () => {
+onClickOutside(dropdownRef, () => {
     isOpen.value = false
-})
+}, { ignore: [menuRef] })
 </script>
 
 <template>
@@ -71,87 +187,103 @@ onClickOutside(menuRef, () => {
         <button
             type="button"
             class="menu-trigger"
+            aria-label="Actions"
+            :aria-expanded="isOpen"
             @click="toggleMenu"
         >
             <Icon name="solar:menu-dots-bold" />
         </button>
 
-        <div
-            v-if="isOpen"
-            class="menu-dropdown"
-        >
-            <button
-                v-if="hasAction('open')"
-                type="button"
-                class="menu-item"
-                @click="handleAction('open')"
+        <Teleport to="body">
+            <div
+                v-if="isOpen"
+                ref="dropdownRef"
+                class="menu-dropdown"
+                :style="menuPosition"
             >
-                <Icon
-                    :name="type === 'folder'
-                        ? 'solar:folder-open-bold'
-                        : type === 'note'
-                            ? 'solar:notebook-bold'
-                            : 'solar:document-bold'"
-                />
+                <button
+                    v-if="hasAction('open')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('open')"
+                >
+                    <Icon
+                        :name="type === 'folder'
+                            ? 'solar:folder-open-bold'
+                            : type === 'note'
+                                ? 'solar:notebook-bold'
+                                : 'solar:document-bold'"
+                    />
 
-                Open
-            </button>
+                    Open
+                </button>
 
-            <button
-                v-if="hasAction('rename')"
-                type="button"
-                class="menu-item"
-                @click="handleAction('rename')"
-            >
-                <Icon name="solar:pen-bold" />
-                Rename
-            </button>
+                <button
+                    v-if="hasAction('rename')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('rename')"
+                >
+                    <Icon name="solar:pen-bold" />
+                    Rename
+                </button>
 
-            <button
-                v-if="hasAction('edit')"
-                type="button"
-                class="menu-item"
-                @click="handleAction('edit')"
-            >
-                <Icon name="solar:pen-bold" />
-                Edit
-            </button>
+                <button
+                    v-if="type === 'file' && canCopy && hasAction('copy')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('copy')"
+                >
+                    <Icon name="solar:copy-bold" />
+                    Copy
+                </button>
 
-            <button
-                v-if="hasAction('download')"
-                type="button"
-                class="menu-item"
-                @click="handleAction('download')"
-            >
-                <Icon name="solar:download-bold" />
-                Download
-            </button>
+                <button
+                    v-if="hasAction('edit')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('edit')"
+                >
+                    <Icon name="solar:pen-bold" />
+                    Edit
+                </button>
 
-            <button
-                v-if="hasAction('favorite')"
-                type="button"
-                class="menu-item"
-                @click="handleAction('favorite')"
-            >
-                <Icon
-                    :name="isFavorite
-                        ? 'solar:star-bold'
-                        : 'solar:star-linear'"
-                />
+                <button
+                    v-if="hasAction('download')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('download')"
+                >
+                    <Icon name="solar:download-bold" />
+                    Download
+                </button>
 
-                {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
-            </button>
+                <button
+                    v-if="hasAction('favorite')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('favorite')"
+                >
+                    <Icon
+                        :name="isFavorite
+                            ? 'solar:star-bold'
+                            : 'solar:star-linear'"
+                    />
 
-            <button
-                v-if="hasAction('delete')"
-                type="button"
-                class="menu-item danger"
-                @click="handleAction('delete')"
-            >
-                <Icon name="solar:trash-bin-trash-bold" />
-                Delete
-            </button>
-        </div>
+                    {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
+                </button>
+
+                <button
+                    v-if="hasAction('delete')"
+                    type="button"
+                    class="menu-item danger"
+                    @click="handleAction('delete')"
+                >
+                    <Icon name="solar:trash-bin-trash-bold" />
+                    Delete
+                </button>
+            </div>
+        </Teleport>
     </div>
 </template>
 
@@ -192,10 +324,7 @@ onClickOutside(menuRef, () => {
 }
 
 .menu-dropdown {
-    position: absolute;
-
-    top: calc(100% - 0.5rem);
-    right: 1.625rem;
+    position: fixed;
 
     width: 11rem;
 
@@ -211,11 +340,13 @@ onClickOutside(menuRef, () => {
 
     box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.35);
 
-    z-index: 50;
+    overflow-y: auto;
+    z-index: 1000;
 }
 
 .menu-item {
     width: 100%;
+    flex-shrink: 0;
 
     display: flex;
     align-items: center;

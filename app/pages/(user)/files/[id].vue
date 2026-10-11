@@ -1,6 +1,7 @@
 
 <script setup lang="ts">
 import {
+    canCopyFile,
     getFileIcon,
     getFileType,
     formatFileSize,
@@ -33,7 +34,7 @@ const { data: file } = await useFetch<FileData>(
     `/api/files/${fileId}`
 )
 
-const { deleteFile, renameFile, downloadFile } = useFileActions()
+const { deleteFile, renameFile, downloadFile, copyFile } = useFileActions()
 const { addFavorite, removeFavorite } = useFavoriteActions()
 const { favorites, fetchAll } = useUser()
 const { openToast } = useToast()
@@ -43,6 +44,8 @@ const editingFileName = ref('')
 const nameInput = ref<HTMLInputElement | null>(null)
 const previewNameInput = ref<HTMLInputElement | null>(null)
 const isSavingRename = ref(false)
+const isCopying = ref(false)
+const canCopy = computed(() => canCopyFile(file.value?.mime_type, file.value?.original_name))
 
 const goBack = () => {
     router.push('/files')
@@ -128,6 +131,24 @@ const handleDownload = async (id: string) => {
             err.data?.message || 'File could not be downloaded.',
             'error'
         )
+    }
+}
+
+const handleCopy = async () => {
+    if (!file.value || !canCopy.value || isCopying.value) return
+
+    isCopying.value = true
+
+    try {
+        await copyFile(file.value)
+        openToast('Copied to clipboard.', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || err.message || 'File could not be copied to the clipboard.',
+            'error'
+        )
+    } finally {
+        isCopying.value = false
     }
 }
 
@@ -349,11 +370,14 @@ onMounted(async () => {
                 <DetailsPanel
                     :item-id="fileId"
                     item-type="file"
-                    :actions="['download', 'rename', 'favorite', 'delete']"
+                    :actions="['download', 'rename', 'copy', 'favorite', 'delete']"
                     :is-favorite="isFileFavorite(fileId)"
+                    :is-copying="isCopying"
+                    :can-copy="canCopy"
                     :show-info="false"
                     @download="handleDownload(fileId)"
                     @rename="startRename"
+                    @copy="handleCopy"
                     @favorite="handleFavorite(file)"
                     @delete="handleDelete(fileId)"
                 />
@@ -423,12 +447,15 @@ onMounted(async () => {
                     <DetailsPanel
                         :item-id="fileId"
                         item-type="file"
-                        :actions="['download', 'favorite', 'rename', 'delete']"
+                        :actions="['download', 'favorite', 'rename', 'copy', 'delete']"
                         :is-favorite="isFileFavorite(fileId)"
+                        :is-copying="isCopying"
+                        :can-copy="canCopy"
                         :show-info="true"
                         @download="handleDownload(fileId)"
                         @favorite="handleFavorite(file)"
                         @rename="startRename"
+                        @copy="handleCopy"
                         @delete="handleDelete(fileId)"
                     >
                         <template #info>

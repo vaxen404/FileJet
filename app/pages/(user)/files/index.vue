@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getFileIcon, getFileType, getFileCategory,formatFileSize, formatFileTime} from "~/utils/file"
+import { canCopyFile, getFileIcon, getFileType, getFileCategory,formatFileSize, formatFileTime} from "~/utils/file"
 
 definePageMeta({
     middleware: 'auth',
@@ -15,7 +15,9 @@ const {
     uploadProgress,
     uploadFiles,
     deleteFile,
+    deleteFiles,
     renameFile,
+    copyFile,
     downloadFile,
 } = useFileActions()
 
@@ -136,6 +138,22 @@ const saveRename = async (file: any) => {
     }
 }
 
+const handleCopy = async (fileId: string) => {
+    try {
+        const file = files.value.find(file => file.id === fileId)
+
+        if (!file) throw new Error('File not found.')
+
+        await copyFile(file)
+        openToast('Copied to clipboard.', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || err.message || 'File could not be copied to the clipboard.',
+            'error'
+        )
+    }
+}
+
 const handleDelete = async (fileId: any) => {
     try {
         await deleteFile(fileId, fetchAll)
@@ -187,6 +205,44 @@ const { currentPage, totalPages, paginatedItems: paginatedFiles} = usePagination
 )
 
 const { selectedItems: selectedFiles, allSelected, toggleSelectAll } = useSelection(paginatedFiles)
+const isBulkDeleting = ref(false)
+const partiallySelected = computed(() => !allSelected.value && paginatedFiles.value.some(file => selectedFiles.value.includes(file.id)))
+
+const handleDeleteSelected = async () => {
+    if (!selectedFiles.value.length || isLoading.value || isBulkDeleting.value) return
+
+    isBulkDeleting.value = true
+
+    try {
+        const result = await deleteFiles([...selectedFiles.value])
+        const deletedIds = new Set(result.deletedIds)
+
+        selectedFiles.value = selectedFiles.value.filter(id => !deletedIds.has(id))
+        files.value = files.value.filter(file => !deletedIds.has(file.id))
+        await fetchAll()
+
+        const deletedCount = result.deletedIds.length
+        const failedCount = result.failedIds.length
+        const message = failedCount
+            ? `${deletedCount} file${deletedCount === 1 ? '' : 's'} deleted. ${failedCount} could not be deleted.`
+            : `${deletedCount} file${deletedCount === 1 ? '' : 's'} deleted successfully.`
+
+        openToast(error.value ? `${message} ${error.value}` : message, result.failedIds.length || error.value ? 'error' : 'success')
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Selected files could not be deleted.', 'error')
+    } finally {
+        isBulkDeleting.value = false
+    }
+}
+
+watch(files, (items) => {
+    const availableIds = new Set(items.map(file => file.id))
+    selectedFiles.value = selectedFiles.value.filter(id => availableIds.has(id))
+})
+
+watch(totalPages, (total) => {
+    currentPage.value = Math.min(currentPage.value, Math.max(1, total))
+})
 
 watch([searchQuery, activeCategory, viewMode], () => {
     currentPage.value = 1
@@ -263,12 +319,38 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
                 <SortDropdown v-model="sortMode" /> 
             </div>
+
+            <div v-if="selectedFiles.length" class="selection-toolbar" role="group" aria-label="Selected files">
+                <span role="status" aria-live="polite">{{ selectedFiles.length }} selected</span>
+
+                <div class="selection-actions">
+                    <button
+                        type="button"
+                        class="filter-btn"
+                        :disabled="isLoading || isBulkDeleting"
+                        @click="selectedFiles = []"
+                    >
+                        Clear
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-btn delete-selected-btn"
+                        :disabled="isLoading || isBulkDeleting"
+                        :aria-busy="isBulkDeleting"
+                        @click="handleDeleteSelected"
+                    >
+                        <Icon name="solar:trash-bin-trash-bold" />
+                        {{ isBulkDeleting ? 'Deleting...' : 'Delete Selected' }}
+                    </button>
+                </div>
+            </div>
         </div>
 
         <DataView
             :view-mode="viewMode"
             :is-dragging="isDragging"
-            :is-loading="isLoading"
+            :is-loading="isLoading || isBulkDeleting"
             drop-text="Drop files to upload"
             @dragover="isDragging = true"
             @dragleave="isDragging = false"
@@ -289,12 +371,12 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
                     <div v-if="isDeleting || !isUploading || uploadProgress === null" class="operation-loading">
                         <span class="loading-spinner" aria-hidden="true"></span>
-                        <span>{{ isDeleting ? 'Deleting files...' : isUploading ? 'Uploading files...' : 'Updating file...' }}</span>
+                        <span>{{ isDeleting || isBulkDeleting ? 'Deleting files...' : isUploading ? 'Uploading files...' : 'Updating file...' }}</span>
                     </div>
                 </div>
             </template>
 
-            <template v-if="!isLoading && files.length === 0" #empty>
+            <template v-if="!isLoading && !isBulkDeleting && files.length === 0" #empty>
                 <div class="empty-state">
                     <Icon name="solar:file-bold" size="2.5rem" class="empty-state-icon" />
                     <strong>No files yet</strong>
@@ -312,6 +394,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                         type="checkbox"
                                         class="file-checkbox"
                                         :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="isLoading || isBulkDeleting"
+                                        aria-label="Select all files on this page"
                                         @change="toggleSelectAll"
                                     >
                                 </th>
@@ -345,6 +430,8 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                         type="checkbox"
                                         class="file-checkbox"
                                         :value="file.id"
+                                        :disabled="isLoading || isBulkDeleting"
+                                        :aria-label="`Select ${file.name}`"
                                     >
                                 </td>
 
@@ -381,9 +468,11 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                     <ItemMenu
                                         type="file"
                                         :is-favorite="isFileFavorite(file.id)"
+                                        :can-copy="canCopyFile(file.mime_type, file.original_name)"
                                         @open="openFile(file)"
                                         @download="downloadFile(file.id)"
                                         @rename="startRename(file)"
+                                        @copy="handleCopy(file.id)"
                                         @favorite="handleFavorite(file)"
                                         @delete="handleDelete(file.id)"
                                     />
@@ -401,16 +490,29 @@ watch([searchQuery, activeCategory, viewMode], () => {
                     class="file-card"
                 >
                     <div class="file-card-top">
-                        <div class="file-card-icon">
-                            <Icon :name="getFileIcon(file.mime_type)" />
+                        <div class="file-card-selection">
+                            <input
+                                v-model="selectedFiles"
+                                type="checkbox"
+                                class="file-checkbox"
+                                :value="file.id"
+                                :disabled="isLoading || isBulkDeleting"
+                                :aria-label="`Select ${file.name}`"
+                            >
+
+                            <div class="file-card-icon">
+                                <Icon :name="getFileIcon(file.mime_type)" />
+                            </div>
                         </div>
 
                         <ItemMenu
                             type="file"
                             :is-favorite="isFileFavorite(file.id)"
+                            :can-copy="canCopyFile(file.mime_type, file.original_name)"
                             @open="openFile(file)"
                             @download="downloadFile(file.id)"
                             @rename="startRename(file)"
+                            @copy="handleCopy(file.id)"
                             @favorite="handleFavorite(file)"
                             @delete="handleDelete(file.id)"
                         />
@@ -449,6 +551,42 @@ watch([searchQuery, activeCategory, viewMode], () => {
 </template>
 
 <style scoped>
+.selection-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.875rem;
+    color: #a8a8b0;
+    font-size: 0.85rem;
+}
+
+.selection-actions,
+.file-card-selection {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.selection-actions .delete-selected-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #ff6b6b;
+}
+
+.selection-actions .delete-selected-btn:hover {
+    background: #3a2024;
+    border-color: #4a292d;
+    color: #ff7d7d;
+}
+
+.selection-actions button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 .files-page {
     width: 100%;
     flex: 1;

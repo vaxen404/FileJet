@@ -48,6 +48,30 @@ const folders = ref([
         iconName: 'solar:folder-bold'
     },
     {
+        name: 'Work',
+        items: 14,
+        type: 'Folder',
+        modified: 'Oct 2, 2026 20:40',
+        time: '1 day ago',
+        iconName: 'solar:folder-bold'
+    },
+    {
+        name: 'Work',
+        items: 14,
+        type: 'Folder',
+        modified: 'Oct 2, 2026 20:40',
+        time: '1 day ago',
+        iconName: 'solar:folder-bold'
+    },
+    {
+        name: 'Work',
+        items: 14,
+        type: 'Folder',
+        modified: 'Oct 2, 2026 20:40',
+        time: '1 day ago',
+        iconName: 'solar:folder-bold'
+    },
+    {
         name: 'Personal',
         items: 9,
         type: 'Folder',

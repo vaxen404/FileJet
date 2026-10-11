@@ -2,6 +2,7 @@
 type Action =
     | 'download'
     | 'rename'
+    | 'copy'
     | 'favorite'
     | 'delete'
 
@@ -11,6 +12,8 @@ withDefaults(
         itemType: 'file' | 'folder' | 'note'
         actions?: Action[]
         isFavorite?: boolean
+        isCopying?: boolean
+        canCopy?: boolean
         showInfo: boolean
     }>(),
     {
@@ -20,6 +23,8 @@ withDefaults(
             'delete'
         ],
         isFavorite: false,
+        isCopying: false,
+        canCopy: false,
         showInfo: true
     }
 )
@@ -27,6 +32,7 @@ withDefaults(
 const emit = defineEmits<{
     download: []
     rename: []
+    copy: []
     favorite: []
     delete: []
 }>()
@@ -65,6 +71,18 @@ const emit = defineEmits<{
                 />
 
                 {{ isFavorite ? 'Remove Favorite' : 'Favorite' }}
+            </button>
+
+            <button
+                v-if="itemType === 'file' && canCopy && actions.includes('copy')"
+                type="button"
+                class="actions-btn copy"
+                :disabled="isCopying"
+                :aria-busy="isCopying"
+                @click="emit('copy')"
+            >
+                <Icon name="solar:copy-bold" />
+                {{ isCopying ? 'Copying...' : 'Copy' }}
             </button>
 
             <button
