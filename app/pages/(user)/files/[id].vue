@@ -7,15 +7,20 @@ import {
     formatFileSize,
     formatFileTime
 } from "~/utils/file"
+import { getFileReturnPage } from '~/utils/fileNavigation'
 
 definePageMeta({
-    middleware: 'auth',
+    middleware: ['auth', 'file-origin'],
     layout: 'user'
 })
 
 const route = useRoute()
 const router = useRouter()
 const fileId = route.params.id as string
+
+const returnPage = computed(() => {
+    return getFileReturnPage(route.query.from) ?? { path: '/files', name: 'Files' }
+})
 
 interface FileData {
     id: string
@@ -48,7 +53,7 @@ const isCopying = ref(false)
 const canCopy = computed(() => canCopyFile(file.value?.mime_type, file.value?.original_name))
 
 const goBack = () => {
-    router.push('/files')
+    router.push(returnPage.value.path)
 }
 
 const startRename = async () => {
@@ -158,7 +163,7 @@ const handleDelete = async (id: string) => {
 
         openToast('File deleted successfully.', 'success')
 
-        await router.push('/files')
+        await router.push(returnPage.value.path)
     } catch (err: any) {
         openToast(
             err.data?.message || 'File could not be deleted.',
@@ -273,7 +278,7 @@ onMounted(async () => {
                     @click="goBack"
                 >
                     <Icon name="solar:arrow-left-linear" size="1.2rem" />
-                    <span>Files</span>
+                    <span>{{ returnPage.name }}</span>
                 </button>
 
                 <span class="separator">/</span>
@@ -391,7 +396,7 @@ onMounted(async () => {
                     @click="goBack"
                 >
                     <Icon name="solar:arrow-left-linear" size="1.2rem" />
-                    <span>Back to Files</span>
+                    <span>Back to {{ returnPage.name }}</span>
                 </button>
 
                 <span class="separator">/</span>

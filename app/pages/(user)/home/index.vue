@@ -4,11 +4,13 @@ definePageMeta({
   layout: 'user'
 })
 
-import { getFileIcon, getFileType, formatFileSize, formatFileTime} from "~/utils/file"
+import { canCopyFile, getFileIcon, getFileType, formatFileSize, formatFileTime } from "~/utils/file"
 
 const { openToast } = useToast()
 
-const { user, files, folders, notes, error, fetchAll } = useUser()
+const { user, files, folders, notes, favorites, error, fetchAll } = useUser()
+const { deleteFile, renameFile, copyFile, downloadFile, isDeleting } = useFileActions()
+const { addFavorite, removeFavorite } = useFavoriteActions()
 
 await fetchAll()
 
@@ -16,7 +18,113 @@ if (error.value) {
   openToast(error.value, 'error')
 }
 
-const recentFiles = files.value.slice(0, 12)
+const recentFiles = computed(() => files.value.slice(0, 12))
+type FileItem = (typeof files.value)[number]
+
+const editingFileId = ref<string | null>(null)
+const editingFileName = ref('')
+const nameInput = ref<HTMLInputElement | null>(null)
+const isSavingRename = ref(false)
+const isCopying = ref(false)
+const isSavingFavorite = ref(false)
+
+const openFile = (file: FileItem) => navigateTo(`/files/${file.id}`)
+
+const startRename = async (file: FileItem) => {
+  if (isSavingRename.value) return
+
+  editingFileId.value = file.id
+  editingFileName.value = file.name
+
+  await nextTick()
+  nameInput.value?.focus()
+  nameInput.value?.select()
+}
+
+const cancelRename = () => {
+  if (isSavingRename.value) return
+  editingFileId.value = null
+}
+
+const saveRename = async (file: FileItem) => {
+  if (editingFileId.value !== file.id || isSavingRename.value) return
+
+  const newName = editingFileName.value.trim()
+
+  if (!newName || newName === file.name) {
+    cancelRename()
+    return
+  }
+
+  isSavingRename.value = true
+
+  try {
+    await renameFile(file.id, newName)
+    file.name = newName
+    editingFileId.value = null
+    await fetchAll()
+    openToast(error.value || 'File renamed successfully.', error.value ? 'error' : 'success')
+  } catch (err: any) {
+    openToast(err.data?.message || err.message || 'File could not be renamed.', 'error')
+  } finally {
+    isSavingRename.value = false
+  }
+}
+
+const handleCopy = async (file: FileItem) => {
+  if (isCopying.value || !canCopyFile(file.mime_type, file.original_name)) return
+
+  isCopying.value = true
+
+  try {
+    await copyFile(file)
+    openToast('Copied to clipboard.', 'success')
+  } catch (err: any) {
+    openToast(err.data?.message || err.message || 'File could not be copied to the clipboard.', 'error')
+  } finally {
+    isCopying.value = false
+  }
+}
+
+const handleDelete = async (file: FileItem) => {
+  if (isDeleting.value) return
+
+  try {
+    await deleteFile(file.id)
+    files.value = files.value.filter(item => item.id !== file.id)
+    await fetchAll()
+    openToast(error.value || 'File deleted successfully.', error.value ? 'error' : 'success')
+  } catch (err: any) {
+    openToast(err.data?.message || err.message || 'File could not be deleted.', 'error')
+  }
+}
+
+const isFileFavorite = (fileId: string) => favorites.value.some(item => item.file_id === fileId)
+
+const handleFavorite = async (file: FileItem) => {
+  if (isSavingFavorite.value) return
+
+  isSavingFavorite.value = true
+  const wasFavorite = isFileFavorite(file.id)
+
+  try {
+    if (wasFavorite) {
+      await removeFavorite(file.id, 'file')
+    } else {
+      await addFavorite(file.id, 'file')
+    }
+
+    await fetchAll()
+    openToast(
+      error.value || (wasFavorite ? 'File removed from favorites.' : 'File favorited successfully.'),
+      error.value ? 'error' : 'success'
+    )
+  } catch (err: any) {
+    openToast(err.data?.message || err.message || 'File could not be favorited.', 'error')
+  } finally {
+    isSavingFavorite.value = false
+  }
+}
 
 const storagePercent = computed(() => {
   const used = Number(user.value?.storageUsed ?? 0)
@@ -111,6 +219,7 @@ const othersSize = ref(0)
                 v-for="file in recentFiles"
                 :key="file.id"
                 class="file-main"
+                @dblclick="openFile(file)"
               >
                 <div class="file-left">
                   <div class="file-icon">
@@ -118,17 +227,39 @@ const othersSize = ref(0)
                   </div>
 
                   <div class="file-info">
-                    <strong>{{ file.name }}</strong>
-                    <span>{{ getFileType(file.name) }} • {{ formatFileTime(file.created_at) }}</span>
+                    <input
+                      v-if="editingFileId === file.id"
+                      :ref="element => { nameInput = element as HTMLInputElement | null }"
+                      v-model="editingFileName"
+                      type="text"
+                      class="file-name-input"
+                      :aria-label="`Rename ${file.name}`"
+                      :readonly="isSavingRename"
+                      @keydown.enter.prevent="saveRename(file)"
+                      @keydown.esc.prevent="cancelRename"
+                      @blur="saveRename(file)"
+                      @dblclick.stop
+                    >
+                    <strong v-else>{{ file.name }}</strong>
+                    <span>{{ getFileType(file.original_name) }} • {{ formatFileTime(file.created_at) }}</span>
                   </div>
                 </div>
 
                 <div class="file-right">
                   <span class="file-size">{{ formatFileSize(file.size) }}</span>
 
-                  <button class="file-menu" type="button">
-                    <Icon name="solar:menu-dots-bold" class="vertical-dots" />
-                  </button>
+                  <ItemMenu
+                      type="file"
+                      :is-favorite="isFileFavorite(file.id)"
+                      :can-copy="canCopyFile(file.mime_type, file.original_name)"
+                      @open="openFile(file)"
+                      @download="downloadFile(file.id)"
+                      @rename="startRename(file)"
+                      @copy="handleCopy(file)"
+                      @favorite="handleFavorite(file)"
+                      @delete="handleDelete(file)"
+                      @dblclick.stop
+                  />
                 </div>
               </div>
             </template>
@@ -448,12 +579,15 @@ const othersSize = ref(0)
   }
 
   .file-left {
+    flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 0.85rem;
   }
   
   .file-icon {
+    flex-shrink: 0;
     width: 2.5rem;
     height: 2.5rem;
 
@@ -470,6 +604,7 @@ const othersSize = ref(0)
   }
 
   .file-info {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -480,6 +615,9 @@ const othersSize = ref(0)
 
     font-size: 0.9rem;
     font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .file-info span {
@@ -488,7 +626,27 @@ const othersSize = ref(0)
     font-size: 0.78rem;
   }
 
+  .file-name-input {
+    width: 100%;
+    min-width: 0;
+    padding: 0.3rem 0.4rem;
+    box-sizing: border-box;
+    color: #ffffff;
+    background: #202024;
+    border: 1px solid #3c47be;
+    border-radius: 0.45rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    outline: none;
+  }
+
+  .file-name-input:focus-visible {
+    border-color: #5965ed;
+  }
+
   .file-right {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 0.675rem;
@@ -499,33 +657,6 @@ const othersSize = ref(0)
     color: #b0b0b8;
     font-size: 0.85rem;
     text-align: right;
-  }
-
-  .file-menu {
-    width: 2rem;
-    height: 2rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #9a9aa3;
-    background: transparent;
-
-    border: none;
-    border-radius: 0.45rem;
-
-    font-size: 1.25rem;
-    cursor: pointer;
-  }
-
-  .file-menu:hover {
-    color: #ffffff;
-    background: #29292e;
-  }
-
-  .vertical-dots {
-    transform: rotate(90deg);
   }
 
   .dashboard-right {

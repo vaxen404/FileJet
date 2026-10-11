@@ -34,6 +34,7 @@ openToast(error.value, 'error')
 const searchQuery = ref('')
 const viewMode = ref<'list' | 'grid'>('list')
 const activeCategory = ref('All')
+const filterOptions = ['All', 'Images', 'Documents', 'Videos', 'Compressed', 'Others']
 
 const isDragging = ref(false)
 
@@ -267,55 +268,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
             </div>
 
             <div class="files-subtoolbar">
-                <div class="file-filters">
-                    <button
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'All'}"
-                        @click="activeCategory = 'All'"
-                    >
-                        All
-                    </button>
-    
-                    <button
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Images'}"
-                        @click="activeCategory = 'Images'"
-                    >
-                        Images
-                    </button>
-    
-                    <button
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Documents'}"
-                        @click="activeCategory = 'Documents'"
-                    >
-                        Documents
-                    </button>
-    
-                    <button
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Videos'}"
-                        @click="activeCategory = 'Videos'"
-                    >
-                        Videos
-                    </button>
-    
-                    <button
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Compressed'}"
-                        @click="activeCategory = 'Compressed'"
-                    >
-                        Compressed
-                    </button>
-    
-                    <button
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Others'}"
-                        @click="activeCategory = 'Others'"
-                    >
-                        Others
-                    </button>
-                </div>
+                <ItemFilters v-model="activeCategory" :options="filterOptions" label="Filter files" />
 
                 <SortDropdown v-model="sortMode" /> 
             </div>
@@ -423,8 +376,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                 v-for="file in paginatedFiles"
                                 :key="file.id"
                                 :class="{ selected: selectedFiles.includes(file.id) }"
+                                @dblclick="openFile(file)"
                             >
-                                <td>
+                                <td @dblclick.stop>
                                     <input
                                         v-model="selectedFiles"
                                         type="checkbox"
@@ -452,6 +406,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                                 @input="editingFileName = ($event.target as HTMLInputElement).value"
                                                 @keyup.enter="saveRename(file)"
                                                 @blur="editingFileId === file.id && saveRename(file)"
+                                                @dblclick.stop
                                             >
                                             <span>
                                                 {{ formatFileSize(file.size) }} • {{ formatFileTime(file.created_at) }}
@@ -464,7 +419,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                 <td>{{ formatFileSize(file.size) }}</td>
                                 <td>{{ formatFileTime(file.updated_at) }}</td>
 
-                                <td>
+                                <td @dblclick.stop>
                                     <ItemMenu
                                         type="file"
                                         :is-favorite="isFileFavorite(file.id)"
@@ -488,34 +443,38 @@ watch([searchQuery, activeCategory, viewMode], () => {
                     v-for="file in paginatedFiles"
                     :key="file.id"
                     class="file-card"
+                    :class="{ selected: selectedFiles.includes(file.id) }"
+                    @dblclick="openFile(file)"
                 >
                     <div class="file-card-top">
-                        <div class="file-card-selection">
-                            <input
-                                v-model="selectedFiles"
-                                type="checkbox"
-                                class="file-checkbox"
-                                :value="file.id"
-                                :disabled="isLoading || isBulkDeleting"
-                                :aria-label="`Select ${file.name}`"
-                            >
-
-                            <div class="file-card-icon">
-                                <Icon :name="getFileIcon(file.mime_type)" />
-                            </div>
+                        <div class="file-card-icon">
+                            <Icon :name="getFileIcon(file.mime_type)" />
                         </div>
 
-                        <ItemMenu
-                            type="file"
-                            :is-favorite="isFileFavorite(file.id)"
-                            :can-copy="canCopyFile(file.mime_type, file.original_name)"
-                            @open="openFile(file)"
-                            @download="downloadFile(file.id)"
-                            @rename="startRename(file)"
-                            @copy="handleCopy(file.id)"
-                            @favorite="handleFavorite(file)"
-                            @delete="handleDelete(file.id)"
-                        />
+                        <div class="file-card-actions" @dblclick.stop>
+                            <label class="file-card-select">
+                                <input
+                                    v-model="selectedFiles"
+                                    type="checkbox"
+                                    class="file-checkbox"
+                                    :value="file.id"
+                                    :disabled="isLoading || isBulkDeleting"
+                                    :aria-label="`Select ${file.name}`"
+                                >
+                            </label>
+
+                            <ItemMenu
+                                type="file"
+                                :is-favorite="isFileFavorite(file.id)"
+                                :can-copy="canCopyFile(file.mime_type, file.original_name)"
+                                @open="openFile(file)"
+                                @download="downloadFile(file.id)"
+                                @rename="startRename(file)"
+                                @copy="handleCopy(file.id)"
+                                @favorite="handleFavorite(file)"
+                                @delete="handleDelete(file.id)"
+                            />
+                        </div>
                     </div>
 
                     <div class="file-card-info">
@@ -529,6 +488,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
                             @input="editingFileName = ($event.target as HTMLInputElement).value"
                             @keyup.enter="saveRename(file)"
                             @blur="editingFileId === file.id && saveRename(file)"
+                            @dblclick.stop
                         >
                         <span>{{ file.mime_type }}</span>
                     </div>
@@ -562,8 +522,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
     font-size: 0.85rem;
 }
 
-.selection-actions,
-.file-card-selection {
+.selection-actions {
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -640,16 +599,8 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
     align-items: center;
     justify-content: space-between;
-}
-
-.file-filters {
-    display: flex;
-    flex-direction: row;
-
-    align-items: center;
-
-    gap: 0.5rem;
-
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin-bottom: 1rem;
 }
 
@@ -682,14 +633,6 @@ watch([searchQuery, activeCategory, viewMode], () => {
     background: #242429;
 
     border-color: #35353c;
-}
-
-.filter-btn.active {
-    color: #ffffff;
-
-    background: #3c47be;
-
-    border-color: #3c47be;
 }
 
 .table-scroll {
@@ -787,45 +730,62 @@ watch([searchQuery, activeCategory, viewMode], () => {
 }
 
 .file-checkbox {
+    position: relative;
     appearance: none;
-
     -webkit-appearance: none;
-
-    width: 1rem;
-    height: 1rem;
-
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.1rem;
+    height: 1.1rem;
     margin: 0;
-
-    background: #1a1a1d;
-
-    border: 1px solid #6b6b75;
-
-    border-radius: 0.2rem;
-
+    box-sizing: border-box;
+    background: #202024;
+    border: 1px solid #505057;
+    border-radius: 0.3rem;
     cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.file-checkbox:checked {
-    background: #3c47be;
+.file-checkbox:hover:not(:disabled) {
+    border-color: #8b7cff;
+}
 
-    border-color: #3c47be;
+.file-checkbox:checked,
+.file-checkbox:indeterminate {
+    background: #3c47be;
+    border-color: #5965ed;
 }
 
 .file-checkbox:checked::after {
-    content: '✓';
+    content: '';
+    width: 0.3rem;
+    height: 0.55rem;
+    margin-top: -0.15rem;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
 
-    display: flex;
+.file-checkbox:indeterminate::after {
+    content: '';
+    width: 0.55rem;
+    height: 2px;
+    margin: 0;
+    background: #ffffff;
+    border: 0;
+    border-radius: 1px;
+    transform: none;
+}
 
-    align-items: center;
-    justify-content: center;
+.file-checkbox:focus-visible {
+    outline: 2px solid #8b7cff;
+    outline-offset: 3px;
+}
 
-    width: 100%;
-    height: 100%;
-
-    color: #ffffff;
-
-    font-size: 0.7rem;
-    font-weight: 700;
+.file-checkbox:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .files-table th:nth-child(2),
@@ -906,6 +866,10 @@ watch([searchQuery, activeCategory, viewMode], () => {
     border-color: #3c47be;
 }
 
+.name-input:disabled {
+    pointer-events: none;
+}
+
 .file-info span {
     color: #898991;
 
@@ -915,6 +879,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
 }
 
 .file-card {
+    min-width: 0;
     min-height: 10rem;
 
     padding: 1rem;
@@ -931,6 +896,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
     box-sizing: border-box;
     
     cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .file-card:hover {
@@ -939,13 +905,40 @@ watch([searchQuery, activeCategory, viewMode], () => {
     border-color: #35353c;
 }
 
+.file-card.selected {
+    background: #201d2d;
+    border-color: #6055b8;
+}
+
 .file-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
+.file-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.file-card-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.45rem;
+    cursor: pointer;
+}
+
+.file-card-select:hover {
+    background: #252529;
+}
+
 .file-card-icon {
+    flex-shrink: 0;
     width: 2.7rem;
     height: 2.7rem;
 
@@ -963,9 +956,17 @@ watch([searchQuery, activeCategory, viewMode], () => {
 }
 
 .file-card-info {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+}
+
+.file-card-info .name-input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
 }
 
 .file-card-info strong {
@@ -979,6 +980,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
     color: #898991;
 
     font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .file-card-bottom {
@@ -989,6 +993,34 @@ watch([searchQuery, activeCategory, viewMode], () => {
     color: #898991;
 
     font-size: 0.75rem;
+}
+
+.files-page :deep(.grid-view) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 1500px) {
+    .files-page :deep(.grid-view) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1100px) {
+    .files-page :deep(.grid-view) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .files-page :deep(.grid-view) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 500px) {
+    .files-page :deep(.grid-view) {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 .upload-loading {

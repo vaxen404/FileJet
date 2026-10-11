@@ -4,12 +4,7 @@ const props = defineProps<{
     itemType: 'file' | 'folder' | 'note'
 }>()
 
-const {
-    toastMessage,
-    toastType,
-    showToast,
-    openToast
-} = useToast()
+const { openToast } = useToast()
 
 const shareLink = ref<string | null>(null)
 const copied = ref(false)
@@ -248,11 +243,6 @@ watch(
             </button>
         </template>
 
-        <Toast
-            :message="toastMessage"
-            :type="toastType"
-            :show="showToast"
-        />
     </div>
 </template>
 

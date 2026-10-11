@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatFileTime } from '~/utils/file'
+
 definePageMeta({
     middleware: 'auth',
     layout: 'user'
@@ -6,80 +8,14 @@ definePageMeta({
 
 const { openToast } = useToast()
 
-const folders = ref([
-    {
-        name: 'Projects',
-        items: 12,
-        type: 'Folder',
-        modified: 'Oct 3, 2026 18:12',
-        time: '2 minutes ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Documents',
-        items: 24,
-        type: 'Folder',
-        modified: 'Oct 3, 2026 17:45',
-        time: '15 minutes ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Images',
-        items: 42,
-        type: 'Folder',
-        modified: 'Oct 3, 2026 16:30',
-        time: '1 hour ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Videos',
-        items: 18,
-        type: 'Folder',
-        modified: 'Oct 3, 2026 14:10',
-        time: '3 hours ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Work',
-        items: 14,
-        type: 'Folder',
-        modified: 'Oct 2, 2026 20:40',
-        time: '1 day ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Work',
-        items: 14,
-        type: 'Folder',
-        modified: 'Oct 2, 2026 20:40',
-        time: '1 day ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Work',
-        items: 14,
-        type: 'Folder',
-        modified: 'Oct 2, 2026 20:40',
-        time: '1 day ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Work',
-        items: 14,
-        type: 'Folder',
-        modified: 'Oct 2, 2026 20:40',
-        time: '1 day ago',
-        iconName: 'solar:folder-bold'
-    },
-    {
-        name: 'Personal',
-        items: 9,
-        type: 'Folder',
-        modified: 'Oct 1, 2026 19:20',
-        time: '2 days ago',
-        iconName: 'solar:folder-bold'
-    }
-])
+const { folders, favorites, pending, error, fetchAll } = useUser()
+type FolderItem = (typeof folders.value)[number]
+
+await fetchAll()
+
+if (error.value) {
+    openToast(error.value, 'error')
+}
 
 const searchQuery = ref('')
 const viewMode = ref<'list' | 'grid'>('list')
@@ -91,9 +27,9 @@ const handleDrop = (event: DragEvent) => {
     
     const droppedFolders = event.dataTransfer?.files
     
-    if (!droppedFolders) return
+    if (!droppedFolders?.length) return
     
-    openToast('Folder uploaded successfully.', 'success')
+    console.log('Upload folders:', droppedFolders)
 }
 
 const filteredFolders = computed(() => {
@@ -101,82 +37,81 @@ const filteredFolders = computed(() => {
         const matchesSearch = 
             folder.name
             .toLowerCase()
-            .includes(searchQuery.value.toLowerCase())
+            .includes(searchQuery.value.trim().toLowerCase())
 
         return matchesSearch
     })
 
 })
 
-const selectedFolders = ref<string[]>([])
+const sortMode = ref<
+    'newest' |
+    'oldest' |
+    'name-asc' |
+    'name-desc'
+>('newest')
 
-const allSelected = computed(() => {
-    return paginatedFolders.value.length > 0 &&
-        paginatedFolders.value.every(folder => {
-            return selectedFolders.value.includes(folder.name)
-        })
-})
+const { sortedItems: sortedFolders } = useSort(
+    filteredFolders, sortMode, folder => folder.name, folder => folder.created_at
+)
 
-const toggleSelectAll = (event: Event) => {
-    const checked = (event.target as HTMLInputElement).checked
-
-    if (checked) {
-        selectedFolders.value = paginatedFolders.value.map(folder => folder.name)
-    }else {
-        selectedFolders.value = []
-    }
+const handleFolders = (folder: FileSystemDirectoryHandle) => {
+    console.log('Upload folder:', folder)
 }
 
-const handleFolders = (folders: any) => {
-    const files = Array.from(folders) as File[]
-
-    const isFolderUpload = files.every(file => file.webkitRelativePath)
-
-    if (!isFolderUpload) {
-        openToast('Please select a folder.', 'error')
-        return
-    }
-
-    openToast('Folder selected successfully.', 'success')
-}
-
-const openFolder = (folder: any) => {
+const openFolder = (folder: FolderItem) => {
     console.log('Open:', folder.name);
 }
 
-const downloadFolder = (folder: any) => {
+const downloadFolder = (folder: FolderItem) => {
     console.log('Download:', folder.name);
 }
 
-const renameFolder = (folder: any) => {
+const renameFolder = (folder: FolderItem) => {
     console.log('Rename:', folder.name);
 }
 
-const favoriteFolder = (folder: any) => {
+const favoriteFolder = (folder: FolderItem) => {
     console.log('Favorite:', folder.name);
 }
 
-const deleteFolder = (folder: any) => {
+const deleteFolder = (folder: FolderItem) => {
     console.log('Delete:', folder.name);
 }
 
-const currentPage = ref(1)
 const itemsPerPage = computed(() => {
     return viewMode.value === 'list' ? 12 : 20
 })
 
-const totalPages = computed(() => {
-    return Math.ceil(filteredFolders.value.length / itemsPerPage.value)
+const { currentPage, totalPages, paginatedItems: paginatedFolders } = usePagination(
+    sortedFolders,
+    itemsPerPage
+)
+
+const { selectedItems: selectedFolders, allSelected, toggleSelectAll } = useSelection(paginatedFolders)
+const partiallySelected = computed(() => {
+    return !allSelected.value && paginatedFolders.value.some(folder => selectedFolders.value.includes(folder.id))
 })
 
-const paginatedFolders = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value
-    const end = start + itemsPerPage.value
+const isFolderFavorite = (folderId: string) => {
+    return favorites.value.some(favorite => favorite.folder_id === folderId)
+}
 
-    return filteredFolders.value.slice(start, end)
+const handleDeleteSelected = () => {
+    if (!selectedFolders.value.length || pending.value) return
+    console.log('Delete selected folders:', [...selectedFolders.value])
+}
+
+watch(folders, (items) => {
+    const availableIds = new Set(items.map(folder => folder.id))
+    selectedFolders.value = selectedFolders.value.filter(id => availableIds.has(id))
 })
 
-watch(searchQuery, () => {
+watch(totalPages, (total) => {
+    currentPage.value = Math.min(currentPage.value, Math.max(1, total))
+})
+
+watch([searchQuery, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 </script>
@@ -191,6 +126,7 @@ watch(searchQuery, () => {
                 />
 
                 <div class="toolbar-actions">
+                    <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
 
                     <UploadButton
@@ -200,21 +136,45 @@ watch(searchQuery, () => {
                     />
                 </div>
             </div>
+
+            <div v-if="selectedFolders.length" class="selection-toolbar" role="group" aria-label="Selected folders">
+                <span role="status" aria-live="polite">{{ selectedFolders.length }} selected</span>
+
+                <div class="selection-actions">
+                    <button type="button" class="selection-btn" :disabled="pending" @click="selectedFolders = []">
+                        Clear
+                    </button>
+                    <button type="button" class="selection-btn delete-selected-btn" :disabled="pending" @click="handleDeleteSelected">
+                        <Icon name="solar:trash-bin-trash-bold" />
+                        Delete Selected
+                    </button>
+                </div>
+            </div>
         </div>
 
         <DataView
             :view-mode="viewMode"
             :is-dragging="isDragging"
+            :is-loading="pending"
             drop-text="Drop folders to upload"
             @dragover="isDragging = true"
             @dragleave="isDragging = false"
             @drop="handleDrop"
         >
-            <template v-if="folders.length === 0" #empty>
+            <template #loading>
+                <div class="loading-state" role="status" aria-live="polite">
+                    <span class="loading-spinner" aria-hidden="true" />
+                    <span>Loading folders...</span>
+                </div>
+            </template>
+
+            <template v-if="!pending && filteredFolders.length === 0" #empty>
                 <div class="empty-state">
                     <Icon name="solar:folder-linear" size="2.5rem" class="empty-state-icon empty-state-folder-icon" />
-                    <strong>No folders yet</strong>
-                    <span class="empty-state-description">Create your first folder to organize your files.</span>
+                    <strong>{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
+                    <span class="empty-state-description">
+                        {{ folders.length ? 'Try a different search.' : 'Create your first folder to organize your files.' }}
+                    </span>
                 </div>
             </template>
 
@@ -228,6 +188,9 @@ watch(searchQuery, () => {
                                         type="checkbox"
                                         class="folder-checkbox"
                                         :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="pending"
+                                        aria-label="Select all folders on this page"
                                         @change="toggleSelectAll"
                                     >
                                 </th>
@@ -243,7 +206,7 @@ watch(searchQuery, () => {
                                 </th>
 
                                 <th>Type</th>
-                                <th>Items</th>
+                                <th>Created</th>
                                 <th>Modified</th>
                                 <th>Actions</th>
                             </tr>
@@ -251,41 +214,46 @@ watch(searchQuery, () => {
 
                         <tbody>
                             <tr
-                                v-for="(folder, index) in paginatedFolders"
-                                :key="index"
+                                v-for="folder in paginatedFolders"
+                                :key="folder.id"
+                                :class="{ selected: selectedFolders.includes(folder.id) }"
+                                @dblclick="openFolder(folder)"
                             >
-                                <td>
+                                <td @dblclick.stop>
                                     <input
                                         v-model="selectedFolders"
                                         type="checkbox"
                                         class="folder-checkbox"
-                                        :value="folder.name"
+                                        :value="folder.id"
+                                        :disabled="pending"
+                                        :aria-label="`Select ${folder.name}`"
                                     >
                                 </td>
 
                                 <td>
                                     <div class="folder-name">
                                         <div class="folder-icon">
-                                            <Icon :name="folder.iconName" />
+                                            <Icon name="solar:folder-bold" />
                                         </div>
 
                                         <div class="folder-info">
-                                            <strong>{{ folder.name }}</strong>
+                                            <strong :title="folder.name">{{ folder.name }}</strong>
                                             <span>
-                                                {{ folder.items }} • {{ folder.time }}
+                                                Folder • {{ formatFileTime(folder.created_at) }}
                                             </span>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td>{{ folder.type }}</td>
-                                <td>{{ folder.items }}</td>
-                                <td>{{ folder.modified }}</td>
+                                <td>Folder</td>
+                                <td>{{ formatFileTime(folder.created_at) }}</td>
+                                <td>{{ formatFileTime(folder.updated_at) }}</td>
 
-                                <td>
+                                <td @dblclick.stop>
                                     <ItemMenu
                                         type="folder"
                                         :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                                        :is-favorite="isFolderFavorite(folder.id)"
                                         @open="openFolder(folder)"
                                         @download="downloadFolder(folder)"
                                         @rename="renameFolder(folder)"
@@ -301,34 +269,50 @@ watch(searchQuery, () => {
 
             <template #grid>
                 <div
-                    v-for="(folder, index) in paginatedFolders"
-                    :key="index"
+                    v-for="folder in paginatedFolders"
+                    :key="folder.id"
                     class="folder-card"
+                    :class="{ selected: selectedFolders.includes(folder.id) }"
+                    @dblclick="openFolder(folder)"
                 >
                     <div class="folder-card-top">
                         <div class="folder-card-icon">
-                            <Icon :name="folder.iconName" />
+                            <Icon name="solar:folder-bold" />
                         </div>
 
-                        <ItemMenu
-                            type="folder"
-                            :actions="['open', 'download', 'rename', 'favorite', 'delete']"
-                            @open="openFolder(folder)"
-                            @download="downloadFolder(folder)"
-                            @rename="renameFolder(folder)"
-                            @favorite="favoriteFolder(folder)"
-                            @delete="deleteFolder(folder)"
-                        />
+                        <div class="folder-card-actions" @dblclick.stop>
+                            <label class="folder-card-select">
+                                <input
+                                    v-model="selectedFolders"
+                                    type="checkbox"
+                                    class="folder-checkbox"
+                                    :value="folder.id"
+                                    :disabled="pending"
+                                    :aria-label="`Select ${folder.name}`"
+                                >
+                            </label>
+
+                            <ItemMenu
+                                type="folder"
+                                :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                                :is-favorite="isFolderFavorite(folder.id)"
+                                @open="openFolder(folder)"
+                                @download="downloadFolder(folder)"
+                                @rename="renameFolder(folder)"
+                                @favorite="favoriteFolder(folder)"
+                                @delete="deleteFolder(folder)"
+                            />
+                        </div>
                     </div>
 
                     <div class="folder-card-info">
-                        <strong>{{ folder.name }}</strong>
-                        <span>{{ folder.type }}</span>
+                        <strong :title="folder.name">{{ folder.name }}</strong>
+                        <span>Folder</span>
                     </div>
 
                     <div class="folder-card-bottom">
-                        <span>{{ folder.items }} Items</span>
-                        <span>{{ folder.time }}</span>
+                        <span>{{ formatFileTime(folder.created_at) }}</span>
+                        <span>{{ formatFileTime(folder.updated_at) }}</span>
                     </div>
                 </div>
             </template>
@@ -374,21 +358,25 @@ watch(searchQuery, () => {
 
 .folders-toolbar {
     display: flex;
-    flex-direction: row;
-
     align-items: center;
     justify-content: space-between;
-
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin-bottom: 0.875rem;
+}
+
+.folders-toolbar :deep(.search-box) {
+    flex: 1 1 18rem;
+    min-width: 0;
+    max-width: 32rem;
+    box-sizing: border-box;
 }
 
 .toolbar-actions {
     display: flex;
-    flex-direction: row;
-
     align-items: center;
-
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
 }
 
 .table-scroll {
@@ -463,45 +451,62 @@ watch(searchQuery, () => {
 }
 
 .folder-checkbox {
+    position: relative;
     appearance: none;
-
     -webkit-appearance: none;
-
-    width: 1rem;
-    height: 1rem;
-
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.1rem;
+    height: 1.1rem;
     margin: 0;
-
-    background: #1a1a1d;
-
-    border: 1px solid #6b6b75;
-
-    border-radius: 0.2rem;
-
+    box-sizing: border-box;
+    background: #202024;
+    border: 1px solid #505057;
+    border-radius: 0.3rem;
     cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.folder-checkbox:checked {
-    background: #3c47be;
+.folder-checkbox:hover:not(:disabled) {
+    border-color: #8b7cff;
+}
 
-    border-color: #3c47be;
+.folder-checkbox:checked,
+.folder-checkbox:indeterminate {
+    background: #3c47be;
+    border-color: #5965ed;
 }
 
 .folder-checkbox:checked::after {
-    content: '✓';
+    content: '';
+    width: 0.3rem;
+    height: 0.55rem;
+    margin-top: -0.15rem;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
 
-    display: flex;
+.folder-checkbox:indeterminate::after {
+    content: '';
+    width: 0.55rem;
+    height: 2px;
+    margin: 0;
+    background: #ffffff;
+    border: 0;
+    border-radius: 1px;
+    transform: none;
+}
 
-    align-items: center;
-    justify-content: center;
+.folder-checkbox:focus-visible {
+    outline: 2px solid #8b7cff;
+    outline-offset: 3px;
+}
 
-    width: 100%;
-    height: 100%;
-
-    color: #ffffff;
-
-    font-size: 0.7rem;
-    font-weight: 700;
+.folder-checkbox:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .folders-table th:nth-child(2),
@@ -650,5 +655,189 @@ watch(searchQuery, () => {
     color: #898991;
 
     font-size: 0.75rem;
+}
+
+.selection-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.875rem;
+    color: #a8a8b0;
+    font-size: 0.85rem;
+}
+
+.selection-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.selection-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 2.35rem;
+    padding: 0 1rem;
+    color: #a8a8b0;
+    background: #1a1a1d;
+    border: 1px solid #29292e;
+    border-radius: 0.6rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.selection-btn:hover:not(:disabled) {
+    color: #ffffff;
+    background: #242429;
+    border-color: #35353c;
+}
+
+.delete-selected-btn {
+    color: #ff6b6b;
+}
+
+.delete-selected-btn:hover:not(:disabled) {
+    color: #ff7d7d;
+    background: #3a2024;
+    border-color: #4a292d;
+}
+
+.selection-btn:focus-visible {
+    outline: 2px solid #8b7cff;
+    outline-offset: 3px;
+}
+
+.selection-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+.folders-table {
+    min-width: 44rem;
+    table-layout: fixed;
+}
+
+.folders-table tbody tr.selected {
+    background: #201d2d;
+}
+
+.folder-info strong,
+.folder-info span,
+.folder-card-info strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.folder-card,
+.folder-card-info {
+    min-width: 0;
+}
+
+.folder-card {
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.folder-card.selected {
+    background: #201d2d;
+    border-color: #6055b8;
+}
+
+.folder-card-icon {
+    flex-shrink: 0;
+}
+
+.folder-card-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.25rem;
+}
+
+.folder-card-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.45rem;
+    cursor: pointer;
+}
+
+.folder-card-select:hover {
+    background: #252529;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    color: #a8a8b0;
+    font-size: 0.85rem;
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #29292e;
+    border-top-color: #3c47be;
+    border-radius: 50%;
+    animation: loading-spin 0.8s linear infinite;
+}
+
+@keyframes loading-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-spinner { animation: none; }
+}
+
+
+.folders-page :deep(.grid-view) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 1500px) {
+    .folders-page :deep(.grid-view) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1100px) {
+    .folders-page :deep(.grid-view) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .folders-page :deep(.grid-view) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 500px) {
+    .folders-page :deep(.grid-view) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+
+@media (max-width: 800px) {
+    .folders-toolbar :deep(.search-box) {
+        flex-basis: 100%;
+        max-width: none;
+    }
 }
 </style>
