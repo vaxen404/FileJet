@@ -66,8 +66,8 @@ const handleDrop = async (event: DragEvent) => {
         await uploadFiles(droppedFiles, fetchAll)
 
         openToast('File uploaded successfully.', 'success')
-    } catch {
-        openToast('File upload failed.', 'error')
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'File upload failed.', 'error')
     }
 }
 
@@ -107,8 +107,8 @@ const handleFiles = async (files: FileList) => {
         await uploadFiles(files, fetchAll)
 
         openToast('File uploaded successfully.', 'success')
-    } catch {
-        openToast('File upload failed.', 'error')
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'File upload failed.', 'error')
     }
 }
 
@@ -133,7 +133,7 @@ const saveRename = async (file: any) => {
         openToast('File renamed successfully', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'File could not be renamed.',
+            err.data?.message || err.message || 'File could not be renamed.',
             'error'
         )
     }
@@ -155,6 +155,14 @@ const handleCopy = async (fileId: string) => {
     }
 }
 
+const handleDownload = async (fileId: string) => {
+    try {
+        await downloadFile(fileId)
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'File could not be downloaded.', 'error')
+    }
+}
+
 const handleDelete = async (fileId: any) => {
     try {
         await deleteFile(fileId, fetchAll)
@@ -162,7 +170,7 @@ const handleDelete = async (fileId: any) => {
         openToast('File deleted successfully.', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'File could not be deleted.',
+            err.data?.message || err.message || 'File could not be deleted.',
             'error'
         )
     }   
@@ -190,7 +198,7 @@ const handleFavorite = async (file: any) => {
         openToast('File favorited successfully.', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'File could not be favorited',
+            err.data?.message || err.message || 'File could not be favorited',
             'error'
         )
     }
@@ -425,7 +433,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                         :is-favorite="isFileFavorite(file.id)"
                                         :can-copy="canCopyFile(file.mime_type, file.original_name)"
                                         @open="openFile(file)"
-                                        @download="downloadFile(file.id)"
+                                        @download="handleDownload(file.id)"
                                         @rename="startRename(file)"
                                         @copy="handleCopy(file.id)"
                                         @favorite="handleFavorite(file)"
@@ -468,7 +476,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
                                 :is-favorite="isFileFavorite(file.id)"
                                 :can-copy="canCopyFile(file.mime_type, file.original_name)"
                                 @open="openFile(file)"
-                                @download="downloadFile(file.id)"
+                                @download="handleDownload(file.id)"
                                 @rename="startRename(file)"
                                 @copy="handleCopy(file.id)"
                                 @favorite="handleFavorite(file)"

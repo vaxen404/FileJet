@@ -44,7 +44,7 @@ const loadShareLink = async () => {
         if (currentRequest !== requestId) return
 
         openToast(
-            err.data?.message || 'Could not load share link.',
+            err.data?.message || err.message || 'Could not load share link.',
             'error'
         )
     }
@@ -88,7 +88,7 @@ const createShareLink = async () => {
         )
     } catch (err: any) {
         openToast(
-            err.data?.message || 'Could not create share link.',
+            err.data?.message || err.message || 'Could not create share link.',
             'error'
         )
     } finally {
@@ -135,7 +135,7 @@ const removeShareLink = async () => {
         if (currentRequest !== requestId) return
 
         openToast(
-            err.data?.message || 'Could not remove share link.',
+            err.data?.message || err.message || 'Could not remove share link.',
             'error'
         )
     } finally {
@@ -163,9 +163,9 @@ const copyShareLink = async () => {
         setTimeout(() => {
             copied.value = false
         }, 1500)
-    } catch {
+    } catch (err: any) {
         openToast(
-            'Could not copy share link.',
+            err.data?.message || err.message || 'Could not copy share link.',
             'error'
         )
     }

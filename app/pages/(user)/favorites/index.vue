@@ -70,7 +70,7 @@ const handleRemove = async (item: any) => {
         openToast('Removed from favorites.', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'Could not remove from favorites.',
+            err.data?.message || err.message || 'Could not remove from favorites.',
             'error'
         )
     }
@@ -131,18 +131,22 @@ const saveRename = async (item: any) => {
         openToast('Item renamed successfully', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'Item could not be renamed.',
+            err.data?.message || err.message || 'Item could not be renamed.',
             'error'
         )
     }
 }
 
-const handleDownload = (item: any) => {
+const handleDownload = async (item: any) => {
     const type = getItemType(item)
     const itemId = getItemId(item)
 
     if (type === 'file') {
-        downloadFile(itemId)
+        try {
+            await downloadFile(itemId)
+        } catch (err: any) {
+            openToast(err.data?.message || err.message || 'File could not be downloaded.', 'error')
+        }
         return
     }
 

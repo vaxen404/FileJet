@@ -208,6 +208,7 @@ onClickOutside(dropdownRef, () => {
                     @click="handleAction('open')"
                 >
                     <Icon
+                        class="menu-item-icon"
                         :name="type === 'folder'
                             ? 'solar:folder-open-bold'
                             : type === 'note'
@@ -224,7 +225,7 @@ onClickOutside(dropdownRef, () => {
                     class="menu-item"
                     @click="handleAction('rename')"
                 >
-                    <Icon name="solar:pen-bold" />
+                    <Icon class="menu-item-icon" name="solar:pen-bold" />
                     Rename
                 </button>
 
@@ -234,7 +235,7 @@ onClickOutside(dropdownRef, () => {
                     class="menu-item"
                     @click="handleAction('copy')"
                 >
-                    <Icon name="solar:copy-bold" />
+                    <Icon class="menu-item-icon" name="solar:copy-bold" />
                     Copy
                 </button>
 
@@ -244,7 +245,7 @@ onClickOutside(dropdownRef, () => {
                     class="menu-item"
                     @click="handleAction('edit')"
                 >
-                    <Icon name="solar:pen-bold" />
+                    <Icon class="menu-item-icon" name="solar:pen-bold" />
                     Edit
                 </button>
 
@@ -254,7 +255,7 @@ onClickOutside(dropdownRef, () => {
                     class="menu-item"
                     @click="handleAction('download')"
                 >
-                    <Icon name="solar:download-bold" />
+                    <Icon class="menu-item-icon" name="solar:download-bold" />
                     Download
                 </button>
 
@@ -265,6 +266,7 @@ onClickOutside(dropdownRef, () => {
                     @click="handleAction('favorite')"
                 >
                     <Icon
+                        class="menu-item-icon"
                         :name="isFavorite
                             ? 'solar:star-bold'
                             : 'solar:star-linear'"
@@ -279,7 +281,7 @@ onClickOutside(dropdownRef, () => {
                     class="menu-item danger"
                     @click="handleAction('delete')"
                 >
-                    <Icon name="solar:trash-bin-trash-bold" />
+                    <Icon class="menu-item-icon" name="solar:trash-bin-trash-bold" />
                     Delete
                 </button>
             </div>
@@ -326,7 +328,8 @@ onClickOutside(dropdownRef, () => {
 .menu-dropdown {
     position: fixed;
 
-    width: 11rem;
+    width: max-content;
+    min-width: min(11rem, calc(100vw - 2rem));
 
     padding: 0.35rem;
 
@@ -346,6 +349,7 @@ onClickOutside(dropdownRef, () => {
 
 .menu-item {
     width: 100%;
+    box-sizing: border-box;
     flex-shrink: 0;
 
     display: flex;
@@ -366,7 +370,14 @@ onClickOutside(dropdownRef, () => {
     cursor: pointer;
 
     text-align: left;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.menu-item :deep(.menu-item-icon) {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
 }
 
 .menu-item:hover {

@@ -82,7 +82,7 @@ export const useUser = () => {
             const data = await requestFetch<UserData>('/api/users/@me')
             user.value = data
         } catch (err: any) {
-            error.value = err.data?.message || 'Kullanıcı bilgileri alınamadı.'
+            error.value = err.data?.message || err.message || 'Kullanıcı bilgileri alınamadı.'
         }
     }
 
@@ -91,7 +91,7 @@ export const useUser = () => {
             const data = await requestFetch<FilesResponse>('/api/files')
             files.value = data.files
         } catch (err: any) {
-            error.value = err.data?.message || 'Dosyalar alınamadı.'
+            error.value = err.data?.message || err.message || 'Dosyalar alınamadı.'
         }
     }
 
@@ -100,7 +100,7 @@ export const useUser = () => {
             const data = await requestFetch<FoldersResponse>('/api/folders')
             folders.value = data.folders
         } catch (err: any) {
-            error.value = err.data?.message || 'Klasörler alınamadı.'
+            error.value = err.data?.message || err.message || 'Klasörler alınamadı.'
         }
     }
 
@@ -109,7 +109,7 @@ export const useUser = () => {
             const data = await requestFetch<NotesResponse>('/api/notes')
             notes.value = data.notes
         } catch (err: any) {
-            error.value = err.data?.message || 'Notlar alınamadı.'
+            error.value = err.data?.message || err.message || 'Notlar alınamadı.'
         }
     }
 
@@ -118,7 +118,7 @@ export const useUser = () => {
             const data = await requestFetch<FavoritesResponse>('/api/favorites')
             favorites.value = data.favorites
         } catch (err: any) {
-            error.value = err.data?.message || 'Favoriler alınamadı.'
+            error.value = err.data?.message || err.message || 'Favoriler alınamadı.'
         }
     }
 

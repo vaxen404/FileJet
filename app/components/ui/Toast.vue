@@ -18,117 +18,76 @@ withDefaults(
             :role="type === 'error' ? 'alert' : 'status'"
             aria-atomic="true"
         >
-            <div class="toast-icon" aria-hidden="true">
-                <Icon
-                    :name="type === 'error' ? 'solar:close-circle-bold' : 'solar:check-circle-bold'"
-                    size="1.35rem"
-                />
-            </div>
+            <Icon
+                class="toast-icon"
+                :name="type === 'error' ? 'solar:close-circle-linear' : 'solar:check-circle-linear'"
+                size="1rem"
+                aria-hidden="true"
+            />
 
-            <div class="toast-content">
-                <strong class="toast-title">{{ type === 'error' ? 'Something went wrong' : 'Success' }}</strong>
-                <span class="toast-message">{{ message }}</span>
-            </div>
+            <span class="toast-message">{{ message }}</span>
         </div>
     </Transition>
 </template>
 
 <style scoped>
     .toast {
-        --toast-accent: #69a9ff;
-        --toast-tint: #17243a;
-        --toast-border: #2d4261;
-        --toast-icon-background: #1d3150;
-        --toast-message: #aebed6;
-
         position: fixed;
-        top: calc(1.25rem + env(safe-area-inset-top, 0px));
+        top: calc(1rem + env(safe-area-inset-top, 0px));
         left: 50%;
         transform: translateX(-50%);
 
         display: flex;
-        align-items: flex-start;
-        gap: 0.85rem;
+        align-items: center;
+        gap: 0.6rem;
 
-        width: min(28rem, calc(100vw - 2rem));
-        padding: 1rem 1.2rem;
+        width: max-content;
+        max-width: min(28rem, calc(100vw - 2rem));
+        padding: 0.75rem 1rem;
         box-sizing: border-box;
         
-        background: linear-gradient(110deg, var(--toast-tint), #1a1a1d 70%);
-        border: 1px solid var(--toast-border);
-        border-radius: 0.85rem;
-        box-shadow: 0 0.75rem 2rem #00000040;
+        background: #17263a;
+        border: 1px solid #294568;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.25rem 1rem #00000026;
 
-        color: #f5f5f5;
+        color: #c5dcff;
         font-family: inherit;
 
         z-index: 9999;
     }
 
-    .toast::before {
-        content: '';
-        position: absolute;
-        top: 1rem;
-        bottom: 1rem;
-        left: 0;
-        width: 3px;
-        background: var(--toast-accent);
-        border-radius: 0 3px 3px 0;
+    .toast-icon {
+        flex: 0 0 auto;
+        color: #7bb5ff;
     }
 
     .toast.error {
-        --toast-accent: #ff7d89;
-        --toast-tint: #321f28;
-        --toast-border: #56303b;
-        --toast-icon-background: #422630;
-        --toast-message: #cbb4bb;
+        background: #301d22;
+        border-color: #593039;
+        color: #ffc5cd;
     }
 
-    .toast-icon {
-        flex: 0 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 2.6rem;
-        height: 2.6rem;
-        box-sizing: border-box;
-        color: var(--toast-accent);
-        background: var(--toast-icon-background);
-        border: 1px solid var(--toast-border);
-        border-radius: 0.7rem;
-    }
-
-    .toast-content {
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-    }
-
-    .toast-title {
-        color: #f5f5f5;
-        font-size: 0.85rem;
-        font-weight: 600;
-        line-height: 1.4;
+    .toast.error .toast-icon {
+        color: #ff8998;
     }
 
     .toast-message {
-        color: var(--toast-message);
+        min-width: 0;
         font-size: 0.8rem;
-        line-height: 1.6;
+        line-height: 1.5;
         white-space: pre-line;
         overflow-wrap: anywhere;
     }
 
     .toast-enter-active,
     .toast-leave-active {
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        transition: opacity 0.15s ease;
     }
 
     .toast-enter-from,
     .toast-leave-to {
         opacity: 0;
-        transform: translate(-50%, -0.5rem);
     }
 
     @media (prefers-reduced-motion: reduce) {

@@ -86,6 +86,14 @@ const handleCopy = async (file: FileItem) => {
   }
 }
 
+const handleDownload = async (fileId: string) => {
+  try {
+    await downloadFile(fileId)
+  } catch (err: any) {
+    openToast(err.data?.message || err.message || 'File could not be downloaded.', 'error')
+  }
+}
+
 const handleDelete = async (file: FileItem) => {
   if (isDeleting.value) return
 
@@ -253,7 +261,7 @@ const othersSize = ref(0)
                       :is-favorite="isFileFavorite(file.id)"
                       :can-copy="canCopyFile(file.mime_type, file.original_name)"
                       @open="openFile(file)"
-                      @download="downloadFile(file.id)"
+                      @download="handleDownload(file.id)"
                       @rename="startRename(file)"
                       @copy="handleCopy(file)"
                       @favorite="handleFavorite(file)"

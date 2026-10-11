@@ -1,3 +1,5 @@
+let toastTimeout: ReturnType<typeof setTimeout> | undefined
+
 export const useToast = () => {
     const toastMessage = useState('toast-message', () => '')
     const toastType = useState<'success' | 'error'>(
@@ -15,9 +17,13 @@ export const useToast = () => {
         toastType.value = type
         showToast.value = true
 
-        setTimeout(() => {
+        if (!import.meta.client) return
+
+        clearTimeout(toastTimeout)
+        toastTimeout = setTimeout(() => {
             showToast.value = false
-        }, 3000);
+            toastTimeout = undefined
+        }, 3000)
     }
 
     return {

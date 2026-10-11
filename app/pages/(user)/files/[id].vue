@@ -109,7 +109,7 @@ const saveRename = async () => {
         openToast('File renamed successfully.', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'File could not be renamed.',
+            err.data?.message || err.message || 'File could not be renamed.',
             'error'
         )
     } finally {
@@ -130,10 +130,10 @@ watch(
 const handleDownload = async (id: string) => {
     try {
         await downloadFile(id)
-        openToast('File downloaded successfully.', 'success')
+        openToast('Download started.', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'File could not be downloaded.',
+            err.data?.message || err.message || 'File could not be downloaded.',
             'error'
         )
     }
@@ -166,7 +166,7 @@ const handleDelete = async (id: string) => {
         await router.push(returnPage.value.path)
     } catch (err: any) {
         openToast(
-            err.data?.message || 'File could not be deleted.',
+            err.data?.message || err.message || 'File could not be deleted.',
             'error'
         )
     }
@@ -194,7 +194,7 @@ const handleFavorite = async (item: FileData) => {
         openToast('File favorited successfully.', 'success')
     } catch (err: any) {
         openToast(
-            err.data?.message || 'File could not be favorited.',
+            err.data?.message || err.message || 'File could not be favorited.',
             'error'
         )
     }

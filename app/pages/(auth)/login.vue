@@ -42,7 +42,7 @@ const handleLogin = async () => {
         await navigateTo('/home')
     } catch (e: any) {
         openToast(
-            e.data?.message || 'Login failed',
+            e.data?.message || e.message || 'Login failed',
             'error'
         )
     }
