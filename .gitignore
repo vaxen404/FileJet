@@ -21,8 +21,6 @@ logs
 
 /tests/
 
-tests/
-
 # Misc
 .DS_Store
 .fleet
