@@ -36,7 +36,7 @@ const contentClass = computed(() => ({
     <div class="user-main">
       <HeaderBar :title="pageTitle" class="user-header" />
 
-      <main :class="contentClass">
+      <main class="user-content" :class="contentClass">
         <slot />
       </main>
     </div>

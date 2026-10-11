@@ -42,6 +42,11 @@ withDefaults(
 .previewable-side,
 .details-side {
     min-width: 0;
+    min-height: 0;
+}
+
+.details-side {
+    overflow: auto;
 }
 
 @media (max-width: 900px) {

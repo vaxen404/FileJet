@@ -126,7 +126,6 @@ watch([searchQuery, sortMode, viewMode], () => {
                 />
 
                 <div class="toolbar-actions">
-                    <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
 
                     <UploadButton
@@ -135,6 +134,11 @@ watch([searchQuery, sortMode, viewMode], () => {
                         @folder="handleFolders"
                     />
                 </div>
+            </div>
+
+            <div class="folders-subtoolbar">
+                <
+                <SortDropdown v-model="sortMode" />
             </div>
 
             <div v-if="selectedFolders.length" class="selection-toolbar" role="group" aria-label="Selected folders">
@@ -358,25 +362,21 @@ watch([searchQuery, sortMode, viewMode], () => {
 
 .folders-toolbar {
     display: flex;
+    flex-direction: row;
+
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 0.875rem;
-}
 
-.folders-toolbar :deep(.search-box) {
-    flex: 1 1 18rem;
-    min-width: 0;
-    max-width: 32rem;
-    box-sizing: border-box;
+    margin-bottom: 0.875rem;
 }
 
 .toolbar-actions {
     display: flex;
+    flex-direction: row;
+
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+
+    gap: 1rem;
 }
 
 .table-scroll {
@@ -657,6 +657,12 @@ watch([searchQuery, sortMode, viewMode], () => {
     font-size: 0.75rem;
 }
 
+.folders-subtoolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
 .selection-toolbar {
     display: flex;
     align-items: center;
@@ -835,9 +841,20 @@ watch([searchQuery, sortMode, viewMode], () => {
 
 
 @media (max-width: 800px) {
+    .folders-toolbar {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
     .folders-toolbar :deep(.search-box) {
-        flex-basis: 100%;
-        max-width: none;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .toolbar-actions {
+        flex-wrap: wrap;
+        gap: 0.75rem;
     }
 }
 </style>

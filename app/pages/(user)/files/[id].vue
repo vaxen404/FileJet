@@ -406,7 +406,7 @@ onMounted(async () => {
                 </span>
             </div>
 
-            <DetailsView :previewable="isPreviewable">
+            <DetailsView class="file-preview" :previewable="isPreviewable">
                 <template #preview>
                     <div class="preview-card">
                         <div class="preview-header">
@@ -424,7 +424,7 @@ onMounted(async () => {
                             <span v-else>{{ file.name }}</span>
                         </div>
 
-                        <div class="preview-content">
+                        <div class="preview-content" :class="{ 'text-preview': isText }">
                             <img
                                 v-if="isImage"
                                 :src="`/api/files/preview?fileId=${file.id}`"
@@ -521,6 +521,14 @@ onMounted(async () => {
     width: 100%;
     height: 100%;
     min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.file-preview {
+    flex: 1;
+    min-height: 0;
 }
 
 .file-details {
@@ -547,6 +555,7 @@ onMounted(async () => {
 
 .preview-navigation {
     width: 100%;
+    flex-shrink: 0;
     margin-bottom: 1rem;
     padding: 0.9rem 1.2rem;
     background: #1a1a1d;
@@ -701,7 +710,8 @@ onMounted(async () => {
 
 .preview-card {
     height: 100%;
-    min-height: 36rem;
+    min-height: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     background: #1a1a1d;
@@ -711,6 +721,7 @@ onMounted(async () => {
 }
 
 .preview-header {
+    flex-shrink: 0;
     padding: 1rem 1.2rem;
     color: #fff;
     border-bottom: 1px solid #29292e;
@@ -742,13 +753,17 @@ onMounted(async () => {
 
 .preview-content pre {
     width: 100%;
-    height: 100%;
     margin: 0;
     color: #d5d5da;
     white-space: pre-wrap;
     word-break: break-word;
     font-family: monospace;
     font-size: 0.85rem;
+}
+
+.preview-content.text-preview {
+    display: block;
+    overscroll-behavior: contain;
 }
 
 .preview-content iframe {
@@ -826,6 +841,21 @@ onMounted(async () => {
 
 .name-input.active:focus {
     border-color: #5965ed;
+}
+
+@media (max-width: 900px) {
+    .file-page {
+        height: auto;
+        min-height: 100%;
+    }
+
+    .file-preview {
+        flex: none;
+    }
+
+    .preview-card {
+        height: 36rem;
+    }
 }
 
 @media (max-width: 800px) {

@@ -238,22 +238,10 @@ export const useFileActions = () => {
         }
     }
 
-    const downloadFile = async (fileId: string) => {
-        const url = `/api/files/download?fileId=${encodeURIComponent(fileId)}`
-
-        try {
-            await $fetch(url, { method: 'HEAD', retry: 0 })
-        } catch (err: any) {
-            if (err.statusCode === 404 || err.status === 404) {
-                throw new Error('File not found in storage. Please upload it again.')
-            }
-
-            throw err
-        }
-
+    const downloadFile = (fileId: string) => {
         const link = document.createElement('a')
 
-        link.href = url
+        link.href = `/api/files/download?fileId=${encodeURIComponent(fileId)}`
         link.download = ''
 
         document.body.appendChild(link)
