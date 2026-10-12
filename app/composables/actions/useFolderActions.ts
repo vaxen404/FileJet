@@ -6,8 +6,8 @@ export const useFolderActions = () => {
 
     const isLoading = computed(() => activeRequests.value > 0)
     const isUploading = computed(() => activeUploads.value > 0)
-    const isDeleting = computed(() => activeDeletes.value > 0)
-    const uploadProgress = computed(() => {
+    const isDelete = computed(() => activeDeletes.value > 0)
+    const uploadProgres = computed(() => {
         let loaded = 0
         let total = 0
 
@@ -29,8 +29,8 @@ export const useFolderActions = () => {
         activeRequests.value = Math.max(0, activeRequests.value - 1)
     }
 
-    const uploadFolders = async (
-        folder: FileSystemDirectoryHandle,
+    const uploadFiles = async (
+        files: FileList | File[],
         onSuccess?: () => Promise<void>
     ) => {
         const uploadId = Symbol()
@@ -46,26 +46,9 @@ export const useFolderActions = () => {
         try {
             const formData = new FormData()
 
-            let fileCount = 0
-
-            const appendDirectory = async (directory: FileSystemDirectoryHandle, path: string): Promise<void> => {
-                for await (const entry of directory.values()) {
-                    const relativePath = `${path}/${entry.name}`
-
-                    if (entry.kind === 'directory') {
-                        await appendDirectory(entry, relativePath)
-                    } else {
-                        const file = await entry.getFile()
-                        formData.append('files', file, file.name)
-                        formData.append('paths', relativePath)
-                        fileCount++
-                    }
-                }
-            }
-
-            await appendDirectory(folder, folder.name)
-
-            if (!fileCount) throw new Error('The selected folder contains no files.')
+            Array.from(files).forEach((file) => {
+                formData.append('files', file)
+            })
 
             await new Promise<void>((resolve, reject) => {
                 const xhr = new XMLHttpRequest()
@@ -117,11 +100,11 @@ export const useFolderActions = () => {
 
             activeUploads.value--
             if (!activeUploads.value) uploads.clear()
-            stopLoading()
+                stopLoading()
         }
     }
 
-    const deleteFolder = async (folderId: string, onSuccess?: () => Promise<void>) => {
+    const deleteFile = async (folderId: string, onSuccess?: () => Promise<void>) => {
         activeDeletes.value++
         startLoading()
 
@@ -139,12 +122,10 @@ export const useFolderActions = () => {
         }
     }
 
-    return {
-        isLoading,
-        isUploading,
-        isDeleting,
-        uploadProgress,
-        uploadFolders,
-        deleteFolder
+    const deleteFiles = async (folderIds: string[]) => {
+        const uniqueIds = [...new Set(folderIds)]
+
+        if (!uniqueIds.length) return { success: true, deleteIds: [], failedIds: [] }
+        
     }
 }
