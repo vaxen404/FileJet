@@ -24,7 +24,6 @@ export default defineEventHandler(async (event) => {
             !isUuid(body.folderId)
         ) {
             throwError(400, 'Invalid folder ID.')
-            return
         }
 
         const folder = await prisma.folders.findFirst({

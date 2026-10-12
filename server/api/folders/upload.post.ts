@@ -18,7 +18,6 @@ export default defineEventHandler(async (event) => {
 
         if (!session) {
             throwError(401, 'You need to be logged in.')
-            return
         }
 
         enforceRateLimit(
@@ -43,7 +42,6 @@ export default defineEventHandler(async (event) => {
 
         if (!files.length || files.length !== paths.length) {
             throwError(400, 'Invalid folder upload.')
-            return
         }
 
         const user = await prisma.users.findUnique({
@@ -58,7 +56,6 @@ export default defineEventHandler(async (event) => {
 
         if (!user) {
             throwError(401, 'Invalid session.')
-            return
         }
 
         const totalSize = files.reduce(
@@ -72,7 +69,6 @@ export default defineEventHandler(async (event) => {
 
         if (BigInt(totalSize) > remainingStorage) {
             throwError(400, 'Not enough storage space.')
-            return
         }
 
         const validatedFiles: {
@@ -87,7 +83,6 @@ export default defineEventHandler(async (event) => {
 
             if (!part || !relativePath) {
                 throwError(400, 'Invalid folder path.')
-                return
             }
 
             const segments = relativePath
@@ -106,14 +101,12 @@ export default defineEventHandler(async (event) => {
                 )
             ) {
                 throwError(400, 'Invalid folder path.')
-                return
             }
 
             const fileName = segments.pop()
 
             if (!fileName) {
                 throwError(400, 'Invalid filename.')
-                return
             }
 
             validatedFiles.push({
@@ -184,7 +177,6 @@ export default defineEventHandler(async (event) => {
 
             if (!parentId) {
                 throwError(400, 'Invalid folder.')
-                throw new Error('Invalid folder.')
             }
 
             return parentId
