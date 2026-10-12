@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 const { openToast } = useToast()
+const { uploadFolders } = useFolderActions()
 
 const { folders, favorites, pending, error, fetchAll } = useUser()
 type FolderItem = (typeof folders.value)[number]
@@ -55,8 +56,13 @@ const { sortedItems: sortedFolders } = useSort(
     filteredFolders, sortMode, folder => folder.name, folder => folder.created_at
 )
 
-const handleFolders = (folder: FileSystemDirectoryHandle) => {
-    console.log('Upload folder:', folder)
+const handleFolders = async (folder: FileSystemDirectoryHandle) => {
+    try {
+        await uploadFolders(folder, fetchAll)
+        openToast('Folder uploaded successfully.', 'success')
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Folder upload failed.', 'error')
+    }
 }
 
 const openFolder = (folder: FolderItem) => {
@@ -137,7 +143,6 @@ watch([searchQuery, sortMode, viewMode], () => {
             </div>
 
             <div class="folders-subtoolbar">
-                <
                 <SortDropdown v-model="sortMode" />
             </div>
 

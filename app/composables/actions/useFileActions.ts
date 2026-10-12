@@ -1,4 +1,4 @@
-
+ { }
 import { canCopyFile } from '~/utils/file'
 
 export const useFileActions = () => {

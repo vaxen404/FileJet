@@ -23,11 +23,7 @@ export default defineEventHandler(async (event) => {
 
         const { fileId } = body
 
-        if (typeof fileId !== 'string') {
-            throwError(400, 'Invalid file ID.')
-        }
-
-        if (!isUuid(fileId)) {
+        if (typeof fileId !== 'string' || !isUuid(fileId)) {
             throwError(400, 'Invalid file ID.')
         }
 

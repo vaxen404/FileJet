@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
         const session = getAuthSession(event)
 
         if (!session) {
-            throwError(401, 'Oturum açmanız gerek.')
+            throwError(401, 'You need to be logged in.')
         }
 
         enforceRateLimit(event, `files-upload:${session.userId}`, 10, 60 * 1000 )
@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
         const remainingStorage = storageLimit - storageUsed
 
         if (totalUploadSize > remainingStorage) {
-            throwError(400, 'Yeterli depolama alanınız yok.')
+            throwError(400, 'Not enough storage space.')
         }
 
         const uploadedFiles = []
@@ -107,6 +107,6 @@ export default defineEventHandler(async (event) => {
     } catch (err: any) {
         if (err.statusCode) throw err
 
-        throwError(500, 'Dosya yüklenirken bilinmeyen bir hata oluştu!')
+        throwError(500, 'An unknown error occurred while uploading the file.')
     }
 })
