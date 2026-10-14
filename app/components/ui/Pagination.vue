@@ -1,3 +1,51 @@
+<template>
+    <div
+        v-if="totalPages > 0"
+        class="pagination"
+        :class="{ 'grid-pagination': viewMode === 'grid' }"
+    >
+        <button
+            type="button"
+            class="page-button"
+            :disabled="modelValue === 1"
+            @click="previousPage"
+        >
+            <Icon name="solar:alt-arrow-left-linear" />
+        </button>
+
+        <template
+            v-for="(page, index) in visiblePages"
+            :key="index"
+        >
+            <span
+                v-if="page === '...'"
+                class="page-dots"
+            >
+                ...
+            </span>
+
+            <button
+                v-else
+                type="button"
+                class="page-button"
+                :class="{ active: modelValue === page }"
+                @click="goToPage(Number(page))"
+            >
+                {{ page }}
+            </button>
+        </template>
+
+        <button
+            type="button"
+            class="page-button"
+            :disabled="modelValue === totalPages"
+            @click="nextPage"
+        >
+            <Icon name="solar:alt-arrow-right-linear" />
+        </button>
+    </div>
+</template>
+
 <script setup lang="ts">
 const props = withDefaults(
     defineProps<{
@@ -55,54 +103,6 @@ const goToPage = (page: number) => {
     emit('update:modelValue', page)
 }
 </script>
-
-<template>
-    <div
-        v-if="totalPages > 0"
-        class="pagination"
-        :class="{ 'grid-pagination': viewMode === 'grid' }"
-    >
-        <button
-            type="button"
-            class="page-button"
-            :disabled="modelValue === 1"
-            @click="previousPage"
-        >
-            <Icon name="solar:alt-arrow-left-linear" />
-        </button>
-
-        <template
-            v-for="(page, index) in visiblePages"
-            :key="index"
-        >
-            <span
-                v-if="page === '...'"
-                class="page-dots"
-            >
-                ...
-            </span>
-
-            <button
-                v-else
-                type="button"
-                class="page-button"
-                :class="{ active: modelValue === page }"
-                @click="goToPage(Number(page))"
-            >
-                {{ page }}
-            </button>
-        </template>
-
-        <button
-            type="button"
-            class="page-button"
-            :disabled="modelValue === totalPages"
-            @click="nextPage"
-        >
-            <Icon name="solar:alt-arrow-right-linear" />
-        </button>
-    </div>
-</template>
 
 <style scoped>
 .pagination {

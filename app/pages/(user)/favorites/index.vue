@@ -1,197 +1,3 @@
-<script setup lang="ts">
-definePageMeta({
-    middleware: 'auth',
-    layout: 'user'
-})
-
-import {
-    getItemIcon,
-    getItemName,
-    getItemType,
-    getItemId,
-    getItemActions,
-    formatTime
-} from '~/utils/favorite'
-
-const { toastMessage, toastType, showToast, openToast } = useToast()
-
-const { addFavorite, removeFavorite } = useFavoriteActions()
-
-const { renameFile, downloadFile } = useFileActions()
-
-const { favorites, error, fetchAll } = useUser()
-
-await fetchAll()
-
-if (error.value) {
-    openToast(error.value, 'error')
-}
-
-const searchQuery = ref('')
-const viewMode = ref<'list' | 'grid'>('list')
-const activeCategory = ref('All')
-
-const filteredFavorites = computed(() => {
-    return favorites.value.filter(item => {
-
-        const itemType = getItemType(item)
-        const matchesCategory =
-            activeCategory.value === 'All' ||
-            activeCategory.value === `${itemType.charAt(0).toUpperCase()}${itemType.slice(1)}s`
-        
-        const matchesSearch =
-            getItemName(item)
-            .toLowerCase()
-            .includes(searchQuery.value.toLowerCase())
-
-        return matchesCategory && matchesSearch
-    })
-})
-
-const sortMode = ref<
-    'newest' |
-    'oldest' |
-    'name-asc' |
-    'name-desc'
->('newest')
-
-const { sortedItems: sortedFavorites } = useSort(
-    filteredFavorites, sortMode, item => getItemName(item), item => item.created_at
-)
-
-const handleRemove = async (item: any) => {
-    try {
-        const type = getItemType(item)
-        const itemId = getItemId(item)
-
-        await removeFavorite(itemId, type)
-        await fetchAll()
-
-        openToast('Removed from favorites.', 'success')
-    } catch (err: any) {
-        openToast(
-            err.data?.message || err.message || 'Could not remove from favorites.',
-            'error'
-        )
-    }
-}
-
-const editingItemId = ref<string | null>(null)
-const editingItemName = ref('')
-
-const startRename = async (item: any) => {
-    editingItemId.value = item.id
-    editingItemName.value = getItemName(item)
-    
-    await nextTick()
-
-    const input = document.querySelector(
-        `[data-file-id="${item.id}"]`
-    ) as HTMLInputElement | null
-
-    input?.focus()
-    input?.select()
-}
-
-const renameItem = async (
-    itemId: string,
-    itemType: 'file' | 'folder' | 'note',
-    newName: string
-) => {
-    if (itemType === 'file') {
-        await renameFile(itemId, newName)
-        return
-    }
-
-    // if (itemType === 'folder') {
-    //     await renameFolder(itemId, newName)
-    //     return
-    // }
-
-    // await renameNote(itemId, newName)
-}
-
-const saveRename = async (item: any) => {
-    const newName = editingItemName.value.trim()
-
-    if (!newName || newName === getItemName(item)) {
-        editingItemId.value = null
-        return
-    }
-
-    try {
-        const type = getItemType(item)
-        const itemId = getItemId(item)
-
-        await renameItem(itemId, type, newName)
-        await fetchAll()
-
-        editingItemId.value = null
-
-        openToast('Item renamed successfully', 'success')
-    } catch (err: any) {
-        openToast(
-            err.data?.message || err.message || 'Item could not be renamed.',
-            'error'
-        )
-    }
-}
-
-const handleDownload = async (item: any) => {
-    const type = getItemType(item)
-    const itemId = getItemId(item)
-
-    if (type === 'file') {
-        try {
-            await downloadFile(itemId)
-        } catch (err: any) {
-            openToast(err.data?.message || err.message || 'File could not be downloaded.', 'error')
-        }
-        return
-    }
-
-    // if (type === 'note') {
-    //     downloadNote(itemId)
-    //     return
-    // }
-
-    // if (type === 'folder') {
-    //     downloadFolder(itemId)
-    //     return
-    // }
-}
-
-const itemsPerPage = computed(() => {
-    return viewMode.value === 'list' ? 12 : 20
-})
-
-const { currentPage, totalPages, paginatedItems } = usePagination(
-    sortedFavorites,
-    itemsPerPage
-)
-
-const { selectedItems: selectedFavorites, allSelected, toggleSelectAll } = useSelection(paginatedItems) 
-
-type FavoriteResource = (typeof favorites.value)[number] & {
-    files?: { size?: number | string | null } | null
-    notes?: { size?: number | string | null } | null
-}
-
-const getItemSize = (item: FavoriteResource) => {
-    const size = item.file_id
-        ? item.files?.size
-        : item.note_id
-            ? item.notes?.size
-            : null
-
-    return size == null ? '-' : formatFileSize(size)
-}
-
-watch([searchQuery, activeCategory, viewMode, sortMode], () => {
-    currentPage.value = 1
-})
-</script>
-
 <template>
     <div class="favorites-page">
         <div class="favorites-header">
@@ -402,6 +208,200 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
         />
     </div>
 </template>
+
+<script setup lang="ts">
+definePageMeta({
+    middleware: 'auth',
+    layout: 'user'
+})
+
+import {
+    getItemIcon,
+    getItemName,
+    getItemType,
+    getItemId,
+    getItemActions,
+    formatTime
+} from '~/utils/favorite'
+
+const { toastMessage, toastType, showToast, openToast } = useToast()
+
+const { addFavorite, removeFavorite } = useFavoriteActions()
+
+const { renameFile, downloadFile } = useFileActions()
+
+const { favorites, error, fetchAll } = useUser()
+
+await fetchAll()
+
+if (error.value) {
+    openToast(error.value, 'error')
+}
+
+const searchQuery = ref('')
+const viewMode = ref<'list' | 'grid'>('list')
+const activeCategory = ref('All')
+
+const filteredFavorites = computed(() => {
+    return favorites.value.filter(item => {
+
+        const itemType = getItemType(item)
+        const matchesCategory =
+            activeCategory.value === 'All' ||
+            activeCategory.value === `${itemType.charAt(0).toUpperCase()}${itemType.slice(1)}s`
+        
+        const matchesSearch =
+            getItemName(item)
+            .toLowerCase()
+            .includes(searchQuery.value.toLowerCase())
+
+        return matchesCategory && matchesSearch
+    })
+})
+
+const sortMode = ref<
+    'newest' |
+    'oldest' |
+    'name-asc' |
+    'name-desc'
+>('newest')
+
+const { sortedItems: sortedFavorites } = useSort(
+    filteredFavorites, sortMode, item => getItemName(item), item => item.created_at
+)
+
+const handleRemove = async (item: any) => {
+    try {
+        const type = getItemType(item)
+        const itemId = getItemId(item)
+
+        await removeFavorite(itemId, type)
+        await fetchAll()
+
+        openToast('Removed from favorites.', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || err.message || 'Could not remove from favorites.',
+            'error'
+        )
+    }
+}
+
+const editingItemId = ref<string | null>(null)
+const editingItemName = ref('')
+
+const startRename = async (item: any) => {
+    editingItemId.value = item.id
+    editingItemName.value = getItemName(item)
+    
+    await nextTick()
+
+    const input = document.querySelector(
+        `[data-file-id="${item.id}"]`
+    ) as HTMLInputElement | null
+
+    input?.focus()
+    input?.select()
+}
+
+const renameItem = async (
+    itemId: string,
+    itemType: 'file' | 'folder' | 'note',
+    newName: string
+) => {
+    if (itemType === 'file') {
+        await renameFile(itemId, newName)
+        return
+    }
+
+    // if (itemType === 'folder') {
+    //     await renameFolder(itemId, newName)
+    //     return
+    // }
+
+    // await renameNote(itemId, newName)
+}
+
+const saveRename = async (item: any) => {
+    const newName = editingItemName.value.trim()
+
+    if (!newName || newName === getItemName(item)) {
+        editingItemId.value = null
+        return
+    }
+
+    try {
+        const type = getItemType(item)
+        const itemId = getItemId(item)
+
+        await renameItem(itemId, type, newName)
+        await fetchAll()
+
+        editingItemId.value = null
+
+        openToast('Item renamed successfully', 'success')
+    } catch (err: any) {
+        openToast(
+            err.data?.message || err.message || 'Item could not be renamed.',
+            'error'
+        )
+    }
+}
+
+const handleDownload = async (item: any) => {
+    const type = getItemType(item)
+    const itemId = getItemId(item)
+
+    if (type === 'file') {
+        try {
+            await downloadFile(itemId)
+        } catch (err: any) {
+            openToast(err.data?.message || err.message || 'File could not be downloaded.', 'error')
+        }
+        return
+    }
+
+    // if (type === 'note') {
+    //     downloadNote(itemId)
+    //     return
+    // }
+
+    // if (type === 'folder') {
+    //     downloadFolder(itemId)
+    //     return
+    // }
+}
+
+const itemsPerPage = computed(() => {
+    return viewMode.value === 'list' ? 12 : 20
+})
+
+const { currentPage, totalPages, paginatedItems } = usePagination(
+    sortedFavorites,
+    itemsPerPage
+)
+
+const { selectedItems: selectedFavorites, allSelected, toggleSelectAll } = useSelection(paginatedItems) 
+
+type FavoriteResource = (typeof favorites.value)[number] & {
+    files?: { size?: number | string | null } | null
+    notes?: { size?: number | string | null } | null
+}
+
+const getItemSize = (item: FavoriteResource) => {
+    const size = item.file_id
+        ? item.files?.size
+        : item.note_id
+            ? item.notes?.size
+            : null
+
+    return size == null ? '-' : formatFileSize(size)
+}
+
+watch([searchQuery, activeCategory, viewMode, sortMode], () => {
+    currentPage.value = 1
+})
+</script>
 
 <style scoped>
 .favorites-page {

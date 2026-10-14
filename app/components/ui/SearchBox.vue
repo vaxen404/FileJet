@@ -1,14 +1,3 @@
-<script setup lang="ts">
-defineProps<{
-    modelValue: string
-    placeholder?: string
-}>()
-
-const emit = defineEmits<{
-    'update:modelValue': [value: string]
-}>()
-</script>
-
 <template>
     <div class="search-box">
         <Icon name="lucide:search" class="search-icon" />
@@ -21,6 +10,17 @@ const emit = defineEmits<{
         />
     </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+    modelValue: string
+    placeholder?: string
+}>()
+
+const emit = defineEmits<{
+    'update:modelValue': [value: string]
+}>()
+</script>
 
 <style scoped>
 .search-box {

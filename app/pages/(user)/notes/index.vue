@@ -1,3 +1,221 @@
+<template>
+    <div class="notes-page">
+        <div class="notes-header">
+            <div class="notes-toolbar">
+                <SearchBox 
+                    v-model="searchQuery"
+                    placeholder="Search notes..."
+                />
+
+                <div class="toolbar-actions">
+                    <SortDropdown v-model="sortMode" />
+                    <ViewSwitcher v-model="viewMode" />
+                    <UploadButton text="Upload" mode="file" @files="handleNoteUpload"/>
+
+
+                    <button
+                        type="button"
+                        class="new-note-button"
+                        @click="createNote"
+                    >
+                        <Icon name="solar:add-circle-bold" />
+                        New Note
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="selectedNotes.length" class="selection-toolbar" role="group" aria-label="Selected notes">
+                <span role="status" aria-live="polite">{{ selectedNotes.length }} selected</span>
+
+                <div class="selection-actions">
+                    <button type="button" class="selection-btn" :disabled="pending" @click="selectedNotes = []">
+                        Clear
+                    </button>
+                    <button type="button" class="selection-btn delete-selected-btn" :disabled="pending" @click="handleDeleteSelected">
+                        <Icon name="solar:trash-bin-trash-bold" />
+                        Delete Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <DataView
+            :view-mode="viewMode"
+            :is-dragging="isDragging"
+            :is-loading="pending"
+            drop-text="Drop notes to upload"
+            @dragover="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop="handleDrop"
+        >
+            <template #loading>
+                <div class="loading-state" role="status" aria-live="polite">
+                    <span class="loading-spinner" aria-hidden="true" />
+                    <span>Loading notes...</span>
+                </div>
+            </template>
+
+            <template v-if="!pending && filteredNotes.length === 0" #empty>
+                <div class="empty-state">
+                    <Icon name="solar:notebook-linear" size="2.5rem" class="empty-state-icon" />
+                    <strong>{{ notes.length ? 'No matching notes' : 'No notes yet' }}</strong>
+                    <span class="empty-state-description">
+                        {{ notes.length ? 'Try a different search.' : 'Create your first note to get started.' }}
+                    </span>
+                </div>
+            </template>
+
+            <template #list>
+                <div class="table-scroll">
+                    <table class="notes-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input 
+                                        type="checkbox"
+                                        class="note-checkbox"
+                                        :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="pending"
+                                        aria-label="Select all notes on this page"
+                                        @change="toggleSelectAll"
+                                    >
+                                </th>
+
+                                <th>
+                                    <div class="name-header">
+                                        Name
+                                        <Icon
+                                            name="solar:sort-vertical-linear"
+                                            class="sort-icon"
+                                        />
+                                    </div>
+                                </th>
+
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr
+                                v-for="note in paginatedNotes"
+                                :key="note.id"
+                                :class="{ selected: selectedNotes.includes(note.id) }"
+                                @click="openNote(note)"
+                            >
+                                <td @click.stop>
+                                    <input 
+                                        v-model="selectedNotes"
+                                        type="checkbox"
+                                        class="note-checkbox"
+                                        :value="note.id"
+                                        :disabled="pending"
+                                        :aria-label="`Select ${note.title}`"
+                                    >
+                                </td>
+
+                                <td>
+                                    <div class="note-name">
+                                        <div class="note-icon">
+                                            <Icon name="solar:notebook-bold" />
+                                        </div>
+
+                                        <div class="note-info">
+                                            <strong :title="note.title">{{ note.title }}</strong>
+                                            <span>
+                                                {{ formatFileSize(note.size) }} • {{ formatFileTime(note.created_at) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>Note</td>
+                                <td>{{ formatFileSize(note.size) }}</td>
+                                <td>{{ formatFileTime(note.updated_at) }}</td>
+
+                                <td @click.stop>
+                                    <ItemMenu
+                                        type="note"
+                                        :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']"
+                                        :is-favorite="isNoteFavorite(note.id)"
+                                        @open="openNote(note)"
+                                        @edit="editNote(note)"
+                                        @rename="renameNote(note)"
+                                        @download="downloadNote(note)"
+                                        @favorite="favoriteNote(note)"
+                                        @delete="deleteNote(note)"
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <template #grid>
+                <div
+                    v-for="note in paginatedNotes"
+                    :key="note.id"
+                    class="note-card"
+                    :class="{ selected: selectedNotes.includes(note.id) }"
+                    @click="openNote(note)"
+                >
+                    <div class="note-card-top">
+                        <div class="note-card-icon">
+                            <Icon name="solar:notebook-bold" />
+                        </div>
+
+                        <div class="note-card-actions" @click.stop>
+                            <label class="note-card-select">
+                                <input
+                                    v-model="selectedNotes"
+                                    type="checkbox"
+                                    class="note-checkbox"
+                                    :value="note.id"
+                                    :disabled="pending"
+                                    :aria-label="`Select ${note.title}`"
+                                >
+                            </label>
+
+                            <ItemMenu
+                                type="note"
+                                :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']"
+                                :is-favorite="isNoteFavorite(note.id)"
+                                @open="openNote(note)"
+                                @edit="editNote(note)"
+                                @rename="renameNote(note)"
+                                @download="downloadNote(note)"
+                                @favorite="favoriteNote(note)"
+                                @delete="deleteNote(note)"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="note-card-info">
+                        <strong :title="note.title">{{ note.title }}</strong>
+                        <span>{{ note.content || 'Empty note' }}</span>
+                    </div>
+
+                    <div class="note-card-bottom">
+                        <span>{{ formatFileSize(note.size) }}</span>
+                        <span>{{ formatFileTime(note.created_at) }}</span>
+                    </div>
+                </div>
+            </template>
+        </DataView>
+        
+
+        <Pagination
+            v-model="currentPage"
+            :total-pages="totalPages"
+            :view-mode="viewMode"
+        />
+    </div>
+</template>
+
 <script setup lang="ts">
 import { formatFileSize, formatFileTime } from '~/utils/file'
 
@@ -105,224 +323,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 </script>
-
-<template>
-    <div class="notes-page">
-        <div class="notes-header">
-            <div class="notes-toolbar">
-                <SearchBox 
-                    v-model="searchQuery"
-                    placeholder="Search notes..."
-                />
-
-                <div class="toolbar-actions">
-                    <SortDropdown v-model="sortMode" />
-                    <ViewSwitcher v-model="viewMode" />
-                    <UploadButton text="Upload" mode="file" @files="handleNoteUpload"/>
-
-
-                    <button
-                        type="button"
-                        class="new-note-button"
-                        @click="createNote"
-                    >
-                        <Icon name="solar:add-circle-bold" />
-                        New Note
-                    </button>
-                </div>
-            </div>
-
-            <div v-if="selectedNotes.length" class="selection-toolbar" role="group" aria-label="Selected notes">
-                <span role="status" aria-live="polite">{{ selectedNotes.length }} selected</span>
-
-                <div class="selection-actions">
-                    <button type="button" class="selection-btn" :disabled="pending" @click="selectedNotes = []">
-                        Clear
-                    </button>
-                    <button type="button" class="selection-btn delete-selected-btn" :disabled="pending" @click="handleDeleteSelected">
-                        <Icon name="solar:trash-bin-trash-bold" />
-                        Delete Selected
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <DataView
-            :view-mode="viewMode"
-            :is-dragging="isDragging"
-            :is-loading="pending"
-            drop-text="Drop notes to upload"
-            @dragover="isDragging = true"
-            @dragleave="isDragging = false"
-            @drop="handleDrop"
-        >
-            <template #loading>
-                <div class="loading-state" role="status" aria-live="polite">
-                    <span class="loading-spinner" aria-hidden="true" />
-                    <span>Loading notes...</span>
-                </div>
-            </template>
-
-            <template v-if="!pending && filteredNotes.length === 0" #empty>
-                <div class="empty-state">
-                    <Icon name="solar:notebook-linear" size="2.5rem" class="empty-state-icon" />
-                    <strong>{{ notes.length ? 'No matching notes' : 'No notes yet' }}</strong>
-                    <span class="empty-state-description">
-                        {{ notes.length ? 'Try a different search.' : 'Create your first note to get started.' }}
-                    </span>
-                </div>
-            </template>
-
-            <template #list>
-                <div class="table-scroll">
-                    <table class="notes-table">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <input 
-                                        type="checkbox"
-                                        class="note-checkbox"
-                                        :checked="allSelected"
-                                        :indeterminate="partiallySelected"
-                                        :disabled="pending"
-                                        aria-label="Select all notes on this page"
-                                        @change="toggleSelectAll"
-                                    >
-                                </th>
-
-                                <th>
-                                    <div class="name-header">
-                                        Name
-                                        <Icon
-                                            name="solar:sort-vertical-linear"
-                                            class="sort-icon"
-                                        />
-                                    </div>
-                                </th>
-
-                                <th>Type</th>
-                                <th>Size</th>
-                                <th>Modified</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr
-                                v-for="note in paginatedNotes"
-                                :key="note.id"
-                                :class="{ selected: selectedNotes.includes(note.id) }"
-                                @dblclick="openNote(note)"
-                            >
-                                <td @dblclick.stop>
-                                    <input 
-                                        v-model="selectedNotes"
-                                        type="checkbox"
-                                        class="note-checkbox"
-                                        :value="note.id"
-                                        :disabled="pending"
-                                        :aria-label="`Select ${note.title}`"
-                                    >
-                                </td>
-
-                                <td>
-                                    <div class="note-name">
-                                        <div class="note-icon">
-                                            <Icon name="solar:notebook-bold" />
-                                        </div>
-
-                                        <div class="note-info">
-                                            <strong :title="note.title">{{ note.title }}</strong>
-                                            <span>
-                                                {{ formatFileSize(note.size) }} • {{ formatFileTime(note.created_at) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td>Note</td>
-                                <td>{{ formatFileSize(note.size) }}</td>
-                                <td>{{ formatFileTime(note.updated_at) }}</td>
-
-                                <td @dblclick.stop>
-                                    <ItemMenu
-                                        type="note"
-                                        :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']"
-                                        :is-favorite="isNoteFavorite(note.id)"
-                                        @open="openNote(note)"
-                                        @edit="editNote(note)"
-                                        @rename="renameNote(note)"
-                                        @download="downloadNote(note)"
-                                        @favorite="favoriteNote(note)"
-                                        @delete="deleteNote(note)"
-                                    />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
-
-            <template #grid>
-                <div
-                    v-for="note in paginatedNotes"
-                    :key="note.id"
-                    class="note-card"
-                    :class="{ selected: selectedNotes.includes(note.id) }"
-                    @dblclick="openNote(note)"
-                >
-                    <div class="note-card-top">
-                        <div class="note-card-icon">
-                            <Icon name="solar:notebook-bold" />
-                        </div>
-
-                        <div class="note-card-actions" @dblclick.stop>
-                            <label class="note-card-select">
-                                <input
-                                    v-model="selectedNotes"
-                                    type="checkbox"
-                                    class="note-checkbox"
-                                    :value="note.id"
-                                    :disabled="pending"
-                                    :aria-label="`Select ${note.title}`"
-                                >
-                            </label>
-
-                            <ItemMenu
-                                type="note"
-                                :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']"
-                                :is-favorite="isNoteFavorite(note.id)"
-                                @open="openNote(note)"
-                                @edit="editNote(note)"
-                                @rename="renameNote(note)"
-                                @download="downloadNote(note)"
-                                @favorite="favoriteNote(note)"
-                                @delete="deleteNote(note)"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="note-card-info">
-                        <strong :title="note.title">{{ note.title }}</strong>
-                        <span>{{ note.content || 'Empty note' }}</span>
-                    </div>
-
-                    <div class="note-card-bottom">
-                        <span>{{ formatFileSize(note.size) }}</span>
-                        <span>{{ formatFileTime(note.created_at) }}</span>
-                    </div>
-                </div>
-            </template>
-        </DataView>
-        
-
-        <Pagination
-            v-model="currentPage"
-            :total-pages="totalPages"
-            :view-mode="viewMode"
-        />
-    </div>
-</template>
 
 <style scoped>
 .notes-page {

@@ -1,3 +1,39 @@
+<template>
+    <div class="login-page">
+        <div class="login-card">
+            <h2>Login</h2>
+
+            <div class="form-group">
+                <label>Username<i>*</i></label>
+                <input type="text" v-model="username">
+            </div>
+            
+            <div class="form-group">
+                <label>Password<i>*</i></label>
+                <div class="input-box">
+                    <input :type=" isView ? 'text' : 'password'" @keyup.enter="handleLogin"  v-model="password">
+                    <button v-if="password.length > 0" @click="isView = !isView" class="password-icon">
+                        <Icon 
+                            :name=" isView ? 'lucide:eye' : 'lucide:eye-closed'"    
+                        />
+                    </button>
+                </div>
+            </div>
+
+            <div class="login-actions">
+                <button @click="handleLogin" class="login-btn">
+                    <Icon name="lucide:lock" />
+                    Login
+                </button>
+
+                <button class="auth-btn">
+                    <Icon name="lucide:fingerprint" />
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
 <script setup lang="ts">
 import { loginSchema } from '~/schemas/auth'
 
@@ -49,42 +85,6 @@ const handleLogin = async () => {
 }
 
 </script>
-
-<template>
-    <div class="login-page">
-        <div class="login-card">
-            <h2>Login</h2>
-
-            <div class="form-group">
-                <label>Username<i>*</i></label>
-                <input type="text" v-model="username">
-            </div>
-            
-            <div class="form-group">
-                <label>Password<i>*</i></label>
-                <div class="input-box">
-                    <input :type=" isView ? 'text' : 'password'" @keyup.enter="handleLogin"  v-model="password">
-                    <button v-if="password.length > 0" @click="isView = !isView" class="password-icon">
-                        <Icon 
-                            :name=" isView ? 'lucide:eye' : 'lucide:eye-closed'"    
-                        />
-                    </button>
-                </div>
-            </div>
-
-            <div class="login-actions">
-                <button @click="handleLogin" class="login-btn">
-                    <Icon name="lucide:lock" />
-                    Login
-                </button>
-
-                <button class="auth-btn">
-                    <Icon name="lucide:fingerprint" />
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
 
 <style>
 * {

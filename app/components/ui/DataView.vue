@@ -1,18 +1,3 @@
-<script setup lang="ts">
-defineProps<{
-    viewMode: 'list' | 'grid'
-    isDragging?: boolean
-    isLoading?: boolean
-    dropText?: string
-}>()
-
-const emit = defineEmits<{
-    dragover: []
-    dragleave: []
-    drop: [event: DragEvent]
-}>()
-</script>
-
 <template>
     <div
         class="data-view"
@@ -52,6 +37,21 @@ const emit = defineEmits<{
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+    viewMode: 'list' | 'grid'
+    isDragging?: boolean
+    isLoading?: boolean
+    dropText?: string
+}>()
+
+const emit = defineEmits<{
+    dragover: []
+    dragleave: []
+    drop: [event: DragEvent]
+}>()
+</script>
 
 <style scoped>
 .data-view {

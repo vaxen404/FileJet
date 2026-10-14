@@ -1,18 +1,3 @@
-<script setup lang="ts">
-defineProps<{
-    show: boolean
-    title: string
-    message: string
-    confirmText?: string
-    cancelText?: string
-}>()
-
-const emit = defineEmits<{
-    confirm: []
-    cancel: []
-}>()
-</script>
-
 <template>
     <Teleport to="body">
         <div
@@ -50,6 +35,21 @@ const emit = defineEmits<{
         </div>
     </Teleport>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+    show: boolean
+    title: string
+    message: string
+    confirmText?: string
+    cancelText?: string
+}>()
+
+const emit = defineEmits<{
+    confirm: []
+    cancel: []
+}>()
+</script>
 
 <style scoped>
 .modal-overlay {

@@ -1,15 +1,3 @@
-<script setup lang="ts">
-withDefaults(
-    defineProps<{
-        options: readonly string[]
-        label?: string
-    }>(),
-    { label: 'Filter items' }
-)
-
-const model = defineModel<string>({ required: true })
-</script>
-
 <template>
     <div class="item-filters" role="group" :aria-label="label">
         <button
@@ -25,6 +13,18 @@ const model = defineModel<string>({ required: true })
         </button>
     </div>
 </template>
+
+<script setup lang="ts">
+withDefaults(
+    defineProps<{
+        options: readonly string[]
+        label?: string
+    }>(),
+    { label: 'Filter items' }
+)
+
+const model = defineModel<string>({ required: true })
+</script>
 
 <style scoped>
 .item-filters {

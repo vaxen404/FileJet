@@ -1,4 +1,151 @@
 
+<template>
+    <div class="shared-page">
+        <div v-if="error" class="shared-error" role="alert">
+            <div class="shared-error-card">
+                <div class="shared-error-icon" aria-hidden="true">
+                    <Icon
+                        :name="error.statusCode === 404 ? 'solar:link-broken-linear' : 'solar:danger-circle-linear'"
+                        size="2.75rem"
+                    />
+                </div>
+
+                <span class="shared-error-code">{{ error.statusCode || 'Error' }}</span>
+
+                <h1>
+                    {{ error.statusCode === 404 ? 'Shared item not found' : 'Unable to load shared item' }}
+                </h1>
+
+                <p>
+                    {{
+                        error.statusCode === 404
+                            ? 'This link may be invalid or no longer available. Ask the sender for a new link.'
+                            : 'Something went wrong while opening this link. Please try again in a moment.'
+                    }}
+                </p>
+            </div>
+        </div>
+
+        <template v-else-if="sharedItem">
+            <div
+                v-if="sharedItem.type === 'file'"
+                class="shared-content"
+                :class="{
+                    'media-content': isImage || isPdf || isVideo,
+                    'image-content': isImage,
+                    'text-content': isText
+                }"
+            >
+                <div
+                    v-if="isImage"
+                    ref="imageStage"
+                    class="image-stage"
+                    :class="{ 'is-expanded': isImageExpanded }"
+                >
+                    <img
+                        class="image-preview"
+                        :src="`/api/shared/${token}/preview`"
+                        :alt="sharedItem.item.name"
+                    >
+
+                    <button
+                        type="button"
+                        class="image-fullscreen-btn"
+                        :aria-label="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
+                        :title="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
+                        :aria-pressed="isImageFullscreen"
+                        @click="toggleImageFullscreen"
+                    >
+                        <Icon
+                            :name="isImageFullscreen ? 'solar:quit-full-screen-linear' : 'solar:full-screen-linear'"
+                            size="1.2rem"
+                        />
+                    </button>
+                </div>
+
+                <template v-else-if="isText">
+                    <div v-if="textPreviewError" class="error-message">
+                        Text preview could not be loaded.
+                    </div>
+
+                    <pre
+                        v-else
+                        class="text-preview"
+                    >{{ textContent }}</pre>
+                </template>
+
+                <iframe
+                    v-else-if="isPdf"
+                    class="pdf-preview"
+                    :src="`/api/shared/${token}/preview`"
+                    :title="itemName"
+                />
+
+                <video
+                    v-else-if="isVideo"
+                    class="video-preview"
+                    :src="`/api/shared/${token}/preview`"
+                    controls
+                    autoplay
+                    muted
+                    playsinline
+                    preload="auto"
+                />
+
+                <div v-else class="download-message">
+                    <div class="download-icon" aria-hidden="true">
+                        <Icon
+                            name="solar:file-bold"
+                            size="3rem"
+                        />
+                    </div>
+
+                    <h2 :title="itemName">{{ itemName }}</h2>
+
+                    <div class="download-status" role="status" aria-live="polite">
+                        <span class="status-dot" aria-hidden="true" />
+                        {{ downloadedToken === token ? 'Download started' : 'Starting download...' }}
+                    </div>
+
+                    <p>
+                        Your file will download automatically.<br>
+                        If it hasn't started, use the button below.
+                    </p>
+
+                    <button
+                        type="button"
+                        class="download-btn"
+                        :disabled="isDownloading"
+                        :aria-busy="isDownloading"
+                        @click="manualDownload"
+                    >
+                        <Icon
+                            name="solar:download-linear"
+                            size="1.2rem"
+                        />
+
+                        Download File
+                    </button>
+                </div>
+            </div>
+
+            <div
+                v-else-if="sharedItem.type === 'note'"
+                class="shared-content text-content"
+            >
+                {{ sharedItem.item.content }}
+            </div>
+
+            <div
+                v-else-if="sharedItem.type === 'folder'"
+                class="shared-content"
+            >
+                Folder
+            </div>
+        </template>
+    </div>
+</template>
+
 <script setup lang="ts">
 import { useEventListener, useFullscreen } from '@vueuse/core'
 
@@ -165,153 +312,6 @@ watch(
     }
 )
 </script>
-
-<template>
-    <div class="shared-page">
-        <div v-if="error" class="shared-error" role="alert">
-            <div class="shared-error-card">
-                <div class="shared-error-icon" aria-hidden="true">
-                    <Icon
-                        :name="error.statusCode === 404 ? 'solar:link-broken-linear' : 'solar:danger-circle-linear'"
-                        size="2.75rem"
-                    />
-                </div>
-
-                <span class="shared-error-code">{{ error.statusCode || 'Error' }}</span>
-
-                <h1>
-                    {{ error.statusCode === 404 ? 'Shared item not found' : 'Unable to load shared item' }}
-                </h1>
-
-                <p>
-                    {{
-                        error.statusCode === 404
-                            ? 'This link may be invalid or no longer available. Ask the sender for a new link.'
-                            : 'Something went wrong while opening this link. Please try again in a moment.'
-                    }}
-                </p>
-            </div>
-        </div>
-
-        <template v-else-if="sharedItem">
-            <div
-                v-if="sharedItem.type === 'file'"
-                class="shared-content"
-                :class="{
-                    'media-content': isImage || isPdf || isVideo,
-                    'image-content': isImage,
-                    'text-content': isText
-                }"
-            >
-                <div
-                    v-if="isImage"
-                    ref="imageStage"
-                    class="image-stage"
-                    :class="{ 'is-expanded': isImageExpanded }"
-                >
-                    <img
-                        class="image-preview"
-                        :src="`/api/shared/${token}/preview`"
-                        :alt="sharedItem.item.name"
-                    >
-
-                    <button
-                        type="button"
-                        class="image-fullscreen-btn"
-                        :aria-label="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
-                        :title="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
-                        :aria-pressed="isImageFullscreen"
-                        @click="toggleImageFullscreen"
-                    >
-                        <Icon
-                            :name="isImageFullscreen ? 'solar:quit-full-screen-linear' : 'solar:full-screen-linear'"
-                            size="1.2rem"
-                        />
-                    </button>
-                </div>
-
-                <template v-else-if="isText">
-                    <div v-if="textPreviewError" class="error-message">
-                        Text preview could not be loaded.
-                    </div>
-
-                    <pre
-                        v-else
-                        class="text-preview"
-                    >{{ textContent }}</pre>
-                </template>
-
-                <iframe
-                    v-else-if="isPdf"
-                    class="pdf-preview"
-                    :src="`/api/shared/${token}/preview`"
-                    :title="itemName"
-                />
-
-                <video
-                    v-else-if="isVideo"
-                    class="video-preview"
-                    :src="`/api/shared/${token}/preview`"
-                    controls
-                    autoplay
-                    muted
-                    playsinline
-                    preload="auto"
-                />
-
-                <div v-else class="download-message">
-                    <div class="download-icon" aria-hidden="true">
-                        <Icon
-                            name="solar:file-bold"
-                            size="3rem"
-                        />
-                    </div>
-
-                    <h2 :title="itemName">{{ itemName }}</h2>
-
-                    <div class="download-status" role="status" aria-live="polite">
-                        <span class="status-dot" aria-hidden="true" />
-                        {{ downloadedToken === token ? 'Download started' : 'Starting download...' }}
-                    </div>
-
-                    <p>
-                        Your file will download automatically.<br>
-                        If it hasn't started, use the button below.
-                    </p>
-
-                    <button
-                        type="button"
-                        class="download-btn"
-                        :disabled="isDownloading"
-                        :aria-busy="isDownloading"
-                        @click="manualDownload"
-                    >
-                        <Icon
-                            name="solar:download-linear"
-                            size="1.2rem"
-                        />
-
-                        Download File
-                    </button>
-                </div>
-            </div>
-
-            <div
-                v-else-if="sharedItem.type === 'note'"
-                class="shared-content text-content"
-            >
-                {{ sharedItem.item.content }}
-            </div>
-
-            <div
-                v-else-if="sharedItem.type === 'folder'"
-                class="shared-content"
-            >
-                Folder
-            </div>
-        </template>
-    </div>
-</template>
 
 <style scoped>
 .shared-page {

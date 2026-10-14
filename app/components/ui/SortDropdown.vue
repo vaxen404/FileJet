@@ -1,3 +1,38 @@
+<template>
+    <div class="sort-dropdown">
+        <button
+            type="button"
+            class="sort-trigger"
+            @click="isOpen = !isOpen"
+        >
+            <Icon name="solar:sort-vertical-linear" />
+
+            <span>{{ currentLabel }}</span>
+
+            <Icon
+                name="solar:alt-arrow-down-linear"
+                class="arrow-icon"
+            />
+        </button>
+
+        <div
+            v-if="isOpen"
+            class="sort-menu"
+        >
+            <button
+                v-for="option in options"
+                :key="option.value"
+                type="button"
+                class="sort-option"
+                :class="{ active: model === option.value }"
+                @click="selectOption(option.value)"
+            >
+                {{ option.label }}
+            </button>
+        </div>
+    </div>
+</template>
+
 <script setup lang="ts">
 const model = defineModel<'newest' | 'oldest' | 'name-asc' | 'name-desc'>({
     default: 'newest'
@@ -35,41 +70,6 @@ const selectOption = (
     isOpen.value = false
 }
 </script>
-
-<template>
-    <div class="sort-dropdown">
-        <button
-            type="button"
-            class="sort-trigger"
-            @click="isOpen = !isOpen"
-        >
-            <Icon name="solar:sort-vertical-linear" />
-
-            <span>{{ currentLabel }}</span>
-
-            <Icon
-                name="solar:alt-arrow-down-linear"
-                class="arrow-icon"
-            />
-        </button>
-
-        <div
-            v-if="isOpen"
-            class="sort-menu"
-        >
-            <button
-                v-for="option in options"
-                :key="option.value"
-                type="button"
-                class="sort-option"
-                :class="{ active: model === option.value }"
-                @click="selectOption(option.value)"
-            >
-                {{ option.label }}
-            </button>
-        </div>
-    </div>
-</template>
 
 <style scoped>
 .sort-dropdown {

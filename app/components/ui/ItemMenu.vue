@@ -1,3 +1,110 @@
+<template>
+    <div ref="menuRef" class="item-menu">
+        <button
+            type="button"
+            class="menu-trigger"
+            aria-label="Actions"
+            :aria-expanded="isOpen"
+            @click="toggleMenu"
+        >
+            <Icon name="solar:menu-dots-bold" />
+        </button>
+
+        <Teleport to="body">
+            <div
+                v-if="isOpen"
+                ref="dropdownRef"
+                class="menu-dropdown"
+                :style="menuPosition"
+            >
+                <button
+                    v-if="hasAction('open')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('open')"
+                >
+                    <Icon
+                        class="menu-item-icon"
+                        :name="type === 'folder'
+                            ? 'solar:folder-open-bold'
+                            : type === 'note'
+                                ? 'solar:notebook-bold'
+                                : 'solar:document-bold'"
+                    />
+
+                    Open
+                </button>
+
+                <button
+                    v-if="hasAction('rename')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('rename')"
+                >
+                    <Icon class="menu-item-icon" name="solar:pen-bold" />
+                    Rename
+                </button>
+
+                <button
+                    v-if="type === 'file' && canCopy && hasAction('copy')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('copy')"
+                >
+                    <Icon class="menu-item-icon" name="solar:copy-bold" />
+                    Copy
+                </button>
+
+                <button
+                    v-if="hasAction('edit')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('edit')"
+                >
+                    <Icon class="menu-item-icon" name="solar:pen-bold" />
+                    Edit
+                </button>
+
+                <button
+                    v-if="hasAction('download')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('download')"
+                >
+                    <Icon class="menu-item-icon" name="solar:download-bold" />
+                    Download
+                </button>
+
+                <button
+                    v-if="hasAction('favorite')"
+                    type="button"
+                    class="menu-item"
+                    @click="handleAction('favorite')"
+                >
+                    <Icon
+                        class="menu-item-icon"
+                        :name="isFavorite
+                            ? 'solar:star-bold'
+                            : 'solar:star-linear'"
+                    />
+
+                    {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
+                </button>
+
+                <button
+                    v-if="hasAction('delete')"
+                    type="button"
+                    class="menu-item danger"
+                    @click="handleAction('delete')"
+                >
+                    <Icon class="menu-item-icon" name="solar:trash-bin-trash-bold" />
+                    Delete
+                </button>
+            </div>
+        </Teleport>
+    </div>
+</template>
+
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core'
 
@@ -181,113 +288,6 @@ onClickOutside(dropdownRef, () => {
     isOpen.value = false
 }, { ignore: [menuRef] })
 </script>
-
-<template>
-    <div ref="menuRef" class="item-menu">
-        <button
-            type="button"
-            class="menu-trigger"
-            aria-label="Actions"
-            :aria-expanded="isOpen"
-            @click="toggleMenu"
-        >
-            <Icon name="solar:menu-dots-bold" />
-        </button>
-
-        <Teleport to="body">
-            <div
-                v-if="isOpen"
-                ref="dropdownRef"
-                class="menu-dropdown"
-                :style="menuPosition"
-            >
-                <button
-                    v-if="hasAction('open')"
-                    type="button"
-                    class="menu-item"
-                    @click="handleAction('open')"
-                >
-                    <Icon
-                        class="menu-item-icon"
-                        :name="type === 'folder'
-                            ? 'solar:folder-open-bold'
-                            : type === 'note'
-                                ? 'solar:notebook-bold'
-                                : 'solar:document-bold'"
-                    />
-
-                    Open
-                </button>
-
-                <button
-                    v-if="hasAction('rename')"
-                    type="button"
-                    class="menu-item"
-                    @click="handleAction('rename')"
-                >
-                    <Icon class="menu-item-icon" name="solar:pen-bold" />
-                    Rename
-                </button>
-
-                <button
-                    v-if="type === 'file' && canCopy && hasAction('copy')"
-                    type="button"
-                    class="menu-item"
-                    @click="handleAction('copy')"
-                >
-                    <Icon class="menu-item-icon" name="solar:copy-bold" />
-                    Copy
-                </button>
-
-                <button
-                    v-if="hasAction('edit')"
-                    type="button"
-                    class="menu-item"
-                    @click="handleAction('edit')"
-                >
-                    <Icon class="menu-item-icon" name="solar:pen-bold" />
-                    Edit
-                </button>
-
-                <button
-                    v-if="hasAction('download')"
-                    type="button"
-                    class="menu-item"
-                    @click="handleAction('download')"
-                >
-                    <Icon class="menu-item-icon" name="solar:download-bold" />
-                    Download
-                </button>
-
-                <button
-                    v-if="hasAction('favorite')"
-                    type="button"
-                    class="menu-item"
-                    @click="handleAction('favorite')"
-                >
-                    <Icon
-                        class="menu-item-icon"
-                        :name="isFavorite
-                            ? 'solar:star-bold'
-                            : 'solar:star-linear'"
-                    />
-
-                    {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
-                </button>
-
-                <button
-                    v-if="hasAction('delete')"
-                    type="button"
-                    class="menu-item danger"
-                    @click="handleAction('delete')"
-                >
-                    <Icon class="menu-item-icon" name="solar:trash-bin-trash-bold" />
-                    Delete
-                </button>
-            </div>
-        </Teleport>
-    </div>
-</template>
 
 <style scoped>
 .item-menu {

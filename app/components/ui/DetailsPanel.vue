@@ -1,43 +1,3 @@
-<script setup lang="ts">
-type Action =
-    | 'download'
-    | 'rename'
-    | 'copy'
-    | 'favorite'
-    | 'delete'
-
-withDefaults(
-    defineProps<{
-        itemId: string
-        itemType: 'file' | 'folder' | 'note'
-        actions?: Action[]
-        isFavorite?: boolean
-        isCopying?: boolean
-        canCopy?: boolean
-        showInfo: boolean
-    }>(),
-    {
-        actions: () => [
-            'rename',
-            'favorite',
-            'delete'
-        ],
-        isFavorite: false,
-        isCopying: false,
-        canCopy: false,
-        showInfo: true
-    }
-)
-
-const emit = defineEmits<{
-    download: []
-    rename: []
-    copy: []
-    favorite: []
-    delete: []
-}>()
-</script>
-
 <template>
     <div class="details-panel">
         <div class="details-actions">
@@ -110,6 +70,46 @@ const emit = defineEmits<{
         />
     </div>
 </template>
+
+<script setup lang="ts">
+type Action =
+    | 'download'
+    | 'rename'
+    | 'copy'
+    | 'favorite'
+    | 'delete'
+
+withDefaults(
+    defineProps<{
+        itemId: string
+        itemType: 'file' | 'folder' | 'note'
+        actions?: Action[]
+        isFavorite?: boolean
+        isCopying?: boolean
+        canCopy?: boolean
+        showInfo: boolean
+    }>(),
+    {
+        actions: () => [
+            'rename',
+            'favorite',
+            'delete'
+        ],
+        isFavorite: false,
+        isCopying: false,
+        canCopy: false,
+        showInfo: true
+    }
+)
+
+const emit = defineEmits<{
+    download: []
+    rename: []
+    copy: []
+    favorite: []
+    delete: []
+}>()
+</script>
 
 
 <style scoped>

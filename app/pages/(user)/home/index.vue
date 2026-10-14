@@ -1,3 +1,236 @@
+<template>
+  <div class="dashboard-page">
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon purple-bg">
+          <Icon name="solar:document-linear" class="purple" />
+        </div>
+
+        <div class="stat-info">
+          <strong>{{ files.length }}</strong>
+          <span>Files</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon blue-bg">
+          <Icon name="solar:folder-linear" class="blue" />
+        </div>
+
+        <div class="stat-info">
+          <strong>{{ folders.length }}</strong>
+          <span>Folders</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green-bg">
+          <Icon name="solar:notebook-linear" class="green" />
+        </div>
+
+        <div class="stat-info">
+          <strong>{{ notes.length }}</strong>
+          <span>Notes</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <div class="dashboard-left">
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h2>Recent Files</h2>
+
+            <NuxtLink to="/files">
+              View all
+              <Icon name="solar:arrow-right-linear" />
+            </NuxtLink>
+          </div>
+
+          <div class="files-list" :class="{ 'files-list-empty': files.length === 0 }">
+            <div
+              v-if="files.length === 0"
+              class="empty-files"
+            >
+              <div class="empty-files-icon">
+                <Icon name="solar:file-bold" size="3rem" />
+              </div>
+
+              <strong>No files yet</strong>
+
+              <span>
+                Your recent files will appear here.
+              </span>
+
+              <NuxtLink
+                to="/files"
+                class="empty-files-link"
+              >
+                Open Files
+                <Icon name="solar:arrow-right-linear" />
+              </NuxtLink>
+            </div>
+            <template v-else>
+              <div
+                v-for="file in recentFiles"
+                :key="file.id"
+                class="file-main"
+                @click="openFile(file)"
+              >
+                <div class="file-left">
+                  <div class="file-icon">
+                    <Icon :name="getFileIcon(file.mime_type)" />
+                  </div>
+
+                  <div class="file-info">
+                    <input
+                      v-if="editingFileId === file.id"
+                      :ref="element => { nameInput = element as HTMLInputElement | null }"
+                      v-model="editingFileName"
+                      type="text"
+                      class="file-name-input"
+                      :aria-label="`Rename ${file.name}`"
+                      :readonly="isSavingRename"
+                      @keydown.enter.prevent="saveRename(file)"
+                      @keydown.esc.prevent="cancelRename"
+                      @blur="saveRename(file)"
+                      @click.stop
+                    >
+                    <strong v-else>{{ file.name }}</strong>
+                    <span>{{ getFileType(file.original_name) }} • {{ formatFileTime(file.created_at) }}</span>
+                  </div>
+                </div>
+
+                <div class="file-right">
+                  <span class="file-size">{{ formatFileSize(file.size) }}</span>
+
+                  <ItemMenu
+                      type="file"
+                      :is-favorite="isFileFavorite(file.id)"
+                      :can-copy="canCopyFile(file.mime_type, file.original_name)"
+                      @open="openFile(file)"
+                      @download="handleDownload(file.id)"
+                      @rename="startRename(file)"
+                      @copy="handleCopy(file)"
+                      @favorite="handleFavorite(file)"
+                      @delete="handleDelete(file)"
+                      @click.stop
+                  />
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-right">
+        <div class="dashboard-card storage-card">
+          <div class="card-header">
+            <h2>Storage Usage</h2>
+          </div>
+
+          <div class="storage-content">
+            <div class="storage-top">
+              <strong>{{ storagePercent }}%</strong>
+
+              <span>
+                <b>{{ formatFileSize(user?.storageUsed ?? 0) }}</b> / {{ formatFileSize(user?.storageLimit ?? 0) }}
+              </span>
+            </div>
+          
+            <meter 
+              class="storage-meter"
+              min="0"
+              max="100"
+              :value="storagePercent"
+            >
+              {{ storagePercent }}%
+            </meter>
+
+            <div class="storage-types">
+              <div class="storage-item">
+                <div class="storage-name">
+                  <span class="storage-dot blue-dot"></span>
+                  Images
+                </div>
+
+                <span>{{ imagesSize }} GB</span>
+              </div>
+
+              <div class="storage-item">
+                <div class="storage-name">
+                  <span class="storage-dot purple-dot"></span>
+                  Documents
+                </div>
+
+                <span>{{ documentsSize }} GB</span>
+              </div>
+              
+              <div class="storage-item">
+                <div class="storage-name">
+                  <span class="storage-dot cyan-dot"></span>
+                  Videos
+                </div>
+                
+                <span>{{ videosSize }} GB</span>
+              </div>
+              
+              <div class="storage-item">
+                <div class="storage-name">
+                  <span class="storage-dot gray-dot"></span>
+                  Others
+                </div>
+                
+                <span>{{ othersSize }} GB</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="dashboard-card quick-card">
+          <div class="card-header">
+            <h2>Quick Actions</h2>
+          </div>  
+
+          <div class="quick-actions-grid">
+            <button @click="navigateTo('/files')" type="button" class="quick-action-card">
+              <div class="quick-action-icon upload-icon">
+                <Icon name="solar:upload-linear" />
+              </div>
+
+              <span class="quick-action-title">Upload File</span>
+            </button>
+
+            <button @click="navigateTo('/folders')" type="button" class="quick-action-card">
+              <div class="quick-action-icon folder-icon">
+                <Icon name="solar:add-linear" />
+              </div>
+
+              <span class="quick-action-title">New Folder</span>
+            </button>
+
+            <button type="button" class="quick-action-card">
+              <div class="quick-action-icon note-icon">
+                <Icon name="solar:notebook-linear" />
+              </div>
+
+              <span class="quick-action-title">New Note</span>
+            </button>
+
+            <button type="button" class="quick-action-card">
+              <div class="quick-action-icon inbox-icon">
+                <Icon name="solar:users-group-rounded-linear" class="" />
+              </div>
+
+              <span class="quick-action-title">Shared Inbox</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
 <script setup lang="ts">
 definePageMeta({
   middleware: 'auth',
@@ -149,239 +382,6 @@ const videosSize = ref(0)
 const othersSize = ref(0)
 
 </script>
-
-<template>
-  <div class="dashboard-page">
-    <section class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon purple-bg">
-          <Icon name="solar:document-linear" class="purple" />
-        </div>
-
-        <div class="stat-info">
-          <strong>{{ files.length }}</strong>
-          <span>Files</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon blue-bg">
-          <Icon name="solar:folder-linear" class="blue" />
-        </div>
-
-        <div class="stat-info">
-          <strong>{{ folders.length }}</strong>
-          <span>Folders</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon green-bg">
-          <Icon name="solar:notebook-linear" class="green" />
-        </div>
-
-        <div class="stat-info">
-          <strong>{{ notes.length }}</strong>
-          <span>Notes</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="dashboard-grid">
-      <div class="dashboard-left">
-        <div class="dashboard-card">
-          <div class="card-header">
-            <h2>Recent Files</h2>
-
-            <NuxtLink to="/files">
-              View all
-              <Icon name="solar:arrow-right-linear" />
-            </NuxtLink>
-          </div>
-
-          <div class="files-list" :class="{ 'files-list-empty': files.length === 0 }">
-            <div
-              v-if="files.length === 0"
-              class="empty-files"
-            >
-              <div class="empty-files-icon">
-                <Icon name="solar:file-bold" size="3rem" />
-              </div>
-
-              <strong>No files yet</strong>
-
-              <span>
-                Your recent files will appear here.
-              </span>
-
-              <NuxtLink
-                to="/files"
-                class="empty-files-link"
-              >
-                Open Files
-                <Icon name="solar:arrow-right-linear" />
-              </NuxtLink>
-            </div>
-            <template v-else>
-              <div
-                v-for="file in recentFiles"
-                :key="file.id"
-                class="file-main"
-                @dblclick="openFile(file)"
-              >
-                <div class="file-left">
-                  <div class="file-icon">
-                    <Icon :name="getFileIcon(file.mime_type)" />
-                  </div>
-
-                  <div class="file-info">
-                    <input
-                      v-if="editingFileId === file.id"
-                      :ref="element => { nameInput = element as HTMLInputElement | null }"
-                      v-model="editingFileName"
-                      type="text"
-                      class="file-name-input"
-                      :aria-label="`Rename ${file.name}`"
-                      :readonly="isSavingRename"
-                      @keydown.enter.prevent="saveRename(file)"
-                      @keydown.esc.prevent="cancelRename"
-                      @blur="saveRename(file)"
-                      @dblclick.stop
-                    >
-                    <strong v-else>{{ file.name }}</strong>
-                    <span>{{ getFileType(file.original_name) }} • {{ formatFileTime(file.created_at) }}</span>
-                  </div>
-                </div>
-
-                <div class="file-right">
-                  <span class="file-size">{{ formatFileSize(file.size) }}</span>
-
-                  <ItemMenu
-                      type="file"
-                      :is-favorite="isFileFavorite(file.id)"
-                      :can-copy="canCopyFile(file.mime_type, file.original_name)"
-                      @open="openFile(file)"
-                      @download="handleDownload(file.id)"
-                      @rename="startRename(file)"
-                      @copy="handleCopy(file)"
-                      @favorite="handleFavorite(file)"
-                      @delete="handleDelete(file)"
-                      @dblclick.stop
-                  />
-                </div>
-              </div>
-            </template>
-          </div>
-        </div>
-      </div>
-
-      <div class="dashboard-right">
-        <div class="dashboard-card storage-card">
-          <div class="card-header">
-            <h2>Storage Usage</h2>
-          </div>
-
-          <div class="storage-content">
-            <div class="storage-top">
-              <strong>{{ storagePercent }}%</strong>
-
-              <span>
-                <b>{{ formatFileSize(user?.storageUsed ?? 0) }}</b> / {{ formatFileSize(user?.storageLimit ?? 0) }}
-              </span>
-            </div>
-          
-            <meter 
-              class="storage-meter"
-              min="0"
-              max="100"
-              :value="storagePercent"
-            >
-              {{ storagePercent }}%
-            </meter>
-
-            <div class="storage-types">
-              <div class="storage-item">
-                <div class="storage-name">
-                  <span class="storage-dot blue-dot"></span>
-                  Images
-                </div>
-
-                <span>{{ imagesSize }} GB</span>
-              </div>
-
-              <div class="storage-item">
-                <div class="storage-name">
-                  <span class="storage-dot purple-dot"></span>
-                  Documents
-                </div>
-
-                <span>{{ documentsSize }} GB</span>
-              </div>
-              
-              <div class="storage-item">
-                <div class="storage-name">
-                  <span class="storage-dot cyan-dot"></span>
-                  Videos
-                </div>
-                
-                <span>{{ videosSize }} GB</span>
-              </div>
-              
-              <div class="storage-item">
-                <div class="storage-name">
-                  <span class="storage-dot gray-dot"></span>
-                  Others
-                </div>
-                
-                <span>{{ othersSize }} GB</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        <div class="dashboard-card quick-card">
-          <div class="card-header">
-            <h2>Quick Actions</h2>
-          </div>  
-
-          <div class="quick-actions-grid">
-            <button @click="navigateTo('/files')" type="button" class="quick-action-card">
-              <div class="quick-action-icon upload-icon">
-                <Icon name="solar:upload-linear" />
-              </div>
-
-              <span class="quick-action-title">Upload File</span>
-            </button>
-
-            <button @click="navigateTo('/folders')" type="button" class="quick-action-card">
-              <div class="quick-action-icon folder-icon">
-                <Icon name="solar:add-linear" />
-              </div>
-
-              <span class="quick-action-title">New Folder</span>
-            </button>
-
-            <button type="button" class="quick-action-card">
-              <div class="quick-action-icon note-icon">
-                <Icon name="solar:notebook-linear" />
-              </div>
-
-              <span class="quick-action-title">New Note</span>
-            </button>
-
-            <button type="button" class="quick-action-card">
-              <div class="quick-action-icon inbox-icon">
-                <Icon name="solar:users-group-rounded-linear" class="" />
-              </div>
-
-              <span class="quick-action-title">Shared Inbox</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-</template>
 
 <style scoped>
   .dashboard-page {

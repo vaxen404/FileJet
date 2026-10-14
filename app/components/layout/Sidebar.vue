@@ -1,30 +1,3 @@
-<script setup lang="ts">
-import ConfirmModal from '../ui/ConfirmModal.vue'
-
-const route = useRoute()
-const isLogoutHover = ref(false)
-
-const authUser = useAuthUser()
-
-const { toastMessage, toastType, showToast, openToast } = useToast()
-
-const showLogoutModal = ref(false)
-
-const handleLogout = async () => {
-    await $fetch('/api/auth/logout', {
-        method: 'POST'
-    })
-
-    authUser.value = null
-
-    showLogoutModal.value = false
-
-    openToast('Logged out successfully', 'success')
-
-    await navigateTo('/login')
-}
-</script>
-
 <template>
     <aside class="sidebar-area">
         <div class="logo-area">
@@ -186,6 +159,33 @@ const handleLogout = async () => {
         @cancel="showLogoutModal = false"
     />
 </template>
+
+<script setup lang="ts">
+import ConfirmModal from '../ui/ConfirmModal.vue'
+
+const route = useRoute()
+const isLogoutHover = ref(false)
+
+const authUser = useAuthUser()
+
+const { toastMessage, toastType, showToast, openToast } = useToast()
+
+const showLogoutModal = ref(false)
+
+const handleLogout = async () => {
+    await $fetch('/api/auth/logout', {
+        method: 'POST'
+    })
+
+    authUser.value = null
+
+    showLogoutModal.value = false
+
+    openToast('Logged out successfully', 'success')
+
+    await navigateTo('/login')
+}
+</script>
 
 <style scoped>
 .sidebar-area {

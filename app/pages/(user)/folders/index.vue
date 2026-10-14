@@ -1,3 +1,217 @@
+<template>
+    <div class="folders-page">
+        <div class="folders-header">
+            <div class="folders-toolbar">
+                <SearchBox
+                    v-model="searchQuery"
+                    placeholder="Search folders..."
+                />
+
+                <div class="toolbar-actions">
+                    <ViewSwitcher v-model="viewMode" />
+
+                    <UploadButton
+                        text="Upload"
+                        mode="folder"
+                        @folder="handleFolders"
+                    />
+                </div>
+            </div>
+
+            <div class="folders-subtoolbar">
+                <SortDropdown v-model="sortMode" />
+            </div>
+
+            <div v-if="selectedFolders.length" class="selection-toolbar" role="group" aria-label="Selected folders">
+                <span role="status" aria-live="polite">{{ selectedFolders.length }} selected</span>
+
+                <div class="selection-actions">
+                    <button type="button" class="selection-btn" :disabled="pending" @click="selectedFolders = []">
+                        Clear
+                    </button>
+                    <button type="button" class="selection-btn delete-selected-btn" :disabled="pending" @click="handleDeleteSelected">
+                        <Icon name="solar:trash-bin-trash-bold" />
+                        Delete Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <DataView
+            :view-mode="viewMode"
+            :is-dragging="isDragging"
+            :is-loading="pending"
+            drop-text="Drop folders to upload"
+            @dragover="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop="handleDrop"
+        >
+            <template #loading>
+                <div class="loading-state" role="status" aria-live="polite">
+                    <span class="loading-spinner" aria-hidden="true" />
+                    <span>Loading folders...</span>
+                </div>
+            </template>
+
+            <template v-if="!pending && filteredFolders.length === 0" #empty>
+                <div class="empty-state">
+                    <Icon name="solar:folder-linear" size="2.5rem" class="empty-state-icon empty-state-folder-icon" />
+                    <strong>{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
+                    <span class="empty-state-description">
+                        {{ folders.length ? 'Try a different search.' : 'Create your first folder to organize your files.' }}
+                    </span>
+                </div>
+            </template>
+
+            <template #list>
+                <div class="table-scroll">
+                    <table class="folders-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input
+                                        type="checkbox"
+                                        class="folder-checkbox"
+                                        :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="pending"
+                                        aria-label="Select all folders on this page"
+                                        @change="toggleSelectAll"
+                                    >
+                                </th>
+
+                                <th>
+                                    <div class="name-header">
+                                        Name
+                                        <Icon
+                                            name="solar:sort-vertical-linear"
+                                            class="sort-icon"
+                                        />
+                                    </div>
+                                </th>
+
+                                <th>Type</th>
+                                <th>Created</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr
+                                v-for="folder in paginatedFolders"
+                                :key="folder.id"
+                                :class="{ selected: selectedFolders.includes(folder.id) }"
+                                @click="openFolder(folder)"
+                            >
+                                <td @click.stop>
+                                    <input
+                                        v-model="selectedFolders"
+                                        type="checkbox"
+                                        class="folder-checkbox"
+                                        :value="folder.id"
+                                        :disabled="pending"
+                                        :aria-label="`Select ${folder.name}`"
+                                    >
+                                </td>
+
+                                <td>
+                                    <div class="folder-name">
+                                        <div class="folder-icon">
+                                            <Icon name="solar:folder-bold" />
+                                        </div>
+
+                                        <div class="folder-info">
+                                            <strong :title="folder.name">{{ folder.name }}</strong>
+                                            <span>
+                                                Folder • {{ formatFileTime(folder.created_at) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>Folder</td>
+                                <td>{{ formatFileTime(folder.created_at) }}</td>
+                                <td>{{ formatFileTime(folder.updated_at) }}</td>
+
+                                <td @click.stop>
+                                    <ItemMenu
+                                        type="folder"
+                                        :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                                        :is-favorite="isFolderFavorite(folder.id)"
+                                        @open="openFolder(folder)"
+                                        @download="downloadFolder(folder)"
+                                        @rename="renameFolder(folder)"
+                                        @favorite="favoriteFolder(folder)"
+                                        @delete="deleteFolder(folder)"
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <template #grid>
+                <div
+                    v-for="folder in paginatedFolders"
+                    :key="folder.id"
+                    class="folder-card"
+                    :class="{ selected: selectedFolders.includes(folder.id) }"
+                    @click="openFolder(folder)"
+                >
+                    <div class="folder-card-top">
+                        <div class="folder-card-icon">
+                            <Icon name="solar:folder-bold" />
+                        </div>
+
+                        <div class="folder-card-actions" @click.stop>
+                            <label class="folder-card-select">
+                                <input
+                                    v-model="selectedFolders"
+                                    type="checkbox"
+                                    class="folder-checkbox"
+                                    :value="folder.id"
+                                    :disabled="pending"
+                                    :aria-label="`Select ${folder.name}`"
+                                >
+                            </label>
+
+                            <ItemMenu
+                                type="folder"
+                                :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                                :is-favorite="isFolderFavorite(folder.id)"
+                                @open="openFolder(folder)"
+                                @download="downloadFolder(folder)"
+                                @rename="renameFolder(folder)"
+                                @favorite="favoriteFolder(folder)"
+                                @delete="deleteFolder(folder)"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="folder-card-info">
+                        <strong :title="folder.name">{{ folder.name }}</strong>
+                        <span>Folder</span>
+                    </div>
+
+                    <div class="folder-card-bottom">
+                        <span>{{ formatFileTime(folder.created_at) }}</span>
+                        <span>{{ formatFileTime(folder.updated_at) }}</span>
+                    </div>
+                </div>
+            </template>
+        </DataView>
+
+        <Pagination
+            v-model="currentPage"
+            :total-pages="totalPages"
+            :view-mode="viewMode"
+        />
+
+    </div>
+</template>
+
 <script setup lang="ts">
 import { formatFileTime } from '~/utils/file'
 
@@ -121,220 +335,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 </script>
-
-<template>
-    <div class="folders-page">
-        <div class="folders-header">
-            <div class="folders-toolbar">
-                <SearchBox
-                    v-model="searchQuery"
-                    placeholder="Search folders..."
-                />
-
-                <div class="toolbar-actions">
-                    <ViewSwitcher v-model="viewMode" />
-
-                    <UploadButton
-                        text="Upload"
-                        mode="folder"
-                        @folder="handleFolders"
-                    />
-                </div>
-            </div>
-
-            <div class="folders-subtoolbar">
-                <SortDropdown v-model="sortMode" />
-            </div>
-
-            <div v-if="selectedFolders.length" class="selection-toolbar" role="group" aria-label="Selected folders">
-                <span role="status" aria-live="polite">{{ selectedFolders.length }} selected</span>
-
-                <div class="selection-actions">
-                    <button type="button" class="selection-btn" :disabled="pending" @click="selectedFolders = []">
-                        Clear
-                    </button>
-                    <button type="button" class="selection-btn delete-selected-btn" :disabled="pending" @click="handleDeleteSelected">
-                        <Icon name="solar:trash-bin-trash-bold" />
-                        Delete Selected
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <DataView
-            :view-mode="viewMode"
-            :is-dragging="isDragging"
-            :is-loading="pending"
-            drop-text="Drop folders to upload"
-            @dragover="isDragging = true"
-            @dragleave="isDragging = false"
-            @drop="handleDrop"
-        >
-            <template #loading>
-                <div class="loading-state" role="status" aria-live="polite">
-                    <span class="loading-spinner" aria-hidden="true" />
-                    <span>Loading folders...</span>
-                </div>
-            </template>
-
-            <template v-if="!pending && filteredFolders.length === 0" #empty>
-                <div class="empty-state">
-                    <Icon name="solar:folder-linear" size="2.5rem" class="empty-state-icon empty-state-folder-icon" />
-                    <strong>{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
-                    <span class="empty-state-description">
-                        {{ folders.length ? 'Try a different search.' : 'Create your first folder to organize your files.' }}
-                    </span>
-                </div>
-            </template>
-
-            <template #list>
-                <div class="table-scroll">
-                    <table class="folders-table">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <input
-                                        type="checkbox"
-                                        class="folder-checkbox"
-                                        :checked="allSelected"
-                                        :indeterminate="partiallySelected"
-                                        :disabled="pending"
-                                        aria-label="Select all folders on this page"
-                                        @change="toggleSelectAll"
-                                    >
-                                </th>
-
-                                <th>
-                                    <div class="name-header">
-                                        Name
-                                        <Icon
-                                            name="solar:sort-vertical-linear"
-                                            class="sort-icon"
-                                        />
-                                    </div>
-                                </th>
-
-                                <th>Type</th>
-                                <th>Created</th>
-                                <th>Modified</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr
-                                v-for="folder in paginatedFolders"
-                                :key="folder.id"
-                                :class="{ selected: selectedFolders.includes(folder.id) }"
-                                @dblclick="openFolder(folder)"
-                            >
-                                <td @dblclick.stop>
-                                    <input
-                                        v-model="selectedFolders"
-                                        type="checkbox"
-                                        class="folder-checkbox"
-                                        :value="folder.id"
-                                        :disabled="pending"
-                                        :aria-label="`Select ${folder.name}`"
-                                    >
-                                </td>
-
-                                <td>
-                                    <div class="folder-name">
-                                        <div class="folder-icon">
-                                            <Icon name="solar:folder-bold" />
-                                        </div>
-
-                                        <div class="folder-info">
-                                            <strong :title="folder.name">{{ folder.name }}</strong>
-                                            <span>
-                                                Folder • {{ formatFileTime(folder.created_at) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td>Folder</td>
-                                <td>{{ formatFileTime(folder.created_at) }}</td>
-                                <td>{{ formatFileTime(folder.updated_at) }}</td>
-
-                                <td @dblclick.stop>
-                                    <ItemMenu
-                                        type="folder"
-                                        :actions="['open', 'download', 'rename', 'favorite', 'delete']"
-                                        :is-favorite="isFolderFavorite(folder.id)"
-                                        @open="openFolder(folder)"
-                                        @download="downloadFolder(folder)"
-                                        @rename="renameFolder(folder)"
-                                        @favorite="favoriteFolder(folder)"
-                                        @delete="deleteFolder(folder)"
-                                    />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
-
-            <template #grid>
-                <div
-                    v-for="folder in paginatedFolders"
-                    :key="folder.id"
-                    class="folder-card"
-                    :class="{ selected: selectedFolders.includes(folder.id) }"
-                    @dblclick="openFolder(folder)"
-                >
-                    <div class="folder-card-top">
-                        <div class="folder-card-icon">
-                            <Icon name="solar:folder-bold" />
-                        </div>
-
-                        <div class="folder-card-actions" @dblclick.stop>
-                            <label class="folder-card-select">
-                                <input
-                                    v-model="selectedFolders"
-                                    type="checkbox"
-                                    class="folder-checkbox"
-                                    :value="folder.id"
-                                    :disabled="pending"
-                                    :aria-label="`Select ${folder.name}`"
-                                >
-                            </label>
-
-                            <ItemMenu
-                                type="folder"
-                                :actions="['open', 'download', 'rename', 'favorite', 'delete']"
-                                :is-favorite="isFolderFavorite(folder.id)"
-                                @open="openFolder(folder)"
-                                @download="downloadFolder(folder)"
-                                @rename="renameFolder(folder)"
-                                @favorite="favoriteFolder(folder)"
-                                @delete="deleteFolder(folder)"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="folder-card-info">
-                        <strong :title="folder.name">{{ folder.name }}</strong>
-                        <span>Folder</span>
-                    </div>
-
-                    <div class="folder-card-bottom">
-                        <span>{{ formatFileTime(folder.created_at) }}</span>
-                        <span>{{ formatFileTime(folder.updated_at) }}</span>
-                    </div>
-                </div>
-            </template>
-        </DataView>
-
-        <Pagination
-            v-model="currentPage"
-            :total-pages="totalPages"
-            :view-mode="viewMode"
-        />
-
-    </div>
-</template>
 
 <style scoped>
 .folders-page {

@@ -1,3 +1,262 @@
+<template>
+    <div class="files-page">
+        <div class="files-header">
+
+            <div class="files-toolbar">
+                <SearchBox
+                    v-model="searchQuery"
+                    placeholder="Search files..."
+                />
+
+                <div class="toolbar-actions">
+                    <ViewSwitcher v-model="viewMode" />
+                    <UploadButton text="Upload" mode="file" @files="handleFiles"/>
+                </div>
+            </div>
+
+            <div class="files-subtoolbar">
+                <ItemFilters v-model="activeCategory" :options="filterOptions" label="Filter files" />
+
+                <SortDropdown v-model="sortMode" /> 
+            </div>
+
+            <div v-if="selectedFiles.length" class="selection-toolbar" role="group" aria-label="Selected files">
+                <span role="status" aria-live="polite">{{ selectedFiles.length }} selected</span>
+
+                <div class="selection-actions">
+                    <button
+                        type="button"
+                        class="filter-btn"
+                        :disabled="isLoading || isBulkDeleting"
+                        @click="selectedFiles = []"
+                    >
+                        Clear
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-btn delete-selected-btn"
+                        :disabled="isLoading || isBulkDeleting"
+                        :aria-busy="isBulkDeleting"
+                        @click="handleDeleteSelected"
+                    >
+                        <Icon name="solar:trash-bin-trash-bold" />
+                        {{ isBulkDeleting ? 'Deleting...' : 'Delete Selected' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <DataView
+            :view-mode="viewMode"
+            :is-dragging="isDragging"
+            :is-loading="isLoading || isBulkDeleting"
+            drop-text="Drop files to upload"
+            @dragover="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop="handleDrop"
+        >
+            <template #loading>
+                <div class="upload-loading" role="status" aria-live="polite">
+                    <template v-if="isUploading && uploadProgress !== null">
+                        <span>{{ uploadProgress }}%</span>
+
+                        <div class="upload-progress">
+                            <div
+                                class="upload-progress-bar"
+                                :style="{ width: `${uploadProgress}%` }"
+                            ></div>
+                        </div>
+                    </template>
+
+                    <div v-if="isDeleting || !isUploading || uploadProgress === null" class="operation-loading">
+                        <span class="loading-spinner" aria-hidden="true"></span>
+                        <span>{{ isDeleting || isBulkDeleting ? 'Deleting files...' : isUploading ? 'Uploading files...' : 'Updating file...' }}</span>
+                    </div>
+                </div>
+            </template>
+
+            <template v-if="!isLoading && !isBulkDeleting && files.length === 0" #empty>
+                <div class="empty-state">
+                    <Icon name="solar:file-bold" size="2.5rem" class="empty-state-icon" />
+                    <strong>No files yet</strong>
+                    <span class="empty-state-description">Upload your first file to get started.</span>
+                </div>
+            </template>
+
+            <template #list>
+                <div class="table-scroll">
+                    <table class="files-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="isLoading || isBulkDeleting"
+                                        aria-label="Select all files on this page"
+                                        @change="toggleSelectAll"
+                                    >
+                                </th>
+
+                                <th>
+                                    <div class="name-header">
+                                        Name
+                                        <Icon
+                                            name="solar:sort-vertical-linear"
+                                            class="sort-icon"
+                                        />
+                                    </div>
+                                </th>
+
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr
+                                v-for="file in paginatedFiles"
+                                :key="file.id"
+                                :class="{ selected: selectedFiles.includes(file.id) }"
+                                @click="openFile(file)"
+                            >
+                                <td @click.stop>
+                                    <input
+                                        v-model="selectedFiles"
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        :value="file.id"
+                                        :disabled="isLoading || isBulkDeleting"
+                                        :aria-label="`Select ${file.name}`"
+                                    >
+                                </td>
+
+                                <td>
+                                    <div class="file-name">
+                                        <div class="file-icon">
+                                            <Icon :name="getFileIcon(file.mime_type)" />
+                                        </div>
+
+                                        <div class="file-info">
+                                            <input 
+                                                type="text" 
+                                                class="name-input" 
+                                                :data-file-id="file.id"
+                                                :class="{ active: editingFileId === file.id}"
+                                                :value="editingFileId === file.id ? editingFileName : file.name"
+                                                :disabled="editingFileId !== file.id"
+                                                @input="editingFileName = ($event.target as HTMLInputElement).value"
+                                                @keyup.enter="saveRename(file)"
+                                                @blur="editingFileId === file.id && saveRename(file)"
+                                                @click.stop
+                                            >
+                                            <span>
+                                                {{ formatFileSize(file.size) }} • {{ formatFileTime(file.created_at) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>{{ getFileType(file.original_name) }}</td>
+                                <td>{{ formatFileSize(file.size) }}</td>
+                                <td>{{ formatFileTime(file.updated_at) }}</td>
+
+                                <td @click.stop>
+                                    <ItemMenu
+                                        type="file"
+                                        :is-favorite="isFileFavorite(file.id)"
+                                        :can-copy="canCopyFile(file.mime_type, file.original_name)"
+                                        @open="openFile(file)"
+                                        @download="handleDownload(file.id)"
+                                        @rename="startRename(file)"
+                                        @copy="handleCopy(file.id)"
+                                        @favorite="handleFavorite(file)"
+                                        @delete="handleDelete(file.id)"
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <template #grid>
+                <div
+                    v-for="file in paginatedFiles"
+                    :key="file.id"
+                    class="file-card"
+                    :class="{ selected: selectedFiles.includes(file.id) }"
+                    @click="openFile(file)"
+                >
+                    <div class="file-card-top">
+                        <div class="file-card-icon">
+                            <Icon :name="getFileIcon(file.mime_type)" />
+                        </div>
+
+                        <div class="file-card-actions" @click.stop>
+                            <label class="file-card-select">
+                                <input
+                                    v-model="selectedFiles"
+                                    type="checkbox"
+                                    class="file-checkbox"
+                                    :value="file.id"
+                                    :disabled="isLoading || isBulkDeleting"
+                                    :aria-label="`Select ${file.name}`"
+                                >
+                            </label>
+
+                            <ItemMenu
+                                type="file"
+                                :is-favorite="isFileFavorite(file.id)"
+                                :can-copy="canCopyFile(file.mime_type, file.original_name)"
+                                @open="openFile(file)"
+                                @download="handleDownload(file.id)"
+                                @rename="startRename(file)"
+                                @copy="handleCopy(file.id)"
+                                @favorite="handleFavorite(file)"
+                                @delete="handleDelete(file.id)"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="file-card-info">
+                        <input 
+                            type="text" 
+                            class="name-input" 
+                            :data-file-id="file.id"
+                            :class="{ active: editingFileId === file.id}"
+                            :value="editingFileId === file.id ? editingFileName : file.name"
+                            :disabled="editingFileId !== file.id"
+                            @input="editingFileName = ($event.target as HTMLInputElement).value"
+                            @keyup.enter="saveRename(file)"
+                            @blur="editingFileId === file.id && saveRename(file)"
+                            @click.stop
+                        >
+                        <span>{{ file.mime_type }}</span>
+                    </div>
+
+                    <div class="file-card-bottom">
+                        <span>{{ formatFileSize(file.size) }}</span>
+                        <span>{{ formatFileTime(file.created_at) }}</span>
+                    </div>
+                </div>
+            </template>
+        </DataView>
+
+        <Pagination
+            v-model="currentPage"
+            :total-pages="totalPages"
+            :view-mode="viewMode"
+        />
+
+    </div>
+</template>
+
 <script setup lang="ts">
 import { canCopyFile, getFileIcon, getFileType, getFileCategory,formatFileSize, formatFileTime} from "~/utils/file"
 
@@ -258,265 +517,6 @@ watch([searchQuery, activeCategory, viewMode], () => {
 })
 
 </script>
-
-<template>
-    <div class="files-page">
-        <div class="files-header">
-
-            <div class="files-toolbar">
-                <SearchBox
-                    v-model="searchQuery"
-                    placeholder="Search files..."
-                />
-
-                <div class="toolbar-actions">
-                    <ViewSwitcher v-model="viewMode" />
-                    <UploadButton text="Upload" mode="file" @files="handleFiles"/>
-                </div>
-            </div>
-
-            <div class="files-subtoolbar">
-                <ItemFilters v-model="activeCategory" :options="filterOptions" label="Filter files" />
-
-                <SortDropdown v-model="sortMode" /> 
-            </div>
-
-            <div v-if="selectedFiles.length" class="selection-toolbar" role="group" aria-label="Selected files">
-                <span role="status" aria-live="polite">{{ selectedFiles.length }} selected</span>
-
-                <div class="selection-actions">
-                    <button
-                        type="button"
-                        class="filter-btn"
-                        :disabled="isLoading || isBulkDeleting"
-                        @click="selectedFiles = []"
-                    >
-                        Clear
-                    </button>
-
-                    <button
-                        type="button"
-                        class="filter-btn delete-selected-btn"
-                        :disabled="isLoading || isBulkDeleting"
-                        :aria-busy="isBulkDeleting"
-                        @click="handleDeleteSelected"
-                    >
-                        <Icon name="solar:trash-bin-trash-bold" />
-                        {{ isBulkDeleting ? 'Deleting...' : 'Delete Selected' }}
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <DataView
-            :view-mode="viewMode"
-            :is-dragging="isDragging"
-            :is-loading="isLoading || isBulkDeleting"
-            drop-text="Drop files to upload"
-            @dragover="isDragging = true"
-            @dragleave="isDragging = false"
-            @drop="handleDrop"
-        >
-            <template #loading>
-                <div class="upload-loading" role="status" aria-live="polite">
-                    <template v-if="isUploading && uploadProgress !== null">
-                        <span>{{ uploadProgress }}%</span>
-
-                        <div class="upload-progress">
-                            <div
-                                class="upload-progress-bar"
-                                :style="{ width: `${uploadProgress}%` }"
-                            ></div>
-                        </div>
-                    </template>
-
-                    <div v-if="isDeleting || !isUploading || uploadProgress === null" class="operation-loading">
-                        <span class="loading-spinner" aria-hidden="true"></span>
-                        <span>{{ isDeleting || isBulkDeleting ? 'Deleting files...' : isUploading ? 'Uploading files...' : 'Updating file...' }}</span>
-                    </div>
-                </div>
-            </template>
-
-            <template v-if="!isLoading && !isBulkDeleting && files.length === 0" #empty>
-                <div class="empty-state">
-                    <Icon name="solar:file-bold" size="2.5rem" class="empty-state-icon" />
-                    <strong>No files yet</strong>
-                    <span class="empty-state-description">Upload your first file to get started.</span>
-                </div>
-            </template>
-
-            <template #list>
-                <div class="table-scroll">
-                    <table class="files-table">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <input
-                                        type="checkbox"
-                                        class="file-checkbox"
-                                        :checked="allSelected"
-                                        :indeterminate="partiallySelected"
-                                        :disabled="isLoading || isBulkDeleting"
-                                        aria-label="Select all files on this page"
-                                        @change="toggleSelectAll"
-                                    >
-                                </th>
-
-                                <th>
-                                    <div class="name-header">
-                                        Name
-                                        <Icon
-                                            name="solar:sort-vertical-linear"
-                                            class="sort-icon"
-                                        />
-                                    </div>
-                                </th>
-
-                                <th>Type</th>
-                                <th>Size</th>
-                                <th>Modified</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr
-                                v-for="file in paginatedFiles"
-                                :key="file.id"
-                                :class="{ selected: selectedFiles.includes(file.id) }"
-                                @dblclick="openFile(file)"
-                            >
-                                <td @dblclick.stop>
-                                    <input
-                                        v-model="selectedFiles"
-                                        type="checkbox"
-                                        class="file-checkbox"
-                                        :value="file.id"
-                                        :disabled="isLoading || isBulkDeleting"
-                                        :aria-label="`Select ${file.name}`"
-                                    >
-                                </td>
-
-                                <td>
-                                    <div class="file-name">
-                                        <div class="file-icon">
-                                            <Icon :name="getFileIcon(file.mime_type)" />
-                                        </div>
-
-                                        <div class="file-info">
-                                            <input 
-                                                type="text" 
-                                                class="name-input" 
-                                                :data-file-id="file.id"
-                                                :class="{ active: editingFileId === file.id}"
-                                                :value="editingFileId === file.id ? editingFileName : file.name"
-                                                :disabled="editingFileId !== file.id"
-                                                @input="editingFileName = ($event.target as HTMLInputElement).value"
-                                                @keyup.enter="saveRename(file)"
-                                                @blur="editingFileId === file.id && saveRename(file)"
-                                                @dblclick.stop
-                                            >
-                                            <span>
-                                                {{ formatFileSize(file.size) }} • {{ formatFileTime(file.created_at) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td>{{ getFileType(file.original_name) }}</td>
-                                <td>{{ formatFileSize(file.size) }}</td>
-                                <td>{{ formatFileTime(file.updated_at) }}</td>
-
-                                <td @dblclick.stop>
-                                    <ItemMenu
-                                        type="file"
-                                        :is-favorite="isFileFavorite(file.id)"
-                                        :can-copy="canCopyFile(file.mime_type, file.original_name)"
-                                        @open="openFile(file)"
-                                        @download="handleDownload(file.id)"
-                                        @rename="startRename(file)"
-                                        @copy="handleCopy(file.id)"
-                                        @favorite="handleFavorite(file)"
-                                        @delete="handleDelete(file.id)"
-                                    />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
-
-            <template #grid>
-                <div
-                    v-for="file in paginatedFiles"
-                    :key="file.id"
-                    class="file-card"
-                    :class="{ selected: selectedFiles.includes(file.id) }"
-                    @dblclick="openFile(file)"
-                >
-                    <div class="file-card-top">
-                        <div class="file-card-icon">
-                            <Icon :name="getFileIcon(file.mime_type)" />
-                        </div>
-
-                        <div class="file-card-actions" @dblclick.stop>
-                            <label class="file-card-select">
-                                <input
-                                    v-model="selectedFiles"
-                                    type="checkbox"
-                                    class="file-checkbox"
-                                    :value="file.id"
-                                    :disabled="isLoading || isBulkDeleting"
-                                    :aria-label="`Select ${file.name}`"
-                                >
-                            </label>
-
-                            <ItemMenu
-                                type="file"
-                                :is-favorite="isFileFavorite(file.id)"
-                                :can-copy="canCopyFile(file.mime_type, file.original_name)"
-                                @open="openFile(file)"
-                                @download="handleDownload(file.id)"
-                                @rename="startRename(file)"
-                                @copy="handleCopy(file.id)"
-                                @favorite="handleFavorite(file)"
-                                @delete="handleDelete(file.id)"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="file-card-info">
-                        <input 
-                            type="text" 
-                            class="name-input" 
-                            :data-file-id="file.id"
-                            :class="{ active: editingFileId === file.id}"
-                            :value="editingFileId === file.id ? editingFileName : file.name"
-                            :disabled="editingFileId !== file.id"
-                            @input="editingFileName = ($event.target as HTMLInputElement).value"
-                            @keyup.enter="saveRename(file)"
-                            @blur="editingFileId === file.id && saveRename(file)"
-                            @dblclick.stop
-                        >
-                        <span>{{ file.mime_type }}</span>
-                    </div>
-
-                    <div class="file-card-bottom">
-                        <span>{{ formatFileSize(file.size) }}</span>
-                        <span>{{ formatFileTime(file.created_at) }}</span>
-                    </div>
-                </div>
-            </template>
-        </DataView>
-
-        <Pagination
-            v-model="currentPage"
-            :total-pages="totalPages"
-            :view-mode="viewMode"
-        />
-
-    </div>
-</template>
 
 <style scoped>
 .selection-toolbar {

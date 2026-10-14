@@ -1,3 +1,62 @@
+<template>
+    <div class="share-box-card">
+        <div class="share-title">
+            <Icon name="solar:link-bold" />
+            Share
+        </div>
+
+        <template v-if="!shareLink">
+            <p class="share-description">
+                Create a share link to let others view this item.
+            </p>
+
+            <button
+                class="create-share-btn"
+                :disabled="isLoading"
+                @click="createShareLink"
+            >
+                <Icon name="solar:link-circle-bold" />
+                Create Link
+            </button>
+        </template>
+
+        <template v-else>
+            <div class="share-link">
+                <input
+                    type="text"
+                    :value="shareLink"
+                    readonly
+                >
+
+               <button
+                    class="copy-btn"
+                    @click="copyShareLink"
+                >
+                    <Icon
+                        :name="copied
+                            ? 'solar:check-circle-bold'
+                            : 'solar:copy-bold'"
+                    />
+                </button>
+            </div>
+
+            <span class="share-description">
+                Anyone with the link can view this item.
+            </span>
+
+            <button
+                class="remove-share-btn"
+                :disabled="isLoading"
+                @click="removeShareLink"
+            >
+                <Icon name="solar:trash-bin-trash-linear" />
+                Remove Link
+            </button>
+        </template>
+
+    </div>
+</template>
+
 <script setup lang="ts">
 const props = defineProps<{
     itemId: string
@@ -186,65 +245,6 @@ watch(
     }
 )
 </script>
-
-<template>
-    <div class="share-box-card">
-        <div class="share-title">
-            <Icon name="solar:link-bold" />
-            Share
-        </div>
-
-        <template v-if="!shareLink">
-            <p class="share-description">
-                Create a share link to let others view this item.
-            </p>
-
-            <button
-                class="create-share-btn"
-                :disabled="isLoading"
-                @click="createShareLink"
-            >
-                <Icon name="solar:link-circle-bold" />
-                Create Link
-            </button>
-        </template>
-
-        <template v-else>
-            <div class="share-link">
-                <input
-                    type="text"
-                    :value="shareLink"
-                    readonly
-                >
-
-               <button
-                    class="copy-btn"
-                    @click="copyShareLink"
-                >
-                    <Icon
-                        :name="copied
-                            ? 'solar:check-circle-bold'
-                            : 'solar:copy-bold'"
-                    />
-                </button>
-            </div>
-
-            <span class="share-description">
-                Anyone with the link can view this item.
-            </span>
-
-            <button
-                class="remove-share-btn"
-                :disabled="isLoading"
-                @click="removeShareLink"
-            >
-                <Icon name="solar:trash-bin-trash-linear" />
-                Remove Link
-            </button>
-        </template>
-
-    </div>
-</template>
 
 <style scoped>
 .share-box-card {

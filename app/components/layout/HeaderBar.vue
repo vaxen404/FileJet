@@ -1,14 +1,3 @@
-<script setup lang="ts">
-defineProps({
-  title: {
-    type: String,
-    default: 'Dashboard'
-  }
-})
-
-const avatar = ref('VX')
-</script>
-
 <template>
   <header class="header-bar">
     <div class="title">
@@ -34,6 +23,17 @@ const avatar = ref('VX')
     </div>
   </header>
 </template>
+
+<script setup lang="ts">
+defineProps({
+  title: {
+    type: String,
+    default: 'Dashboard'
+  }
+})
+
+const avatar = ref('VX')
+</script>
 
 <style scoped>
 .header-bar {

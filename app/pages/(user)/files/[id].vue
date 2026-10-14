@@ -1,4 +1,254 @@
 
+<template>
+    <div class="file-page">
+        <div
+            v-if="file && !isPreviewable"
+            class="file-details"
+        >
+            <div class="file-breadcrumb">
+                <button
+                    class="breadcrumb-back"
+                    @click="goBack"
+                >
+                    <Icon name="solar:arrow-left-linear" size="1.2rem" />
+                    <span>{{ returnPage.name }}</span>
+                </button>
+
+                <span class="separator">/</span>
+
+                <span class="file-name">
+                    {{ file.name }}
+                </span>
+            </div>
+
+            <div class="file-details-body">
+                <div class="file-details-icon">
+                    <Icon
+                        :name="getFileIcon(file.original_name)"
+                        size="3.75rem"
+                    />
+                </div>
+
+                <div class="file-details-content">
+                    <div class="file-details-title">
+                        <input
+                            ref="nameInput"
+                            v-model="editingFileName"
+                            type="text"
+                            class="name-input"
+                            :class="{ active: isRenaming }"
+                            :readonly="!isRenaming"
+                            @keyup.enter="saveRename"
+                            @keyup.esc="cancelRename"
+                            @blur="handleRenameBlur"
+                        >
+
+                        <span>
+                            {{ file.mime_type || 'Unknown file type' }}
+                        </span>
+                    </div>
+
+                    <div class="file-stats">
+                        <div class="file-stat-card">
+                            <div class="file-stat-icon">
+                                <Icon name="solar:file-text-bold" size="1.45rem" />
+                            </div>
+
+                            <div class="file-stat-content">
+                                <span class="stat-label">Type</span>
+                                <span class="stat-value">
+                                    {{ fileExtension }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="file-stat-card">
+                            <div class="file-stat-icon">
+                                <Icon name="solar:database-bold" size="1.45rem" />
+                            </div>
+
+                            <div class="file-stat-content">
+                                <span class="stat-label">Size</span>
+                                <span class="stat-value">
+                                    {{ formatFileSize(file.size) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="file-stat-card">
+                            <div class="file-stat-icon">
+                                <Icon name="solar:calendar-add-bold" size="1.45rem" />
+                            </div>
+
+                            <div class="file-stat-content">
+                                <span class="stat-label">Created</span>
+                                <span class="stat-value">
+                                    {{ formatFileTime(file.created_at ?? '') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="file-stat-card">
+                            <div class="file-stat-icon">
+                                <Icon name="solar:clock-circle-bold" size="1.45rem" />
+                            </div>
+
+                            <div class="file-stat-content">
+                                <span class="stat-label">Modified</span>
+                                <span class="stat-value">
+                                    {{ formatFileTime(file.updated_at ?? '') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-details-actions">
+                <DetailsPanel
+                    :item-id="fileId"
+                    item-type="file"
+                    :actions="['download', 'rename', 'copy', 'favorite', 'delete']"
+                    :is-favorite="isFileFavorite(fileId)"
+                    :is-copying="isCopying"
+                    :can-copy="canCopy"
+                    :show-info="false"
+                    @download="handleDownload(fileId)"
+                    @rename="startRename"
+                    @copy="handleCopy"
+                    @favorite="handleFavorite(file)"
+                    @delete="handleDelete(fileId)"
+                />
+            </div>
+        </div>
+
+        <template v-else-if="file">
+            <div class="preview-navigation">
+                <button
+                    class="preview-back-btn"
+                    @click="goBack"
+                >
+                    <Icon name="solar:arrow-left-linear" size="1.2rem" />
+                    <span>Back to {{ returnPage.name }}</span>
+                </button>
+
+                <span class="separator">/</span>
+
+                <span class="file-name">
+                    {{ file.name }}
+                </span>
+            </div>
+
+            <DetailsView class="file-preview" :previewable="isPreviewable">
+                <template #preview>
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            <input
+                                v-if="isRenaming"
+                                ref="previewNameInput"
+                                v-model="editingFileName"
+                                type="text"
+                                class="name-input active"
+                                @keyup.enter="saveRename"
+                                @keyup.esc="cancelRename"
+                                @blur="handleRenameBlur"
+                            >
+
+                            <span v-else>{{ file.name }}</span>
+                        </div>
+
+                        <div class="preview-content" :class="{ 'text-preview': isText }">
+                            <img
+                                v-if="isImage"
+                                :src="`/api/files/preview?fileId=${file.id}`"
+                                :alt="file.name"
+                            >
+
+                            <pre v-else-if="isText">{{ textContent }}</pre>
+
+                            <iframe
+                                v-else-if="isPdf"
+                                :src="`/api/files/preview?fileId=${fileId}`"
+                            />
+
+                            <video
+                                v-else-if="isVideo"
+                                :src="`/api/files/preview?fileId=${fileId}`"
+                                controls
+                                preload="metadata"
+                            />
+                        </div>
+                    </div>
+                </template>
+
+                <template #details>
+                    <DetailsPanel
+                        :item-id="fileId"
+                        item-type="file"
+                        :actions="['download', 'favorite', 'rename', 'copy', 'delete']"
+                        :is-favorite="isFileFavorite(fileId)"
+                        :is-copying="isCopying"
+                        :can-copy="canCopy"
+                        :show-info="true"
+                        @download="handleDownload(fileId)"
+                        @favorite="handleFavorite(file)"
+                        @rename="startRename"
+                        @copy="handleCopy"
+                        @delete="handleDelete(fileId)"
+                    >
+                        <template #info>
+                            <div class="info-row">
+                                <span class="info-label">Name</span>
+                                <span class="info-value">{{ file.name }}</span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">Type</span>
+                                <span class="info-value">
+                                    {{ getFileType(file.original_name) }}
+                                </span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">Size</span>
+                                <span class="info-value">
+                                    {{ formatFileSize(file.size) }}
+                                </span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">Created</span>
+                                <span class="info-value">
+                                    {{ formatFileTime(file.created_at ?? '') }}
+                                </span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">Modified</span>
+                                <span class="info-value">
+                                    {{ formatFileTime(file.updated_at ?? '') }}
+                                </span>
+                            </div>
+
+                            <div v-if="isImage" class="info-row">
+                                <span class="info-label">Dimensions</span>
+                                <span class="info-value">
+                                    <template v-if="imageDimensions">
+                                        {{ imageDimensions.width }} × {{ imageDimensions.height }}
+                                    </template>
+                                    <template v-else>
+                                        -
+                                    </template>
+                                </span>
+                            </div>
+                        </template>
+                    </DetailsPanel>
+                </template>
+            </DetailsView>
+        </template>
+    </div>
+</template>
+
 <script setup lang="ts">
 import {
     canCopyFile,
@@ -265,256 +515,6 @@ onMounted(async () => {
     }
 })
 </script>
-
-<template>
-    <div class="file-page">
-        <div
-            v-if="file && !isPreviewable"
-            class="file-details"
-        >
-            <div class="file-breadcrumb">
-                <button
-                    class="breadcrumb-back"
-                    @click="goBack"
-                >
-                    <Icon name="solar:arrow-left-linear" size="1.2rem" />
-                    <span>{{ returnPage.name }}</span>
-                </button>
-
-                <span class="separator">/</span>
-
-                <span class="file-name">
-                    {{ file.name }}
-                </span>
-            </div>
-
-            <div class="file-details-body">
-                <div class="file-details-icon">
-                    <Icon
-                        :name="getFileIcon(file.original_name)"
-                        size="3.75rem"
-                    />
-                </div>
-
-                <div class="file-details-content">
-                    <div class="file-details-title">
-                        <input
-                            ref="nameInput"
-                            v-model="editingFileName"
-                            type="text"
-                            class="name-input"
-                            :class="{ active: isRenaming }"
-                            :readonly="!isRenaming"
-                            @keyup.enter="saveRename"
-                            @keyup.esc="cancelRename"
-                            @blur="handleRenameBlur"
-                        >
-
-                        <span>
-                            {{ file.mime_type || 'Unknown file type' }}
-                        </span>
-                    </div>
-
-                    <div class="file-stats">
-                        <div class="file-stat-card">
-                            <div class="file-stat-icon">
-                                <Icon name="solar:file-text-bold" size="1.45rem" />
-                            </div>
-
-                            <div class="file-stat-content">
-                                <span class="stat-label">Type</span>
-                                <span class="stat-value">
-                                    {{ fileExtension }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="file-stat-card">
-                            <div class="file-stat-icon">
-                                <Icon name="solar:database-bold" size="1.45rem" />
-                            </div>
-
-                            <div class="file-stat-content">
-                                <span class="stat-label">Size</span>
-                                <span class="stat-value">
-                                    {{ formatFileSize(file.size) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="file-stat-card">
-                            <div class="file-stat-icon">
-                                <Icon name="solar:calendar-add-bold" size="1.45rem" />
-                            </div>
-
-                            <div class="file-stat-content">
-                                <span class="stat-label">Created</span>
-                                <span class="stat-value">
-                                    {{ formatFileTime(file.created_at ?? '') }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="file-stat-card">
-                            <div class="file-stat-icon">
-                                <Icon name="solar:clock-circle-bold" size="1.45rem" />
-                            </div>
-
-                            <div class="file-stat-content">
-                                <span class="stat-label">Modified</span>
-                                <span class="stat-value">
-                                    {{ formatFileTime(file.updated_at ?? '') }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="file-details-actions">
-                <DetailsPanel
-                    :item-id="fileId"
-                    item-type="file"
-                    :actions="['download', 'rename', 'copy', 'favorite', 'delete']"
-                    :is-favorite="isFileFavorite(fileId)"
-                    :is-copying="isCopying"
-                    :can-copy="canCopy"
-                    :show-info="false"
-                    @download="handleDownload(fileId)"
-                    @rename="startRename"
-                    @copy="handleCopy"
-                    @favorite="handleFavorite(file)"
-                    @delete="handleDelete(fileId)"
-                />
-            </div>
-        </div>
-
-        <template v-else-if="file">
-            <div class="preview-navigation">
-                <button
-                    class="preview-back-btn"
-                    @click="goBack"
-                >
-                    <Icon name="solar:arrow-left-linear" size="1.2rem" />
-                    <span>Back to {{ returnPage.name }}</span>
-                </button>
-
-                <span class="separator">/</span>
-
-                <span class="file-name">
-                    {{ file.name }}
-                </span>
-            </div>
-
-            <DetailsView class="file-preview" :previewable="isPreviewable">
-                <template #preview>
-                    <div class="preview-card">
-                        <div class="preview-header">
-                            <input
-                                v-if="isRenaming"
-                                ref="previewNameInput"
-                                v-model="editingFileName"
-                                type="text"
-                                class="name-input active"
-                                @keyup.enter="saveRename"
-                                @keyup.esc="cancelRename"
-                                @blur="handleRenameBlur"
-                            >
-
-                            <span v-else>{{ file.name }}</span>
-                        </div>
-
-                        <div class="preview-content" :class="{ 'text-preview': isText }">
-                            <img
-                                v-if="isImage"
-                                :src="`/api/files/preview?fileId=${file.id}`"
-                                :alt="file.name"
-                            >
-
-                            <pre v-else-if="isText">{{ textContent }}</pre>
-
-                            <iframe
-                                v-else-if="isPdf"
-                                :src="`/api/files/preview?fileId=${fileId}`"
-                            />
-
-                            <video
-                                v-else-if="isVideo"
-                                :src="`/api/files/preview?fileId=${fileId}`"
-                                controls
-                                preload="metadata"
-                            />
-                        </div>
-                    </div>
-                </template>
-
-                <template #details>
-                    <DetailsPanel
-                        :item-id="fileId"
-                        item-type="file"
-                        :actions="['download', 'favorite', 'rename', 'copy', 'delete']"
-                        :is-favorite="isFileFavorite(fileId)"
-                        :is-copying="isCopying"
-                        :can-copy="canCopy"
-                        :show-info="true"
-                        @download="handleDownload(fileId)"
-                        @favorite="handleFavorite(file)"
-                        @rename="startRename"
-                        @copy="handleCopy"
-                        @delete="handleDelete(fileId)"
-                    >
-                        <template #info>
-                            <div class="info-row">
-                                <span class="info-label">Name</span>
-                                <span class="info-value">{{ file.name }}</span>
-                            </div>
-
-                            <div class="info-row">
-                                <span class="info-label">Type</span>
-                                <span class="info-value">
-                                    {{ getFileType(file.original_name) }}
-                                </span>
-                            </div>
-
-                            <div class="info-row">
-                                <span class="info-label">Size</span>
-                                <span class="info-value">
-                                    {{ formatFileSize(file.size) }}
-                                </span>
-                            </div>
-
-                            <div class="info-row">
-                                <span class="info-label">Created</span>
-                                <span class="info-value">
-                                    {{ formatFileTime(file.created_at ?? '') }}
-                                </span>
-                            </div>
-
-                            <div class="info-row">
-                                <span class="info-label">Modified</span>
-                                <span class="info-value">
-                                    {{ formatFileTime(file.updated_at ?? '') }}
-                                </span>
-                            </div>
-
-                            <div v-if="isImage" class="info-row">
-                                <span class="info-label">Dimensions</span>
-                                <span class="info-value">
-                                    <template v-if="imageDimensions">
-                                        {{ imageDimensions.width }} × {{ imageDimensions.height }}
-                                    </template>
-                                    <template v-else>
-                                        -
-                                    </template>
-                                </span>
-                            </div>
-                        </template>
-                    </DetailsPanel>
-                </template>
-            </DetailsView>
-        </template>
-    </div>
-</template>
 
 <style scoped>
 .file-page {

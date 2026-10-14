@@ -1,13 +1,3 @@
-<script setup lang="ts">
-defineProps<{
-    modelValue: 'list' | 'grid'
-}>()
-
-const emit = defineEmits<{
-    'update:modelValue': [value: 'list' | 'grid']
-}>()
-</script>
-
 <template>
     <div class="view-switcher">
         <button
@@ -29,6 +19,16 @@ const emit = defineEmits<{
         </button>
     </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+    modelValue: 'list' | 'grid'
+}>()
+
+const emit = defineEmits<{
+    'update:modelValue': [value: 'list' | 'grid']
+}>()
+</script>
 
 <style scoped>
 .view-switcher {

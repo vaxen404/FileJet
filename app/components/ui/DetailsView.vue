@@ -1,15 +1,4 @@
 
-<script setup lang="ts">
-withDefaults(
-    defineProps<{
-        previewable?: boolean
-    }>(),
-    {
-        previewable: false
-    }
-)
-</script>
-
 <template>
     <div
         class="details-view"
@@ -27,6 +16,17 @@ withDefaults(
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+withDefaults(
+    defineProps<{
+        previewable?: boolean
+    }>(),
+    {
+        previewable: false
+    }
+)
+</script>
 
 <style scoped>
 .details-view {

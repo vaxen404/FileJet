@@ -1,14 +1,3 @@
-<script setup lang="ts">
-withDefaults(
-    defineProps<{
-        message: string
-        show: boolean
-        type?: 'success' | 'error'
-    }>(),
-    { type: 'success' }
-)
-</script>
-
 <template>
     <Transition name="toast">
         <div
@@ -29,6 +18,17 @@ withDefaults(
         </div>
     </Transition>
 </template>
+
+<script setup lang="ts">
+withDefaults(
+    defineProps<{
+        message: string
+        show: boolean
+        type?: 'success' | 'error'
+    }>(),
+    { type: 'success' }
+)
+</script>
 
 <style scoped>
     .toast {

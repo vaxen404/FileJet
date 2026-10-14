@@ -1,3 +1,31 @@
+<template>
+    <div>
+        <input
+            ref="fileInput"
+            type="file"
+            class="file-input"
+            multiple
+            @change="handleFileChange"
+        >
+
+        <button
+            type="button"
+            class="upload-button"
+            @click="openPicker"
+        >
+            <div class="upload-left">
+                <Icon name="solar:cloud-upload-bold" />
+                {{ text }}
+            </div>
+
+            <Icon
+                name="solar:alt-arrow-down-linear"
+                class="small-arrow"
+            />
+        </button>
+    </div>
+</template>
+
 <script setup lang="ts">
 const props = withDefaults(
     defineProps<{
@@ -42,34 +70,6 @@ const handleFileChange = (event: Event) => {
     input.value = ''
 }
 </script>
-
-<template>
-    <div>
-        <input
-            ref="fileInput"
-            type="file"
-            class="file-input"
-            multiple
-            @change="handleFileChange"
-        >
-
-        <button
-            type="button"
-            class="upload-button"
-            @click="openPicker"
-        >
-            <div class="upload-left">
-                <Icon name="solar:cloud-upload-bold" />
-                {{ text }}
-            </div>
-
-            <Icon
-                name="solar:alt-arrow-down-linear"
-                class="small-arrow"
-            />
-        </button>
-    </div>
-</template>
 
 <style scoped>
 .file-input {
