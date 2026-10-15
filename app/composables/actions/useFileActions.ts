@@ -44,8 +44,6 @@ export const useFileActions = () => {
         activeUploads.value++
         startLoading()
 
-        let uploaded = false
-
         try {
             const formData = new FormData()
 
@@ -96,11 +94,8 @@ export const useFileActions = () => {
                 xhr.send(formData)
             })
 
-            uploaded = true
             await onSuccess?.()
         } finally {
-            if (!uploaded) uploads.delete(uploadId)
-
             activeUploads.value--
             if (!activeUploads.value) uploads.clear()
             stopLoading()

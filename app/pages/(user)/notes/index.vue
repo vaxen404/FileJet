@@ -224,6 +224,13 @@ definePageMeta({
     layout: 'user'
 })
 
+const {
+    isLoading,
+    isUploading,
+    isDeleting,
+    
+} = useNoteActions()
+
 const { openToast } = useToast()
 const { notes, favorites, pending, error, fetchAll } = useUser()
 type NoteItem = (typeof notes.value)[number]

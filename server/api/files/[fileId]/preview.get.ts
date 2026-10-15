@@ -2,8 +2,9 @@
 import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
+import { isUuid } from "~~/server/utils/validation"
 import { readFile, stat } from "node:fs/promises"
-import { join } from "node:path"
+import { resolve, sep } from "node:path"
 import { createReadStream } from "node:fs"
 
 export default defineEventHandler(async (event) => {
@@ -16,10 +17,10 @@ export default defineEventHandler(async (event) => {
 
         enforceRateLimit(event, `files-preview:${session.userId}`, 60, 60 * 1000)
 
-        const { fileId } = getQuery(event)
+        const fileId = getRouterParam(event, 'fileId')
 
-        if (!fileId || typeof fileId !== 'string') {
-            throwError(400, 'File ID is required.')
+        if (!fileId || !isUuid(fileId)) {
+            throwError(400, 'Invalid file ID.')
         }
 
         const file = await prisma.files.findFirst({
@@ -37,11 +38,22 @@ export default defineEventHandler(async (event) => {
             throwError(415, 'File preview is not supported.')
         }
 
-        const filePath = join(
-            process.cwd(),
-            'storage',
-            file.storage_key
-        )
+        const storageRoot = resolve(process.cwd(), 'storage')
+        const filePath = resolve(storageRoot, file.storage_key)
+
+        if (!filePath.startsWith(storageRoot + sep)) {
+            throwError(400, 'Invalid file storage path.')
+        }
+
+        const fileStat = await stat(filePath)
+
+        if (!fileStat.isFile()) {
+            throwError(404, 'File not found in storage. Please upload it again.')
+        }
+
+        setHeader(event, 'Cache-Control', 'no-store')
+        setHeader(event, 'X-Content-Type-Options', 'nosniff')
+        setHeader(event, 'Content-Security-Policy', "sandbox; default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'")
 
         if (file.mime_type.startsWith('text/')) {
             const content = await readFile(filePath, 'utf-8')
@@ -64,7 +76,6 @@ export default defineEventHandler(async (event) => {
         }
 
         setHeader(event, 'Content-Type', file.mime_type)
-        setHeader(event, 'X-Content-Type-Options', 'nosniff')
 
         setHeader(
             event,
@@ -73,7 +84,7 @@ export default defineEventHandler(async (event) => {
         )
 
         if (isVideo) {
-            const { size } = await stat(filePath)
+            const { size } = fileStat
             const range = getHeader(event, 'range')
 
             setHeader(event, 'Accept-Ranges', 'bytes')
@@ -124,7 +135,7 @@ export default defineEventHandler(async (event) => {
                     end - start + 1
                 )
 
-                return sendStream(
+                return await sendStream(
                     event,
                     createReadStream(filePath, { start, end })
                 )
@@ -133,12 +144,16 @@ export default defineEventHandler(async (event) => {
             setHeader(event, 'Content-Length', size)
         }
 
-        return sendStream(
+        return await sendStream(
             event,
             createReadStream(filePath)
         )
     } catch (err: any) {
         if (err.statusCode) throw err
+
+        if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
+            throwError(404, 'File not found in storage. Please upload it again.')
+        }
 
         throwError(500, 'An error occurred while previewing the file.')
     }

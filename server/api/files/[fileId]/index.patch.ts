@@ -1,6 +1,7 @@
 import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
+import { isUuid } from "~~/server/utils/validation"
 
 export default defineEventHandler(async (event) => {
     try {
@@ -12,12 +13,35 @@ export default defineEventHandler(async (event) => {
 
         enforceRateLimit(event, `files-rename:${session.userId}`, 10, 60 * 1000)
 
-        const { fileId, newName } = await readBody(event)
+        const fileId = getRouterParam(event, 'fileId')
+
+        if (!fileId || !isUuid(fileId)) {
+            throwError(400, 'Invalid file ID.')
+        }
+
+        const body = await readBody(event)
+
+        if (!body || typeof body !== 'object' || typeof body.newName !== 'string') {
+            throwError(400, 'Invalid request body.')
+        }
+
+        const { newName } = body
 
         const cleanName = newName.trim()
 
-        if (!fileId || !cleanName) {
+        if (!cleanName) {
             throwError(400, 'Eksik veri.')
+        }
+
+        if (
+            cleanName === '.' ||
+            cleanName === '..' ||
+            cleanName.includes('/') ||
+            cleanName.includes('\\') ||
+            cleanName.includes('\0') ||
+            newName.length > 255
+        ) {
+            throwError(400, 'Invalid filename.')
         }
         
         const file = await prisma.files.findFirst({
@@ -37,6 +61,10 @@ export default defineEventHandler(async (event) => {
         : ''
 
         const originalName = `${cleanName}${extension}`
+
+        if (originalName.length > 255) {
+            throwError(400, 'Invalid filename.')
+        }
 
         const existingFile = await prisma.files.findFirst({
             where: {

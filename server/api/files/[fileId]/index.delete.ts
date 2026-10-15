@@ -2,7 +2,7 @@ import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
 import { isUuid } from "~~/server/utils/validation"
-import { join } from "node:path"
+import { resolve, sep } from "node:path"
 import { unlink } from "node:fs/promises"
 
 export default defineEventHandler(async (event) => {
@@ -15,13 +15,7 @@ export default defineEventHandler(async (event) => {
 
         enforceRateLimit(event, `files-delete:${session.userId}`, 10, 60 * 1000)
 
-        const body = await readBody(event)
-
-        if (!body || typeof body !== 'object') {
-            throwError(400, 'Invalid request body.')
-        }
-
-        const { fileId } = body
+        const fileId = getRouterParam(event, 'fileId')
 
         if (typeof fileId !== 'string' || !isUuid(fileId)) {
             throwError(400, 'Invalid file ID.')
@@ -38,13 +32,18 @@ export default defineEventHandler(async (event) => {
             throwError(404, 'File not found.')
         }
 
-        const filePath = join(
-            process.cwd(),
-            'storage',
-            file.storage_key
-        )
+        const storageRoot = resolve(process.cwd(), 'storage')
+        const filePath = resolve(storageRoot, file.storage_key)
 
-        await unlink(filePath)
+        if (!filePath.startsWith(storageRoot + sep)) {
+            throwError(400, 'Invalid file storage path.')
+        }
+
+        try {
+            await unlink(filePath)
+        } catch (err: any) {
+            if (err.code !== 'ENOENT') throw err
+        }
 
         await prisma.$transaction([
             prisma.shared_items.deleteMany({

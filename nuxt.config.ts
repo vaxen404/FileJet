@@ -1,3 +1,4 @@
+
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
 
@@ -14,7 +15,9 @@ export default defineNuxtConfig({
             'composables',
             'composables/**',
             'utils',
-            'utils/**'
+            'utils/**',
+            'shared/schemas',
+            'shared/schemas/**'
         ]
     },
 

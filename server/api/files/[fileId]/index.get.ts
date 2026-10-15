@@ -1,6 +1,7 @@
-import { prisma } from "~~/server/utils/prisma";
-import { getAuthSession } from "~~/server/utils/auth";
-import { throwError } from "~~/server/utils/error";
+import { prisma } from "~~/server/utils/prisma"
+import { getAuthSession } from "~~/server/utils/auth"
+import { throwError } from "~~/server/utils/error"
+import { isUuid } from "~~/server/utils/validation"
 
 export default defineEventHandler(async (event) => {
     try {
@@ -10,17 +11,16 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'You need to be logged in.')
         }
 
-        const fileId = getRouterParam(event, 'id')
+        const fileId = getRouterParam(event, 'fileId')
 
-        if (!fileId) {
-            throwError(400, 'File ID is required.')
+        if (!fileId || !isUuid(fileId)) {
+            throwError(400, 'Invalid file ID.')
         }
 
         const file = await prisma.files.findFirst({
             where: {
                 id: fileId,
-                user_id: session.userId,
-
+                user_id: session.userId
             }
         })
 

@@ -15,20 +15,18 @@ export default defineEventHandler(async (event) => {
 
         enforceRateLimit(event, `folder-delete:${session.userId}`, 10, 60 * 1000)
 
-        const body = await readBody(event)
+        const folderId = getRouterParam(event, 'folderId')
 
         if (
-            !body ||
-            typeof body !== 'object' ||
-            typeof body.folderId !== 'string' ||
-            !isUuid(body.folderId)
+            typeof folderId !== 'string' ||
+            !isUuid(folderId)
         ) {
             throwError(400, 'Invalid folder ID.')
         }
 
         const folder = await prisma.folders.findFirst({
             where: {
-                id: body.folderId,
+                id: folderId,
                 user_id: session.userId
             }
         })

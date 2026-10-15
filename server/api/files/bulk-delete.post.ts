@@ -2,7 +2,7 @@ import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
-import { join } from 'node:path'
+import { resolve, sep } from 'node:path'
 import { unlink } from 'node:fs/promises'
 
 export default defineEventHandler(async (event) => {
@@ -35,8 +35,15 @@ export default defineEventHandler(async (event) => {
 
         for (const file of files) {
             try {
+                const storageRoot = resolve(process.cwd(), 'storage')
+                const filePath = resolve(storageRoot, file.storage_key)
+
+                if (!filePath.startsWith(storageRoot + sep)) {
+                    throwError(400, 'Invalid file storage path.')
+                }
+
                 try {
-                    await unlink(join(process.cwd(), 'storage', file.storage_key))
+                    await unlink(filePath)
                 } catch (err: any) {
                     if (err.code !== 'ENOENT') throw err
                 }
