@@ -2,12 +2,13 @@
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
-import { getFileParts, getTotalUploadSize } from '~~/server/utils/files'
-import { stageUpload } from '~~/server/utils/uploads'
+import { getFileParts, getTotalUploadSize, saveFileToStorage } from '~~/server/utils/files'
 import { reserveStorage } from '~~/server/utils/storage'
+import { resolve, sep } from 'node:path'
+import { unlink } from 'node:fs/promises'
 
 export default defineEventHandler(async (event) => {
-    let batch: Awaited<ReturnType<typeof stageUpload>> | undefined
+    const savedKeys: string[] = []
 
     try {
         const session = getAuthSession(event)
@@ -36,8 +37,8 @@ export default defineEventHandler(async (event) => {
 
         const seen = new Set<string>()
 
-        const items = files.map((part, i) => {
-            const relativePath = paths[i]
+        const items = files.map((part, index) => {
+            const relativePath = paths[index]
 
             if (!relativePath) {
                 throwError(400, 'Invalid folder path.')
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
                 throwError(400, 'Invalid folder path.')
             }
 
-            const path = segments.join('/')
+            const path = segments.join('/').toLowerCase()
 
             if (seen.has(path)) {
                 throwError(409, 'Duplicate file path in upload.')
@@ -101,23 +102,13 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Not enough storage space.')
         }
 
-        batch = await stageUpload(session.userId, files)
-
-        const keys = batch.keys
-
-        const result = await batch.commit(async (tx) => {
-            await reserveStorage(
-                tx,
-                session.userId,
-                totalSize
-            )
+        const result = await prisma.$transaction(async (tx) => {
+            await reserveStorage(tx, session.userId, totalSize)
 
             const cache = new Map<string, string>()
             let foldersCreated = 0
 
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i]!
-
+            for (const item of items) {
                 let parentId: string | null = null
                 let currentPath = ''
 
@@ -145,31 +136,43 @@ export default defineEventHandler(async (event) => {
                             }
                         })
 
-                    const folder: { id: string } =
-                        existingFolder ?? await tx.folders.create({
-                            data: {
-                                user_id: session.userId,
-                                parent_folder_id: parentId,
-                                name
-                            },
-                            select: {
-                                id: true
-                            }
-                        })
+                    let folderId: string
 
-                    if (!existingFolder) {
+                    if (existingFolder) {
+                        folderId = existingFolder.id
+                    } else {
+                        const createdFolder: { id: string } =
+                            await tx.folders.create({
+                                data: {
+                                    user_id: session.userId,
+                                    parent_folder_id: parentId,
+                                    name
+                                },
+                                select: {
+                                    id: true
+                                }
+                            })
+
+                        folderId = createdFolder.id
                         foldersCreated++
                     }
 
-                    parentId = folder.id
-                    cache.set(currentPath, parentId)
+                    parentId = folderId
+                    cache.set(currentPath, folderId)
+                }
+
+                if (!parentId) {
+                    throwError(400, 'Invalid folder path.')
                 }
 
                 const existingFile = await tx.files.findFirst({
                     where: {
                         user_id: session.userId,
                         folder_id: parentId,
-                        original_name: item.fileName
+                        original_name: {
+                            equals: item.fileName,
+                            mode: 'insensitive'
+                        }
                     },
                     select: {
                         id: true
@@ -177,8 +180,18 @@ export default defineEventHandler(async (event) => {
                 })
 
                 if (existingFile) {
-                    throwError(409, 'A file with this path already exists.')
+                    throwError(
+                        409,
+                        `A file named "${item.fileName}" already exists in this folder.`
+                    )
                 }
+
+                const { storageKey } = await saveFileToStorage(
+                    session.userId,
+                    item.part
+                )
+
+                savedKeys.push(storageKey)
 
                 await tx.files.create({
                     data: {
@@ -188,7 +201,7 @@ export default defineEventHandler(async (event) => {
                         original_name: item.fileName,
                         mime_type: item.part.type ?? null,
                         size: BigInt(item.part.data.length),
-                        storage_key: keys[i]!
+                        storage_key: storageKey
                     }
                 })
             }
@@ -197,10 +210,10 @@ export default defineEventHandler(async (event) => {
                 filesUploaded: items.length,
                 foldersCreated
             }
+        }, {
+            maxWait: 5000,
+            timeout: 60000
         })
-
-        await batch.finish()
-        batch = undefined
 
         setResponseStatus(event, 201)
 
@@ -209,11 +222,27 @@ export default defineEventHandler(async (event) => {
             ...result
         }
     } catch (error: unknown) {
-        if (batch) {
+        const storageRoot = resolve(process.cwd(), 'storage')
+
+        for (const storageKey of savedKeys) {
+            const filePath = resolve(storageRoot, storageKey)
+
+            if (!filePath.startsWith(storageRoot + sep)) {
+                console.error('[INVALID STORAGE PATH]', storageKey)
+                continue
+            }
+
             try {
-                await batch.rollback()
-            } catch (rollbackError) {
-                console.error('[FOLDER UPLOAD ROLLBACK ERROR]', rollbackError)
+                await unlink(filePath)
+            } catch (cleanupError: unknown) {
+                if (
+                    cleanupError &&
+                    typeof cleanupError === 'object' &&
+                    'code' in cleanupError &&
+                    cleanupError.code !== 'ENOENT'
+                ) {
+                    console.error('[FOLDER CLEANUP ERROR]', cleanupError)
+                }
             }
         }
 
@@ -231,7 +260,7 @@ export default defineEventHandler(async (event) => {
             'code' in error &&
             error.code === 'P2002'
         ) {
-            throwError(409, 'A folder with this name already exists.')
+            throwError(409, 'A folder or file with this name already exists.')
         }
 
         console.error('[FOLDER UPLOAD ERROR]', error)
