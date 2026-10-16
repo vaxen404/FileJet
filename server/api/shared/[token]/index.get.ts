@@ -29,9 +29,10 @@ export default defineEventHandler(async (event) => {
         }
 
         if (sharedItem.item_type === 'file') {
-            const file = await prisma.files.findUnique({
+            const file = await prisma.files.findFirst({
                 where: {
-                    id: sharedItem.item_id
+                    id: sharedItem.item_id,
+                    user_id: sharedItem.user_id
                 },
                 select: {
                     id: true,
@@ -53,15 +54,16 @@ export default defineEventHandler(async (event) => {
                 sharedBy: sharedItem.users.username,
                 item: {
                     ...file,
-                    size: Number(file.size)
+                    size: file.size.toString()
                 }
             }
         }
 
         if (sharedItem.item_type === 'folder') {
-            const folder = await prisma.folders.findUnique({
+            const folder = await prisma.folders.findFirst({
                 where: {
-                    id: sharedItem.item_id
+                    id: sharedItem.item_id,
+                    user_id: sharedItem.user_id
                 },
                 select: {
                     id: true,
@@ -83,9 +85,10 @@ export default defineEventHandler(async (event) => {
         }
 
         if (sharedItem.item_type === 'note') {
-            const note = await prisma.notes.findUnique({
+            const note = await prisma.notes.findFirst({
                 where: {
-                    id: sharedItem.item_id
+                    id: sharedItem.item_id,
+                    user_id: sharedItem.user_id
                 },
                 select: {
                     id: true,
@@ -106,7 +109,7 @@ export default defineEventHandler(async (event) => {
                 sharedBy: sharedItem.users.username,
                 item: {
                     ...note,
-                    size: Number(note.size)
+                    size: note.size.toString()
                 }
             }
         }

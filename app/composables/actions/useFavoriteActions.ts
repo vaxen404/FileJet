@@ -5,7 +5,9 @@ export const useFavoriteActions = () => {
         itemId: string,
         itemType: FavoriteType
     ) => {
-        await $fetch('/api/favorites/add', {
+        const url: string = '/api/favorites'
+
+        await $fetch(url, {
             method: 'POST',
             body: {
                 itemId,
@@ -18,12 +20,10 @@ export const useFavoriteActions = () => {
         itemId: string,
         itemType: FavoriteType
     ) => {
-        await $fetch('/api/favorites/remove', {
-            method: 'POST',
-            body: {
-                itemId,
-                itemType
-            }
+        const url: string = `/api/favorites/${itemType}/${encodeURIComponent(itemId)}`
+
+        await $fetch(url, {
+            method: 'DELETE'
         })
     }
 

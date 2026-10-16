@@ -160,7 +160,7 @@
                         <div class="preview-content" :class="{ 'text-preview': isText }">
                             <img
                                 v-if="isImage"
-                                :src="`/api/files/preview?fileId=${file.id}`"
+                                :src="`/api/files/${encodeURIComponent(file.id)}/preview`"
                                 :alt="file.name"
                             >
 
@@ -168,12 +168,12 @@
 
                             <iframe
                                 v-else-if="isPdf"
-                                :src="`/api/files/preview?fileId=${fileId}`"
+                                :src="`/api/files/${encodeURIComponent(fileId)}/preview`"
                             />
 
                             <video
                                 v-else-if="isVideo"
-                                :src="`/api/files/preview?fileId=${fileId}`"
+                                :src="`/api/files/${encodeURIComponent(fileId)}/preview`"
                                 controls
                                 preload="metadata"
                             />
@@ -478,7 +478,7 @@ const textContent = ref('')
 
 if (isText.value) {
     textContent.value = await $fetch<string>(
-        `/api/files/preview?fileId=${fileId}`
+        `/api/files/${encodeURIComponent(fileId)}/preview`
     )
 }
 
@@ -508,7 +508,7 @@ onMounted(async () => {
 
     try {
         imageDimensions.value = await getImageDimensions(
-            `/api/files/preview?fileId=${file.value.id}`
+            `/api/files/${encodeURIComponent(file.value.id)}/preview`
         )
     } catch {
         imageDimensions.value = null

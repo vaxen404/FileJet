@@ -42,20 +42,40 @@
         <DataView
             :view-mode="viewMode"
             :is-dragging="isDragging"
-            :is-loading="pending"
+            :is-loading="pending || isLoading"
             drop-text="Drop notes to upload"
             @dragover="isDragging = true"
             @dragleave="isDragging = false"
             @drop="handleDrop"
         >
             <template #loading>
-                <div class="loading-state" role="status" aria-live="polite">
-                    <span class="loading-spinner" aria-hidden="true" />
-                    <span>Loading notes...</span>
+                <div class="upload-loading" role="status" aria-live="polite">
+                    <template v-if="isUploading && uploadProgress !== null">
+                        <span>{{ uploadProgress }}%</span>
+
+                        <div
+                            class="upload-progress"
+                            role="progressbar"
+                            aria-label="Uploading notes"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            :aria-valuenow="uploadProgress"
+                        >
+                            <div
+                                class="upload-progress-bar"
+                                :style="{ width: `${uploadProgress}%` }"
+                            ></div>
+                        </div>
+                    </template>
+
+                    <div v-if="!isUploading || uploadProgress === null" class="loading-state">
+                        <span class="loading-spinner" aria-hidden="true" />
+                        <span>{{ isUploading ? 'Uploading notes...' : 'Loading notes...' }}</span>
+                    </div>
                 </div>
             </template>
 
-            <template v-if="!pending && filteredNotes.length === 0" #empty>
+            <template v-if="!pending && !isLoading && filteredNotes.length === 0" #empty>
                 <div class="empty-state">
                     <Icon name="solar:notebook-linear" size="2.5rem" class="empty-state-icon" />
                     <strong>{{ notes.length ? 'No matching notes' : 'No notes yet' }}</strong>
@@ -228,7 +248,8 @@ const {
     isLoading,
     isUploading,
     isDeleting,
-    
+    uploadProgress,
+    uploadNote,
 } = useNoteActions()
 
 const { openToast } = useToast()
@@ -272,16 +293,25 @@ const isNoteFavorite = (noteId: string) => {
     return favorites.value.some(favorite => favorite.note_id === noteId)
 }
 
-const handleDrop = (event: DragEvent) => {
+const handleDrop = async (event: DragEvent) => {
     isDragging.value = false
     const droppedNotes = event.dataTransfer?.files
     if (!droppedNotes?.length) return
-    console.log('Upload notes:', droppedNotes)
+    await handleNoteUpload(droppedNotes)
 }
 
-const handleNoteUpload = (files: FileList) => {
+const handleNoteUpload = async (files: FileList) => {
     if (!files.length) return
-    console.log('Upload notes:', files)
+
+    try {
+        await uploadNote(files, async () => {
+            await fetchAll()
+            if (error.value) throw new Error(error.value)
+        })
+        openToast('Notes uploaded successfully.', 'success')
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Note upload failed.', 'error')
+    }
 }
 
 const createNote = () => {
@@ -816,6 +846,39 @@ watch([searchQuery, sortMode, viewMode], () => {
 
 .note-card-select:hover {
     background: #252529;
+}
+
+.upload-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    background: rgba(18, 18, 20, 0.92);
+    color: #ffffff;
+}
+
+.upload-loading > span {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.upload-progress {
+    width: 16rem;
+    height: 0.5rem;
+    background: #29292e;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.upload-progress-bar {
+    height: 100%;
+    background: #3c47be;
+    border-radius: 999px;
+    transition: width 0.15s ease;
 }
 
 .loading-state {

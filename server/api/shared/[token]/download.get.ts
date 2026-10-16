@@ -27,9 +27,10 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const file = await prisma.files.findUnique({
+    const file = await prisma.files.findFirst({
         where: {
-            id: sharedItem.item_id
+            id: sharedItem.item_id,
+                    user_id: sharedItem.user_id
         }
     })
 
@@ -54,7 +55,8 @@ export default defineEventHandler(async (event) => {
 
     try {
         fileStat = await stat(filePath)
-    } catch {
+    } catch (error: any) {
+        if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error
         throw createError({
             statusCode: 404,
             statusMessage: 'File not found on disk'

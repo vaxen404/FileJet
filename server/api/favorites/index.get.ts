@@ -12,10 +12,18 @@ export default defineEventHandler(async (event) => {
 
         const favorites = await prisma.favorites.findMany({
             where: {
-                user_id: session.userId
+                user_id: session.userId,
+                OR: [
+                    { files: { is: { user_id: session.userId } }, folder_id: null, note_id: null },
+                    { folders: { is: { user_id: session.userId } }, file_id: null, note_id: null },
+                    { notes: { is: { user_id: session.userId } }, file_id: null, folder_id: null }
+                ]
             },
             include: {
-                files: true,
+                files: { select: {
+                    id: true, user_id: true, folder_id: true, name: true, original_name: true,
+                    mime_type: true, size: true, created_at: true, updated_at: true
+                } },
                 folders: true,
                 notes: true
             },
@@ -24,19 +32,20 @@ export default defineEventHandler(async (event) => {
             }
         })
 
+
         return {
             favorites: favorites.map((item) => ({
                 ...item,
-                files: item.files 
+                files: item.files
                     ? {
                         ...item.files,
-                        size: Number(item.files.size)
+                        size: item.files.size.toString()
                     }
                     : null,
                 notes: item.notes
                     ? {
                         ...item.notes,
-                        size: Number(item.notes.size)
+                        size: item.notes.size.toString()
                     }
                     : null
             }))

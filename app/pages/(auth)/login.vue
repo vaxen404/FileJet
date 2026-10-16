@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { loginSchema } from '~/schemas/auth'
+import { loginSchema } from '~~/shared/schemas/auth'
 
 const username = ref('')
 const password = ref('')

@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
 
         return {
             ...file,
-            size: Number(file.size)
+            size: file.size.toString()
         }
     } catch (err: any) {
         if (err.statusCode) throw err

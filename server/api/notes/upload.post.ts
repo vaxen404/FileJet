@@ -1,3 +1,4 @@
+import { reserveStorage } from '~~/server/utils/storage'
 import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
@@ -113,44 +114,11 @@ export default defineEventHandler(async (event) => {
         }
 
         const uploadedNotes = await prisma.$transaction(async (tx) => {
-            const user = await tx.users.findUnique({
-                where: {
-                    id: session.userId
-                },
-                select: {
-                    storage_limit: true,
-                    storage_used: true
-                }
-            })
-
-            if (!user) {
-                throwError(401, 'Invalid session.')
-            }
-
-            const totalUploadSize = notes.reduce(
-                (total, note) => total + note.size,
-                0n
-            )
-            const storageUsed = user.storage_used ?? 0n
-            const storageLimit = user.storage_limit ?? 0n
-            const remainingStorage = storageLimit - storageUsed
-
-            if (totalUploadSize > remainingStorage) {
-                throwError(400, 'Not enough storage space.')
-            }
-
-            const updated = await tx.users.updateMany({
-                where: {
-                    id: session.userId,
-                    storage_used: user.storage_used
-                }, 
-                data: {
-                    storage_used: storageUsed + totalUploadSize
-                }
-            })
-
-            if (updated.count !== 1) {
-                throwError(409, 'Storage changed. Please try again.')
+            await reserveStorage(tx, session.userId, notes.reduce((total, note) => total + note.size, 0n))
+            for (const note of notes) {
+                if (await tx.notes.findFirst({ where: {
+                    user_id: session.userId, folder_id: null, title: note.title
+                } })) throwError(409, `A note named "${note.title}" already exists.`)
             }
 
             const created = await tx.notes.createManyAndReturn({

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         })
 
         return {
-            notes
+            notes: notes.map(note => ({ ...note, size: note.size.toString() }))
         }
     } catch (err: any) {
         if (err.statusCode) throw err

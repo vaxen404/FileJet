@@ -1,4 +1,6 @@
 
+/// <reference lib="dom.asynciterable" />
+
 export const useFolderActions = () => {
     const activeRequests = ref(0)
     const activeUploads = ref(0)
@@ -38,10 +40,43 @@ export const useFolderActions = () => {
         activeRequests.value = Math.max(0, activeRequests.value - 1)
     }
 
+    const getFolderFiles = async (
+        directory: FileSystemDirectoryHandle,
+        path = directory.name
+    ): Promise<File[]> => {
+        const files: File[] = []
+
+        for await (const entry of directory.values()) {
+            if (entry.kind === 'file') {
+                const file = await (entry as FileSystemFileHandle).getFile()
+
+                Object.defineProperty(file, 'webkitRelativePath', {
+                    value: `${path}/${file.name}`,
+                    configurable: true
+                })
+
+                files.push(file)
+            } else if (entry.kind === 'directory') {
+                const nestedFiles = await getFolderFiles(
+                    entry as FileSystemDirectoryHandle,
+                    `${path}/${entry.name}`
+                )
+
+                files.push(...nestedFiles)
+            }
+        }
+
+        return files
+    }
+
     const uploadFolders = async (
-        files: FileList | File[],
+        input: FileSystemDirectoryHandle | FileList | File[],
         onSuccess?: () => Promise<void>
     ) => {
+        const files = typeof FileSystemDirectoryHandle !== 'undefined' && input instanceof FileSystemDirectoryHandle
+            ? await getFolderFiles(input)
+            : Array.from(input as FileList | File[])
+
         if (files.length === 0) return
 
         const uploadId = Symbol()
@@ -64,7 +99,7 @@ export const useFolderActions = () => {
             await new Promise<void>((resolve, reject) => {
                 const xhr = new XMLHttpRequest()
 
-                xhr.open('POST', '/api/folders/upload')
+                xhr.open('POST', '/api/folders')
                 xhr.responseType = 'json'
                 xhr.setRequestHeader('Accept', 'application/json')
 
@@ -134,9 +169,8 @@ export const useFolderActions = () => {
         startLoading()
 
         try {
-            await $fetch('/api/folders/delete', {
-                method: 'POST',
-                body: { folderId }
+            await $fetch(`/api/folders/${encodeURIComponent(folderId)}`, {
+                method: 'DELETE'
             })
 
             await onSuccess?.()
@@ -169,7 +203,7 @@ export const useFolderActions = () => {
                 success: boolean
                 deletedIds: string[]
                 failedIds: string[]
-            }>('/api/folders/delete-bulk', {
+            }>('/api/folders/bulk-delete', {
                 method: 'POST',
                 body: {
                     folderIds: uniqueIds
@@ -192,10 +226,9 @@ export const useFolderActions = () => {
         startLoading()
 
         try {
-            await $fetch('/api/folders/rename', {
-                method: 'POST',
+            await $fetch(`/api/folders/${encodeURIComponent(folderId)}`, {
+                method: 'PATCH',
                 body: {
-                    folderId,
                     newName
                 }
             })
@@ -207,7 +240,7 @@ export const useFolderActions = () => {
     const downloadFolder = (folderId: string) => {
         const link = document.createElement('a')
 
-        link.href = `/api/folders/download?folderId=${encodeURIComponent(folderId)}`
+        link.href = `/api/folders/${encodeURIComponent(folderId)}/download`
         link.download = ''
 
         document.body.appendChild(link)

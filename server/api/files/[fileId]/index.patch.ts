@@ -1,3 +1,4 @@
+import { lockStorageUser } from '~~/server/utils/storage'
 import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
@@ -44,7 +45,9 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Invalid filename.')
         }
         
-        const file = await prisma.files.findFirst({
+        return await prisma.$transaction(async tx => {
+            await lockStorageUser(tx, session.userId)
+        const file = await tx.files.findFirst({
             where: {
                 id: fileId,
                 user_id: session.userId
@@ -66,7 +69,7 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Invalid filename.')
         }
 
-        const existingFile = await prisma.files.findFirst({
+        const existingFile = await tx.files.findFirst({
             where: {
                 user_id: session.userId,
                 folder_id: file.folder_id,
@@ -81,12 +84,13 @@ export default defineEventHandler(async (event) => {
             throwError(409, 'Bu ada sahip dosya zaten var.')
         }
 
-        const updatedFile = await prisma.files.update({
+        const updatedFile = await tx.files.update({
             where: {
                 id: file.id
             },
             data: {
-                name: newName,
+                name: cleanName,
+                updated_at: new Date(),
                 original_name: originalName
             }
         })
@@ -95,9 +99,10 @@ export default defineEventHandler(async (event) => {
             success: true,
             file: {
                 ...updatedFile,
-                size: Number(updatedFile.size)
+                size: updatedFile.size.toString()
             }
         }
+        })
 
     } catch (err: any) {
         console.log(err.message);

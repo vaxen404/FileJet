@@ -21,6 +21,7 @@ model users {
   notes        notes[]
   favorites    favorites[]
   shared_items shared_items[]
+  trash trash[]
 }
 
 model files {
@@ -41,6 +42,7 @@ model files {
 }
 
 model folders {
+  // Partial unique indexes for root/child names are maintained in migration SQL.
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id          String    @db.Uuid
   parent_folder_id String?   @db.Uuid
@@ -83,6 +85,10 @@ model favorites {
   files   files?   @relation(fields: [file_id], references: [id], onDelete: Cascade)
   folders folders? @relation(fields: [folder_id], references: [id], onDelete: Cascade)
   notes   notes?   @relation(fields: [note_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, file_id])
+  @@unique([user_id, folder_id])
+  @@unique([user_id, note_id])
 }
 
 model shared_items {
@@ -96,4 +102,29 @@ model shared_items {
   users users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, item_type, item_id])
+}
+
+
+model trash {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String    @db.Uuid
+  item_id       String    @db.Uuid
+  item_type     String    @db.VarChar(20)
+
+  name          String?   @db.VarChar(255)
+  original_name String?   @db.VarChar(255)
+  mime_type     String?   @db.VarChar(150)
+  size          BigInt?
+  storage_key   String?
+  folder_id     String?   @db.Uuid
+  parent_folder_id String? @db.Uuid
+  root_folder_id String? @db.Uuid
+
+  content       String?
+  deleted_at    DateTime  @default(now()) @db.Timestamp(6)
+
+  users users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, item_type, item_id])
+  @@index([user_id])
 }

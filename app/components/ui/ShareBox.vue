@@ -121,7 +121,7 @@ const createShareLink = async () => {
 
         const response = await $fetch<{
             url: string
-        }>('/api/shared/create', {
+        }>('/api/shared', {
             method: 'POST',
             body: {
                 itemId: props.itemId,
@@ -166,12 +166,10 @@ const removeShareLink = async () => {
 
     try {
         isLoading.value = true
-        await $fetch('/api/shared/remove', {
-            method: 'POST',
-            body: {
-                itemId: props.itemId,
-                itemType: props.itemType
-            }
+
+        const url: string = `/api/shared/${props.itemType}/${encodeURIComponent(props.itemId)}`
+        await $fetch(url, {
+            method: 'DELETE'
         })
 
         if (currentRequest !== requestId) return

@@ -12,7 +12,9 @@ export default defineEventHandler(async (event) => {
 
         enforceRateLimit(event, `remove-favorite:${session.userId}`, 10, 60 * 1000)
 
-        const { itemId, itemType } = await readBody(event)
+        const itemId = getRouterParam(event, 'itemId')
+        const itemType = getRouterParam(event, 'itemType')
+        
 
         if (!itemId || !itemType) {
             throwError(400, 'Missing data.')

@@ -1,7 +1,7 @@
 import { prisma } from "~~/server/utils/prisma"
 import { createReadStream } from "node:fs";
-import { readFile, access, stat } from "node:fs/promises";
-import { join } from "node:path";
+import { readFile, stat } from "node:fs/promises";
+import { storagePath } from "~~/server/utils/files";
 import { throwError } from "~~/server/utils/error"
 
 export default defineEventHandler(async (event) => {
@@ -28,9 +28,10 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'This shared item is not a file.')
         }
 
-        const file = await prisma.files.findUnique({
+        const file = await prisma.files.findFirst({
             where: {
-                id: sharedItem.item_id
+                id: sharedItem.item_id,
+                    user_id: sharedItem.user_id
             }
         })
 
@@ -42,16 +43,16 @@ export default defineEventHandler(async (event) => {
             throwError(415, 'File preview is not supported.')
         }
 
-        const filePath = join(
-            process.cwd(),
-            'storage',
-            file.storage_key
-        )
+        const filePath = storagePath(file.storage_key)
+        setHeader(event, 'Cache-Control', 'no-store')
+        setHeader(event, 'X-Content-Type-Options', 'nosniff')
+        setHeader(event, 'Content-Security-Policy', "sandbox; default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'")
 
         try {
-            await access(filePath)
-        } catch {
-            throwError(404, 'Stored file not found.')
+            if (!(await stat(filePath)).isFile()) throwError(404, 'Stored file not found.')
+        } catch (error: any) {
+            if (error.code === 'ENOENT' || error.code === 'ENOTDIR') throwError(404, 'Stored file not found.')
+            throw error
         }
 
         if (file.mime_type.startsWith('text/')) {
@@ -151,7 +152,7 @@ export default defineEventHandler(async (event) => {
                 setHeader(event, 'Content-Range', `bytes ${start}-${end}/${size}`)
                 setHeader(event, 'Content-Length', end - start + 1)
 
-                return sendStream(
+                return await sendStream(
                     event,
                     createReadStream(filePath, { start, end })
                 )
@@ -160,14 +161,14 @@ export default defineEventHandler(async (event) => {
             setHeader(event, 'Content-Length', size)
         }
 
-        await sendStream(
+        return await sendStream(
             event,
             createReadStream(filePath)
         )
 
-        return
     } catch (err: any) {
         if (err.statusCode) throw err
+        if (err.code === 'ENOENT' || err.code === 'ENOTDIR') throwError(404, 'Stored file not found.')
 
         throwError(
             500,

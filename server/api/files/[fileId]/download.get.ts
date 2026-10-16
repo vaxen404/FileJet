@@ -54,13 +54,13 @@ export default defineEventHandler(async (event) => {
         setHeader(event, 'X-Content-Type-Options', 'nosniff')
         setHeader(event, 'Content-Length', fileStat.size)
 
+        if (method === 'HEAD') return ''
+
         setHeader(
             event,
             'Content-Disposition',
             `attachment; filename*=UTF-8''${encodeURIComponent(file.original_name)}`
         )
-
-        if (method === 'HEAD') return ''
 
         return await sendStream(
             event,

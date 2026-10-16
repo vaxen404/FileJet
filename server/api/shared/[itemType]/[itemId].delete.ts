@@ -13,13 +13,8 @@ export default defineEventHandler(async (event) => {
 
         enforceRateLimit(event, `shared-remove:${session.userId}`, 10, 60 * 1000)
 
-        const body = await readBody(event)
-
-        if (!body || typeof body !== 'object') {
-            throwError(400, 'Invalid request body.')
-        }
-
-        const { itemId, itemType } = body
+        const itemId = getRouterParam(event, 'itemId')
+        const itemType = getRouterParam(event, 'itemType')
 
         if (typeof itemId !== 'string' || typeof itemType !== 'string') {
             throwError(400, 'Invalid data.')
@@ -33,7 +28,7 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Invalid item type.')
         }
 
-        const sharedItem = await prisma.shared_items.findFirst({
+        const result = await prisma.shared_items.deleteMany({
             where: {
                 item_id: itemId,
                 user_id: session.userId,
@@ -41,15 +36,9 @@ export default defineEventHandler(async (event) => {
             }
         })
 
-        if (!sharedItem) {
+        if (result.count === 0) {
             throwError(404, 'Share link not found.')
         }
-
-        await prisma.shared_items.delete({
-            where: {
-                id: sharedItem.id
-            }
-        })
 
         return {
             success: true

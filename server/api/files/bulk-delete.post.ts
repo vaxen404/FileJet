@@ -2,8 +2,6 @@ import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
-import { resolve, sep } from 'node:path'
-import { unlink } from 'node:fs/promises'
 
 export default defineEventHandler(async (event) => {
     try {
@@ -24,49 +22,61 @@ export default defineEventHandler(async (event) => {
         }
 
         const fileIds = [...new Set<string>(body.fileIds.map((id: string) => id.toLowerCase()))]
-        const files = await prisma.files.findMany({
-            where: { id: { in: fileIds }, user_id: session.userId }
+        
+        const deletedIds = await prisma.$transaction(async (tx) => {
+            const files = await tx.files.findMany({
+                where: { 
+                    id: { 
+                        in: fileIds 
+                    }, 
+                    user_id: session.userId 
+                }
+            })
+
+            if (files.length !== fileIds.length) {
+                throwError(404, 'One or more selected files could not be found.')
+            }
+
+            for (const file of files) {
+                await tx.trash.create({
+                    data: {
+                        user_id: session.userId,
+                        item_id: file.id,
+                        item_type: 'file',
+                        name: file.name,
+                        original_name: file.original_name,
+                        mime_type: file.mime_type,
+                        size: file.size,
+                        storage_key: file.storage_key,
+                        folder_id: file.folder_id
+                    }
+                })
+
+                await tx.shared_items.deleteMany({
+                    where: { 
+                        user_id: session.userId, 
+                        item_id: file.id, 
+                        item_type: 'file' 
+                    }
+                })
+
+                await tx.files.delete({ 
+                    where: { 
+                        id: file.id ,
+                        user_id: session.userId
+                    } 
+                })
+            }
+
+            return files.map(file => file.id)
         })
 
-        if (files.length !== fileIds.length) throwError(404, 'One or more selected files could not be found.')
-
-        const deletedIds: string[] = []
-        const failedIds: string[] = []
-
-        for (const file of files) {
-            try {
-                const storageRoot = resolve(process.cwd(), 'storage')
-                const filePath = resolve(storageRoot, file.storage_key)
-
-                if (!filePath.startsWith(storageRoot + sep)) {
-                    throwError(400, 'Invalid file storage path.')
-                }
-
-                try {
-                    await unlink(filePath)
-                } catch (err: any) {
-                    if (err.code !== 'ENOENT') throw err
-                }
-
-                await prisma.$transaction([
-                    prisma.shared_items.deleteMany({
-                        where: { user_id: session.userId, item_id: file.id, item_type: 'file' }
-                    }),
-                    prisma.files.delete({ where: { id: file.id } }),
-                    prisma.users.update({
-                        where: { id: session.userId },
-                        data: { storage_used: { decrement: file.size } }
-                    })
-                ])
-
-                deletedIds.push(file.id)
-            } catch (err) {
-                console.error('Bulk file deletion failed:', file.id, err)
-                failedIds.push(file.id)
-            }
+        return {
+            success: true,
+            deletedIds,
+            failedIds: []
         }
 
-        return { success: failedIds.length === 0, deletedIds, failedIds }
     } catch (err: any) {
         if (err.statusCode) throw err
 

@@ -88,7 +88,7 @@ export const useFileActions = () => {
                     reject(new Error('File upload timed out'))
                 }
 
-                xhr.open('POST', '/api/files/add')
+                xhr.open('POST', '/api/files')
                 xhr.responseType = 'json'
                 xhr.setRequestHeader('Accept', 'application/json')
                 xhr.send(formData)
@@ -96,8 +96,14 @@ export const useFileActions = () => {
 
             await onSuccess?.()
         } finally {
-            activeUploads.value--
-            if (!activeUploads.value) uploads.clear()
+            uploads.delete(uploadId)
+
+            activeUploads.value = Math.max(0, activeUploads.value - 1)
+
+            if (activeUploads.value === 0) {
+                uploads.clear()
+            }
+
             stopLoading()
         }
     }
@@ -107,12 +113,10 @@ export const useFileActions = () => {
         startLoading()
 
         try {
-            await $fetch('/api/files/delete', {
-                method: 'POST',
-                body: {
-                    fileId
-                }
+            await $fetch(`/api/files/${encodeURIComponent(fileId)}`, {
+                method: 'DELETE'
             })
+
             await onSuccess?.()
         } finally {
             activeDeletes.value--
@@ -129,7 +133,7 @@ export const useFileActions = () => {
         startLoading()
 
         try {
-            return await $fetch<{ success: boolean, deletedIds: string[], failedIds: string[] }>('/api/files/delete-bulk', {
+            return await $fetch<{ success: boolean, deletedIds: string[], failedIds: string[] }>('/api/files/bulk-delete', {
                 method: 'POST',
                 body: { fileIds: uniqueIds }
             })
@@ -146,10 +150,9 @@ export const useFileActions = () => {
         startLoading()
 
         try {
-            await $fetch('/api/files/rename', {
-                method: 'POST',
+            await $fetch(`/api/files/${encodeURIComponent(fileId)}`, {
+                method: 'PATCH',
                 body: {
-                    fileId,
                     newName
                 }
             })
@@ -176,7 +179,7 @@ export const useFileActions = () => {
         startLoading()
 
         try {
-            const previewUrl = `/api/files/preview?fileId=${encodeURIComponent(file.id)}`
+            const previewUrl = `/api/files/${encodeURIComponent(file.id)}/preview`
 
             if (mimeType.startsWith('text/') && (typeof ClipboardItem === 'undefined' || !navigator.clipboard.write)) {
                 const content = await $fetch<string>(previewUrl, { responseType: 'text' })
@@ -233,10 +236,19 @@ export const useFileActions = () => {
         }
     }
 
-    const downloadFile = (fileId: string) => {
+    const downloadFile = async (fileId: string) => {
+        const url = `/api/files/${encodeURIComponent(fileId)}/download`
+        try {
+            await $fetch(url, { method: 'HEAD', retry: 0 })
+        } catch (error: any) {
+            if ((error?.statusCode ?? error?.status) === 404) {
+                throw new Error('File not found in storage. Please upload it again.')
+            }
+            throw error
+        }
         const link = document.createElement('a')
 
-        link.href = `/api/files/download?fileId=${encodeURIComponent(fileId)}`
+        link.href = url
         link.download = ''
 
         document.body.appendChild(link)

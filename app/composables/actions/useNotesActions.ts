@@ -7,10 +7,24 @@ export const useNoteActions = () => {
     const activeRequests = ref(0)
     const activeUploads = ref(0)
     const activeDeletes = ref(0)
+    const uploads = reactive(new Map<symbol, { loaded: number, total: number | null }>())
 
     const isLoading = computed(() => activeRequests.value > 0)
     const isUploading = computed(() => activeUploads.value > 0)
     const isDeleting = computed(() => activeDeletes.value > 0)
+    const uploadProgress = computed(() => {
+        let loaded = 0
+        let total = 0
+
+        for (const upload of uploads.values()) {
+            if (upload.total === null) return null
+
+            loaded += upload.loaded
+            total += upload.total
+        }
+
+        return total > 0 ? Math.min(100, Math.max(0, Math.round((loaded / total) * 100))) : null
+    })
 
     const startLoading = () => {
         activeRequests.value++
@@ -27,7 +41,7 @@ export const useNoteActions = () => {
         startLoading()
         
         try {
-            await $fetch('/api/notes/add', {
+            await $fetch('/api/notes', {
                 method: 'POST',
                 body: {
                     title: data.title,
@@ -42,24 +56,63 @@ export const useNoteActions = () => {
     }
 
     const uploadNote = async (
-        file: File,
+        file: File | FileList | File[],
         onSuccess?: () => Promise<void>
     ) => {
+        const files = file instanceof File ? [file] : Array.from(file)
+        if (!files.length) return
+
+        const uploadId = Symbol()
+        if (!activeUploads.value) uploads.clear()
+
+        uploads.set(uploadId, { loaded: 0, total: null })
         activeUploads.value++
         startLoading()
 
         try {
             const formData = new FormData()
-            formData.append('file', file)
+            files.forEach(file => formData.append('files', file))
 
-            await $fetch('/api/notes/upload', {
-                method: 'POST',
-                body: formData
+            await new Promise<void>((resolve, reject) => {
+                const xhr = new XMLHttpRequest()
+
+                xhr.upload.onprogress = (event) => {
+                    uploads.set(uploadId, {
+                        loaded: event.loaded,
+                        total: event.lengthComputable && event.total > 0 ? event.total : null
+                    })
+                }
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve()
+                        return
+                    }
+
+                    const message =
+                        xhr.response?.message ||
+                        xhr.response?.data?.message ||
+                        xhr.response?.statusMessage ||
+                        'Note upload failed'
+
+                    reject(new Error(message))
+                }
+
+                xhr.onerror = () => reject(new Error('Note upload failed'))
+                xhr.onabort = () => reject(new Error('Note upload cancelled'))
+                xhr.ontimeout = () => reject(new Error('Note upload timed out'))
+
+                xhr.open('POST', '/api/notes/upload')
+                xhr.responseType = 'json'
+                xhr.setRequestHeader('Accept', 'application/json')
+                xhr.send(formData)
             })
 
             await onSuccess?.()
         } finally {
+            uploads.delete(uploadId)
             activeUploads.value = Math.max(0, activeUploads.value - 1)
+            if (activeUploads.value === 0) uploads.clear()
             stopLoading()
         }
     }
@@ -72,10 +125,9 @@ export const useNoteActions = () => {
         startLoading()
 
         try {
-            await $fetch('/api/notes/update', {
-                method: 'POST',
+            await $fetch(`/api/notes/${encodeURIComponent(noteId)}`, {
+                method: 'PATCH',
                 body: {
-                    id: noteId,
                     title: data.title,
                     content: data.content
                 }
@@ -95,11 +147,8 @@ export const useNoteActions = () => {
         startLoading()
 
         try {
-            await $fetch('/api/notes/delete', {
-                method: 'POST',
-                body: {
-                    noteId
-                }
+            await $fetch(`/api/notes/${encodeURIComponent(noteId)}`, {
+                method: 'DELETE',
             })
 
             await onSuccess?.()
@@ -115,7 +164,7 @@ export const useNoteActions = () => {
         if (!uniqueIds.length) {
             return {
                 success: true,
-                deleteIds: [],
+                deletedIds: [],
                 failedIds: []
             }
         }
@@ -128,7 +177,7 @@ export const useNoteActions = () => {
                 success: boolean,
                 deletedIds: string[],
                 failedIds: string[]
-            }>('/api/notes/delete-bulk', {
+            }>('/api/notes/bulk-delete', {
                 method: 'POST',
                 body: {
                     noteIds: uniqueIds
@@ -144,6 +193,7 @@ export const useNoteActions = () => {
         isLoading,
         isUploading,
         isDeleting,
+        uploadProgress,
         createNote,
         uploadNote,
         updateNote,

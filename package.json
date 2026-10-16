@@ -8,7 +8,11 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "contract:emit": "prisma contract emit"
+    "contract:emit": "prisma contract emit",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "typecheck": "nuxt typecheck",
+    "storage:recover": "node maintenance/recover-uploads.mjs",
+    "test:db": "node --env-file=.env --test --test-isolation=none tests/postgres-integrity.test.mjs"
   },
   "dependencies": {
     "@nuxt/icon": "^2.5.1",
@@ -28,6 +32,8 @@
     "@iconify-json/solar": "^1.2.13",
     "@prisma/cli-engine": "^0.6.2",
     "@types/node": "^26.6.4",
-    "prisma": "^7.10.0"
+    "prisma": "^7.10.0",
+    "typescript": "5.9.3",
+    "vue-tsc": "^3.3.13"
   }
 }
