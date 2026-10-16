@@ -26,57 +26,51 @@ export default defineEventHandler(async (event) => {
             const user = await tx.users.findFirst({
                 where: {
                     id: session.userId
-                },
-                select: {
-                    storage_used: true
                 }
             })
 
             if (!user) {
                 throwError(401, 'Invalid session.')
             }
-
-            const existingNote = await tx.notes.findFirst({
+            
+            const note = await tx.notes.findFirst({
                 where: {
                     user_id: session.userId,
                     id: noteId
                 }
             })
-
-            if (!existingNote) {
+            
+            if (!note) {
                 throwError(404, 'Note not found.')
             }
 
-            const note = await tx.notes.deleteMany({
-                where: {
-                    user_id: session.userId,
-                    id: noteId
-                }
-            })
-
-            if (note.count !== 1) {
-                throwError(404, 'Note not found.')
-            }
-
-            const storageUsed = user.storage_used ?? 0n
-
-            if (storageUsed < existingNote.size) {
-                throwError(409, 'Storage usage is inconsistent.')
-            }
-
-            const updated = await tx.users.updateMany({
-                where: {
-                    id: session.userId,
-                    storage_used: user.storage_used
-                },
+            await tx.trash.create({
                 data: {
-                    storage_used: storageUsed - existingNote.size
+                    user_id: session.userId,
+                    item_id: note.id,
+                    item_type: 'note',
+                    name: note.title,
+                    content: note.content,
+                    size: note.size,
+                    folder_id: note.folder_id,
                 }
             })
 
-            if (updated.count !== 1) {
-                throwError(409, 'Storage changed. Please try again.')
-            }
+            await tx.shared_items.deleteMany({
+                where: {
+                    user_id: session.userId,
+                    item_id: note.id,
+                    item_type: 'note'
+                }
+            })
+
+            await tx.notes.delete({
+                where: {
+                    user_id: session.userId,
+                    id: note.id,
+                    folder_id: note.folder_id
+                }
+            })
         })
 
         return {

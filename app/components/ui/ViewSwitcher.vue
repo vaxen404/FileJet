@@ -3,30 +3,31 @@
         <button
             type="button"
             class="view-button"
+            :class="{ active: modelValue === 'grid' }"
+            @click="emit('update:modelValue', 'grid')"
+        >
+            <Icon name="solar:widget-4-linear" class="view-icon" />
+        </button>
+
+        <button
+            type="button"
+            class="view-button"
             :class="{ active: modelValue === 'list' }"
             @click="emit('update:modelValue', 'list')"
         >
             <Icon name="solar:list-linear" class="view-icon" />
         </button>
 
-        <button
-            type="button"
-            class="view-button"
-            :class="{ active: modelValue === 'grid' }"
-            @click="emit('update:modelValue', 'grid')"
-        >
-            <Icon name="solar:widget-4-linear" class="view-icon" />
-        </button>
     </div>
 </template>
 
 <script setup lang="ts">
 defineProps<{
-    modelValue: 'list' | 'grid'
+    modelValue: 'grid' | 'list'
 }>()
 
 const emit = defineEmits<{
-    'update:modelValue': [value: 'list' | 'grid']
+    'update:modelValue': [value: 'grid' | 'list' ]
 }>()
 </script>
 

@@ -291,7 +291,7 @@ openToast(error.value, 'error')
 }
 
 const searchQuery = ref('')
-const viewMode = ref<'list' | 'grid'>('list')
+const viewMode = ref<'grid' | 'list'>('grid')
 const activeCategory = ref('All')
 const filterOptions = ['All', 'Images', 'Documents', 'Videos', 'Compressed', 'Others']
 
