@@ -274,9 +274,9 @@ export default defineEventHandler(async (event) => {
         if (err.code === 'P2002') {
             throwError(409, 'Item already exists.')
         }
-        
+
         if (err.statusCode) throw err
 
-        throwError(500, '')
+        throwError(500, 'An unexpected error occurred while restoring the item.')
     }
 })
