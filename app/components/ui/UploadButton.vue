@@ -5,6 +5,7 @@
             type="file"
             class="file-input"
             multiple
+            :accept="accept"
             @change="handleFileChange"
         >
 
@@ -31,6 +32,7 @@ const props = withDefaults(
     defineProps<{
         text?: string
         mode?: 'file' | 'folder'
+        accept?: string
     }>(),
     {
         text: 'Upload',
@@ -87,19 +89,21 @@ const handleFileChange = (event: Event) => {
     background: #3c47be;
     color: #ffffff;
 
-    padding: 0.2rem 0.5rem;
+    padding: 0 0.75rem;
 
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 500;
 
     border: none;
-    border-radius: 0.625rem;
+    border-radius: 6px;
 
     cursor: pointer;
 
     box-sizing: border-box;
 
     transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
 }
 
 .upload-button:hover {

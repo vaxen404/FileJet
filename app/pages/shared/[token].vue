@@ -1,7 +1,24 @@
 
 <template>
     <div class="shared-page">
-        <div v-if="error" class="shared-error" role="alert">
+        <div v-if="passwordRequired" class="shared-error">
+            <form class="shared-error-card share-unlock" :aria-busy="unlocking" @submit.prevent="unlockShare">
+                <Icon name="solar:lock-keyhole-linear" size="2.75rem" aria-hidden="true" />
+                <h1>Password Protected</h1>
+                <p v-if="lockedFileName" class="locked-filename" :title="lockedFileName">{{ lockedFileName }}</p>
+                <p>This file is protected by a password.</p>
+                <label for="public-share-password">Password</label>
+                <div class="unlock-password-field">
+                    <input id="public-share-password" v-model="sharePassword" :type="showPassword ? 'text' : 'password'" placeholder="Enter password" autocomplete="current-password" required maxlength="128" :disabled="unlocking" :aria-invalid="Boolean(unlockError)" :aria-describedby="unlockError ? 'unlock-error' : undefined" @input="unlockError = ''">
+                    <button type="button" class="password-visibility" :aria-label="showPassword ? 'Hide password' : 'Show password'" :title="showPassword ? 'Hide password' : 'Show password'" :aria-pressed="showPassword" aria-controls="public-share-password" :disabled="unlocking" @click="showPassword = !showPassword">
+                        <Icon :name="showPassword ? 'solar:eye-closed-linear' : 'solar:eye-linear'" size="1.2rem" />
+                    </button>
+                </div>
+                <p v-if="unlockError" id="unlock-error" class="unlock-error" role="alert">{{ unlockError }}</p>
+                <button type="submit" class="download-btn" :disabled="unlocking || !sharePassword" :aria-busy="unlocking">{{ unlocking ? 'Unlocking...' : 'Unlock File' }}</button>
+            </form>
+        </div>
+        <div v-else-if="error" class="shared-error" role="alert">
             <div class="shared-error-card">
                 <div class="shared-error-icon" aria-hidden="true">
                     <Icon
@@ -13,12 +30,12 @@
                 <span class="shared-error-code">{{ error.statusCode || 'Error' }}</span>
 
                 <h1>
-                    {{ error.statusCode === 404 ? 'Shared item not found' : 'Unable to load shared item' }}
+                    {{ error.statusCode === 410 ? 'Link Expired' : error.statusCode === 403 || error.statusCode === 401 ? 'Access Denied' : error.statusCode === 404 ? 'Shared item not found' : 'Unable to load shared item' }}
                 </h1>
 
                 <p>
                     {{
-                        error.statusCode === 404
+                        (error.statusCode === 404 || error.statusCode === 410)
                             ? 'This link may be invalid or no longer available. Ask the sender for a new link.'
                             : 'Something went wrong while opening this link. Please try again in a moment.'
                     }}
@@ -163,9 +180,41 @@ const sharedUrl = computed(() => {
     return `/api/shared/${token.value}`
 })
 
-const { data: sharedItem, error } = await useFetch<SharedResponse>(
+const { data: sharedItem, error, refresh } = await useFetch<SharedResponse>(
     sharedUrl
 )
+
+interface PasswordChallenge { passwordRequired?: boolean, fileName?: string | null }
+const passwordChallenge = computed<PasswordChallenge>(() => (error.value?.data as { data?: PasswordChallenge } | undefined)?.data ?? {})
+const passwordRequired = computed(() => error.value?.statusCode === 401 && passwordChallenge.value.passwordRequired === true)
+const lockedFileName = computed(() => passwordRequired.value ? passwordChallenge.value.fileName || '' : '')
+const sharePassword = ref('')
+const showPassword = ref(false)
+const unlocking = ref(false)
+const unlockError = ref('')
+const unlockShare = async () => {
+    if (unlocking.value || !sharePassword.value) return
+    unlocking.value = true
+    unlockError.value = ''
+    try {
+        await $fetch(`/api/shared/${encodeURIComponent(token.value)}/unlock`, { method: 'POST', body: { password: sharePassword.value } })
+        sharePassword.value = ''
+        showPassword.value = false
+        await refresh()
+        if (error.value?.statusCode === 401) unlockError.value = 'Access could not be verified. Please try again.'
+    } catch (err: any) {
+        const status = err?.statusCode || err?.status || err?.response?.status
+        unlockError.value = status === 401 ? 'Incorrect password. Please try again.'
+            : status === 429 ? 'Too many attempts. Please try again later.'
+            : err?.data?.message || 'Unable to unlock this file. Please try again.'
+        if (status === 410 || status === 404 || status === 409) await refresh()
+    } finally { unlocking.value = false }
+}
+watch(token, () => {
+    sharePassword.value = ''
+    showPassword.value = false
+    unlockError.value = ''
+})
 
 const isImage = computed(() => {
     return sharedItem.value?.type === 'file' &&
@@ -228,7 +277,7 @@ const itemName = computed(() => {
         return sharedItem.value.item.title
     }
 
-    return sharedItem.value.item.name
+    return sharedItem.value.item.original_name || sharedItem.value.item.name
 })
 
 const isDownloadOnly = computed(() => {
@@ -340,7 +389,7 @@ watch(
     display: flex;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 1rem;
+    border-radius: 24px;
     overflow: hidden;
 }
 
@@ -394,7 +443,7 @@ watch(
     color: #cfcfd5;
     background: #202024;
     border: 1px solid #303036;
-    border-radius: 0.45rem;
+    border-radius: 6px;
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
 }
@@ -426,7 +475,7 @@ watch(
 }
 
 .image-preview {
-    border-radius: 1rem;
+    border-radius: 24px;
 }
 
 .pdf-preview {
@@ -477,7 +526,7 @@ watch(
     background: linear-gradient(145deg, #30295f, #211d3b);
     border: 1px solid #42386f;
     color: #8b7cff;
-    border-radius: 1.4rem;
+    border-radius: 6px;
 }
 
 .download-message h2 {
@@ -506,7 +555,7 @@ watch(
     color: #b5acff;
     background: #242039;
     border: 1px solid #37304f;
-    border-radius: 999px;
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 500;
     line-height: 1.4;
@@ -541,7 +590,7 @@ watch(
     color: #ffffff;
     background: #3c47be;
     border: 1px solid #4f5bdf;
-    border-radius: 0.6rem;
+    border-radius: 6px;
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 600;
@@ -584,7 +633,7 @@ watch(
     padding: clamp(1.25rem, 4vw, 2.5rem);
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 1.25rem;
+    border-radius: 24px;
     text-align: center;
 }
 
@@ -596,7 +645,7 @@ watch(
     height: 5.5rem;
     background: linear-gradient(145deg, #30295f, #211d3b);
     border: 1px solid #42386f;
-    border-radius: 1.25rem;
+    border-radius: 6px;
     color: #a79aff;
 }
 
@@ -605,7 +654,7 @@ watch(
     color: #b5acff;
     background: #242039;
     border: 1px solid #37304f;
-    border-radius: 999px;
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -666,7 +715,6 @@ watch(
     .shared-error-icon {
         width: 4rem;
         height: 4rem;
-        border-radius: 1rem;
     }
 
     .download-message {
@@ -685,7 +733,6 @@ watch(
         align-self: center;
         width: 3.5rem;
         height: 3.5rem;
-        border-radius: 0.85rem;
     }
 
     .download-icon :deep(.iconify) {
@@ -714,4 +761,18 @@ watch(
         padding: 0.65rem 1.1rem;
     }
 }
+.share-unlock { color: #8b7cff; }
+.share-unlock label { width: 100%; text-align: left; color: #d5d5da; font-size: 0.875rem; }
+.share-unlock input { width: 100%; height: 2.75rem; padding: 0 0.75rem; color: #ffffff; background: #151518; border: 1px solid #303036; border-radius: 6px; font: inherit; font-size: 0.875rem; outline: none; }
+.share-unlock input:focus { border-color: #5965ed; }
+.share-unlock .unlock-error { color: #ff6b6b; }
+.shared-error:has(.share-unlock) { overflow-y: auto; }
+.share-unlock { margin-block: auto; flex-shrink: 0; }
+.share-unlock .locked-filename { width: 100%; color: #d5d5da; overflow-wrap: anywhere; font-weight: 500; }
+.unlock-password-field { position: relative; width: 100%; }
+.unlock-password-field input { padding-right: 2.75rem; }
+.password-visibility { position: absolute; top: 0; right: 0; display: flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: 6px; color: #898991; background: transparent; cursor: pointer; }
+.password-visibility:hover:not(:disabled) { color: #ffffff; }
+.password-visibility:focus-visible { outline: 2px solid #8b7cff; outline-offset: -2px; }
+.password-visibility:disabled { opacity: 0.65; cursor: wait; }
 </style>

@@ -1,3 +1,6 @@
+import { readShareBody } from '../../utils/shareBody'
+import { parseShareSettings } from '../../utils/shareSettings'
+import { assertShareOrigin, shareState } from '../../utils/shares'
 import { randomUUID } from "node:crypto";
 import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from '~~/server/utils/auth'
@@ -6,6 +9,8 @@ import { isUuid } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
     try {
+        assertShareOrigin(event)
+        setHeader(event, 'Cache-Control', 'no-store')
         const session = getAuthSession(event)
 
         if (!session) {
@@ -19,7 +24,7 @@ export default defineEventHandler(async (event) => {
             60 * 1000
         )
 
-        const body = await readBody(event)
+        const body = await readShareBody(event)
 
         if (!body || typeof body !== 'object') {
             throwError(400, 'Invalid request body.')
@@ -78,7 +83,7 @@ export default defineEventHandler(async (event) => {
             }
         }
 
-        const origin = getRequestURL(event).origin
+        const settings = await parseShareSettings(body)
 
         const existing = await prisma.shared_items.findFirst({
             where: {
@@ -89,9 +94,7 @@ export default defineEventHandler(async (event) => {
         })
 
         if (existing) {
-            return {
-                url: `${origin}/shared/${existing.token}`
-            }
+            return shareState(event, Object.keys(settings).length ? await prisma.shared_items.update({ where: { id: existing.id }, data: settings }) : existing)
         }
 
         let retries = 3
@@ -109,7 +112,7 @@ export default defineEventHandler(async (event) => {
                         })
 
                         if (existing) {
-                            return existing
+                            return Object.keys(settings).length ? await tx.shared_items.update({ where: { id: existing.id }, data: settings }) : existing
                         }
 
                         const shareCount = await tx.shared_items.count({
@@ -127,6 +130,7 @@ export default defineEventHandler(async (event) => {
 
                         return await tx.shared_items.create({
                             data: {
+                                ...settings,
                                 user_id: session.userId,
                                 item_id: itemId,
                                 item_type: itemType,
@@ -139,9 +143,7 @@ export default defineEventHandler(async (event) => {
                     }
                 )
 
-                return {
-                    url: `${origin}/shared/${result.token}`
-                }
+                return shareState(event, result)
             } catch (err: any) {
                 if (err.statusCode) throw err
 
@@ -155,9 +157,7 @@ export default defineEventHandler(async (event) => {
                     })
 
                     if (existing) {
-                        return {
-                            url: `${origin}/shared/${existing.token}`
-                        }
+                        return shareState(event, Object.keys(settings).length ? await prisma.shared_items.update({ where: { id: existing.id }, data: settings }) : existing)
                     }
                 }
 

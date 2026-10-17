@@ -35,6 +35,9 @@ model files {
   storage_key   String
   created_at    DateTime? @default(now()) @db.Timestamp(6)
   updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  technical_metadata Json? @db.JsonB
+  metadata_checked_at DateTime? @db.Timestamptz(6)
+  metadata_signature String?
 
   folders   folders?    @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_folder")
   users     users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_user")
@@ -98,6 +101,9 @@ model shared_items {
   item_type  String   @db.VarChar(20)
   token      String   @unique @db.VarChar(120)
   created_at DateTime @default(now()) @db.Timestamp(6)
+  password_hash String?
+  expires_at DateTime? @db.Timestamptz(6)
+  access_version String @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   users users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 

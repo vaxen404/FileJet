@@ -342,9 +342,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     flex: 1;
     min-height: 0;
 
-    padding: 0.4rem 0.5rem;
+    padding: 0 0.5rem;
 
-    border-radius: 1rem;
+    border-radius: 12px;
 
     display: flex;
     flex-direction: column;
@@ -362,7 +362,9 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     flex-shrink: 0;
 
-    padding: 0 0.5rem;
+    padding: 0;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .folders-toolbar {
@@ -371,8 +373,9 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     align-items: center;
     justify-content: space-between;
-
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .toolbar-actions {
@@ -381,7 +384,9 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     align-items: center;
 
-    gap: 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .table-scroll {
@@ -468,7 +473,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     box-sizing: border-box;
     background: #202024;
     border: 1px solid #505057;
-    border-radius: 0.3rem;
+    border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -500,7 +505,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     margin: 0;
     background: #ffffff;
     border: 0;
-    border-radius: 1px;
     transform: none;
 }
 
@@ -536,7 +540,7 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     align-items: center;
     
-    gap: 0.8rem;
+    gap: 0.75rem;
 }
 
 .folder-icon {
@@ -553,7 +557,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     background: #1f2d4a;
 
     border: 1px solid #2f4770;
-    border-radius: 0.55rem;
+    border-radius: 6px;
 
     font-size: 1.2rem;
 }
@@ -563,7 +567,7 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     flex-direction: column;
 
-    gap: 0.2rem;
+    gap: 0.25rem;
 
     min-width: 0;
 }
@@ -571,10 +575,11 @@ watch([searchQuery, sortMode, viewMode], () => {
 .folder-info strong {
     color: #ffffff;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
 
     white-space: nowrap;
+    line-height: 1.5;
 }
 
 .folder-info span {
@@ -583,12 +588,14 @@ watch([searchQuery, sortMode, viewMode], () => {
     font-size: 0.75rem;
 
     white-space: nowrap;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .folder-card {
     min-height: 10rem;
 
-    padding: 1rem;
+    padding: 0.75rem;
 
     display: flex;
     flex-direction: column;
@@ -597,11 +604,12 @@ watch([searchQuery, sortMode, viewMode], () => {
     background: #1a1a1d;
 
     border: 1px solid #29292e;
-    border-radius: 0.625rem;
+    border-radius: 24px;
 
     box-sizing: border-box;
 
     cursor: pointer;
+    gap: 0.75rem;
 }
 
 .folder-card:hover {
@@ -628,7 +636,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     background: #1f2d4a;
 
     border: 1px solid #2f4770;
-    border-radius: 0.55rem;
+    border-radius: 6px;
 
     font-size: 1.25rem;
 }
@@ -636,20 +644,23 @@ watch([searchQuery, sortMode, viewMode], () => {
 .folder-card-info {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.25rem;
 }
 
 .folder-card-info strong {
     color: #ffffff;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
+    line-height: 1.5;
 }
 
 .folder-card-info span {
     color: #898991;
 
     font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .folder-card-bottom {
@@ -660,12 +671,16 @@ watch([searchQuery, sortMode, viewMode], () => {
     color: #898991;
 
     font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    gap: 0.5rem;
 }
 
 .folders-subtoolbar {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .selection-toolbar {
@@ -673,34 +688,39 @@ watch([searchQuery, sortMode, viewMode], () => {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
     color: #a8a8b0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .selection-actions {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .selection-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    height: 2.35rem;
-    padding: 0 1rem;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding: 0 0.75rem;
     color: #a8a8b0;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 0.6rem;
-    font-family: inherit;
-    font-size: 0.85rem;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .selection-btn:hover:not(:disabled) {
@@ -781,7 +801,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: 0.45rem;
+    border-radius: 6px;
     cursor: pointer;
 }
 
@@ -846,20 +866,11 @@ watch([searchQuery, sortMode, viewMode], () => {
 
 
 @media (max-width: 800px) {
-    .folders-toolbar {
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
 
     .folders-toolbar :deep(.search-box) {
         width: 100%;
         min-width: 0;
         box-sizing: border-box;
-    }
-
-    .toolbar-actions {
-        flex-wrap: wrap;
-        gap: 0.75rem;
     }
 }
 </style>

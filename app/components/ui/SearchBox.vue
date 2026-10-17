@@ -25,21 +25,23 @@ const emit = defineEmits<{
 <style scoped>
 .search-box {
     width: 32rem;
-    height: 2.3rem;
+    height: 2.5rem;
 
     display: flex;
     align-items: center;
 
     background: #1a1a1d;
 
-    padding: 0.25rem 0.8rem;
+    padding: 0 0.75rem;
 
     border: 1px solid #29292e;
-    border-radius: 0.625rem;
+    border-radius: 6px;
 
-    gap: 0.475rem;
+    gap: 0.5rem;
 
     transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .search-box:focus-within {
@@ -57,7 +59,12 @@ const emit = defineEmits<{
 
     color: #dadada;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
+    min-width: 0;
+    padding: 0;
 }
 
 .search-icon {

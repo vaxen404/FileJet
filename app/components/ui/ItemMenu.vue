@@ -346,7 +346,7 @@ onClickOutside(dropdownRef, () => {
     color: #a8a8b0;
 
     border: none;
-    border-radius: 50%;
+    border-radius: 6px;
 
     font-size: 1.1rem;
 
@@ -368,7 +368,7 @@ onClickOutside(dropdownRef, () => {
     width: max-content;
     min-width: min(11rem, calc(100vw - 2rem));
 
-    padding: 0.35rem;
+    padding: 0.25rem;
 
     display: flex;
     flex-direction: column;
@@ -376,7 +376,7 @@ onClickOutside(dropdownRef, () => {
     background: #1f1f23;
 
     border: 1px solid #303036;
-    border-radius: 0.6rem;
+    border-radius: 24px;
 
     box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.35);
 
@@ -392,23 +392,26 @@ onClickOutside(dropdownRef, () => {
     display: flex;
     align-items: center;
 
-    gap: 0.45rem;
+    gap: 0.5rem;
 
-    padding: 0.6rem;
+    padding: 0.5rem 0.75rem;
 
     background: transparent;
     color: #d5d5da;
 
     border: none;
-    border-radius: 0.45rem;
+    border-radius: 6px;
 
-    font-size: 0.8rem;
+    font-size: 0.875rem;
 
     cursor: pointer;
 
     text-align: left;
     white-space: normal;
     overflow-wrap: anywhere;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .menu-item :deep(.menu-item-icon) {

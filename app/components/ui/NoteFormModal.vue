@@ -7,11 +7,13 @@
                 @click.self="closeModal"
             >
                 <div 
+                    ref="dialog"
                     class="note-modal-conteiner"
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="note-modal-title"
                     @keydown.esc="closeModal"
+                    @keydown.tab="trapFocus"
                 >
                     <div class="note-modal-header">
                         <div class="header-left">
@@ -25,7 +27,7 @@
                                 </h2>
 
                                 <p>
-                                    {{ isEditing ? 'Make changes to your note.' : 'Capture your idead and thoughts' }}
+                                    {{ isEditing ? 'Make changes to your note.' : 'Capture your ideas and thoughts.' }}
                                 </p>
                             </div>
                         </div>
@@ -41,11 +43,11 @@
                         </button>
                     </div>
 
-                    <form @submit.prevent="saveNote">
+                    <form :aria-busy="isLoading" @submit.prevent="saveNote">
                         <div class="note-modal-body">
                             <div class="form-field">
                                 <div class="fielad-header">
-                                    <label class="note-form-title">
+                                    <label for="note-form-title">
                                         Title
                                     </label>
                                     
@@ -54,12 +56,14 @@
                                 
                                 <input
                                     id="note-form-title"
+                                    ref="titleInput"
                                     v-model="title" 
                                     type="text"
                                     maxlength="32"
                                     placeholder="Enter your title..."
                                     autocomplete="off"
                                     required
+                                    :disabled="isLoading"
                                     />
                                 </div>
                             
@@ -78,6 +82,7 @@
                                         placeholder="Start writing your note..."
                                         rows="8"
                                         required
+                                        :disabled="isLoading"
                                     />
                                 </div>
                             </div>
@@ -105,7 +110,7 @@
                                     >
                                         <Icon
                                             :name="isLoading
-                                                ? 'svg-spinners:180-ring'
+                                                ? 'solar:refresh-linear'
                                                 : isEditing
                                                     ? 'solar:diskette-linear'
                                                     : 'solar:add-circle-linear'"
@@ -150,6 +155,8 @@ const { openToast } = useToast()
 
 const title = ref('')
 const content = ref('')
+const titleInput = ref<HTMLInputElement | null>(null)
+const dialog = ref<HTMLElement | null>(null)
 
 const isEditing = computed(() => props.mode === 'edit')
 
@@ -162,14 +169,25 @@ const canSubmit = computed(() => {
 
 watch(
     () => [props.open, props.mode, props.note] as const,
-    () => {
+    async () => {
         if (!props.open) return
 
         title.value = isEditing.value ? props.note?.title ?? '' : ''
         content.value = isEditing.value ? props.note?.content ?? '' : ''
+        await nextTick()
+        titleInput.value?.focus()
     },
     { immediate: true }
 )
+
+const trapFocus = (event: KeyboardEvent) => {
+    const fields = dialog.value?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled)')
+    if (!fields?.length) { event.preventDefault(); return }
+    const first = fields[0]!
+    const last = fields[fields.length - 1]!
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+}
 
 const closeModal = () => {
     if (isLoading.value) return
@@ -219,3 +237,29 @@ const saveNote = async () => {
     }
 }
 </script>
+
+<style scoped>
+.note-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(0, 0, 0, 0.65); box-sizing: border-box; }
+.note-modal-conteiner { width: 100%; max-width: 36rem; max-height: calc(100dvh - 2rem); overflow-y: auto; background: #1a1a1d; border: 1px solid #29292e; border-radius: 12px; padding: 1.5rem; box-sizing: border-box; color: #d5d5da; }
+.note-modal-header, .header-left, .note-modal-footer, .footer-info, .footer-actions { display: flex; align-items: center; gap: 0.75rem; }
+.note-modal-header, .note-modal-footer { justify-content: space-between; }
+.header-text { min-width: 0; }
+.header-text h2 { margin: 0; color: #ffffff; font-size: 1.1rem; font-weight: 600; }
+.header-text p { margin: 0.25rem 0 0; color: #898991; font-size: 0.875rem; line-height: 1.5; }
+.note-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem; color: #8b7cff; background: #29215c; border-radius: 6px; }
+.clouse-button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2rem; height: 2rem; padding: 0; color: #a8a8b0; border: 1px solid #303036; background: #242429; border-radius: 6px; cursor: pointer; }
+.note-modal-body { display: flex; flex-direction: column; gap: 1rem; padding: 1rem 0; }
+.form-field { display: flex; flex-direction: column; gap: 0.5rem; }
+.fielad-header, .field-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.875rem; line-height: 1.5; }
+.fielad-header span, .field-header span, .footer-info { color: #898991; font-size: 0.75rem; }
+.form-field input, .form-field textarea { width: 100%; min-width: 0; padding: 0.75rem; color: #d5d5da; background: #151518; border: 1px solid #303036; border-radius: 6px; font: inherit; font-size: 0.875rem; line-height: 1.5; box-sizing: border-box; outline: none; }
+.form-field textarea { resize: vertical; min-height: 8rem; }
+.form-field input:focus, .form-field textarea:focus { border-color: #5965ed; }
+.cancel-btn, .save-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.5rem; padding: 0.5rem 0.75rem; border: 1px solid #303036; border-radius: 6px; color: #ffffff; background: #242429; font-family: inherit; font-size: 0.875rem; font-weight: 500; line-height: 1.5; cursor: pointer; }
+.save-btn { background: #3c47be; border-color: #3c47be; }
+.save-btn:hover:not(:disabled) { background: #4652d1; }
+.cancel-btn:hover:not(:disabled), .clouse-button:hover:not(:disabled) { background: #2a2a2f; }
+button:disabled, input:disabled, textarea:disabled { opacity: 0.6; cursor: wait; }
+button:focus-visible { outline: 2px solid #8b7cff; outline-offset: 2px; }
+@media (max-width: 500px) { .note-modal-conteiner { padding: 1rem; } .note-modal-footer { flex-wrap: wrap; } .footer-actions { margin-left: auto; } }
+</style>

@@ -10,7 +10,7 @@
                 <div class="toolbar-actions">
                     <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
-                    <UploadButton text="Upload" mode="file" @files="handleNoteUpload"/>
+                    <UploadButton text="Upload" mode="file" accept=".txt,.md" @files="handleNoteUpload"/>
 
 
                     <button
@@ -28,10 +28,10 @@
                 <span role="status" aria-live="polite">{{ selectedNotes.length }} selected</span>
 
                 <div class="selection-actions">
-                    <button type="button" class="selection-btn" :disabled="pending" @click="selectedNotes = []">
+                    <button type="button" class="selection-btn" :disabled="busy" @click="selectedNotes = []">
                         Clear
                     </button>
-                    <button type="button" class="selection-btn delete-selected-btn" :disabled="pending" @click="handleDeleteSelected">
+                    <button type="button" class="selection-btn delete-selected-btn" :disabled="busy" @click="handleDeleteSelected">
                         <Icon name="solar:trash-bin-trash-bold" />
                         Delete Selected
                     </button>
@@ -41,47 +41,17 @@
 
         <DataView
             :view-mode="viewMode"
-            :is-dragging="isDragging"
-            :is-loading="pending || isLoading"
+            :is-loading="isInitialLoading"
+            :aria-busy="pending || isLoading || isBulkDeleting"
             drop-text="Drop notes to upload"
-            @dragover="isDragging = true"
-            @dragleave="isDragging = false"
             @drop="handleDrop"
         >
-            <template #loading>
-                <div class="upload-loading" role="status" aria-live="polite">
-                    <template v-if="isUploading && uploadProgress !== null">
-                        <span>{{ uploadProgress }}%</span>
-
-                        <div
-                            class="upload-progress"
-                            role="progressbar"
-                            aria-label="Uploading notes"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            :aria-valuenow="uploadProgress"
-                        >
-                            <div
-                                class="upload-progress-bar"
-                                :style="{ width: `${uploadProgress}%` }"
-                            ></div>
-                        </div>
-                    </template>
-
-                    <div v-if="!isUploading || uploadProgress === null" class="loading-state">
-                        <span class="loading-spinner" aria-hidden="true" />
-                        <span>{{ isUploading ? 'Uploading notes...' : 'Loading notes...' }}</span>
-                    </div>
-                </div>
-            </template>
-
-            <template v-if="!pending && !isLoading && filteredNotes.length === 0" #empty>
+            <template #loading><div class="loading-state" role="status">Loading notes...</div></template>
+            <template v-if="!isInitialLoading && filteredNotes.length === 0" #empty>
                 <div class="empty-state">
-                    <Icon name="solar:notebook-linear" size="2.5rem" class="empty-state-icon" />
-                    <strong>{{ notes.length ? 'No matching notes' : 'No notes yet' }}</strong>
-                    <span class="empty-state-description">
-                        {{ notes.length ? 'Try a different search.' : 'Create your first note to get started.' }}
-                    </span>
+                    <Icon name="solar:notebook-bold" size="2.5rem" class="empty-state-icon" />
+                    <strong>{{ error ? 'Unable to load notes' : notes.length ? 'No matching notes' : 'No notes yet' }}</strong>
+                    <span class="empty-state-description">{{ error || (notes.length ? 'Try a different search.' : 'Create your first note to get started.') }}</span>
                 </div>
             </template>
 
@@ -96,7 +66,7 @@
                                         class="note-checkbox"
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
-                                        :disabled="pending"
+                                        :disabled="busy"
                                         aria-label="Select all notes on this page"
                                         @change="toggleSelectAll"
                                     >
@@ -125,6 +95,7 @@
                                 :key="note.id"
                                 :class="{ selected: selectedNotes.includes(note.id) }"
                                 @click="openNote(note)"
+                                @contextmenu.prevent.stop="openContextMenu($event, note.id)"
                             >
                                 <td @click.stop>
                                     <input 
@@ -132,7 +103,7 @@
                                         type="checkbox"
                                         class="note-checkbox"
                                         :value="note.id"
-                                        :disabled="pending"
+                                        :disabled="busy"
                                         :aria-label="`Select ${note.title}`"
                                     >
                                 </td>
@@ -158,6 +129,7 @@
 
                                 <td @click.stop>
                                     <ItemMenu
+                                        :ref="(menu) => setNoteMenuRef(note.id, menu)"
                                         type="note"
                                         :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']"
                                         :is-favorite="isNoteFavorite(note.id)"
@@ -176,56 +148,25 @@
             </template>
 
             <template #grid>
-                <div
-                    v-for="note in paginatedNotes"
-                    :key="note.id"
-                    class="note-card"
-                    :class="{ selected: selectedNotes.includes(note.id) }"
-                    @click="openNote(note)"
-                >
-                    <div class="note-card-top">
-                        <div class="note-card-icon">
-                            <Icon name="solar:notebook-bold" />
-                        </div>
-
-                        <div class="note-card-actions" @click.stop>
-                            <label class="note-card-select">
-                                <input
-                                    v-model="selectedNotes"
-                                    type="checkbox"
-                                    class="note-checkbox"
-                                    :value="note.id"
-                                    :disabled="pending"
-                                    :aria-label="`Select ${note.title}`"
-                                >
+                <ItemGrid>
+                    <ItemGridCard v-for="note in paginatedNotes" :key="note.id" :title="note.title" icon="solar:notebook-bold"
+                        :selected="selectedNotes.includes(note.id)" @click="openNote(note)" @contextmenu.prevent.stop="openContextMenu($event, note.id)">
+                        <template #actions>
+                            <label class="file-select">
+                                <input v-model="selectedNotes" type="checkbox" class="note-checkbox" :value="note.id" :disabled="busy" :aria-label="`Select ${note.title}`">
                             </label>
-
-                            <ItemMenu
-                                type="note"
-                                :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']"
-                                :is-favorite="isNoteFavorite(note.id)"
-                                @open="openNote(note)"
-                                @edit="editNote(note)"
-                                @rename="renameNote(note)"
-                                @download="downloadNote(note)"
-                                @favorite="favoriteNote(note)"
-                                @delete="deleteNote(note)"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="note-card-info">
-                        <strong :title="note.title">{{ note.title }}</strong>
-                        <span>{{ note.content || 'Empty note' }}</span>
-                    </div>
-
-                    <div class="note-card-bottom">
-                        <span>{{ formatFileSize(note.size) }}</span>
-                        <span>{{ formatFileTime(note.created_at) }}</span>
-                    </div>
-                </div>
+                            <ItemMenu :ref="(menu) => setNoteMenuRef(note.id, menu)" type="note"
+                                :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']" :is-favorite="isNoteFavorite(note.id)"
+                                @open="openNote(note)" @edit="editNote(note)" @rename="renameNote(note)" @download="downloadNote(note)"
+                                @favorite="favoriteNote(note)" @delete="deleteNote(note)" />
+                        </template>
+                        <template #metadata><span>{{ formatFileSize(note.size) }}</span> ? <span>{{ formatFileTime(note.created_at) }}</span></template>
+                    </ItemGridCard>
+                </ItemGrid>
             </template>
         </DataView>
+        <UploadProgress :active="isUploading" :progress="uploadProgress" :processing="isProcessing" label="Uploading notes..." />
+        <NoteFormModal :open="noteModalOpen" :mode="noteModalMode" :note="activeNote" @close="noteModalOpen = false" @saved="handleNoteSaved" />
         
 
         <Pagination
@@ -238,6 +179,8 @@
 
 <script setup lang="ts">
 import { formatFileSize, formatFileTime } from '~/utils/file'
+import type { ComponentPublicInstance } from 'vue'
+import type ItemMenu from '~/components/ui/ItemMenu.vue'
 
 definePageMeta({
     middleware: 'auth',
@@ -247,9 +190,12 @@ definePageMeta({
 const {
     isLoading,
     isUploading,
+    isProcessing,
     isDeleting,
     uploadProgress,
     uploadNote,
+    deleteNote: removeNote,
+    deleteNotes,
 } = useNoteActions()
 
 const { openToast } = useToast()
@@ -263,8 +209,7 @@ if (error.value) {
 }
 
 const searchQuery = ref('')
-const viewMode = ref<'list' | 'grid'>('list')
-const isDragging = ref(false)
+const viewMode = ref<'list' | 'grid'>('grid')
 const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
 
 const filteredNotes = computed(() => {
@@ -278,7 +223,7 @@ const { sortedItems: sortedNotes } = useSort(
     filteredNotes, sortMode, note => note.title, note => note.created_at
 )
 
-const itemsPerPage = computed(() => viewMode.value === 'list' ? 12 : 20)
+const itemsPerPage = computed(() => viewMode.value === 'list' ? 12 : 24)
 const { currentPage, totalPages, paginatedItems: paginatedNotes } = usePagination(
     sortedNotes,
     itemsPerPage
@@ -294,7 +239,6 @@ const isNoteFavorite = (noteId: string) => {
 }
 
 const handleDrop = async (event: DragEvent) => {
-    isDragging.value = false
     const droppedNotes = event.dataTransfer?.files
     if (!droppedNotes?.length) return
     await handleNoteUpload(droppedNotes)
@@ -314,37 +258,89 @@ const handleNoteUpload = async (files: FileList) => {
     }
 }
 
+const noteModalOpen = ref(false)
+const noteModalMode = ref<'create' | 'edit'>('create')
+const activeNote = ref<NoteItem | null>(null)
+const isBulkDeleting = ref(false)
+const isFavoriting = ref(false)
+const busy = computed(() => pending.value || isLoading.value || isBulkDeleting.value || isFavoriting.value)
+const isInitialLoading = computed(() => pending.value && notes.value.length === 0 && !isUploading.value)
+const { addFavorite, removeFavorite } = useFavoriteActions()
+const noteMenus = new Map<string, InstanceType<typeof ItemMenu>>()
+const setNoteMenuRef = (id: string, menu: Element | ComponentPublicInstance | null) => {
+    if (menu) noteMenus.set(id, menu as InstanceType<typeof ItemMenu>)
+    else noteMenus.delete(id)
+}
+const openContextMenu = (event: MouseEvent, id: string) => { noteMenus.get(id)?.openAt(event.clientX, event.clientY) }
 const createNote = () => {
-    console.log('Create note')
+    activeNote.value = null
+    noteModalMode.value = 'create'
+    noteModalOpen.value = true
 }
-
 const openNote = (note: NoteItem) => {
-    console.log('Open:', note.title)
+    activeNote.value = note
+    noteModalMode.value = 'edit'
+    noteModalOpen.value = true
 }
-
-const editNote = (note: NoteItem) => {
-    console.log('Edit:', note.title)
+const editNote = openNote
+const renameNote = async (note: NoteItem) => {
+    openNote(note)
+    await nextTick()
+    const input = document.getElementById('note-form-title') as HTMLInputElement | null
+    input?.focus()
+    input?.select()
 }
-
+const handleNoteSaved = async () => {
+    await fetchAll()
+    if (error.value) openToast(error.value, 'error')
+}
 const downloadNote = (note: NoteItem) => {
-    console.log('Download:', note.title)
+    const url = URL.createObjectURL(new Blob([note.content], { type: 'text/plain;charset=utf-8' }))
+    try {
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `${note.title.replace(/[/\\\0]/g, '_')}.txt`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    } finally { setTimeout(() => URL.revokeObjectURL(url), 1000) }
 }
-
-const renameNote = (note: NoteItem) => {
-    console.log('Rename:', note.title)
+const favoriteNote = async (note: NoteItem) => {
+    if (isFavoriting.value) return
+    isFavoriting.value = true
+    try {
+        const favorite = isNoteFavorite(note.id)
+        if (favorite) await removeFavorite(note.id, 'note')
+        else await addFavorite(note.id, 'note')
+        await fetchAll()
+        if (error.value) throw new Error(error.value)
+        openToast(favorite ? 'Note removed from favorites.' : 'Note added to favorites.', 'success')
+    } catch (err: any) { openToast(err.data?.message || err.message || 'Could not update favorite.', 'error') }
+    finally { isFavoriting.value = false }
 }
-
-const favoriteNote = (note: NoteItem) => {
-    console.log('Favorite:', note.title)
+const deleteNote = async (note: NoteItem) => {
+    if (isDeleting.value) return
+    try {
+        await removeNote(note.id)
+        notes.value = notes.value.filter(item => item.id !== note.id)
+        await fetchAll()
+        if (error.value) throw new Error(error.value)
+        openToast('Note deleted successfully.', 'success')
+    } catch (err: any) { openToast(err.data?.message || err.message || 'Could not delete note.', 'error') }
 }
-
-const deleteNote = (note: NoteItem) => {
-    console.log('Delete:', note.title)
-}
-
-const handleDeleteSelected = () => {
-    if (!selectedNotes.value.length || pending.value) return
-    console.log('Delete selected notes:', [...selectedNotes.value])
+const handleDeleteSelected = async () => {
+    if (!selectedNotes.value.length || busy.value) return
+    isBulkDeleting.value = true
+    try {
+        const result = await deleteNotes([...selectedNotes.value])
+        const deleted = new Set(result.deletedIds)
+        notes.value = notes.value.filter(note => !deleted.has(note.id))
+        selectedNotes.value = selectedNotes.value.filter(id => !deleted.has(id))
+        await fetchAll()
+        const message = `${result.deletedIds.length} notes deleted.${result.failedIds.length ? ` ${result.failedIds.length} could not be deleted.` : ''}`
+        openToast(error.value ? `${message} ${error.value}` : message, result.failedIds.length || error.value ? 'error' : 'success')
+    } catch (err: any) { openToast(err.data?.message || err.message || 'Could not delete selected notes.', 'error') }
+    finally { isBulkDeleting.value = false }
 }
 
 watch(notes, (items) => {
@@ -367,9 +363,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     flex: 1;
     min-height: 0;
 
-    padding: 0.4rem 0.5rem;
+    padding: 0 0.5rem;
 
-    border-radius: 1rem;
+    border-radius: 12px;
 
     display: flex;
     flex-direction: column;
@@ -387,7 +383,9 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     flex-shrink: 0;
 
-    padding: 0 0.5rem;
+    padding: 0;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .notes-toolbar {
@@ -395,8 +393,8 @@ watch([searchQuery, sortMode, viewMode], () => {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
+    min-width: 0;
 }
 
 .notes-toolbar :deep(.search-box) {
@@ -410,7 +408,8 @@ watch([searchQuery, sortMode, viewMode], () => {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    min-width: 0;
 }
 
 .new-note-button {
@@ -422,15 +421,15 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     gap: 0.5rem;
 
-    padding: 0 1rem;
+    padding: 0 0.75rem;
 
     background: #3c47be;
     color: #ffffff;
 
     border: none;
-    border-radius: 0.625rem;
+    border-radius: 6px;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 500;
 
     cursor: pointer;
@@ -438,6 +437,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     transition:
         background 0.2s ease,
         transform 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .new-note-button:hover {
@@ -536,7 +538,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     box-sizing: border-box;
     background: #202024;
     border: 1px solid #505057;
-    border-radius: 0.3rem;
+    border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -568,7 +570,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     margin: 0;
     background: #ffffff;
     border: 0;
-    border-radius: 1px;
     transform: none;
 }
 
@@ -597,7 +598,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     display: flex;
     align-items: center;
 
-    gap: 0.8rem;
+    gap: 0.75rem;
 }
 
 .note-icon {
@@ -614,7 +615,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     background: #29215c;
 
     border: 1px solid #443b82;
-    border-radius: 0.55rem;
+    border-radius: 6px;
 
     font-size: 1.2rem;
 }
@@ -625,16 +626,17 @@ watch([searchQuery, sortMode, viewMode], () => {
     display: flex;
     flex-direction: column;
 
-    gap: 0.2rem;
+    gap: 0.25rem;
 }
 
 .note-info strong {
     color: #ffffff;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
 
     white-space: nowrap;
+    line-height: 1.5;
 }
 
 .note-info span {
@@ -643,88 +645,8 @@ watch([searchQuery, sortMode, viewMode], () => {
     font-size: 0.75rem;
 
     white-space: nowrap;
-}
-
-.note-card {
-    min-height: 10rem;
-
-    padding: 1rem;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-radius: 0.625rem;
-
-    box-sizing: border-box;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.note-card:hover {
-    background: #1f1f23;
-
-    border-color: #35353c;
-}
-
-.note-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.note-card-icon {
-    width: 2.7rem;
-    height: 2.7rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #9c8cff;
-    background: #29215c;
-
-    border: 1px solid #443b82;
-    border-radius: 0.55rem;
-
-    font-size: 1.25rem;
-}
-
-.note-card-info {
-    display: flex;
-    flex-direction: column;
-
-    gap: 0.3rem;
-}
-
-.note-card-info strong {
-    color: #ffffff;
-
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.note-card-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-}
-
-.note-card-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    color: #898991;
-
-    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .selection-toolbar {
@@ -732,34 +654,39 @@ watch([searchQuery, sortMode, viewMode], () => {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
     color: #a8a8b0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .selection-actions {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .selection-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    height: 2.35rem;
-    padding: 0 1rem;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding: 0 0.75rem;
     color: #a8a8b0;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 0.6rem;
-    font-family: inherit;
-    font-size: 0.85rem;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .selection-btn:hover:not(:disabled) {
@@ -802,147 +729,10 @@ watch([searchQuery, sortMode, viewMode], () => {
 }
 
 .note-info strong,
-.note-info span,
-.note-card-info strong {
+.note-info span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.note-card,
-.note-card-info {
-    min-width: 0;
-}
-
-.note-card {
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.note-card.selected {
-    background: #201d2d;
-    border-color: #6055b8;
-}
-
-.note-card-icon {
-    flex-shrink: 0;
-}
-
-.note-card-actions {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    gap: 0.25rem;
-}
-
-.note-card-select {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.45rem;
-    cursor: pointer;
-}
-
-.note-card-select:hover {
-    background: #252529;
-}
-
-.upload-loading {
-    position: absolute;
-    inset: 0;
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    background: rgba(18, 18, 20, 0.92);
-    color: #ffffff;
-}
-
-.upload-loading > span {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.upload-progress {
-    width: 16rem;
-    height: 0.5rem;
-    background: #29292e;
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.upload-progress-bar {
-    height: 100%;
-    background: #3c47be;
-    border-radius: 999px;
-    transition: width 0.15s ease;
-}
-
-.loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-    color: #a8a8b0;
-    font-size: 0.85rem;
-}
-
-.loading-spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid #29292e;
-    border-top-color: #3c47be;
-    border-radius: 50%;
-    animation: loading-spin 0.8s linear infinite;
-}
-
-@keyframes loading-spin {
-    to { transform: rotate(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .loading-spinner { animation: none; }
-}
-
-.note-card-info span {
-    display: -webkit-box;
-    overflow: hidden;
-    overflow-wrap: anywhere;
-    line-height: 1.5;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-}
-
-.notes-page :deep(.grid-view) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-@media (max-width: 1500px) {
-    .notes-page :deep(.grid-view) {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 1100px) {
-    .notes-page :deep(.grid-view) {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 800px) {
-    .notes-page :deep(.grid-view) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 500px) {
-    .notes-page :deep(.grid-view) {
-        grid-template-columns: minmax(0, 1fr);
-    }
 }
 
 

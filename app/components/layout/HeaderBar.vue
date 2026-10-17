@@ -1,7 +1,18 @@
 <template>
   <header class="header-bar">
     <div class="title">
-      <h1>{{ title }}</h1>
+      <ClientOnly>
+      <nav v-if="fileHeader && isFileDetails" class="header-breadcrumb" aria-label="Breadcrumb">
+        <NuxtLink :to="fileHeader.returnPath" class="header-back">
+          <Icon name="solar:arrow-left-linear" size="1.2rem" />
+          <span>Back to {{ fileHeader.returnName }}</span>
+        </NuxtLink>
+        <span class="header-separator" aria-hidden="true">/</span>
+        <span class="header-filename" :title="fileHeader.fileName" aria-current="page">{{ fileHeader.fileName }}</span>
+      </nav>
+      <h1 v-else>{{ title }}</h1>
+        <template #fallback><h1>{{ title }}</h1></template>
+      </ClientOnly>
     </div>
 
     <div class="header-actions">
@@ -33,22 +44,32 @@ defineProps({
 })
 
 const avatar = ref('VX')
+const fileHeader = useFileHeader()
+const route = useRoute()
+const isFileDetails = computed(() => /^\/files\/[^/]+\/?$/.test(route.path) && fileHeader.value?.fileId === route.params.id)
 </script>
 
 <style scoped>
+.title { flex: 1; min-width: 0; margin-right: 1rem; }
+.header-breadcrumb { display: flex; align-items: center; gap: 0.75rem; min-width: 0; font-size: 0.875rem; line-height: 1.5; }
+.header-back { display: inline-flex; align-items: center; gap: 0.5rem; flex-shrink: 0; color: #8b7cff; text-decoration: none; font-weight: 500; }
+.header-back:hover { color: #b5acff; }
+.header-separator { color: #6f6f78; }
+.header-filename { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c5c5cb; }
+.header-actions { flex-shrink: 0; }
 .header-bar {
   width: 100%;
-  height: 5rem;
+  height: 4rem;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 1.25rem;
+  padding: 0 1rem;
 
   background: #1a1a1d;
   border: 1px solid #29292e;
-  border-radius: 1rem;
+  border-radius: 12px;
 
   box-sizing: border-box;
 }
@@ -58,21 +79,22 @@ const avatar = ref('VX')
 
   color: #ffffff;
 
-  font-size: 1.7rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .icon-button {
   position: relative;
 
-  width: 2.8rem;
-  height: 2.8rem;
+  width: 2.5rem;
+  height: 2.5rem;
 
   display: flex;
   align-items: center;
@@ -82,7 +104,7 @@ const avatar = ref('VX')
   background: #202024;
 
   border: 1px solid #303036;
-  border-radius: 0.7rem;
+  border-radius: 6px;
 
   cursor: pointer;
 
@@ -114,19 +136,19 @@ const avatar = ref('VX')
 }
 
 .profile-button {
-  height: 2.8rem;
+  height: 2.5rem;
 
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
 
-  padding: 0 0.65rem;
+  padding: 0 0.5rem;
 
   color: #ffffff;
   background: #202024;
 
   border: 1px solid #303036;
-  border-radius: 0.7rem;
+  border-radius: 6px;
 
   cursor: pointer;
 
@@ -151,8 +173,9 @@ const avatar = ref('VX')
   background: #5a5aff;
   border-radius: 50%;
 
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
 .arrow-icon {

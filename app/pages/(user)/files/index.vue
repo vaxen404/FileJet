@@ -49,38 +49,19 @@
 
         <DataView
             :view-mode="viewMode"
-            :is-dragging="isDragging"
-            :is-loading="isLoading || isBulkDeleting"
+            :is-loading="isInitialLoading"
+            :aria-busy="isLoading || pending || isBulkDeleting"
             drop-text="Drop files to upload"
-            @dragover="isDragging = true"
-            @dragleave="isDragging = false"
             @drop="handleDrop"
         >
             <template #loading>
-                <div class="upload-loading" role="status" aria-live="polite">
-                    <template v-if="isUploading && uploadProgress !== null">
-                        <span>{{ uploadProgress }}%</span>
-
-                        <div class="upload-progress">
-                            <div
-                                class="upload-progress-bar"
-                                :style="{ width: `${uploadProgress}%` }"
-                            ></div>
-                        </div>
-                    </template>
-
-                    <div v-if="isDeleting || !isUploading || uploadProgress === null" class="operation-loading">
-                        <span class="loading-spinner" aria-hidden="true"></span>
-                        <span>{{ isDeleting || isBulkDeleting ? 'Deleting files...' : isUploading ? 'Uploading files...' : 'Updating file...' }}</span>
-                    </div>
-                </div>
+                <div class="loading-state" role="status">Loading files...</div>
             </template>
-
-            <template v-if="!isLoading && !isBulkDeleting && files.length === 0" #empty>
+            <template v-if="!isInitialLoading && filteredFiles.length === 0" #empty>
                 <div class="empty-state">
                     <Icon name="solar:file-bold" size="2.5rem" class="empty-state-icon" />
-                    <strong>No files yet</strong>
-                    <span class="empty-state-description">Upload your first file to get started.</span>
+                    <strong>{{ error ? 'Unable to load files' : files.length ? 'No matching files' : 'No files yet' }}</strong>
+                    <span class="empty-state-description">{{ error || (files.length ? 'Try a different search or filter.' : 'Upload your first file to get started.') }}</span>
                 </div>
             </template>
 
@@ -188,94 +169,37 @@
             </template>
 
             <template #grid>
-                <div class="files-grid">
-                    <div
-                        v-for="file in paginatedFiles"
-                        :key="file.id"
-                        class="file-card"
-                        :class="{ selected: selectedFiles.includes(file.id) }"
-                        @click="openFile(file)"
-                        @contextmenu.prevent.stop="openContextMenu($event, file.id)"
-                    >
-                        <div class="file-preview">
-                            <div
-                                v-if="file.mime_type?.startsWith('video/')"
-                                class="video-play-icon"
-                            >
-                                <Icon name="solar:play-bold" />
-                            </div>
-
-                            <img
-                                v-if="file.mime_type?.startsWith('image/')"
-                                :src="`/api/files/${file.id}/preview`"
-                                :alt="file.name"
-                                loading="lazy"
-                                class="file-preview-image"
-                            >
-
-                            <video
-                                v-else-if="file.mime_type?.startsWith('video/')"
-                                :src="`/api/files/${file.id}/preview`"
-                                class="file-preview-image"
-                                preload="metadata"
-                                muted
-                                playsinline
-                            />
-
-                            <div v-else class="file-preview-placeholder">
-                                <Icon :name="getFileIcon(file.mime_type, file.original_name)" />
-                            </div>
-
-                            <div class="file-overlay" @click.stop>
-                                <label class="file-select">
-                                    <input
-                                        v-model="selectedFiles"
-                                        type="checkbox"
-                                        :value="file.id"
-                                        :disabled="isLoading || isBulkDeleting"
-                                        :aria-label="`Select ${file.name}`"
-                                    >
-                                </label>
-
-                                <ItemMenu
-                                    :ref="(menu) => setFileMenuRef(file.id, menu)"
-                                    type="file"
-                                    :is-favorite="isFileFavorite(file.id)"
-                                    :can-copy="canCopyFile(file.mime_type, file.original_name)"
-                                    @open="openFile(file)"
-                                    @download="handleDownload(file.id)"
-                                    @rename="startRename(file)"
-                                    @copy="handleCopy(file.id)"
-                                    @favorite="handleFavorite(file)"
-                                    @delete="handleDelete(file.id)"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="file-details">
-                            <input
-                                type="text"
-                                class="file-name-input"
-                                :data-file-id="file.id"
-                                :class="{ active: editingFileId === file.id }"
-                                :value="editingFileId === file.id ? editingFileName : file.name"
-                                :disabled="editingFileId !== file.id"
-                                @input="editingFileName = ($event.target as HTMLInputElement).value"
-                                @keyup.enter="saveRename(file)"
-                                @blur="editingFileId === file.id && saveRename(file)"
-                                @click.stop
-                            >
-
-                            <div class="file-metadata">
-                                <span>{{ formatFileSize(file.size) }}</span>
-                                <span>{{ formatFileTime(file.created_at) }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ItemGrid>
+                    <ItemGridCard v-for="file in paginatedFiles" :key="file.id"
+                        :selected="selectedFiles.includes(file.id)" :title="file.name" :icon="getFileIcon(file.mime_type, file.original_name)"
+                        @click="openFile(file)" @contextmenu.prevent.stop="openContextMenu($event, file.id)">
+                        <template v-if="file.mime_type?.startsWith('image/') || file.mime_type?.startsWith('video/')" #preview>
+                            <div v-if="file.mime_type?.startsWith('video/')" class="video-play-icon"><Icon name="solar:play-bold" /></div>
+                            <img v-if="file.mime_type?.startsWith('image/')" :src="`/api/files/${file.id}/preview`" :alt="file.name" loading="lazy" class="file-preview-image">
+                            <video v-else :src="`/api/files/${file.id}/preview`" class="file-preview-image" preload="metadata" muted playsinline />
+                        </template>
+                        <template #actions>
+                            <label class="file-select">
+                                <input class="file-checkbox" v-model="selectedFiles" type="checkbox" :value="file.id" :disabled="isLoading || isBulkDeleting" :aria-label="`Select ${file.name}`">
+                            </label>
+                            <ItemMenu :ref="(menu) => setFileMenuRef(file.id, menu)" type="file"
+                                :is-favorite="isFileFavorite(file.id)" :can-copy="canCopyFile(file.mime_type, file.original_name)"
+                                @open="openFile(file)" @download="handleDownload(file.id)" @rename="startRename(file)"
+                                @copy="handleCopy(file.id)" @favorite="handleFavorite(file)" @delete="handleDelete(file.id)" />
+                        </template>
+                        <template #title>
+                            <input type="text" class="file-name-input" :data-file-id="file.id" :class="{ active: editingFileId === file.id }"
+                                :value="editingFileId === file.id ? editingFileName : file.name" :disabled="editingFileId !== file.id"
+                                @input="editingFileName = ($event.target as HTMLInputElement).value" @keyup.enter="saveRename(file)"
+                                @blur="editingFileId === file.id && saveRename(file)" @click.stop>
+                        </template>
+                        <template #metadata><span>{{ formatFileSize(file.size) }}</span> ? <span>{{ formatFileTime(file.created_at) }}</span></template>
+                    </ItemGridCard>
+                </ItemGrid>
             </template>
 
         </DataView>
+        <UploadProgress :active="isUploading" :progress="uploadProgress" :processing="isProcessing" />
 
         <Pagination
             v-model="currentPage"
@@ -296,12 +220,12 @@ definePageMeta({
     layout: 'user'
 })
 
-const { toastMessage, toastType, showToast, openToast } = useToast()
+const { openToast } = useToast()
 
 const {
     isLoading,
     isUploading,
-    isDeleting,
+    isProcessing,
     uploadProgress,
     uploadFiles,
     deleteFile,
@@ -313,7 +237,8 @@ const {
 
 const { addFavorite, removeFavorite } = useFavoriteActions()
 
-const { files, favorites, error, fetchAll } = useUser()
+const { files, favorites, pending, error, fetchAll } = useUser()
+const isInitialLoading = computed(() => pending.value && files.value.length === 0 && !isUploading.value)
 
 await fetchAll()
 
@@ -326,7 +251,6 @@ const viewMode = ref<'grid' | 'list'>('grid')
 const activeCategory = ref('All')
 const filterOptions = ['All', 'Images', 'Documents', 'Videos', 'Compressed', 'Others']
 
-const isDragging = ref(false)
 
 const fileMenus = new Map<string, InstanceType<typeof ItemMenu>>()
 
@@ -356,20 +280,9 @@ const startRename = async (file: any) => {
     input?.select()
 }
 
-const handleDrop = async (event: DragEvent) => {
-    isDragging.value = false
-    
+const handleDrop = (event: DragEvent) => {
     const droppedFiles = event.dataTransfer?.files
-    
-    if (!droppedFiles?.length) return
-
-    try {
-        await uploadFiles(droppedFiles, fetchAll)
-
-        openToast('File uploaded successfully.', 'success')
-    } catch (err: any) {
-        openToast(err.data?.message || err.message || 'File upload failed.', 'error')
-    }
+    if (droppedFiles?.length) return handleFiles(droppedFiles)
 }
 
 const filteredFiles = computed(() => {
@@ -405,7 +318,10 @@ const handleFiles = async (files: FileList) => {
     }
 
     try {
-        await uploadFiles(files, fetchAll)
+        await uploadFiles(files, async () => {
+            await fetchAll()
+            if (error.value) throw new Error(error.value)
+        })
 
         openToast('File uploaded successfully.', 'success')
     } catch (err: any) {
@@ -506,7 +422,7 @@ const handleFavorite = async (file: any) => {
 }
 
 const itemsPerPage = computed(() => {
-    return viewMode.value === 'list' ? 12 : 20
+    return viewMode.value === 'list' ? 12 : 24
 })
 
 const { currentPage, totalPages, paginatedItems: paginatedFiles} = usePagination(
@@ -554,7 +470,7 @@ watch(totalPages, (total) => {
     currentPage.value = Math.min(currentPage.value, Math.max(1, total))
 })
 
-watch([searchQuery, activeCategory, viewMode], () => {
+watch([searchQuery, activeCategory, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 
@@ -566,16 +482,19 @@ watch([searchQuery, activeCategory, viewMode], () => {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
     color: #a8a8b0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .selection-actions {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .selection-actions .delete-selected-btn {
@@ -601,9 +520,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
     flex: 1;
     min-height: 0;
 
-    padding: 0.4rem 0.5rem;
+    padding: 0 0.5rem;
 
-    border-radius: 1rem;
+    border-radius: 12px;
 
     display: flex;
     flex-direction: column;
@@ -621,7 +540,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
     flex-shrink: 0;
 
-    padding: 0 0.5rem;
+    padding: 0;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .files-toolbar {
@@ -630,8 +551,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
     align-items: center;
     justify-content: space-between;
-
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .toolbar-actions {
@@ -640,7 +562,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
     align-items: center;
 
-    gap: 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .files-subtoolbar {
@@ -650,23 +574,22 @@ watch([searchQuery, activeCategory, viewMode], () => {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: 0.5rem;
 }
 
 .filter-btn {
-    height: 2.35rem;
+    height: 2.5rem;
 
-    padding: 0 1rem;
+    padding: 0 0.75rem;
 
     color: #a8a8b0;
 
     background: #1a1a1d;
 
     border: 1px solid #29292e;
-    border-radius: 0.6rem;
+    border-radius: 6px;
 
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 500;
 
     cursor: pointer;
@@ -675,6 +598,9 @@ watch([searchQuery, activeCategory, viewMode], () => {
         background 0.2s ease,
         color 0.2s ease,
         border-color 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .filter-btn:hover {
@@ -792,7 +718,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
     box-sizing: border-box;
     background: #202024;
     border: 1px solid #505057;
-    border-radius: 0.3rem;
+    border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -824,7 +750,6 @@ watch([searchQuery, activeCategory, viewMode], () => {
     margin: 0;
     background: #ffffff;
     border: 0;
-    border-radius: 1px;
     transform: none;
 }
 
@@ -860,7 +785,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
     align-items: center;
 
-    gap: 0.8rem;
+    gap: 0.75rem;
 }
 
 .file-icon {
@@ -878,7 +803,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
     background: #29215c;
 
-    border-radius: 0.55rem;
+    border-radius: 6px;
 
     font-size: 1.15rem;
 }
@@ -888,7 +813,7 @@ watch([searchQuery, activeCategory, viewMode], () => {
 
     flex-direction: column;
 
-    gap: 0.2rem;
+    gap: 0.25rem;
 
     min-width: 0;
 }
@@ -900,15 +825,21 @@ watch([searchQuery, activeCategory, viewMode], () => {
     background: transparent;
 
     border: 1px solid transparent;
-    border-radius: 0.5rem;
+    border-radius: 6px;
 
     
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
 
     white-space: nowrap;
     
     outline: none;
+    line-height: 1.5;
+    font-family: 'Inter', sans-serif;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
 }
 
 .name-input.active {
@@ -926,183 +857,8 @@ watch([searchQuery, activeCategory, viewMode], () => {
     font-size: 0.75rem;
 
     white-space: nowrap;
-}
-
-.file-card {
-    min-width: 0;
-    min-height: 10rem;
-
-    padding: 1rem;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-radius: 0.625rem;
-
-    box-sizing: border-box;
-    
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.file-card:hover {
-    background: #1f1f23;
-
-    border-color: #35353c;
-}
-
-.file-card.selected {
-    background: #201d2d;
-    border-color: #6055b8;
-}
-
-.file-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.file-card-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    flex-shrink: 0;
-}
-
-.file-card-select {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.45rem;
-    cursor: pointer;
-}
-
-.file-card-select:hover {
-    background: #252529;
-}
-
-.file-card-icon {
-    flex-shrink: 0;
-    width: 2.7rem;
-    height: 2.7rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #8b7cff;
-
-    background: #29215c;
-
-    border-radius: 0.55rem;
-
-    font-size: 1.25rem;
-}
-
-.file-card-info {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
-.file-card-info .name-input {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    text-overflow: ellipsis;
-}
-
-.file-card-info strong {
-    color: #ffffff;
-
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.file-card-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.file-card-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    color: #898991;
-
-    font-size: 0.75rem;
-}
-
-
-.files-page :deep(.grid-view) {
-    display: block;
-}
-
-.files-grid {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 1rem;
-}
-
-.file-card {
-    min-width: 0;
-    overflow: hidden;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 0.8rem;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-}
-
-.file-card:hover {
-    background: #202024;
-    border-color: #454550;
-}
-
-.file-card.selected {
-    border-color: #7063d8;
-    background: #211f30;
-}
-
-.file-preview {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    background: #141417;
-}
-
-.file-preview-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.25s ease;
-}
-
-.file-card:hover .file-preview-image {
-    transform: scale(1.035);
-}
-
-.file-preview-placeholder {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #8b7cff;
-    font-size: 3.5rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .video-play-icon {
@@ -1127,123 +883,16 @@ watch([searchQuery, activeCategory, viewMode], () => {
     background: rgba(60, 71, 190, 0.9);
 }
 
-.file-overlay {
-    position: absolute;
-    inset: 0 0 auto;
-    z-index: 2;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 0.65rem;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-
-.file-card:hover .file-overlay,
-.file-card.selected .file-overlay,
-.file-card:focus-within .file-overlay {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.file-select {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #242429;
-    border: 1px solid #3a3a42;
-    border-radius: 0.5rem;
-    cursor: pointer;
-}
-
-.file-select input {
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: 0;
-    accent-color: #7063d8;
-    cursor: pointer;
-}
-
-.file-overlay :deep(.item-menu-trigger) {
-    background: #242429;
-    border-radius: 0.5rem;
-}
-
-.file-details {
-    padding: 0.8rem 0.9rem;
-}
-
-.file-name-input {
-    display: block;
-    width: 100%;
+.files-toolbar :deep(.search-box) {
+    flex: 1 1 18rem;
     min-width: 0;
-    padding: 0.2rem 0;
-    border: 1px solid transparent;
-    background: transparent;
-    color: #f3f3f5;
-    font-size: 0.85rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.file-name-input:disabled {
-    opacity: 1;
-    -webkit-text-fill-color: #f3f3f5;
-    cursor: pointer;
-}
-
-.file-name-input.active {
-    border-color: #7063d8;
-    border-radius: 0.35rem;
-    padding: 0.2rem 0.4rem;
-}
-
-.file-metadata {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: 0.4rem;
-    color: #898991;
-    font-size: 0.73rem;
-}
-
-@media (max-width: 1500px) {
-    .files-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 1100px) {
-    .files-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+    max-width: 32rem;
 }
 
 @media (max-width: 800px) {
-    .files-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .files-toolbar :deep(.search-box) {
+        flex-basis: 100%;
+        max-width: none;
     }
 }
-
-@media (max-width: 500px) {
-    .files-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-@media (hover: none) {
-    .file-overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
-}
-
 </style>

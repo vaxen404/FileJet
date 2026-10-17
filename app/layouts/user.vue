@@ -78,7 +78,7 @@ body {
 
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.75rem;
 }
 
 .user-content {

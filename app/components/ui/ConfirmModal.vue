@@ -79,7 +79,7 @@ const emit = defineEmits<{
     background: #1a1a1d;
 
     border: 1px solid #29292e;
-    border-radius: 0.9rem;
+    border-radius: 12px;
 
     box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.45);
 
@@ -99,7 +99,7 @@ const emit = defineEmits<{
     background: #3a2024;
     color: #ff6b6b;
 
-    border-radius: 0.7rem;
+    border-radius: 6px;
 
     font-size: 1.5rem;
 }
@@ -139,12 +139,15 @@ const emit = defineEmits<{
 
     height: 2.5rem;
 
-    border-radius: 0.6rem;
+    border-radius: 6px;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 500;
 
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .cancel-button {

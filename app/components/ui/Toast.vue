@@ -48,7 +48,7 @@ withDefaults(
         
         background: #17263a;
         border: 1px solid #294568;
-        border-radius: 0.5rem;
+        border-radius: 24px;
         box-shadow: 0 0.25rem 1rem #00000026;
 
         color: #c5dcff;

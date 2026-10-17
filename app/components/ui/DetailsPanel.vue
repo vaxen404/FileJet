@@ -118,7 +118,7 @@ const emit = defineEmits<{
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.75rem;
 }
 
 .details-actions,
@@ -130,28 +130,28 @@ const emit = defineEmits<{
 .details-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.6rem;
-    padding: 0.6rem;
+    gap: 0.5rem;
+    padding: 0.5rem;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 0.65rem;
+    border-radius: 24px;
 }
 
 .actions-btn {
     width: 100%;
     min-width: 0;
-    height: 2.6rem;
-    padding: 0 0.55rem;
+    height: 2.5rem;
+    padding: 0 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
     background: #202024;
     color: #cfcfd5;
     border: 1px solid #303036;
-    border-radius: 0.45rem;
-    font-family: Inter, sans-serif;
-    font-size: 0.77rem;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
     font-weight: 500;
     white-space: nowrap;
     box-sizing: border-box;
@@ -160,6 +160,7 @@ const emit = defineEmits<{
         background 0.2s ease,
         color 0.2s ease,
         border-color 0.2s ease;
+    line-height: 1.5;
 }
 
 .actions-btn:hover {
@@ -199,7 +200,7 @@ const emit = defineEmits<{
 .details-info {
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 0.65rem;
+    border-radius: 24px;
     overflow: hidden;
 }
 
@@ -243,19 +244,21 @@ const emit = defineEmits<{
 .details-info :deep(.info-label) {
     flex-shrink: 0;
     color: #898991;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
 }
 
 .details-info :deep(.info-value) {
     min-width: 0;
     max-width: 68%;
     color: #d5d5da;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 500;
     text-align: right;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.5;
 }
 
 .details-actions > .actions-btn:nth-child(2) {
@@ -265,8 +268,8 @@ const emit = defineEmits<{
 
 @media (max-width: 360px) {
     .actions-btn {
-        font-size: 0.7rem;
-        padding: 0 0.3rem;
+        font-size: 0.75rem;
+        padding: 0 0.25rem;
         gap: 0.25rem;
     }
 }

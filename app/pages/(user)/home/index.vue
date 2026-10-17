@@ -390,7 +390,7 @@ const othersSize = ref(0)
 
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
 
     box-sizing: border-box;
   }
@@ -398,7 +398,7 @@ const othersSize = ref(0)
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
 
     flex-shrink: 0;
   }
@@ -408,13 +408,13 @@ const othersSize = ref(0)
 
     display: flex;
     align-items: center;
-    gap: 1.3rem;
+    gap: 1rem;
 
-    padding: 1.4rem;
+    padding: 1rem;
 
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 1rem;
+    border-radius: 24px;
 
     box-sizing: border-box;
   }
@@ -430,7 +430,7 @@ const othersSize = ref(0)
     color: #7777ff;
     background: #24244d;
 
-    border-radius: 0.8rem;
+    border-radius: 6px;
 
     font-size: 1.6rem;
   }
@@ -480,7 +480,7 @@ const othersSize = ref(0)
   .dashboard-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.85fr) minmax(0, 1.15fr);
-    gap: 1rem;
+    gap: 0.75rem;
 
     flex: 1;
     min-height: 0;
@@ -509,7 +509,7 @@ const othersSize = ref(0)
   .dashboard-card {
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 1rem;
+    border-radius: 24px;
 
     box-sizing: border-box;
     overflow: hidden;
@@ -520,7 +520,7 @@ const othersSize = ref(0)
     align-items: center;
     justify-content: space-between;
 
-    padding: 1.2rem 1.4rem;
+    padding: 1rem;
 
     flex-shrink: 0;
   }
@@ -530,8 +530,9 @@ const othersSize = ref(0)
 
     color: #ffffff;
 
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.25;
   }
 
   .card-header a {
@@ -542,7 +543,10 @@ const othersSize = ref(0)
     color: #7777ff;
 
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
   }
 
   .card-header a:hover {
@@ -568,7 +572,7 @@ const othersSize = ref(0)
 
   .files-list::-webkit-scrollbar-thumb {
     background: #39393f;
-    border-radius: 999px;
+    border-radius: 4px;
   }
 
   .files-list::-webkit-scrollbar-thumb:hover {
@@ -606,7 +610,7 @@ const othersSize = ref(0)
     color: #8b7cff;
     background: #29215c;
 
-    border-radius: 0.6rem;
+    border-radius: 6px;
 
     font-size: 1.25rem;
   }
@@ -621,32 +625,36 @@ const othersSize = ref(0)
   .file-info strong {
     color: #ffffff;
 
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: 1.5;
   }
 
   .file-info span {
     color: #898991;
 
-    font-size: 0.78rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
   }
 
   .file-name-input {
     width: 100%;
     min-width: 0;
-    padding: 0.3rem 0.4rem;
+    padding: 0.25rem 0.5rem;
     box-sizing: border-box;
     color: #ffffff;
     background: #202024;
     border: 1px solid #3c47be;
-    border-radius: 0.45rem;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
     outline: none;
+    line-height: 1.5;
   }
 
   .file-name-input:focus-visible {
@@ -674,8 +682,6 @@ const othersSize = ref(0)
     display: flex;
     flex-direction: column;
     gap: 1rem;
-
-    min-height: 0;
   }
 
   .storage-content {
@@ -721,26 +727,26 @@ const othersSize = ref(0)
     -webkit-appearance: none;
 
     border: none;
-    border-radius: 999px;
+    border-radius: 4px;
     background: #2c2c31;
   }
 
   .storage-meter::-webkit-meter-bar {
     background: #29292e;
     border: none;
-    border-radius: 999px;
+    border-radius: 4px;
 
     box-shadow: none;
   }
 
   .storage-meter::-webkit-meter-optimum-value {
     background: #4242fc;
-    border-radius: 999px;
+    border-radius: 4px;
   }
 
   .storage-meter::-moz-meter-bar {
     background: #4242fc;
-    border-radius: 999px;
+    border-radius: 4px;
   }
 
   .storage-types {
@@ -799,15 +805,15 @@ const othersSize = ref(0)
   }
 
   .quick-card {
-    padding-bottom: 1.4rem;
+    padding-bottom: 1rem;
   }
 
   .quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    gap: 0.75rem;
 
-    padding: 0 1.4rem;
+    padding: 0 1rem;
   }
 
   .quick-action-card {
@@ -815,15 +821,15 @@ const othersSize = ref(0)
 
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
 
-    padding: 1rem 1.2rem;
+    padding: 1rem;
 
     color: #ffffff;
     background: #1d1d21;
 
     border: 1px solid #2d2d33;
-    border-radius: 1rem;
+    border-radius: 24px;
 
     cursor: pointer;
 
@@ -850,7 +856,7 @@ const othersSize = ref(0)
 
     flex-shrink: 0;
 
-    border-radius: 0.9rem;
+    border-radius: 6px;
 
     font-size: 1.65rem;
   }

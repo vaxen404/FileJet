@@ -112,7 +112,7 @@ body {
         padding: 2rem;
         background: #1a1a1d;
         border: 1px solid #202025;
-        border-radius: 1rem;
+        border-radius: 24px;
         display: flex;
         flex-direction: column;
     }
@@ -153,7 +153,7 @@ body {
         background: #252529;
         color: white;
         border: 1px solid #2f2f33;
-        border-radius: 0.875rem;
+        border-radius: 6px;
         outline: none;
     }
 
@@ -182,7 +182,7 @@ body {
         height: 2rem;
         font-size: 1.1rem;
         border: none;
-        border-radius: 0.7rem;
+        border-radius: 6px;
         background: #232327;
         color: #f5f5f5;
         cursor: pointer;
@@ -204,7 +204,7 @@ body {
         padding: 0.625rem;
         font-size: 1.1rem;
         background: #5a5aff;
-        border-radius: 0.875rem;
+        border-radius: 6px;
         border: 1px solid #5a5aff;
         color: #ffffff;
         cursor: pointer;
@@ -223,7 +223,7 @@ body {
         align-items: center;
         background: #2f2f33;
         color: #ffffff;
-        border-radius: 1rem;
+        border-radius: 6px;
         border: 1px solid #2f2f33;
         font-size: 1.5rem;
         flex-shrink: 0;

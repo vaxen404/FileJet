@@ -1,31 +1,26 @@
+import { getPublicShare } from '../../../utils/shares'
+import { assertShareAccess } from '../../../utils/shareSecurity'
+import { enforceRateLimit } from '../../../utils/rateLimit'
 import { prisma } from "~~/server/utils/prisma";
 import { throwError } from "~~/server/utils/error";
 
 export default defineEventHandler(async (event) => {
     try {
-        const token = getRouterParam(event, 'token')
-
-        if (!token) {
-            throwError(400, 'Share token is required.')
-        }
-
-        enforceRateLimit(event, `shared-public:${token}`, 60, 60 * 1000)
-
-        const sharedItem = await prisma.shared_items.findUnique({
-            where: {
-                token
-            },
-            include: {
-                users: {
-                    select: {
-                        username: true
-                    }
-                }
-            }
-        })
-
-        if (!sharedItem) {
-            throwError(404, 'Shared item not found.')
+        const sharedItem = await getPublicShare(event, false)
+        enforceRateLimit(event, `shared-public:${sharedItem.token}`, 60, 60 * 1000)
+        try {
+            assertShareAccess(event, sharedItem)
+        } catch (err: any) {
+            if (err.statusCode !== 401) throw err
+            const file = sharedItem.item_type === 'file' ? await prisma.files.findFirst({
+                where: { id: sharedItem.item_id, user_id: sharedItem.user_id },
+                select: { name: true, original_name: true }
+            }) : null
+            if (sharedItem.item_type === 'file' && !file) throwError(404, 'File not found.')
+            throw createError({
+                statusCode: 401, message: 'A password is required for this share link.',
+                data: { passwordRequired: true, fileName: file?.original_name || file?.name || null }
+            })
         }
 
         if (sharedItem.item_type === 'file') {

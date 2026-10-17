@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
         const session = getAuthSession(event)
 
         if (!session) {
-            throwError(401, 'Oturum açmanız gerek.')
+            throwError(401, 'You need to be logged in.')
         }
 
         enforceRateLimit(event, `files-delete:${session.userId}`, 10, 60 * 1000)
@@ -69,6 +69,6 @@ export default defineEventHandler(async (event) => {
         console.log(err.message);
         if (err.statusCode) throw err
 
-        throwError(500, 'Dosya silinirken bilinmeyen bir hata oluştu.')
+        throwError(500, 'An error occurred while deleting the file.')
     }
 })

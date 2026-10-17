@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
         const session = getAuthSession(event)
 
         if (!session) {
-            throwError(401, 'Oturum açmanız gerek.')
+            throwError(401, 'You need to be logged in.')
         }
 
         enforceRateLimit(event, `files-rename:${session.userId}`, 10, 60 * 1000)
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
         const cleanName = newName.trim()
 
         if (!cleanName) {
-            throwError(400, 'Eksik veri.')
+            throwError(400, 'Filename is required.')
         }
 
         if (
@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
         })
         
         if (!file) {
-            throwError(404, 'Dosya bulunamadı.')
+            throwError(404, 'File not found.')
         }
 
         
@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
         })
 
         if (existingFile) {
-            throwError(409, 'Bu ada sahip dosya zaten var.')
+            throwError(409, 'A file with this name already exists.')
         }
 
         const updatedFile = await tx.files.update({
@@ -108,6 +108,6 @@ export default defineEventHandler(async (event) => {
         console.log(err.message);
         if (err.statusCode) throw err
 
-        throwError(500, 'Dosya adı değiştirilirken bilinmeyen bir hata oluştu.')
+        throwError(500, 'An error occurred while renaming the file.')
     }
 })

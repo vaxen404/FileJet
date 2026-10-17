@@ -1,3 +1,5 @@
+import { getPublicShare } from '../../../utils/shares'
+import { enforceRateLimit } from '../../../utils/rateLimit'
 
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
@@ -5,20 +7,8 @@ import { resolve, sep } from 'node:path'
 import { prisma } from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
-    const token = getRouterParam(event, 'token')
-
-    if (!token) {
-        throw createError({
-            statusCode: 400,
-            statusMessage: 'Invalid share token'
-        })
-    }
-
-    const sharedItem = await prisma.shared_items.findUnique({
-        where: {
-            token
-        }
-    })
+    const sharedItem = await getPublicShare(event)
+    enforceRateLimit(event, `shared-download:${sharedItem.token}`, 60, 60 * 1000)
 
     if (!sharedItem || sharedItem.item_type !== 'file') {
         throw createError({
@@ -70,7 +60,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const fileName = file.name || file.original_name || 'download'
+    const fileName = file.original_name || file.name || 'download'
     const encodedName = encodeURIComponent(fileName)
 
     setResponseHeaders(event, {

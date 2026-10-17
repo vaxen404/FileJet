@@ -15,6 +15,12 @@ export function enforceRateLimit(
 ) {
     const now = Date.now()
 
+    if (buckets.size >= 10000) {
+        for (const [storedKey, bucket] of buckets) {
+            if (bucket.resetAt <= now) buckets.delete(storedKey)
+        }
+    }
+
     const ip =
         getRequestIP(event) ||
         'unknown'
@@ -23,6 +29,9 @@ export function enforceRateLimit(
     const current = buckets.get(bucketKey)
 
     if (!current || current.resetAt <= now) {
+        if (!current && buckets.size >= 10000) {
+            throw createError({ statusCode: 429, message: 'Too many requests. Please try again later.' })
+        }
         buckets.set(bucketKey, {
             count: 1,
             resetAt: now + windowMs

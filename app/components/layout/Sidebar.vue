@@ -192,17 +192,17 @@ const handleLogout = async () => {
     width: 16rem;
     height: 100%;
 
-    padding: 1.25rem;
+    padding: 1rem;
 
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 1rem;
+    border-radius: 12px;
     box-sizing: border-box;
 
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.25rem;
 }
 
 .logo-area {
@@ -220,14 +220,16 @@ const handleLogout = async () => {
 .menu-section {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.25rem;
 }
 
 .menu-title {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Inter', sans-serif;
     color: #c4bebe;
-    font-size: 0.875rem;
-    margin: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    margin: 0 0.75rem 0.25rem;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .menu-icon {
@@ -242,20 +244,22 @@ const handleLogout = async () => {
     gap: 0.5rem;
 
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.5rem 0.75rem;
 
     color: #ffffff;
     background: transparent;
     border: none;
-    border-radius: 0.65rem;
+    border-radius: 6px;
     box-sizing: border-box;
 
     text-decoration: none;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
     font-weight: 500;
 
     cursor: pointer;
+    line-height: 1.5;
+    min-height: 2.25rem;
 }
 
 .menu-section a:hover,
@@ -266,7 +270,7 @@ const handleLogout = async () => {
 .menu-section a.active {
     background: #5a5aff;
     color: white;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .menu-section .logout-btn:hover {

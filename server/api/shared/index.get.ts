@@ -1,3 +1,4 @@
+import { requireOwnedShareItem, shareState } from '../../utils/shares'
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
@@ -25,6 +26,8 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Invalid item type.')
         }
 
+        setHeader(event, 'Cache-Control', 'no-store')
+        await requireOwnedShareItem(session.userId, itemId, itemType)
         const sharedItem = await prisma.shared_items.findFirst({
             where: {
                 user_id: session.userId,
@@ -33,17 +36,7 @@ export default defineEventHandler(async (event) => {
             }
         })
 
-        if (!sharedItem) {
-            return {
-                url: null
-            }
-        }
-
-        const origin = getRequestURL(event).origin
-
-        return {
-            url: `${origin}/shared/${sharedItem.token}`
-        }
+        return shareState(event, sharedItem)
     } catch (err: any) {
         if (err.statusCode) throw err
 

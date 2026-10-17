@@ -1,3 +1,5 @@
+import { getPublicShare } from '../../../utils/shares'
+import { enforceRateLimit } from '../../../utils/rateLimit'
 import { prisma } from "~~/server/utils/prisma"
 import { createReadStream } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
@@ -6,23 +8,8 @@ import { throwError } from "~~/server/utils/error"
 
 export default defineEventHandler(async (event) => {
     try {
-        const token = getRouterParam(event, 'token')
-
-        if (!token) {
-            throwError(400, 'Share token is required.')
-        }
-
-        enforceRateLimit(event, `shared-preview:${token}`, 120, 60 * 1000)
-
-        const sharedItem = await prisma.shared_items.findUnique({
-            where: {
-                token
-            }
-        })
-
-        if (!sharedItem) {
-            throwError(404, 'Shared item not found.')
-        }
+        const sharedItem = await getPublicShare(event)
+        enforceRateLimit(event, `shared-preview:${sharedItem.token}`, 120, 60 * 1000)
 
         if (sharedItem.item_type !== 'file') {
             throwError(400, 'This shared item is not a file.')
@@ -122,7 +109,7 @@ export default defineEventHandler(async (event) => {
                 if (!match || (!match[1] && !match[2])) {
                     setResponseStatus(event, 416)
                     setHeader(event, 'Content-Range', `bytes */${size}`)
-                    return
+                    return ''
                 }
 
                 const isSuffix = match[1] === ''
@@ -145,7 +132,7 @@ export default defineEventHandler(async (event) => {
                 ) {
                     setResponseStatus(event, 416)
                     setHeader(event, 'Content-Range', `bytes */${size}`)
-                    return
+                    return ''
                 }
 
                 setResponseStatus(event, 206)

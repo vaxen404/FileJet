@@ -409,9 +409,9 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     height: 100%;
     min-height: 0;
 
-    padding: 0.4rem 0.5rem;
+    padding: 0 0.5rem;
 
-    border-radius: 1rem;
+    border-radius: 12px;
 
     display: flex;
     flex-direction: column;
@@ -429,7 +429,9 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     flex-shrink: 0;
 
-    padding: 0 0.5rem;
+    padding: 0;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .favorites-toolbar {
@@ -438,8 +440,9 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     align-items: center;
     justify-content: space-between;
-
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .toolbar-actions {
@@ -448,14 +451,17 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     align-items: center;
 
-    gap: 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .favorites-subtoolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .favorites-filters {
@@ -465,22 +471,23 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     align-items: center;
 
     gap: 0.5rem;
+    flex-wrap: wrap;
 
 }
 
 .filter-btn {
-    height: 2.35rem;
+    height: 2.5rem;
 
-    padding: 0 1rem;
+    padding: 0 0.75rem;
 
     color: #a8a8b0;
 
     background: #1a1a1d;
 
     border: 1px solid #29292e;
-    border-radius: 0.6rem;
+    border-radius: 6px;
 
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 500;
 
     cursor: pointer;
@@ -489,6 +496,9 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
         background 0.2s ease,
         color 0.2s ease,
         border-color 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .filter-btn:hover {
@@ -615,7 +625,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     border: 1px solid #6b6b75;
 
-    border-radius: 0.2rem;
+    border-radius: 4px;
 
     cursor: pointer;
 }
@@ -667,15 +677,21 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     background: transparent;
 
     border: 1px solid transparent;
-    border-radius: 0.5rem;
+    border-radius: 6px;
 
     
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
 
     white-space: nowrap;
     
     outline: none;
+    line-height: 1.5;
+    font-family: 'Inter', sans-serif;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
 }
 
 .name-input.active {
@@ -699,7 +715,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     background: #29215c;
 
-    border-radius: 0.55rem;
+    border-radius: 6px;
 
     font-size: 1.15rem;
 }
@@ -709,7 +725,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     flex-direction: column;
 
-    gap: 0.2rem;
+    gap: 0.25rem;
 
     min-width: 0;
 }
@@ -717,10 +733,11 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 .favorite-info strong {
     color: #ffffff;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
 
     white-space: nowrap;
+    line-height: 1.5;
 }
 
 .favorite-info span {
@@ -729,12 +746,14 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     font-size: 0.75rem;
 
     white-space: nowrap;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .favorite-card {
     min-height: 10rem;
 
-    padding: 1rem;
+    padding: 0.75rem;
 
     display: flex;
     flex-direction: column;
@@ -743,11 +762,12 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     background: #1a1a1d;
 
     border: 1px solid #29292e;
-    border-radius: 0.625rem;
+    border-radius: 24px;
 
     box-sizing: border-box;
     
     cursor: pointer;
+    gap: 0.75rem;
 }
 
 .favorite-card:hover {
@@ -774,7 +794,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     background: #29215c;
 
-    border-radius: 0.55rem;
+    border-radius: 6px;
 
     font-size: 1.25rem;
 }
@@ -782,20 +802,23 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 .favorite-card-info {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.25rem;
 }
 
 .favorite-card-info strong {
     color: #ffffff;
 
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
+    line-height: 1.5;
 }
 
 .favorite-card-info span {
     color: #898991;
 
     font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .favorite-card-bottom {
@@ -806,9 +829,25 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     color: #898991;
 
     font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    gap: 0.5rem;
 }
 
 .favorite-type {
     text-transform: capitalize;
+}
+
+.favorites-toolbar :deep(.search-box) {
+    flex: 1 1 18rem;
+    min-width: 0;
+    max-width: 32rem;
+}
+
+@media (max-width: 800px) {
+    .favorites-toolbar :deep(.search-box) {
+        flex-basis: 100%;
+        max-width: none;
+    }
 }
 </style>

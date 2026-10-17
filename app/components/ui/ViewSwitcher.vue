@@ -42,10 +42,11 @@ const emit = defineEmits<{
 
     background: #1f1f23;
 
-    padding: 0.2rem;
+    padding: 0.25rem;
 
     border: 1px solid #29292e;
-    border-radius: 0.625rem;
+    border-radius: 6px;
+    box-sizing: border-box;
 }
 
 .view-button {
@@ -60,9 +61,13 @@ const emit = defineEmits<{
     background: transparent;
 
     border: none;
-    border-radius: 0.45rem;
+    border-radius: 6px;
 
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .view-button:hover {

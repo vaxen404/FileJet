@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
         const session = getAuthSession(event)
 
         if (!session) {
-            throwError(401, 'Oturum açmanız gerek.')
+            throwError(401, 'You need to be logged in.')
         }
 
         const method = getMethod(event)
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
         })
 
         if (!file) {
-            throwError(404, 'Dosya bulunamadı.')
+            throwError(404, 'File not found.')
         }
 
         const storageRoot = resolve(process.cwd(), 'storage')
@@ -75,7 +75,7 @@ export default defineEventHandler(async (event) => {
 
         throwError(
             500,
-            'Dosya indirilirken bilinmeyen bir hata oluştu.'
+            'An error occurred while downloading the file.'
         )
     }
 })

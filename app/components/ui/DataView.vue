@@ -1,66 +1,49 @@
 <template>
-    <div
-        class="data-view"
-        :aria-busy="isLoading"
-        :class="[
+    <div class="data-view" :aria-busy="isLoading" :class="{ 'drag-active': isDragging }"
+        @dragenter="dragenter" @dragover="handleDragover" @dragleave="handleDragleave" @drop="drop">
+        <div class="view-content" :class="[
             viewMode === 'list' ? 'list-view' : 'grid-view',
-            { 
-                'drag-active': isDragging,
-                'empty-view': $slots.empty && !isLoading,
-                'loading-view': isLoading
-            }
-        ]"
-        @dragover.prevent="emit('dragover')"
-        @dragleave.prevent="emit('dragleave')"
-        @drop.prevent="emit('drop', $event)"
-    >
-        <slot
-            v-if="isLoading"
-            name="loading"
-        />
-
-        <slot
-            v-else-if="$slots.empty"
-            name="empty"
-        />
-
-        <slot
-            v-else
-            :name="viewMode"
-        />
-
-        <div
-            v-if="isDragging"
-            class="drop-overlay"
-        >
-            {{ dropText }}
+            { 'empty-view': $slots.empty && !isLoading, 'loading-view': isLoading }
+        ]">
+            <slot v-if="isLoading" name="loading" />
+            <slot v-else-if="$slots.empty" name="empty" />
+            <slot v-else :name="viewMode" />
+        </div>
+        <div v-if="isDragging" class="drop-overlay" role="status">
+            <span class="drop-message"><Icon name="solar:cloud-upload-bold" />{{ dropText }}</span>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
     viewMode: 'list' | 'grid'
     isDragging?: boolean
     isLoading?: boolean
     dropText?: string
 }>()
-
 const emit = defineEmits<{
-    dragover: []
-    dragleave: []
+    dragover: [event: DragEvent]
+    dragleave: [event: DragEvent]
     drop: [event: DragEvent]
 }>()
+const { isDragging, dragenter, dragover, dragleave, drop } = useFileDrop(event => emit('drop', event), () => Boolean(props.dropText))
+const handleDragover = (event: DragEvent) => { dragover(event); if (isDragging.value) emit('dragover', event) }
+const handleDragleave = (event: DragEvent) => { dragleave(event); if (!isDragging.value) emit('dragleave', event) }
 </script>
 
 <style scoped>
 .data-view {
     position: relative;
-
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-width: 0;
     min-height: 0;
 }
+
+.view-content { flex: 1; min-height: 0; min-width: 0; }
+.data-view :deep(.loading-state) { color: #a8a8b0; font-size: 0.85rem; }
 
 .list-view {
     display: flex;
@@ -69,8 +52,8 @@ const emit = defineEmits<{
     background: #1a1a1d;
 
     border: 1px solid #29292e;
-    border-top-left-radius: 0.625rem;
-    border-top-right-radius: 0.625rem;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
 
     overflow: hidden;
 }
@@ -80,7 +63,7 @@ const emit = defineEmits<{
     grid-template-columns: repeat(5, 1fr);
     align-content: start;
 
-    gap: 1rem;
+    gap: 0.75rem;
 
     overflow-y: auto;
 }
@@ -103,7 +86,7 @@ const emit = defineEmits<{
     align-items: center;
     justify-content: center;
 
-    gap: 0.45rem;
+    gap: 0.5rem;
 
     text-align: center;
 
@@ -128,38 +111,32 @@ const emit = defineEmits<{
 .data-view :deep(.empty-state strong) {
     color: #f5f5f5;
 
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     font-weight: 600;
+    line-height: 1.5;
 }
 
 .data-view :deep(.empty-state-description) {
     color: #898991;
 
-    font-size: 0.825rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .drop-overlay {
     position: absolute;
     inset: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    background: #121214e0;
-
     border: 2px dashed #5a5aff;
-    border-radius: 0.8rem;
-
-    color: white;
-
-    font-size: 1.2rem;
-    font-weight: 600;
-
-    z-index: 20;
-
+    border-radius: 24px;
     pointer-events: none;
+    z-index: 20;
 }
+.drop-message { display: flex; align-items: center; gap: 0.5rem; max-width: calc(100% - 2rem); padding: 0.75rem 1rem; color: #d5d5da; background: #1a1a1d; border: 1px solid #29292e; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-align: center; }
+.drop-message :deep(.iconify) { color: #8b7cff; flex-shrink: 0; }
 
 @media (max-width: 1500px) {
     .grid-view {

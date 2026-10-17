@@ -19,6 +19,26 @@ const { toastMessage, toastType, showToast } = useToast()
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+:where(button, input[type='button'], input[type='submit'], input[type='reset']) {
+  border-radius: 6px;
+}
+
+:where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']), textarea, select) {
+  border-radius: 6px;
+}
+
+:where(input[type='checkbox']) {
+  border-radius: 4px;
+}
+
+:where(dialog, [role='dialog'], [role='alertdialog']) {
+  border-radius: 12px;
+}
+
+:where([role='tooltip']) {
+  border-radius: 6px;
+}
+
 * {
   font-family: 'Inter', sans-serif;
 }

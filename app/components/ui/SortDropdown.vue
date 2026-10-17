@@ -77,9 +77,9 @@ const selectOption = (
 }
 
 .sort-trigger {
-    height: 2.35rem;
+    height: 2.5rem;
 
-    padding: 0 0.8rem;
+    padding: 0 0.75rem;
 
     display: flex;
     align-items: center;
@@ -91,12 +91,15 @@ const selectOption = (
     background: transparent;
 
     border: none;
-    border-radius: 0.5rem;
+    border-radius: 6px;
 
-    font-family: Inter, sans-serif;
-    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
 
     cursor: pointer;
+    font-weight: 500;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 .sort-trigger:hover {
@@ -112,12 +115,12 @@ const selectOption = (
 .sort-menu {
     position: absolute;
 
-    top: calc(100% + 0.4rem);
+    top: calc(100% + 0.5rem);
     right: 0;
 
     width: 10rem;
 
-    padding: 0.35rem;
+    padding: 0.25rem;
 
     display: flex;
     flex-direction: column;
@@ -125,7 +128,7 @@ const selectOption = (
     background: #1f1f23;
 
     border: 1px solid #303036;
-    border-radius: 0.6rem;
+    border-radius: 24px;
 
     box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.35);
 
@@ -135,21 +138,23 @@ const selectOption = (
 .sort-option {
     width: 100%;
 
-    padding: 0.65rem 0.7rem;
+    padding: 0.5rem 0.75rem;
 
     color: #a8a8b0;
 
     background: transparent;
 
     border: none;
-    border-radius: 0.45rem;
+    border-radius: 6px;
 
-    font-family: Inter, sans-serif;
-    font-size: 0.82rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
 
     text-align: left;
 
     cursor: pointer;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .sort-option:hover,

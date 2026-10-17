@@ -111,14 +111,14 @@ const goToPage = (page: number) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.25rem;
 
     background: #1a1a1d;
     border: 1px solid #29292e;
     border-top: none;
 
-    border-bottom-left-radius: 0.8rem;
-    border-bottom-right-radius: 0.8rem;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
 }
 
 .grid-pagination {
@@ -140,10 +140,13 @@ const goToPage = (page: number) => {
     color: #a8a8b0;
 
     border: 1px solid #29292e;
-    border-radius: 0.45rem;
+    border-radius: 6px;
 
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 .page-button:hover:not(:disabled) {
