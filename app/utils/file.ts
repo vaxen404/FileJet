@@ -4,7 +4,24 @@ export const canCopyFile = (mimeType: string | null | undefined, fileName = '') 
     return /^(text|image)\//.test(mimeType?.toLowerCase() ?? '')
 }
 
-export const getFileIcon = (mimeType: string | null) => {
+export const getFileIcon = (
+    mimeType: string | null,
+    fileName: string = ''
+) => {
+    const name = fileName.toLowerCase()
+
+    if (name.endsWith('.exe')) {
+        return 'solar:file-bold'
+    }
+
+    if (name.endsWith('.txt')) {
+        return 'solar:document-text-bold'
+    }
+
+    if (name.endsWith('.md')) {
+        return 'solar:code-file-bold'
+    }
+
     if (!mimeType) return 'solar:file-bold'
 
     if (mimeType === 'application/pdf') {

@@ -16,6 +16,8 @@
                 ref="dropdownRef"
                 class="menu-dropdown"
                 :style="menuPosition"
+                @click.stop
+                @contextmenu.stop
             >
                 <button
                     v-if="hasAction('open')"
@@ -148,7 +150,16 @@ const emit = defineEmits<{
     delete: []
 }>()
 
-const isOpen = ref(false)
+const menuId = useId()
+const activeMenuId = useState<string | null>('item-menu:active', () => null)
+const isOpen = computed({
+    get: () => activeMenuId.value === menuId,
+    set: (open: boolean) => {
+        if (open) activeMenuId.value = menuId
+        else if (activeMenuId.value === menuId) activeMenuId.value = null
+    }
+})
+const contextPosition = ref<{ x: number; y: number } | null>(null)
 const menuRef = ref<HTMLElement | null>(null)
 const dropdownRef = ref<HTMLElement | null>(null)
 const menuPosition = ref<Record<string, string>>({ visibility: 'hidden' })
@@ -166,7 +177,7 @@ const updatePosition = () => {
     const viewportBottom = viewportTop + viewportHeight
     const viewportRight = viewportLeft + viewportWidth
 
-    if (trigger.bottom <= viewportTop || trigger.top >= viewportBottom || trigger.right <= viewportLeft || trigger.left >= viewportRight) {
+    if (!contextPosition.value && (trigger.bottom <= viewportTop || trigger.top >= viewportBottom || trigger.right <= viewportLeft || trigger.left >= viewportRight)) {
         isOpen.value = false
         return
     }
@@ -178,19 +189,25 @@ const updatePosition = () => {
     const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
     const horizontalSpace = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
     const maxWidth = `${Math.max(0, viewportWidth - edge * 2 - horizontalSpace)}px`
+    const minWidth = `${Math.min(rootFontSize * 11, parseFloat(maxWidth))}px`
 
     dropdown.style.maxWidth = maxWidth
+    dropdown.style.minWidth = minWidth
 
     const width = dropdown.getBoundingClientRect().width
     const height = dropdown.scrollHeight + verticalBorder
-    const below = Math.max(0, viewportBottom - edge - (trigger.bottom - edge))
-    const above = Math.max(0, trigger.top + edge - viewportTop - edge)
+    const anchorBottom = contextPosition.value
+        ? Math.min(Math.max(contextPosition.value.y, viewportTop + edge), viewportBottom - edge)
+        : trigger.bottom - edge
+    const anchorTop = contextPosition.value ? anchorBottom : trigger.top + edge
+    const below = Math.max(0, viewportBottom - edge - anchorBottom)
+    const above = Math.max(0, anchorTop - viewportTop - edge)
     const opensUp = height > below && above > below
     const availableHeight = opensUp ? above : below
     const visibleHeight = Math.min(height, availableHeight)
-    const top = opensUp ? trigger.top + edge - visibleHeight : trigger.bottom - edge
+    const top = opensUp ? anchorTop - visibleHeight : anchorBottom
     const left = Math.min(
-        Math.max(viewportLeft + edge, trigger.right - rootFontSize * 1.625 - width),
+        Math.max(viewportLeft + edge, contextPosition.value?.x ?? trigger.right - rootFontSize * 1.625 - width),
         viewportRight - edge - width
     )
 
@@ -198,12 +215,13 @@ const updatePosition = () => {
         top: `${Math.max(viewportTop + edge, top)}px`,
         left: `${left}px`,
         maxWidth,
+        minWidth,
         maxHeight: `${Math.max(0, availableHeight - verticalBorder - verticalPadding)}px`,
         visibility: 'visible'
     }
 }
 
-watch(isOpen, async (open, _, onCleanup) => {
+watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
     if (!open) return
 
     menuPosition.value = { visibility: 'hidden' }
@@ -212,6 +230,15 @@ watch(isOpen, async (open, _, onCleanup) => {
     let observer: ResizeObserver | null = null
     let visibilityObserver: IntersectionObserver | null = null
     const viewport = window.visualViewport
+    const handleScroll = (event: Event) => {
+        // Keep scrolling inside a tall menu available; close a pointer-anchored
+        // menu when its file moves instead of leaving it over another file.
+        if (contextPosition.value && !(event.target instanceof Node && dropdownRef.value?.contains(event.target))) {
+            isOpen.value = false
+            return
+        }
+        schedulePosition()
+    }
     const schedulePosition = () => {
         if (frame !== null) return
 
@@ -224,7 +251,7 @@ watch(isOpen, async (open, _, onCleanup) => {
         if (event.key === 'Escape') isOpen.value = false
     }
 
-    window.addEventListener('scroll', schedulePosition, true)
+    window.addEventListener('scroll', handleScroll, true)
     window.addEventListener('resize', schedulePosition)
     window.addEventListener('keydown', handleKeydown)
     viewport?.addEventListener('scroll', schedulePosition)
@@ -235,7 +262,7 @@ watch(isOpen, async (open, _, onCleanup) => {
         if (frame !== null) window.cancelAnimationFrame(frame)
         observer?.disconnect()
         visibilityObserver?.disconnect()
-        window.removeEventListener('scroll', schedulePosition, true)
+        window.removeEventListener('scroll', handleScroll, true)
         window.removeEventListener('resize', schedulePosition)
         window.removeEventListener('keydown', handleKeydown)
         viewport?.removeEventListener('scroll', schedulePosition)
@@ -253,7 +280,7 @@ watch(isOpen, async (open, _, onCleanup) => {
         if (menuRef.value) observer.observe(menuRef.value)
     }
 
-    if (typeof IntersectionObserver !== 'undefined' && menuRef.value) {
+    if (!contextPosition.value && typeof IntersectionObserver !== 'undefined' && menuRef.value) {
         visibilityObserver = new IntersectionObserver(([entry]) => {
             if (entry && !entry.isIntersecting) isOpen.value = false
         })
@@ -276,8 +303,20 @@ const actionHandlers = {
 }
 
 const toggleMenu = () => {
+    contextPosition.value = null
     isOpen.value = !isOpen.value
 }
+
+const openAt = (x: number, y: number) => {
+    contextPosition.value = { x, y }
+    isOpen.value = true
+}
+
+defineExpose({ openAt })
+
+onBeforeUnmount(() => {
+    isOpen.value = false
+})
 
 const handleAction = (action: Action) => {
     actionHandlers[action]()
@@ -303,13 +342,11 @@ onClickOutside(dropdownRef, () => {
     align-items: center;
     justify-content: center;
 
-    background: transparent;
+    background: #1a1a1d;
     color: #a8a8b0;
 
     border: none;
-    border-radius: 0.45rem;
-
-    transform: rotate(90deg);
+    border-radius: 50%;
 
     font-size: 1.1rem;
 

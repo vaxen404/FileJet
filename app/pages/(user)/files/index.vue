@@ -124,6 +124,7 @@
                                 :key="file.id"
                                 :class="{ selected: selectedFiles.includes(file.id) }"
                                 @click="openFile(file)"
+                                @contextmenu.prevent.stop="openContextMenu($event, file.id)"
                             >
                                 <td @click.stop>
                                     <input
@@ -139,7 +140,7 @@
                                 <td>
                                     <div class="file-name">
                                         <div class="file-icon">
-                                            <Icon :name="getFileIcon(file.mime_type)" />
+                                            <Icon :name="getFileIcon(file.mime_type, file.original_name)" />
                                         </div>
 
                                         <div class="file-info">
@@ -168,6 +169,7 @@
 
                                 <td @click.stop>
                                     <ItemMenu
+                                        :ref="(menu) => setFileMenuRef(file.id, menu)"
                                         type="file"
                                         :is-favorite="isFileFavorite(file.id)"
                                         :can-copy="canCopyFile(file.mime_type, file.original_name)"
@@ -186,66 +188,93 @@
             </template>
 
             <template #grid>
-                <div
-                    v-for="file in paginatedFiles"
-                    :key="file.id"
-                    class="file-card"
-                    :class="{ selected: selectedFiles.includes(file.id) }"
-                    @click="openFile(file)"
-                >
-                    <div class="file-card-top">
-                        <div class="file-card-icon">
-                            <Icon :name="getFileIcon(file.mime_type)" />
-                        </div>
+                <div class="files-grid">
+                    <div
+                        v-for="file in paginatedFiles"
+                        :key="file.id"
+                        class="file-card"
+                        :class="{ selected: selectedFiles.includes(file.id) }"
+                        @click="openFile(file)"
+                        @contextmenu.prevent.stop="openContextMenu($event, file.id)"
+                    >
+                        <div class="file-preview">
+                            <div
+                                v-if="file.mime_type?.startsWith('video/')"
+                                class="video-play-icon"
+                            >
+                                <Icon name="solar:play-bold" />
+                            </div>
 
-                        <div class="file-card-actions" @click.stop>
-                            <label class="file-card-select">
-                                <input
-                                    v-model="selectedFiles"
-                                    type="checkbox"
-                                    class="file-checkbox"
-                                    :value="file.id"
-                                    :disabled="isLoading || isBulkDeleting"
-                                    :aria-label="`Select ${file.name}`"
-                                >
-                            </label>
+                            <img
+                                v-if="file.mime_type?.startsWith('image/')"
+                                :src="`/api/files/${file.id}/preview`"
+                                :alt="file.name"
+                                loading="lazy"
+                                class="file-preview-image"
+                            >
 
-                            <ItemMenu
-                                type="file"
-                                :is-favorite="isFileFavorite(file.id)"
-                                :can-copy="canCopyFile(file.mime_type, file.original_name)"
-                                @open="openFile(file)"
-                                @download="handleDownload(file.id)"
-                                @rename="startRename(file)"
-                                @copy="handleCopy(file.id)"
-                                @favorite="handleFavorite(file)"
-                                @delete="handleDelete(file.id)"
+                            <video
+                                v-else-if="file.mime_type?.startsWith('video/')"
+                                :src="`/api/files/${file.id}/preview`"
+                                class="file-preview-image"
+                                preload="metadata"
+                                muted
+                                playsinline
                             />
+
+                            <div v-else class="file-preview-placeholder">
+                                <Icon :name="getFileIcon(file.mime_type, file.original_name)" />
+                            </div>
+
+                            <div class="file-overlay" @click.stop>
+                                <label class="file-select">
+                                    <input
+                                        v-model="selectedFiles"
+                                        type="checkbox"
+                                        :value="file.id"
+                                        :disabled="isLoading || isBulkDeleting"
+                                        :aria-label="`Select ${file.name}`"
+                                    >
+                                </label>
+
+                                <ItemMenu
+                                    :ref="(menu) => setFileMenuRef(file.id, menu)"
+                                    type="file"
+                                    :is-favorite="isFileFavorite(file.id)"
+                                    :can-copy="canCopyFile(file.mime_type, file.original_name)"
+                                    @open="openFile(file)"
+                                    @download="handleDownload(file.id)"
+                                    @rename="startRename(file)"
+                                    @copy="handleCopy(file.id)"
+                                    @favorite="handleFavorite(file)"
+                                    @delete="handleDelete(file.id)"
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="file-card-info">
-                        <input 
-                            type="text" 
-                            class="name-input" 
-                            :data-file-id="file.id"
-                            :class="{ active: editingFileId === file.id}"
-                            :value="editingFileId === file.id ? editingFileName : file.name"
-                            :disabled="editingFileId !== file.id"
-                            @input="editingFileName = ($event.target as HTMLInputElement).value"
-                            @keyup.enter="saveRename(file)"
-                            @blur="editingFileId === file.id && saveRename(file)"
-                            @click.stop
-                        >
-                        <span>{{ file.mime_type }}</span>
-                    </div>
+                        <div class="file-details">
+                            <input
+                                type="text"
+                                class="file-name-input"
+                                :data-file-id="file.id"
+                                :class="{ active: editingFileId === file.id }"
+                                :value="editingFileId === file.id ? editingFileName : file.name"
+                                :disabled="editingFileId !== file.id"
+                                @input="editingFileName = ($event.target as HTMLInputElement).value"
+                                @keyup.enter="saveRename(file)"
+                                @blur="editingFileId === file.id && saveRename(file)"
+                                @click.stop
+                            >
 
-                    <div class="file-card-bottom">
-                        <span>{{ formatFileSize(file.size) }}</span>
-                        <span>{{ formatFileTime(file.created_at) }}</span>
+                            <div class="file-metadata">
+                                <span>{{ formatFileSize(file.size) }}</span>
+                                <span>{{ formatFileTime(file.created_at) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </template>
+
         </DataView>
 
         <Pagination
@@ -258,6 +287,8 @@
 </template>
 
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+import type ItemMenu from '~/components/ui/ItemMenu.vue'
 import { canCopyFile, getFileIcon, getFileType, getFileCategory,formatFileSize, formatFileTime} from "~/utils/file"
 
 definePageMeta({
@@ -296,6 +327,17 @@ const activeCategory = ref('All')
 const filterOptions = ['All', 'Images', 'Documents', 'Videos', 'Compressed', 'Others']
 
 const isDragging = ref(false)
+
+const fileMenus = new Map<string, InstanceType<typeof ItemMenu>>()
+
+const setFileMenuRef = (fileId: string, menu: Element | ComponentPublicInstance | null) => {
+    if (menu) fileMenus.set(fileId, menu as InstanceType<typeof ItemMenu>)
+    else fileMenus.delete(fileId)
+}
+
+const openContextMenu = (event: MouseEvent, fileId: string) => {
+    fileMenus.get(fileId)?.openAt(event.clientX, event.clientY)
+}
 
 const editingFileId = ref<string | null>(null)
 const editingFileName = ref('')
@@ -1003,96 +1045,205 @@ watch([searchQuery, activeCategory, viewMode], () => {
     font-size: 0.75rem;
 }
 
+
 .files-page :deep(.grid-view) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    display: block;
+}
+
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.file-card {
+    min-width: 0;
+    overflow: hidden;
+    background: #1a1a1d;
+    border: 1px solid #29292e;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.file-card:hover {
+    background: #202024;
+    border-color: #454550;
+}
+
+.file-card.selected {
+    border-color: #7063d8;
+    background: #211f30;
+}
+
+.file-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #141417;
+}
+
+.file-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+}
+
+.file-card:hover .file-preview-image {
+    transform: scale(1.035);
+}
+
+.file-preview-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8b7cff;
+    font-size: 3.5rem;
+}
+
+.video-play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 1.4rem;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.file-card:hover .video-play-icon {
+    background: rgba(60, 71, 190, 0.9);
+}
+
+.file-overlay {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.65rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.file-card:hover .file-overlay,
+.file-card.selected .file-overlay,
+.file-card:focus-within .file-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.file-select {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #242429;
+    border: 1px solid #3a3a42;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.file-select input {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    accent-color: #7063d8;
+    cursor: pointer;
+}
+
+.file-overlay :deep(.item-menu-trigger) {
+    background: #242429;
+    border-radius: 0.5rem;
+}
+
+.file-details {
+    padding: 0.8rem 0.9rem;
+}
+
+.file-name-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 0.2rem 0;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #f3f3f5;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.file-name-input:disabled {
+    opacity: 1;
+    -webkit-text-fill-color: #f3f3f5;
+    cursor: pointer;
+}
+
+.file-name-input.active {
+    border-color: #7063d8;
+    border-radius: 0.35rem;
+    padding: 0.2rem 0.4rem;
+}
+
+.file-metadata {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    color: #898991;
+    font-size: 0.73rem;
 }
 
 @media (max-width: 1500px) {
-    .files-page :deep(.grid-view) {
+    .files-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 1100px) {
-    .files-page :deep(.grid-view) {
+    .files-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 800px) {
-    .files-page :deep(.grid-view) {
+    .files-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 500px) {
-    .files-page :deep(.grid-view) {
+    .files-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 }
 
-.upload-loading {
-    position: absolute;
-    inset: 0;
-    z-index: 50;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    gap: 0.8rem;
-
-    background: rgba(18, 18, 20, 0.92);
-
-    color: #ffffff;
-}
-
-.upload-loading > span {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.operation-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.loading-spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid #29292e;
-    border-top-color: #3c47be;
-    border-radius: 50%;
-    animation: loading-spin 0.8s linear infinite;
-}
-
-@keyframes loading-spin {
-    to {
-        transform: rotate(360deg);
+@media (hover: none) {
+    .file-overlay {
+        opacity: 1;
+        pointer-events: auto;
     }
 }
 
-.upload-progress {
-    width: 16rem;
-    height: 0.5rem;
-
-    background: #29292e;
-
-    border-radius: 999px;
-
-    overflow: hidden;
-}
-
-.upload-progress-bar {
-    height: 100%;
-
-    background: #3c47be;
-
-    border-radius: 999px;
-
-    transition: width 0.15s ease;
-}
 </style>

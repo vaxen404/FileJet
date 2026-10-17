@@ -79,7 +79,7 @@
               >
                 <div class="file-left">
                   <div class="file-icon">
-                    <Icon :name="getFileIcon(file.mime_type)" />
+                    <Icon :name="getFileIcon(file.mime_type, file.original_name)" />
                   </div>
 
                   <div class="file-info">
