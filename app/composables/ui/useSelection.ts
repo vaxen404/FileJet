@@ -1,6 +1,4 @@
-export const useSelection = <T extends { id: string }>(
-    items: Ref<T[]>
-) => {
+export const useSelection = <T extends { id: string }>(items: Ref<T[]>) => {
     const selectedItems = ref<string[]>([])
 
     const allSelected = computed(() => {
@@ -19,7 +17,7 @@ export const useSelection = <T extends { id: string }>(
             selectedItems.value = []
         }
     }
-    
+
     return {
         selectedItems,
         allSelected,

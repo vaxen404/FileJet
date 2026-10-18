@@ -1,14 +1,15 @@
-
 /// <reference lib="dom.asynciterable" />
 
+import type { TrashMoveOptions, TrashMoveResult } from '~~/shared/types/trash'
+
 export const useFolderActions = () => {
+    const { syncTrash } = useUser()
+    const { notifyTrashed } = useTrashActions()
     const activeRequests = ref(0)
     const activeUploads = ref(0)
     const activeDeletes = ref(0)
 
-    const uploads = reactive(
-        new Map<symbol, { loaded: number; total: number | null }>()
-    )
+    const uploads = reactive(new Map<symbol, { loaded: number; total: number | null }>())
 
     const isLoading = computed(() => activeRequests.value > 0)
     const isUploading = computed(() => activeUploads.value > 0)
@@ -27,9 +28,7 @@ export const useFolderActions = () => {
             total += upload.total
         }
 
-        return total > 0
-            ? Math.round((loaded / total) * 100)
-            : null
+        return total > 0 ? Math.round((loaded / total) * 100) : null
     })
 
     const startLoading = () => {
@@ -71,11 +70,14 @@ export const useFolderActions = () => {
 
     const uploadFolders = async (
         input: FileSystemDirectoryHandle | FileList | File[],
-        onSuccess?: () => Promise<void>
+        onSuccess?: () => Promise<void>,
+        parentFolderId?: string
     ) => {
-        const files = typeof FileSystemDirectoryHandle !== 'undefined' && input instanceof FileSystemDirectoryHandle
-            ? await getFolderFiles(input)
-            : Array.from(input as FileList | File[])
+        const files =
+            typeof FileSystemDirectoryHandle !== 'undefined' &&
+            input instanceof FileSystemDirectoryHandle
+                ? await getFolderFiles(input)
+                : Array.from(input as FileList | File[])
 
         if (files.length === 0) return
 
@@ -88,27 +90,27 @@ export const useFolderActions = () => {
         try {
             const formData = new FormData()
 
-            Array.from(files).forEach((file) => {
+            Array.from(files).forEach(file => {
                 formData.append('files', file)
-                formData.append(
-                    'paths',
-                    file.webkitRelativePath || file.name
-                )
+                formData.append('paths', file.webkitRelativePath || file.name)
             })
 
             await new Promise<void>((resolve, reject) => {
                 const xhr = new XMLHttpRequest()
 
-                xhr.open('POST', '/api/folders')
+                xhr.open(
+                    'POST',
+                    parentFolderId
+                        ? `/api/folders?folderId=${encodeURIComponent(parentFolderId)}`
+                        : '/api/folders'
+                )
                 xhr.responseType = 'json'
                 xhr.setRequestHeader('Accept', 'application/json')
 
-                xhr.upload.onprogress = (event) => {
+                xhr.upload.onprogress = event => {
                     uploads.set(uploadId, {
                         loaded: event.loaded,
-                        total: event.lengthComputable && event.total > 0
-                            ? event.total
-                            : null
+                        total: event.lengthComputable && event.total > 0 ? event.total : null
                     })
                 }
 
@@ -148,10 +150,7 @@ export const useFolderActions = () => {
         } finally {
             uploads.delete(uploadId)
 
-            activeUploads.value = Math.max(
-                0,
-                activeUploads.value - 1
-            )
+            activeUploads.value = Math.max(0, activeUploads.value - 1)
 
             if (activeUploads.value === 0) {
                 uploads.clear()
@@ -163,35 +162,43 @@ export const useFolderActions = () => {
 
     const deleteFolder = async (
         folderId: string,
-        onSuccess?: () => Promise<void>
+        onSuccess?: () => Promise<void>,
+        options: TrashMoveOptions = {}
     ) => {
         activeDeletes.value++
         startLoading()
 
         try {
-            await $fetch(`/api/folders/${encodeURIComponent(folderId)}`, {
-                method: 'DELETE'
-            })
+            const result = await $fetch<TrashMoveResult>(
+                `/api/folders/${encodeURIComponent(folderId)}`,
+                {
+                    method: 'DELETE'
+                }
+            )
+
+            await syncTrash()
+
+            if (options.notify !== false) notifyTrashed(result, 'folder')
 
             await onSuccess?.()
+
+            return result
         } finally {
-            activeDeletes.value = Math.max(
-                0,
-                activeDeletes.value - 1
-            )
+            activeDeletes.value = Math.max(0, activeDeletes.value - 1)
 
             stopLoading()
         }
     }
 
-    const deleteFolders = async (folderIds: string[]) => {
+    const deleteFolders = async (folderIds: string[], options: TrashMoveOptions = {}) => {
         const uniqueIds = [...new Set(folderIds)]
 
         if (!uniqueIds.length) {
             return {
                 success: true,
                 deletedIds: [],
-                failedIds: []
+                failedIds: [],
+                trashIds: []
             }
         }
 
@@ -199,30 +206,26 @@ export const useFolderActions = () => {
         startLoading()
 
         try {
-            return await $fetch<{
-                success: boolean
-                deletedIds: string[]
-                failedIds: string[]
-            }>('/api/folders/bulk-delete', {
+            const result = await $fetch<TrashMoveResult>('/api/folders/bulk-delete', {
                 method: 'POST',
                 body: {
-                    folderIds: uniqueIds
+                    ids: uniqueIds
                 }
             })
+
+            await syncTrash()
+
+            if (options.notify !== false) notifyTrashed(result, 'folder', true)
+
+            return result
         } finally {
-            activeDeletes.value = Math.max(
-                0,
-                activeDeletes.value - 1
-            )
+            activeDeletes.value = Math.max(0, activeDeletes.value - 1)
 
             stopLoading()
         }
     }
 
-    const renameFolder = async (
-        folderId: string,
-        newName: string
-    ) => {
+    const renameFolder = async (folderId: string, newName: string) => {
         startLoading()
 
         try {

@@ -7,7 +7,7 @@ import { readFile, stat } from "node:fs/promises"
 import { resolve, sep } from "node:path"
 import { createReadStream } from "node:fs"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -53,16 +53,16 @@ export default defineEventHandler(async (event) => {
 
         setHeader(event, 'Cache-Control', 'no-store')
         setHeader(event, 'X-Content-Type-Options', 'nosniff')
-        setHeader(event, 'Content-Security-Policy', "sandbox; default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'")
+        setHeader(
+            event,
+            'Content-Security-Policy',
+            "sandbox; default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'"
+        )
 
         if (file.mime_type.startsWith('text/')) {
             const content = await readFile(filePath, 'utf-8')
 
-            setHeader(
-                event,
-                'Content-Type',
-                `${file.mime_type}; charset=utf-8`
-            )
+            setHeader(event, 'Content-Type', `${file.mime_type}; charset=utf-8`)
 
             return content
         }
@@ -100,9 +100,7 @@ export default defineEventHandler(async (event) => {
 
                 const isSuffix = match[1] === ''
 
-                const start = isSuffix
-                    ? Math.max(0, size - Number(match[2]))
-                    : Number(match[1])
+                const start = isSuffix ? Math.max(0, size - Number(match[2])) : Number(match[1])
 
                 const end = isSuffix
                     ? size - 1
@@ -123,31 +121,17 @@ export default defineEventHandler(async (event) => {
 
                 setResponseStatus(event, 206)
 
-                setHeader(
-                    event,
-                    'Content-Range',
-                    `bytes ${start}-${end}/${size}`
-                )
+                setHeader(event, 'Content-Range', `bytes ${start}-${end}/${size}`)
 
-                setHeader(
-                    event,
-                    'Content-Length',
-                    end - start + 1
-                )
+                setHeader(event, 'Content-Length', end - start + 1)
 
-                return await sendStream(
-                    event,
-                    createReadStream(filePath, { start, end })
-                )
+                return await sendStream(event, createReadStream(filePath, { start, end }))
             }
 
             setHeader(event, 'Content-Length', size)
         }
 
-        return await sendStream(
-            event,
-            createReadStream(filePath)
-        )
+        return await sendStream(event, createReadStream(filePath))
     } catch (err: any) {
         if (err.statusCode) throw err
 

@@ -78,13 +78,7 @@ const visiblePages = computed(() => {
         return ['...', total - 3, total - 2, total - 1, total]
     }
 
-    return [
-        '...',
-        current - 1,
-        current,
-        current + 1,
-        '...'
-    ]
+    return ['...', current - 1, current, current + 1, '...']
 })
 
 const previousPage = () => {

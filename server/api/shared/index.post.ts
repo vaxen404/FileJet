@@ -7,7 +7,7 @@ import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         assertShareOrigin(event)
         setHeader(event, 'Cache-Control', 'no-store')
@@ -17,12 +17,7 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'You need to be logged in.')
         }
 
-        enforceRateLimit(
-            event,
-            `shared-create:${session.userId}`,
-            10,
-            60 * 1000
-        )
+        enforceRateLimit(event, `shared-create:${session.userId}`, 10, 60 * 1000)
 
         const body = await readShareBody(event)
 
@@ -31,7 +26,7 @@ export default defineEventHandler(async (event) => {
         }
 
         const { itemId, itemType } = body
-        
+
         if (typeof itemId !== 'string' || typeof itemType !== 'string') {
             throwError(400, 'Invalid data.')
         }
@@ -39,7 +34,7 @@ export default defineEventHandler(async (event) => {
         if (!isUuid(itemId)) {
             throwError(400, 'Invalid item ID.')
         }
-        
+
         if (!['file', 'folder', 'note'].includes(itemType)) {
             throwError(400, 'Invalid item type.')
         }
@@ -94,7 +89,15 @@ export default defineEventHandler(async (event) => {
         })
 
         if (existing) {
-            return shareState(event, Object.keys(settings).length ? await prisma.shared_items.update({ where: { id: existing.id }, data: settings }) : existing)
+            return shareState(
+                event,
+                Object.keys(settings).length
+                    ? await prisma.shared_items.update({
+                            where: { id: existing.id },
+                            data: settings
+                        })
+                    : existing
+            )
         }
 
         let retries = 3
@@ -102,7 +105,7 @@ export default defineEventHandler(async (event) => {
         while (retries > 0) {
             try {
                 const result = await prisma.$transaction(
-                    async (tx) => {
+                    async ( tx) => {
                         const existing = await tx.shared_items.findFirst({
                             where: {
                                 user_id: session.userId,
@@ -112,7 +115,12 @@ export default defineEventHandler(async (event) => {
                         })
 
                         if (existing) {
-                            return Object.keys(settings).length ? await tx.shared_items.update({ where: { id: existing.id }, data: settings }) : existing
+                            return Object.keys(settings).length
+                                ? await tx.shared_items.update({
+                                        where: { id: existing.id },
+                                        data: settings
+                                    })
+                                : existing
                         }
 
                         const shareCount = await tx.shared_items.count({
@@ -157,7 +165,15 @@ export default defineEventHandler(async (event) => {
                     })
 
                     if (existing) {
-                        return shareState(event, Object.keys(settings).length ? await prisma.shared_items.update({ where: { id: existing.id }, data: settings }) : existing)
+                        return shareState(
+                            event,
+                            Object.keys(settings).length
+                                ? await prisma.shared_items.update({
+                                        where: { id: existing.id },
+                                        data: settings
+                                    })
+                                : existing
+                        )
                     }
                 }
 
@@ -173,16 +189,10 @@ export default defineEventHandler(async (event) => {
             }
         }
 
-        throwError(
-            500,
-            'Could not create the share link.'
-        )
+        throwError(500, 'Could not create the share link.')
     } catch (err: any) {
         if (err.statusCode) throw err
 
-        throwError(
-            500,
-            'An error occurred while creating the share link.'
-        )
+        throwError(500, 'An error occurred while creating the share link.')
     }
 })

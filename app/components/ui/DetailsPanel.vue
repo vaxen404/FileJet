@@ -24,11 +24,7 @@
                 class="actions-btn"
                 @click="emit('favorite')"
             >
-                <Icon
-                    :name="isFavorite
-                        ? 'solar:star-bold'
-                        : 'solar:star-linear'"
-                />
+                <Icon :name="isFavorite ? 'solar:star-bold' : 'solar:star-linear'" />
 
                 {{ isFavorite ? 'Remove Favorite' : 'Favorite' }}
             </button>
@@ -55,7 +51,10 @@
             </button>
         </div>
 
-        <div v-if="showInfo" class="details-info">
+        <div
+            v-if="showInfo"
+            class="details-info"
+        >
             <div class="info-title">
                 <Icon name="solar:info-circle-bold" />
                 Information
@@ -73,11 +72,7 @@
 
 <script setup lang="ts">
 type Action =
-    | 'download'
-    | 'rename'
-    | 'copy'
-    | 'favorite'
-    | 'delete'
+    | 'download' | 'rename' | 'copy' | 'favorite' | 'delete'
 
 withDefaults(
     defineProps<{
@@ -90,11 +85,7 @@ withDefaults(
         showInfo: boolean
     }>(),
     {
-        actions: () => [
-            'rename',
-            'favorite',
-            'delete'
-        ],
+        actions: () => ['rename', 'favorite', 'delete'],
         isFavorite: false,
         isCopying: false,
         canCopy: false,
@@ -110,7 +101,6 @@ const emit = defineEmits<{
     delete: []
 }>()
 </script>
-
 
 <style scoped>
 .details-panel {

@@ -1,9 +1,9 @@
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { isUuid } from "~~/server/utils/validation"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Invalid file ID.')
         }
 
-        await prisma.$transaction(async (tx) => {
+        const trashId = await prisma.$transaction(async tx => {
             const file = await tx.files.findFirst({
                 where: {
                     id: fileId,
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
                 throwError(404, 'File not found.')
             }
 
-            await tx.trash.create({
+            const trashed = await tx.trash.create({
                 data: {
                     user_id: session.userId,
                     item_id: file.id,
@@ -42,6 +42,13 @@ export default defineEventHandler(async (event) => {
                     size: file.size,
                     storage_key: file.storage_key,
                     folder_id: file.folder_id
+                }
+            })
+
+            await tx.favorites.deleteMany({
+                where: {
+                    user_id: session.userId,
+                    file_id: file.id
                 }
             })
 
@@ -59,15 +66,25 @@ export default defineEventHandler(async (event) => {
                     user_id: session.userId
                 }
             })
+            return trashed.id
         })
 
         return {
-            success: true
+            success: true,
+            deletedIds: [fileId],
+            failedIds: [],
+            trashIds: [trashId]
         }
-        
-    } catch (err: any) {
-        console.log(err.message);
-        if (err.statusCode) throw err
+    } catch (err: unknown) {
+        console.error('[FILE DELETE ERROR]', err)
+
+        if (
+            err &&
+            typeof err === 'object' &&
+            'statusCode' in err
+        ) {
+            throw err
+        }
 
         throwError(500, 'An error occurred while deleting the file.')
     }

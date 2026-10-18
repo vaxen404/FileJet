@@ -1,11 +1,17 @@
+import type { TrashMoveOptions, TrashMoveResult } from '~~/shared/types/trash'
 import { canCopyFile } from '~/utils/file'
 
-export const useFileActions = () => {
+export const useFileActions = (folderId?: string) => {
+    const { syncTrash } = useUser()
+    const { notifyTrashed } = useTrashActions()
     const activeRequests = ref(0)
     const activeDeletes = ref(0)
 
     const isLoading = computed(() => activeRequests.value > 0 || isUploading.value)
-    const { isUploading, isProcessing, uploadProgress, upload } = useUpload('/api/files', 'File')
+    const { isUploading, isProcessing, uploadProgress, upload } = useUpload(
+        folderId ? `/api/files?folderId=${encodeURIComponent(folderId)}` : '/api/files',
+        'File'
+    )
     const isDeleting = computed(() => activeDeletes.value > 0)
 
     const startLoading = () => {
@@ -16,47 +22,64 @@ export const useFileActions = () => {
         activeRequests.value = Math.max(0, activeRequests.value - 1)
     }
 
-    const uploadFiles = (files: FileList | File[], onSuccess?: () => Promise<void>) => upload(files, onSuccess)
+    const uploadFiles = (files: FileList | File[], onSuccess?: () => Promise<void>) =>
+        upload(files, onSuccess)
 
-    const deleteFile = async (fileId: string, onSuccess?: () => Promise<void>) => {
+    const deleteFile = async (
+        fileId: string,
+        onSuccess?: () => Promise<void>,
+        options: TrashMoveOptions = {}
+    ) => {
         activeDeletes.value++
         startLoading()
 
         try {
-            await $fetch(`/api/files/${encodeURIComponent(fileId)}`, {
-                method: 'DELETE'
-            })
+            const result = await $fetch<TrashMoveResult>(
+                `/api/files/${encodeURIComponent(fileId)}`,
+                {
+                    method: 'DELETE'
+                }
+            )
+
+            await syncTrash()
+
+            if (options.notify !== false) notifyTrashed(result, 'file')
 
             await onSuccess?.()
+
+            return result
         } finally {
             activeDeletes.value--
             stopLoading()
         }
     }
 
-    const deleteFiles = async (fileIds: string[]) => {
+    const deleteFiles = async (fileIds: string[], options: TrashMoveOptions = {}) => {
         const uniqueIds = [...new Set(fileIds)]
 
-        if (!uniqueIds.length) return { success: true, deletedIds: [], failedIds: [] }
+        if (!uniqueIds.length) return { success: true, deletedIds: [], failedIds: [], trashIds: [] }
 
         activeDeletes.value++
         startLoading()
 
         try {
-            return await $fetch<{ success: boolean, deletedIds: string[], failedIds: string[] }>('/api/files/bulk-delete', {
+            const result = await $fetch<TrashMoveResult>('/api/files/bulk-delete', {
                 method: 'POST',
                 body: { fileIds: uniqueIds }
             })
+
+            await syncTrash()
+
+            if (options.notify !== false) notifyTrashed(result, 'file', true)
+
+            return result
         } finally {
             activeDeletes.value--
             stopLoading()
         }
     }
 
-    const renameFile = async (
-        fileId: string,
-        newName: string
-    ) => {
+    const renameFile = async (fileId: string, newName: string) => {
         startLoading()
 
         try {
@@ -85,7 +108,11 @@ export const useFileActions = () => {
         }
     }
 
-    const copyFile = async (file: { id: string, mime_type: string | null, original_name: string }) => {
+    const copyFile = async (file: {
+        id: string
+        mime_type: string | null
+        original_name: string
+    }) => {
         if (!canCopyFile(file.mime_type, file.original_name)) {
             throw new Error('Only text and image files can be copied to the clipboard.')
         }
@@ -96,7 +123,10 @@ export const useFileActions = () => {
 
         const mimeType = file.mime_type!.toLowerCase()
 
-        if (mimeType.startsWith('image/') && (typeof ClipboardItem === 'undefined' || !navigator.clipboard.write)) {
+        if (
+            mimeType.startsWith('image/') &&
+            (typeof ClipboardItem === 'undefined' || !navigator.clipboard.write)
+        ) {
             throw new Error('Your browser does not support copying images to the clipboard.')
         }
 
@@ -105,14 +135,17 @@ export const useFileActions = () => {
         try {
             const previewUrl = `/api/files/${encodeURIComponent(file.id)}/preview`
 
-            if (mimeType.startsWith('text/') && (typeof ClipboardItem === 'undefined' || !navigator.clipboard.write)) {
+            if (
+                mimeType.startsWith('text/') &&
+                (typeof ClipboardItem === 'undefined' || !navigator.clipboard.write)
+            ) {
                 const content = await $fetch<string>(previewUrl, { responseType: 'text' })
                 await navigator.clipboard.writeText(content)
                 return
             }
 
             const clipboardType = mimeType.startsWith('text/') ? 'text/plain' : 'image/png'
-            const content = $fetch<Blob>(previewUrl, { responseType: 'blob' }).then(async (blob) => {
+            const content = $fetch<Blob>(previewUrl, { responseType: 'blob' }).then(async blob => {
                 if (clipboardType === 'text/plain') {
                     return new Blob([await blob.text()], { type: 'text/plain' })
                 }
@@ -127,7 +160,8 @@ export const useFileActions = () => {
                 try {
                     await new Promise<void>((resolve, reject) => {
                         image.onload = () => resolve()
-                        image.onerror = () => reject(new Error('Image could not be loaded for copying.'))
+                        image.onerror = () =>
+                            reject(new Error('Image could not be loaded for copying.'))
                         image.src = imageUrl
                     })
 
@@ -142,7 +176,7 @@ export const useFileActions = () => {
                     context.drawImage(image, 0, 0)
 
                     return await new Promise<Blob>((resolve, reject) => {
-                        canvas.toBlob((png) => {
+                        canvas.toBlob(png => {
                             if (png) resolve(png)
                             else reject(new Error('Image could not be prepared for copying.'))
                         }, 'image/png')

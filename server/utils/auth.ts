@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import type { H3Event } from 'h3'
 
 const SESSION_COOKIE = 'filejet_session'
-const SESSION_TTL = 60 * 60 * 24 * 7 
+const SESSION_TTL = 60 * 60 * 24 * 7
 
 type SessionPayload = {
     userId: string
@@ -23,24 +23,16 @@ function getSessionSecret() {
 }
 
 function sign(value: string) {
-    return crypto
-        .createHmac('sha256', getSessionSecret())
-        .update(value)
-        .digest('base64url')
+    return crypto.createHmac('sha256', getSessionSecret()).update(value).digest('base64url')
 }
 
-export function setAuthSession(
-    event: H3Event,
-    userId: string
-) {
+export function setAuthSession(event: H3Event, userId: string) {
     const payload: SessionPayload = {
         userId,
         expiresAt: Date.now() + SESSION_TTL * 1000
     }
 
-    const encodedPayload = Buffer
-        .from(JSON.stringify(payload))
-        .toString('base64url')
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url')
 
     const signature = sign(encodedPayload)
 
@@ -78,10 +70,7 @@ export function getAuthSession(event: H3Event): SessionPayload | null {
 
     if (
         signature.length !== expectedSignature.length ||
-        !crypto.timingSafeEqual(
-            Buffer.from(signature),
-            Buffer.from(expectedSignature)
-        )
+        !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
     ) {
         return null
     }

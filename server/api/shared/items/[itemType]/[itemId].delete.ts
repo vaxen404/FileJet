@@ -3,7 +3,7 @@ import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from "~~/server/utils/validation"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
         if (!isUuid(itemId)) {
             throwError(400, 'Invalid item ID.')
         }
-        
+
         if (!['file', 'folder', 'note'].includes(itemType)) {
             throwError(400, 'Invalid item type.')
         }
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
         }
     } catch (err: any) {
         if (err.statusCode) throw err
-        
+
         throwError(500, 'An error while removing the share link.')
     }
 })

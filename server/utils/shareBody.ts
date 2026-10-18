@@ -19,10 +19,14 @@ export async function readShareBody(event: H3Event): Promise<Record<string, unkn
             }
             chunks.push(value)
         }
-    } finally { reader.releaseLock() }
+    } finally {
+        reader.releaseLock()
+    }
     try {
         const value = JSON.parse(Buffer.concat(chunks).toString('utf8'))
         if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error()
         return value
-    } catch { throw createError({ statusCode: 400, message: 'Invalid JSON request body.' }) }
+    } catch {
+        throw createError({ statusCode: 400, message: 'Invalid JSON request body.' })
+    }
 }

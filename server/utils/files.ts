@@ -6,8 +6,10 @@ import type { MultiPartData } from 'h3'
 export type FilePart = MultiPartData & { name: 'files'; filename: string }
 
 export function isFilePart(part: MultiPartData): part is FilePart {
-    return part.name === 'files' && typeof part.filename === 'string'
-        && part.filename.length > 0 && Buffer.isBuffer(part.data)
+    return part.name === 'files' &&
+        typeof part.filename === 'string' &&
+        part.filename.length > 0 &&
+        Buffer.isBuffer(part.data)
 }
 
 export const getFileParts = (formData: MultiPartData[]): FilePart[] => formData.filter(isFilePart)

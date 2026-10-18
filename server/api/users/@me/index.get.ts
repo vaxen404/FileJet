@@ -1,17 +1,17 @@
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
-        const session = getAuthSession(event)   
-    
+        const session = getAuthSession(event)
+
         if (!session) {
             throw createError({
                 statusCode: 401,
                 message: 'Oturum açmanız gerekiyor.'
             })
         }
-    
+
         const user = await prisma.users.findUnique({
             where: {
                 id: session.userId
@@ -25,11 +25,11 @@ export default defineEventHandler(async (event) => {
                 created_at: true
             }
         })
-    
+
         if (!user) {
             throw createError({
                 statusCode: 401,
-                message: 'Geçersiz oturum.'  
+                message: 'Geçersiz oturum.'
             })
         }
 
@@ -41,7 +41,6 @@ export default defineEventHandler(async (event) => {
             storageUsed: user.storage_used?.toString() ?? '0',
             createdAt: user.created_at
         }
-
     } catch (err: any) {
         if (err.statusCode) throw err
 

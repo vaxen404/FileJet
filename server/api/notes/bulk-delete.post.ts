@@ -1,11 +1,11 @@
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { isUuid } from "~~/server/utils/validation"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     try {
-        const session = getAuthSession(event) 
+        const session = getAuthSession(event)
 
         if (!session) {
             throwError(401, 'You need to be logged in.')
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
         const noteIds = [...new Set<string>(ids)]
 
-        await prisma.$transaction(async (tx) => {
+        const trashIds = await prisma.$transaction(async tx => {
             const notes = await tx.notes.findMany({
                 where: {
                     user_id: session.userId,
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
                 }
             })
 
-            if (notes.length !== noteIds.length ) {
+            if (notes.length !== noteIds.length) {
                 throwError(404, 'One or more notes not found.')
             }
 
@@ -51,6 +51,13 @@ export default defineEventHandler(async (event) => {
                     size: note.size,
                     folder_id: note.folder_id
                 }))
+            })
+
+            await tx.favorites.deleteMany({
+                where: {
+                    user_id: session.userId,
+                    note_id: { in: noteIds }
+                }
             })
 
             await tx.shared_items.deleteMany({
@@ -75,11 +82,23 @@ export default defineEventHandler(async (event) => {
             if (deleted.count !== noteIds.length) {
                 throwError(409, 'Notes changed during deletion.')
             }
-        }) 
+            const trashed = await tx.trash.findMany({
+                where: {
+                    user_id: session.userId,
+                    item_type: 'note',
+                    item_id: { in: noteIds }
+                },
+                select: { id: true }
+            })
+
+            return trashed.map(item => item.id)
+        })
 
         return {
             success: true,
-            deletedIds: noteIds
+            deletedIds: noteIds,
+            failedIds: [],
+            trashIds
         }
     } catch (err: any) {
         if (err.statusCode) throw err

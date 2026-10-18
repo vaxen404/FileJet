@@ -5,10 +5,10 @@ import { throwError } from "~~/server/utils/error"
 import { noteSchema } from "~~/shared/schemas/note"
 import { getFileParts } from "~~/server/utils/files";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
-        
+
         if (!session) {
             throwError(401, 'You need to be logged in.')
         }
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
             if (!part.filename) {
                 throwError(400, 'Invalid filename.')
             }
-            
+
             const extension = part.filename.split('.').pop()?.toLowerCase()
 
             if (!['txt', 'md'].includes(extension ?? '')) {
@@ -83,7 +83,10 @@ export default defineEventHandler(async (event) => {
             const normalizedTitle = result.data.title.toLowerCase()
 
             if (titles.has(normalizedTitle)) {
-                throwError(409, `A note named "${result.data.title}" already exists in this upload.`)
+                throwError(
+                    409,
+                    `A note named "${result.data.title}" already exists in this upload.`
+                )
             }
 
             titles.add(normalizedTitle)
@@ -107,18 +110,27 @@ export default defineEventHandler(async (event) => {
                 folder_id: null,
                 title: result.data.title,
                 content: result.data.content,
-                size: BigInt(
-                    Buffer.byteLength(result.data.content, 'utf-8')
-                )
+                size: BigInt(Buffer.byteLength(result.data.content, 'utf-8'))
             })
         }
 
-        const uploadedNotes = await prisma.$transaction(async (tx) => {
-            await reserveStorage(tx, session.userId, notes.reduce((total, note) => total + note.size, 0n))
+        const uploadedNotes = await prisma.$transaction(async ( tx) => {
+            await reserveStorage(
+                tx,
+                session.userId,
+                notes.reduce((total, note) => total + note.size, 0n)
+            )
             for (const note of notes) {
-                if (await tx.notes.findFirst({ where: {
-                    user_id: session.userId, folder_id: null, title: note.title
-                } })) throwError(409, `A note named "${note.title}" already exists.`)
+                if (
+                    await tx.notes.findFirst({
+                        where: {
+                            user_id: session.userId,
+                            folder_id: null,
+                            title: note.title
+                        }
+                    })
+                )
+                    throwError(409, `A note named "${note.title}" already exists.`)
             }
 
             const created = await tx.notes.createManyAndReturn({
@@ -126,15 +138,15 @@ export default defineEventHandler(async (event) => {
             })
 
             return created.map(note => ({
-                ...note, 
+                ...note,
                 size: note.size.toString()
             }))
         })
-        
-       return {
-        success: true,
-        notes: uploadedNotes
-       }
+
+        return {
+            success: true,
+            notes: uploadedNotes
+        }
     } catch (err: any) {
         if (err.statusCode) throw err
 

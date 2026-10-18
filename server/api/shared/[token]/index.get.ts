@@ -1,10 +1,10 @@
 import { getPublicShare } from '../../../utils/shares'
 import { assertShareAccess } from '../../../utils/shareSecurity'
 import { enforceRateLimit } from '../../../utils/rateLimit'
-import { prisma } from "~~/server/utils/prisma";
-import { throwError } from "~~/server/utils/error";
+import { prisma } from '~~/server/utils/prisma'
+import { throwError } from '~~/server/utils/error'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     try {
         const sharedItem = await getPublicShare(event, false)
         enforceRateLimit(event, `shared-public:${sharedItem.token}`, 60, 60 * 1000)
@@ -12,14 +12,22 @@ export default defineEventHandler(async (event) => {
             assertShareAccess(event, sharedItem)
         } catch (err: any) {
             if (err.statusCode !== 401) throw err
-            const file = sharedItem.item_type === 'file' ? await prisma.files.findFirst({
-                where: { id: sharedItem.item_id, user_id: sharedItem.user_id },
-                select: { name: true, original_name: true }
-            }) : null
+            const file =
+                sharedItem.item_type === 'file'
+                    ? await prisma.files.findFirst({
+                          where: { id: sharedItem.item_id, user_id: sharedItem.user_id },
+                          select: { name: true, original_name: true }
+                      })
+                    : null
             if (sharedItem.item_type === 'file' && !file) throwError(404, 'File not found.')
             throw createError({
-                statusCode: 401, message: 'A password is required for this share link.',
-                data: { passwordRequired: true, fileName: file?.original_name || file?.name || null }
+                statusCode: 401,
+                message: 'A password is required for this share link.',
+                data: {
+                    passwordRequired: true,
+                    fileName: file?.original_name || file?.name || null,
+                    ...(sharedItem.item_type !== 'file' ? { itemType: sharedItem.item_type } : {})
+                }
             })
         }
 

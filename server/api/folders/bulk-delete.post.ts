@@ -1,11 +1,11 @@
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { isUuid } from "~~/server/utils/validation"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     try {
-        const session = getAuthSession(event) 
+        const session = getAuthSession(event)
 
         if (!session) {
             throwError(401, 'You need to be logged in.')
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
         const folderIds = [...new Set<string>(ids)]
 
-        await prisma.$transaction(async (tx) => {
+        const trashIds = await prisma.$transaction(async tx => {
             const folders = await tx.folders.findMany({
                 where: {
                     user_id: session.userId,
@@ -37,14 +37,14 @@ export default defineEventHandler(async (event) => {
                 }
             })
 
-            if (folders.length !== folderIds.length ) {
+            if (folders.length !== folderIds.length) {
                 throwError(404, 'One or more folders not found.')
             }
 
             const allFolderIds = new Set<string>(folderIds)
             let pendingIds = [...folderIds]
 
-            while(pendingIds.length > 0) {
+            while (pendingIds.length > 0) {
                 const children = await tx.folders.findMany({
                     where: {
                         user_id: session.userId,
@@ -92,9 +92,7 @@ export default defineEventHandler(async (event) => {
                 }
             })
 
-            const folderMap = new Map(
-                allFolders.map(folder => [folder.id,  folder])
-            )
+            const folderMap = new Map(allFolders.map(folder => [folder.id, folder]))
 
             const selectedIds = new Set(folderIds)
 
@@ -105,7 +103,7 @@ export default defineEventHandler(async (event) => {
 
                 while (true) {
                     if (visited.has(currentId)) {
-                         throwError(400, 'Invalid folder hierarchy.')
+                        throwError(400, 'Invalid folder hierarchy.')
                     }
 
                     visited.add(currentId)
@@ -172,9 +170,18 @@ export default defineEventHandler(async (event) => {
             const fileIds = files.map(file => file.id)
             const noteIds = notes.map(note => note.id)
 
-            const rootIds = folderIds.filter(
-                id => getRootId(id) === id
-            )
+            const rootIds = folderIds.filter(id => getRootId(id) === id)
+
+            await tx.favorites.deleteMany({
+                where: {
+                    user_id: session.userId,
+                    OR: [
+                        { folder_id: { in: ids } },
+                        { file_id: { in: fileIds } },
+                        { note_id: { in: noteIds } }
+                    ]
+                }
+            })
 
             await tx.shared_items.deleteMany({
                 where: {
@@ -199,11 +206,23 @@ export default defineEventHandler(async (event) => {
             if (deleted.count !== rootIds.length) {
                 throwError(409, 'folders changed during deletion.')
             }
-        }) 
+            const trashed = await tx.trash.findMany({
+                where: {
+                    user_id: session.userId,
+                    item_type: 'folder',
+                    item_id: { in: rootIds }
+                },
+                select: { id: true }
+            })
+
+            return trashed.map(item => item.id)
+        })
 
         return {
             success: true,
-            deletedIds: folderIds
+            deletedIds: folderIds,
+            failedIds: [],
+            trashIds
         }
     } catch (err: any) {
         if (err.statusCode) throw err

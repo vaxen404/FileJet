@@ -4,7 +4,7 @@ import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
 import { noteSchema } from "~~/shared/schemas/note"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'You need to be logged in.')
         }
 
-        enforceRateLimit(event, `notes-add:${session.userId}`, 10, 60 * 1000 )
+        enforceRateLimit(event, `notes-add:${session.userId}`, 10, 60 * 1000)
 
         const body = await readBody(event)
         const result = noteSchema.safeParse(body)
@@ -23,11 +23,9 @@ export default defineEventHandler(async (event) => {
 
         const { title, content } = result.data
 
-        const size = BigInt(
-            Buffer.byteLength(content, 'utf-8')
-        )
+        const size = BigInt(Buffer.byteLength(content, 'utf-8'))
 
-        const addNote = await prisma.$transaction(async (tx) => {
+        const addNote = await prisma.$transaction(async ( tx) => {
             await reserveStorage(tx, session.userId, size)
 
             const existing = await tx.notes.findFirst({
@@ -55,7 +53,6 @@ export default defineEventHandler(async (event) => {
 
             return note
         })
-
 
         return {
             success: true,

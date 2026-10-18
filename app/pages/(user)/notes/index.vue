@@ -2,7 +2,7 @@
     <div class="notes-page">
         <div class="notes-header">
             <div class="notes-toolbar">
-                <SearchBox 
+                <SearchBox
                     v-model="searchQuery"
                     placeholder="Search notes..."
                 />
@@ -10,8 +10,12 @@
                 <div class="toolbar-actions">
                     <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
-                    <UploadButton text="Upload" mode="file" accept=".txt,.md" @files="handleNoteUpload"/>
-
+                    <UploadButton
+                        text="Upload"
+                        mode="file"
+                        accept=".txt,.md"
+                        @files="handleNoteUpload"
+                    />
 
                     <button
                         type="button"
@@ -24,14 +28,33 @@
                 </div>
             </div>
 
-            <div v-if="selectedNotes.length" class="selection-toolbar" role="group" aria-label="Selected notes">
-                <span role="status" aria-live="polite">{{ selectedNotes.length }} selected</span>
+            <div
+                v-if="selectedNotes.length"
+                class="selection-toolbar"
+                role="group"
+                aria-label="Selected notes"
+            >
+                <span
+                    role="status"
+                    aria-live="polite"
+                    >{{ selectedNotes.length }} selected</span
+                >
 
                 <div class="selection-actions">
-                    <button type="button" class="selection-btn" :disabled="busy" @click="selectedNotes = []">
+                    <button
+                        type="button"
+                        class="selection-btn"
+                        :disabled="busy"
+                        @click="selectedNotes = []"
+                    >
                         Clear
                     </button>
-                    <button type="button" class="selection-btn delete-selected-btn" :disabled="busy" @click="handleDeleteSelected">
+                    <button
+                        type="button"
+                        class="selection-btn delete-selected-btn"
+                        :disabled="busy"
+                        @click="handleDeleteSelected"
+                    >
                         <Icon name="solar:trash-bin-trash-bold" />
                         Delete Selected
                     </button>
@@ -46,12 +69,37 @@
             drop-text="Drop notes to upload"
             @drop="handleDrop"
         >
-            <template #loading><div class="loading-state" role="status">Loading notes...</div></template>
-            <template v-if="!isInitialLoading && filteredNotes.length === 0" #empty>
+            <template #loading>
+                <div
+                    class="loading-state"
+                    role="status"
+                >
+                    Loading notes...
+                </div>
+            </template>
+            <template
+                v-if="!isInitialLoading && filteredNotes.length === 0"
+                #empty
+            >
                 <div class="empty-state">
-                    <Icon name="solar:notebook-bold" size="2.5rem" class="empty-state-icon" />
-                    <strong>{{ error ? 'Unable to load notes' : notes.length ? 'No matching notes' : 'No notes yet' }}</strong>
-                    <span class="empty-state-description">{{ error || (notes.length ? 'Try a different search.' : 'Create your first note to get started.') }}</span>
+                    <Icon
+                        name="solar:notebook-bold"
+                        size="2.5rem"
+                        class="empty-state-icon"
+                    />
+                    <strong>{{
+                        error
+                            ? 'Unable to load notes'
+                            : notes.length
+                              ? 'No matching notes'
+                              : 'No notes yet'
+                    }}</strong>
+                    <span class="empty-state-description">{{
+                        error ||
+                        (notes.length
+                            ? 'Try a different search.'
+                            : 'Create your first note to get started.')
+                    }}</span>
                 </div>
             </template>
 
@@ -61,7 +109,7 @@
                         <thead>
                             <tr>
                                 <th>
-                                    <input 
+                                    <input
                                         type="checkbox"
                                         class="note-checkbox"
                                         :checked="allSelected"
@@ -69,7 +117,7 @@
                                         :disabled="busy"
                                         aria-label="Select all notes on this page"
                                         @change="toggleSelectAll"
-                                    >
+                                    />
                                 </th>
 
                                 <th>
@@ -98,14 +146,14 @@
                                 @contextmenu.prevent.stop="openContextMenu($event, note.id)"
                             >
                                 <td @click.stop>
-                                    <input 
+                                    <input
                                         v-model="selectedNotes"
                                         type="checkbox"
                                         class="note-checkbox"
                                         :value="note.id"
                                         :disabled="busy"
                                         :aria-label="`Select ${note.title}`"
-                                    >
+                                    />
                                 </td>
 
                                 <td>
@@ -117,7 +165,8 @@
                                         <div class="note-info">
                                             <strong :title="note.title">{{ note.title }}</strong>
                                             <span>
-                                                {{ formatFileSize(note.size) }} • {{ formatFileTime(note.created_at) }}
+                                                {{ formatFileSize(note.size) }} •
+                                                {{ formatFileTime(note.created_at) }}
                                             </span>
                                         </div>
                                     </div>
@@ -129,9 +178,16 @@
 
                                 <td @click.stop>
                                     <ItemMenu
-                                        :ref="(menu) => setNoteMenuRef(note.id, menu)"
+                                        :ref="menu => setNoteMenuRef(note.id, menu)"
                                         type="note"
-                                        :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']"
+                                        :actions="[
+                                            'open',
+                                            'edit',
+                                            'rename',
+                                            'download',
+                                            'favorite',
+                                            'delete'
+                                        ]"
                                         :is-favorite="isNoteFavorite(note.id)"
                                         @open="openNote(note)"
                                         @edit="editNote(note)"
@@ -149,25 +205,68 @@
 
             <template #grid>
                 <ItemGrid>
-                    <ItemGridCard v-for="note in paginatedNotes" :key="note.id" :title="note.title" icon="solar:notebook-bold"
-                        :selected="selectedNotes.includes(note.id)" @click="openNote(note)" @contextmenu.prevent.stop="openContextMenu($event, note.id)">
+                    <ItemGridCard
+                        v-for="note in paginatedNotes"
+                        :key="note.id"
+                        :title="note.title"
+                        icon="solar:notebook-bold"
+                        :selected="selectedNotes.includes(note.id)"
+                        @click="openNote(note)"
+                        @contextmenu.prevent.stop="openContextMenu($event, note.id)"
+                    >
                         <template #actions>
                             <label class="file-select">
-                                <input v-model="selectedNotes" type="checkbox" class="note-checkbox" :value="note.id" :disabled="busy" :aria-label="`Select ${note.title}`">
+                                <input
+                                    v-model="selectedNotes"
+                                    type="checkbox"
+                                    class="note-checkbox"
+                                    :value="note.id"
+                                    :disabled="busy"
+                                    :aria-label="`Select ${note.title}`"
+                                />
                             </label>
-                            <ItemMenu :ref="(menu) => setNoteMenuRef(note.id, menu)" type="note"
-                                :actions="['open', 'edit', 'rename', 'download', 'favorite', 'delete']" :is-favorite="isNoteFavorite(note.id)"
-                                @open="openNote(note)" @edit="editNote(note)" @rename="renameNote(note)" @download="downloadNote(note)"
-                                @favorite="favoriteNote(note)" @delete="deleteNote(note)" />
+                            <ItemMenu
+                                :ref="menu => setNoteMenuRef(note.id, menu)"
+                                type="note"
+                                :actions="[
+                                    'open',
+                                    'edit',
+                                    'rename',
+                                    'download',
+                                    'favorite',
+                                    'delete'
+                                ]"
+                                :is-favorite="isNoteFavorite(note.id)"
+                                @open="openNote(note)"
+                                @edit="editNote(note)"
+                                @rename="renameNote(note)"
+                                @download="downloadNote(note)"
+                                @favorite="favoriteNote(note)"
+                                @delete="deleteNote(note)"
+                            />
                         </template>
-                        <template #metadata><span>{{ formatFileSize(note.size) }}</span> ? <span>{{ formatFileTime(note.created_at) }}</span></template>
+                        <template #metadata>
+                            <span>{{ formatFileSize(note.size) }}</span>
+                            ?
+                            <span>{{ formatFileTime(note.created_at) }}</span>
+                        </template>
                     </ItemGridCard>
                 </ItemGrid>
             </template>
         </DataView>
-        <UploadProgress :active="isUploading" :progress="uploadProgress" :processing="isProcessing" label="Uploading notes..." />
-        <NoteFormModal :open="noteModalOpen" :mode="noteModalMode" :note="activeNote" @close="noteModalOpen = false" @saved="handleNoteSaved" />
-        
+        <UploadProgress
+            :active="isUploading"
+            :progress="uploadProgress"
+            :processing="isProcessing"
+            label="Uploading notes..."
+        />
+        <NoteFormModal
+            :open="noteModalOpen"
+            :mode="noteModalMode"
+            :note="activeNote"
+            @close="noteModalOpen = false"
+            @saved="handleNoteSaved"
+        />
 
         <Pagination
             v-model="currentPage"
@@ -195,7 +294,7 @@ const {
     uploadProgress,
     uploadNote,
     deleteNote: removeNote,
-    deleteNotes,
+    deleteNotes
 } = useNoteActions()
 
 const { openToast } = useToast()
@@ -220,18 +319,27 @@ const filteredNotes = computed(() => {
 })
 
 const { sortedItems: sortedNotes } = useSort(
-    filteredNotes, sortMode, note => note.title, note => note.created_at
+    filteredNotes,
+    sortMode,
+    note => note.title,
+    note => note.created_at
 )
 
-const itemsPerPage = computed(() => viewMode.value === 'list' ? 12 : 24)
-const { currentPage, totalPages, paginatedItems: paginatedNotes } = usePagination(
-    sortedNotes,
-    itemsPerPage
-)
+const itemsPerPage = computed(() => (viewMode.value === 'list' ? 12 : 24))
+
+const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedNotes
+} = usePagination(sortedNotes, itemsPerPage)
 
 const { selectedItems: selectedNotes, allSelected, toggleSelectAll } = useSelection(paginatedNotes)
+
 const partiallySelected = computed(() => {
-    return !allSelected.value && paginatedNotes.value.some(note => selectedNotes.value.includes(note.id))
+    return (
+        !allSelected.value &&
+        paginatedNotes.value.some(note => selectedNotes.value.includes(note.id))
+    )
 })
 
 const isNoteFavorite = (noteId: string) => {
@@ -263,37 +371,46 @@ const noteModalMode = ref<'create' | 'edit'>('create')
 const activeNote = ref<NoteItem | null>(null)
 const isBulkDeleting = ref(false)
 const isFavoriting = ref(false)
-const busy = computed(() => pending.value || isLoading.value || isBulkDeleting.value || isFavoriting.value)
-const isInitialLoading = computed(() => pending.value && notes.value.length === 0 && !isUploading.value)
+
+const busy = computed(
+    () => pending.value || isLoading.value || isBulkDeleting.value || isFavoriting.value
+)
+
+const isInitialLoading = computed(
+    () => pending.value && notes.value.length === 0 && !isUploading.value
+)
+
 const { addFavorite, removeFavorite } = useFavoriteActions()
 const noteMenus = new Map<string, InstanceType<typeof ItemMenu>>()
+
 const setNoteMenuRef = (id: string, menu: Element | ComponentPublicInstance | null) => {
     if (menu) noteMenus.set(id, menu as InstanceType<typeof ItemMenu>)
     else noteMenus.delete(id)
 }
-const openContextMenu = (event: MouseEvent, id: string) => { noteMenus.get(id)?.openAt(event.clientX, event.clientY) }
+
+const openContextMenu = (event: MouseEvent, id: string) => {
+    noteMenus.get(id)?.openAt(event.clientX, event.clientY)
+}
+
 const createNote = () => {
     activeNote.value = null
     noteModalMode.value = 'create'
     noteModalOpen.value = true
 }
-const openNote = (note: NoteItem) => {
-    activeNote.value = note
-    noteModalMode.value = 'edit'
-    noteModalOpen.value = true
-}
+
+const openNote = (note: NoteItem) =>
+    navigateTo({ path: '/notes/' + note.id, query: { from: '/notes' } })
+
 const editNote = openNote
-const renameNote = async (note: NoteItem) => {
-    openNote(note)
-    await nextTick()
-    const input = document.getElementById('note-form-title') as HTMLInputElement | null
-    input?.focus()
-    input?.select()
-}
+
+const renameNote = (note: NoteItem) =>
+    navigateTo({ path: '/notes/' + note.id, query: { from: '/notes', tab: 'edit' } })
+
 const handleNoteSaved = async () => {
     await fetchAll()
     if (error.value) openToast(error.value, 'error')
 }
+
 const downloadNote = (note: NoteItem) => {
     const url = URL.createObjectURL(new Blob([note.content], { type: 'text/plain;charset=utf-8' }))
     try {
@@ -303,8 +420,11 @@ const downloadNote = (note: NoteItem) => {
         document.body.appendChild(link)
         link.click()
         link.remove()
-    } finally { setTimeout(() => URL.revokeObjectURL(url), 1000) }
+    } finally {
+        setTimeout(() => URL.revokeObjectURL(url), 1000)
+    }
 }
+
 const favoriteNote = async (note: NoteItem) => {
     if (isFavoriting.value) return
     isFavoriting.value = true
@@ -315,40 +435,51 @@ const favoriteNote = async (note: NoteItem) => {
         await fetchAll()
         if (error.value) throw new Error(error.value)
         openToast(favorite ? 'Note removed from favorites.' : 'Note added to favorites.', 'success')
-    } catch (err: any) { openToast(err.data?.message || err.message || 'Could not update favorite.', 'error') }
-    finally { isFavoriting.value = false }
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not update favorite.', 'error')
+    } finally {
+        isFavoriting.value = false
+    }
 }
+
 const deleteNote = async (note: NoteItem) => {
     if (isDeleting.value) return
     try {
         await removeNote(note.id)
         notes.value = notes.value.filter(item => item.id !== note.id)
-        await fetchAll()
-        if (error.value) throw new Error(error.value)
-        openToast('Note deleted successfully.', 'success')
-    } catch (err: any) { openToast(err.data?.message || err.message || 'Could not delete note.', 'error') }
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not delete note.', 'error')
+    }
 }
+
 const handleDeleteSelected = async () => {
     if (!selectedNotes.value.length || busy.value) return
+
     isBulkDeleting.value = true
+
     try {
         const result = await deleteNotes([...selectedNotes.value])
         const deleted = new Set(result.deletedIds)
+
         notes.value = notes.value.filter(note => !deleted.has(note.id))
         selectedNotes.value = selectedNotes.value.filter(id => !deleted.has(id))
-        await fetchAll()
-        const message = `${result.deletedIds.length} notes deleted.${result.failedIds.length ? ` ${result.failedIds.length} could not be deleted.` : ''}`
-        openToast(error.value ? `${message} ${error.value}` : message, result.failedIds.length || error.value ? 'error' : 'success')
-    } catch (err: any) { openToast(err.data?.message || err.message || 'Could not delete selected notes.', 'error') }
-    finally { isBulkDeleting.value = false }
+
+        if (result.failedIds.length) {
+            openToast(`${result.failedIds.length} items could not be moved to Trash.`, 'error')
+        }
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not delete selected notes.', 'error')
+    } finally {
+        isBulkDeleting.value = false
+    }
 }
 
-watch(notes, (items) => {
+watch(notes, items => {
     const availableIds = new Set(items.map(note => note.id))
     selectedNotes.value = selectedNotes.value.filter(id => availableIds.has(id))
 })
 
-watch(totalPages, (total) => {
+watch(totalPages, total => {
     currentPage.value = Math.min(currentPage.value, Math.max(1, total))
 })
 
@@ -540,7 +671,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     border: 1px solid #505057;
     border-radius: 4px;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .note-checkbox:hover:not(:disabled) {
@@ -684,7 +817,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
     line-height: 1.5;
     box-sizing: border-box;
 }
@@ -734,7 +869,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 
 @media (max-width: 800px) {
     .notes-toolbar :deep(.search-box) {

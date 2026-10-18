@@ -1,5 +1,9 @@
 <template>
-    <div class="item-filters" role="group" :aria-label="label">
+    <div
+        class="item-filters"
+        role="group"
+        :aria-label="label"
+    >
         <button
             v-for="option in options"
             :key="option"
@@ -47,7 +51,10 @@ const model = defineModel<string>({ required: true })
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
     line-height: 1.5;
     box-sizing: border-box;
 }

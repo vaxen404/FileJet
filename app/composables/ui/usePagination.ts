@@ -17,7 +17,7 @@ export const usePagination = <T extends { id: string }>(
 
     return {
         currentPage,
-        totalPages, 
+        totalPages,
         paginatedItems
     }
 }

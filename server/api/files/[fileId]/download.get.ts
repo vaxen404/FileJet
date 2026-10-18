@@ -6,7 +6,7 @@ import { getAuthSession } from "~~/server/utils/auth";
 import { throwError } from "~~/server/utils/error";
 import { isUuid } from "~~/server/utils/validation";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -62,10 +62,7 @@ export default defineEventHandler(async (event) => {
             `attachment; filename*=UTF-8''${encodeURIComponent(file.original_name)}`
         )
 
-        return await sendStream(
-            event,
-            createReadStream(filePath)
-        )
+        return await sendStream(event, createReadStream(filePath))
     } catch (err: any) {
         if (err.statusCode) throw err
 
@@ -73,9 +70,6 @@ export default defineEventHandler(async (event) => {
             throwError(404, 'File not found in storage. Please upload it again.')
         }
 
-        throwError(
-            500,
-            'An error occurred while downloading the file.'
-        )
+        throwError(500, 'An error occurred while downloading the file.')
     }
 })

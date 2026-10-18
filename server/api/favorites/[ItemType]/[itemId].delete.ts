@@ -2,7 +2,7 @@ import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from '~~/server/utils/error'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -14,7 +14,6 @@ export default defineEventHandler(async (event) => {
 
         const itemId = getRouterParam(event, 'itemId')
         const itemType = getRouterParam(event, 'itemType')
-        
 
         if (!itemId || !itemType) {
             throwError(400, 'Missing data.')

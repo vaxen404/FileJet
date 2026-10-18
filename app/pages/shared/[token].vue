@@ -1,28 +1,109 @@
-
 <template>
     <div class="shared-page">
-        <div v-if="passwordRequired" class="shared-error">
-            <form class="shared-error-card share-unlock" :aria-busy="unlocking" @submit.prevent="unlockShare">
-                <Icon name="solar:lock-keyhole-linear" size="2.75rem" aria-hidden="true" />
+        <div
+            v-if="passwordRequired"
+            class="shared-error"
+        >
+            <form
+                class="shared-error-card share-unlock"
+                :aria-busy="unlocking"
+                @submit.prevent="unlockShare"
+            >
+                <Icon
+                    name="solar:lock-keyhole-linear"
+                    size="2.75rem"
+                    aria-hidden="true"
+                />
                 <h1>Password Protected</h1>
-                <p v-if="lockedFileName" class="locked-filename" :title="lockedFileName">{{ lockedFileName }}</p>
-                <p>This file is protected by a password.</p>
+                <p
+                    v-if="lockedFileName"
+                    class="locked-filename"
+                    :title="lockedFileName"
+                >
+                    {{ lockedFileName }}
+                </p>
+                <p>
+                    {{
+                        passwordChallenge.itemType === 'folder'
+                            ? 'This folder is protected by a password.'
+                            : passwordChallenge.itemType === 'note'
+                              ? 'This note is protected by a password.'
+                              : 'This file is protected by a password.'
+                    }}
+                </p>
                 <label for="public-share-password">Password</label>
                 <div class="unlock-password-field">
-                    <input id="public-share-password" v-model="sharePassword" :type="showPassword ? 'text' : 'password'" placeholder="Enter password" autocomplete="current-password" required maxlength="128" :disabled="unlocking" :aria-invalid="Boolean(unlockError)" :aria-describedby="unlockError ? 'unlock-error' : undefined" @input="unlockError = ''">
-                    <button type="button" class="password-visibility" :aria-label="showPassword ? 'Hide password' : 'Show password'" :title="showPassword ? 'Hide password' : 'Show password'" :aria-pressed="showPassword" aria-controls="public-share-password" :disabled="unlocking" @click="showPassword = !showPassword">
-                        <Icon :name="showPassword ? 'solar:eye-closed-linear' : 'solar:eye-linear'" size="1.2rem" />
+                    <input
+                        id="public-share-password"
+                        v-model="sharePassword"
+                        :type="showPassword ? 'text' : 'password'"
+                        placeholder="Enter password"
+                        autocomplete="current-password"
+                        required
+                        maxlength="128"
+                        :disabled="unlocking"
+                        :aria-invalid="Boolean(unlockError)"
+                        :aria-describedby="unlockError ? 'unlock-error' : undefined"
+                        @input="unlockError = ''"
+                    />
+                    <button
+                        type="button"
+                        class="password-visibility"
+                        :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                        :title="showPassword ? 'Hide password' : 'Show password'"
+                        :aria-pressed="showPassword"
+                        aria-controls="public-share-password"
+                        :disabled="unlocking"
+                        @click="showPassword = !showPassword"
+                    >
+                        <Icon
+                            :name="showPassword ? 'solar:eye-closed-linear' : 'solar:eye-linear'"
+                            size="1.2rem"
+                        />
                     </button>
                 </div>
-                <p v-if="unlockError" id="unlock-error" class="unlock-error" role="alert">{{ unlockError }}</p>
-                <button type="submit" class="download-btn" :disabled="unlocking || !sharePassword" :aria-busy="unlocking">{{ unlocking ? 'Unlocking...' : 'Unlock File' }}</button>
+                <p
+                    v-if="unlockError"
+                    id="unlock-error"
+                    class="unlock-error"
+                    role="alert"
+                >
+                    {{ unlockError }}
+                </p>
+                <button
+                    type="submit"
+                    class="download-btn"
+                    :disabled="unlocking || !sharePassword"
+                    :aria-busy="unlocking"
+                >
+                    {{
+                        unlocking
+                            ? 'Unlocking...'
+                            : passwordChallenge.itemType === 'folder'
+                              ? 'Unlock Folder'
+                              : passwordChallenge.itemType === 'note'
+                                ? 'Unlock Note'
+                                : 'Unlock File'
+                    }}
+                </button>
             </form>
         </div>
-        <div v-else-if="error" class="shared-error" role="alert">
+        <div
+            v-else-if="error"
+            class="shared-error"
+            role="alert"
+        >
             <div class="shared-error-card">
-                <div class="shared-error-icon" aria-hidden="true">
+                <div
+                    class="shared-error-icon"
+                    aria-hidden="true"
+                >
                     <Icon
-                        :name="error.statusCode === 404 ? 'solar:link-broken-linear' : 'solar:danger-circle-linear'"
+                        :name="
+                            error.statusCode === 404
+                                ? 'solar:link-broken-linear'
+                                : 'solar:danger-circle-linear'
+                        "
                         size="2.75rem"
                     />
                 </div>
@@ -30,12 +111,20 @@
                 <span class="shared-error-code">{{ error.statusCode || 'Error' }}</span>
 
                 <h1>
-                    {{ error.statusCode === 410 ? 'Link Expired' : error.statusCode === 403 || error.statusCode === 401 ? 'Access Denied' : error.statusCode === 404 ? 'Shared item not found' : 'Unable to load shared item' }}
+                    {{
+                        error.statusCode === 410
+                            ? 'Link Expired'
+                            : error.statusCode === 403 || error.statusCode === 401
+                              ? 'Access Denied'
+                              : error.statusCode === 404
+                                ? 'Shared item not found'
+                                : 'Unable to load shared item'
+                    }}
                 </h1>
 
                 <p>
                     {{
-                        (error.statusCode === 404 || error.statusCode === 410)
+                        error.statusCode === 404 || error.statusCode === 410
                             ? 'This link may be invalid or no longer available. Ask the sender for a new link.'
                             : 'Something went wrong while opening this link. Please try again in a moment.'
                     }}
@@ -63,7 +152,7 @@
                         class="image-preview"
                         :src="`/api/shared/${token}/preview`"
                         :alt="sharedItem.item.name"
-                    >
+                    />
 
                     <button
                         type="button"
@@ -74,21 +163,28 @@
                         @click="toggleImageFullscreen"
                     >
                         <Icon
-                            :name="isImageFullscreen ? 'solar:quit-full-screen-linear' : 'solar:full-screen-linear'"
+                            :name="
+                                isImageFullscreen
+                                    ? 'solar:quit-full-screen-linear'
+                                    : 'solar:full-screen-linear'
+                            "
                             size="1.2rem"
                         />
                     </button>
                 </div>
 
                 <template v-else-if="isText">
-                    <div v-if="textPreviewError" class="error-message">
+                    <div
+                        v-if="textPreviewError"
+                        class="error-message"
+                    >
                         Text preview could not be loaded.
                     </div>
 
                     <pre
                         v-else
                         class="text-preview"
-                    >{{ textContent }}</pre>
+                        >{{ textContent }}</pre>
                 </template>
 
                 <iframe
@@ -109,8 +205,14 @@
                     preload="auto"
                 />
 
-                <div v-else class="download-message">
-                    <div class="download-icon" aria-hidden="true">
+                <div
+                    v-else
+                    class="download-message"
+                >
+                    <div
+                        class="download-icon"
+                        aria-hidden="true"
+                    >
                         <Icon
                             name="solar:file-bold"
                             size="3rem"
@@ -119,13 +221,22 @@
 
                     <h2 :title="itemName">{{ itemName }}</h2>
 
-                    <div class="download-status" role="status" aria-live="polite">
-                        <span class="status-dot" aria-hidden="true" />
-                        {{ downloadedToken === token ? 'Download started' : 'Starting download...' }}
+                    <div
+                        class="download-status"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        <span
+                            class="status-dot"
+                            aria-hidden="true"
+                        />
+                        {{
+                            downloadedToken === token ? 'Download started' : 'Starting download...'
+                        }}
                     </div>
 
                     <p>
-                        Your file will download automatically.<br>
+                        Your file will download automatically.<br />
                         If it hasn't started, use the button below.
                     </p>
 
@@ -150,14 +261,28 @@
                 v-else-if="sharedItem.type === 'note'"
                 class="shared-content text-content"
             >
-                {{ sharedItem.item.content }}
+                <div class="shared-note-heading">
+                    <h1>{{ sharedItem.item.title }}</h1>
+                    <a
+                        class="download-btn"
+                        :href="downloadUrl"
+                        >Download Note</a
+                    >
+                </div>
+                <pre class="text-preview">{{ sharedItem.item.content }}</pre>
             </div>
 
             <div
                 v-else-if="sharedItem.type === 'folder'"
-                class="shared-content"
+                class="shared-content shared-folder-content"
             >
-                Folder
+                <SharedFolderContents
+                    :key="token"
+                    :token="token"
+                    :root-id="sharedItem.item.id"
+                    :root-name="sharedItem.item.name"
+                    @access-error="refresh()"
+                />
             </div>
         </template>
     </div>
@@ -180,36 +305,59 @@ const sharedUrl = computed(() => {
     return `/api/shared/${token.value}`
 })
 
-const { data: sharedItem, error, refresh } = await useFetch<SharedResponse>(
-    sharedUrl
+const { data: sharedItem, error, refresh } = await useFetch<SharedResponse>(sharedUrl)
+
+interface PasswordChallenge {
+    passwordRequired?: boolean
+    fileName?: string | null
+    itemType?: 'file' | 'folder' | 'note'
+}
+
+const passwordChallenge = computed<PasswordChallenge>(
+    () => (error.value?.data as { data?: PasswordChallenge } | undefined)?.data ?? {}
 )
 
-interface PasswordChallenge { passwordRequired?: boolean, fileName?: string | null }
-const passwordChallenge = computed<PasswordChallenge>(() => (error.value?.data as { data?: PasswordChallenge } | undefined)?.data ?? {})
-const passwordRequired = computed(() => error.value?.statusCode === 401 && passwordChallenge.value.passwordRequired === true)
-const lockedFileName = computed(() => passwordRequired.value ? passwordChallenge.value.fileName || '' : '')
+const passwordRequired = computed(
+    () => error.value?.statusCode === 401 && passwordChallenge.value.passwordRequired === true
+)
+
+const lockedFileName = computed(() =>
+    passwordRequired.value ? passwordChallenge.value.fileName || '' : ''
+)
+
 const sharePassword = ref('')
 const showPassword = ref(false)
 const unlocking = ref(false)
 const unlockError = ref('')
+
 const unlockShare = async () => {
     if (unlocking.value || !sharePassword.value) return
     unlocking.value = true
     unlockError.value = ''
     try {
-        await $fetch(`/api/shared/${encodeURIComponent(token.value)}/unlock`, { method: 'POST', body: { password: sharePassword.value } })
+        await $fetch(`/api/shared/${encodeURIComponent(token.value)}/unlock`, {
+            method: 'POST',
+            body: { password: sharePassword.value }
+        })
         sharePassword.value = ''
         showPassword.value = false
         await refresh()
-        if (error.value?.statusCode === 401) unlockError.value = 'Access could not be verified. Please try again.'
+        if (error.value?.statusCode === 401)
+            unlockError.value = 'Access could not be verified. Please try again.'
     } catch (err: any) {
         const status = err?.statusCode || err?.status || err?.response?.status
-        unlockError.value = status === 401 ? 'Incorrect password. Please try again.'
-            : status === 429 ? 'Too many attempts. Please try again later.'
-            : err?.data?.message || 'Unable to unlock this file. Please try again.'
+        unlockError.value =
+            status === 401
+                ? 'Incorrect password. Please try again.'
+                : status === 429
+                  ? 'Too many attempts. Please try again later.'
+                  : err?.data?.message || 'Unable to unlock this file. Please try again.'
         if (status === 410 || status === 404 || status === 409) await refresh()
-    } finally { unlocking.value = false }
+    } finally {
+        unlocking.value = false
+    }
 }
+
 watch(token, () => {
     sharePassword.value = ''
     showPassword.value = false
@@ -217,16 +365,19 @@ watch(token, () => {
 })
 
 const isImage = computed(() => {
-    return sharedItem.value?.type === 'file' &&
-        sharedItem.value.item.mime_type?.startsWith('image/')
+    return (
+        sharedItem.value?.type === 'file' && sharedItem.value.item.mime_type?.startsWith('image/')
+    )
 })
 
 const imageStage = ref<HTMLElement | null>(null)
 const isImageExpanded = ref(false)
-const { isSupported: supportsFullscreen, isFullscreen, toggle: toggleFullscreen } = useFullscreen(
-    imageStage,
-    { autoExit: true }
-)
+const {
+    isSupported: supportsFullscreen,
+    isFullscreen,
+    toggle: toggleFullscreen
+} = useFullscreen(imageStage, { autoExit: true })
+
 const isImageFullscreen = computed(() => isFullscreen.value || isImageExpanded.value)
 
 const toggleImageFullscreen = async () => {
@@ -256,18 +407,19 @@ useEventListener('keydown', (event: KeyboardEvent) => {
 })
 
 const isText = computed(() => {
-    return sharedItem.value?.type === 'file' &&
-        sharedItem.value.item.mime_type?.startsWith('text/')
+    return sharedItem.value?.type === 'file' && sharedItem.value.item.mime_type?.startsWith('text/')
 })
 
 const isPdf = computed(() => {
-    return sharedItem.value?.type === 'file' &&
-        sharedItem.value.item.mime_type === 'application/pdf'
+    return (
+        sharedItem.value?.type === 'file' && sharedItem.value.item.mime_type === 'application/pdf'
+    )
 })
 
 const isVideo = computed(() => {
-    return sharedItem.value?.type === 'file' &&
-        sharedItem.value.item.mime_type?.startsWith('video/')
+    return (
+        sharedItem.value?.type === 'file' && sharedItem.value.item.mime_type?.startsWith('video/')
+    )
 })
 
 const itemName = computed(() => {
@@ -281,11 +433,13 @@ const itemName = computed(() => {
 })
 
 const isDownloadOnly = computed(() => {
-    return sharedItem.value?.type === 'file' &&
+    return (
+        sharedItem.value?.type === 'file' &&
         !isImage.value &&
         !isText.value &&
         !isPdf.value &&
         !isVideo.value
+    )
 })
 
 const downloadUrl = computed(() => {
@@ -343,9 +497,7 @@ const loadTextPreview = async () => {
     if (!isText.value) return
 
     try {
-        textContent.value = await $fetch<string>(
-            `/api/shared/${token.value}/preview`
-        )
+        textContent.value = await $fetch<string>(`/api/shared/${token.value}/preview`)
     } catch {
         textPreviewError.value = true
     }
@@ -445,7 +597,9 @@ watch(
     border: 1px solid #303036;
     border-radius: 6px;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
 .image-fullscreen-btn:hover {
@@ -488,6 +642,26 @@ watch(
     overflow: auto;
     overscroll-behavior: contain;
     overflow-wrap: anywhere;
+}
+
+.shared-note-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.shared-note-heading h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
+}
+
+.shared-note-heading .download-btn {
+    margin: 0;
+    text-decoration: none;
 }
 
 .text-preview {
@@ -595,7 +769,9 @@ watch(
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .download-btn:hover:not(:disabled) {
@@ -761,18 +937,92 @@ watch(
         padding: 0.65rem 1.1rem;
     }
 }
-.share-unlock { color: #8b7cff; }
-.share-unlock label { width: 100%; text-align: left; color: #d5d5da; font-size: 0.875rem; }
-.share-unlock input { width: 100%; height: 2.75rem; padding: 0 0.75rem; color: #ffffff; background: #151518; border: 1px solid #303036; border-radius: 6px; font: inherit; font-size: 0.875rem; outline: none; }
-.share-unlock input:focus { border-color: #5965ed; }
-.share-unlock .unlock-error { color: #ff6b6b; }
-.shared-error:has(.share-unlock) { overflow-y: auto; }
-.share-unlock { margin-block: auto; flex-shrink: 0; }
-.share-unlock .locked-filename { width: 100%; color: #d5d5da; overflow-wrap: anywhere; font-weight: 500; }
-.unlock-password-field { position: relative; width: 100%; }
-.unlock-password-field input { padding-right: 2.75rem; }
-.password-visibility { position: absolute; top: 0; right: 0; display: flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: 6px; color: #898991; background: transparent; cursor: pointer; }
-.password-visibility:hover:not(:disabled) { color: #ffffff; }
-.password-visibility:focus-visible { outline: 2px solid #8b7cff; outline-offset: -2px; }
-.password-visibility:disabled { opacity: 0.65; cursor: wait; }
+
+.share-unlock {
+    color: #8b7cff;
+}
+
+.share-unlock label {
+    width: 100%;
+    text-align: left;
+    color: #d5d5da;
+    font-size: 0.875rem;
+}
+
+.share-unlock input {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    color: #ffffff;
+    background: #151518;
+    border: 1px solid #303036;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 0.875rem;
+    outline: none;
+}
+
+.share-unlock input:focus {
+    border-color: #5965ed;
+}
+
+.share-unlock .unlock-error {
+    color: #ff6b6b;
+}
+
+.shared-error:has(.share-unlock) {
+    overflow-y: auto;
+}
+
+.share-unlock {
+    margin-block: auto;
+    flex-shrink: 0;
+}
+
+.share-unlock .locked-filename {
+    width: 100%;
+    color: #d5d5da;
+    overflow-wrap: anywhere;
+    font-weight: 500;
+}
+
+.unlock-password-field {
+    position: relative;
+    width: 100%;
+}
+
+.unlock-password-field input {
+    padding-right: 2.75rem;
+}
+
+.password-visibility {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    color: #898991;
+    background: transparent;
+    cursor: pointer;
+}
+
+.password-visibility:hover:not(:disabled) {
+    color: #ffffff;
+}
+
+.password-visibility:focus-visible {
+    outline: 2px solid #8b7cff;
+    outline-offset: -2px;
+}
+
+.password-visibility:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
 </style>

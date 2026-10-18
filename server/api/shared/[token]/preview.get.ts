@@ -1,24 +1,31 @@
-import { getPublicShare } from '../../../utils/shares'
+import { getSharedTarget } from '../../../utils/sharedTarget'
 import { enforceRateLimit } from '../../../utils/rateLimit'
-import { prisma } from "~~/server/utils/prisma"
-import { createReadStream } from "node:fs";
-import { readFile, stat } from "node:fs/promises";
-import { storagePath } from "~~/server/utils/files";
-import { throwError } from "~~/server/utils/error"
+import { prisma } from '~~/server/utils/prisma'
+import { createReadStream } from 'node:fs'
+import { readFile, stat } from 'node:fs/promises'
+import { storagePath } from '~~/server/utils/files'
+import { throwError } from '~~/server/utils/error'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     try {
-        const sharedItem = await getPublicShare(event)
+        const target = await getSharedTarget(event)
+        const sharedItem = target.share
         enforceRateLimit(event, `shared-preview:${sharedItem.token}`, 120, 60 * 1000)
 
-        if (sharedItem.item_type !== 'file') {
+        if (target.type === 'note' && 'content' in target.item) {
+            setHeader(event, 'Content-Type', 'text/plain; charset=utf-8')
+            setHeader(event, 'X-Content-Type-Options', 'nosniff')
+            return target.item.content
+        }
+
+        if (target.type !== 'file') {
             throwError(400, 'This shared item is not a file.')
         }
 
         const file = await prisma.files.findFirst({
             where: {
-                id: sharedItem.item_id,
-                    user_id: sharedItem.user_id
+                id: target.id,
+                user_id: sharedItem.user_id
             }
         })
 
@@ -33,42 +40,31 @@ export default defineEventHandler(async (event) => {
         const filePath = storagePath(file.storage_key)
         setHeader(event, 'Cache-Control', 'no-store')
         setHeader(event, 'X-Content-Type-Options', 'nosniff')
-        setHeader(event, 'Content-Security-Policy', "sandbox; default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'")
+        setHeader(
+            event,
+            'Content-Security-Policy',
+            "sandbox; default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'"
+        )
 
         try {
             if (!(await stat(filePath)).isFile()) throwError(404, 'Stored file not found.')
         } catch (error: any) {
-            if (error.code === 'ENOENT' || error.code === 'ENOTDIR') throwError(404, 'Stored file not found.')
+            if (error.code === 'ENOENT' || error.code === 'ENOTDIR')
+                throwError(404, 'Stored file not found.')
             throw error
         }
 
         if (file.mime_type.startsWith('text/')) {
-            const content = await readFile(
-                filePath,
-                'utf-8'
-            )
+            const content = await readFile(filePath, 'utf-8')
 
-            setHeader(
-                event,
-                'Content-Type',
-                'text/plain; charset=utf-8'
-            )
+            setHeader(event, 'Content-Type', 'text/plain; charset=utf-8')
 
-            setHeader(
-                event,
-                'X-Content-Type-Options',
-                'nosniff'
-            )
+            setHeader(event, 'X-Content-Type-Options', 'nosniff')
 
             return content
         }
 
-        const allowedImages = [
-            'image/png',
-            'image/jpeg',
-            'image/webp',
-            'image/gif'
-        ]
+        const allowedImages = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
 
         const isImage = allowedImages.includes(file.mime_type)
         const isPdf = file.mime_type === 'application/pdf'
@@ -78,18 +74,9 @@ export default defineEventHandler(async (event) => {
             throwError(415, 'File preview is not supported.')
         }
 
-        setHeader(
-            event,
-            'Content-Type',
-            file.mime_type
-        )
+        setHeader(event, 'Content-Type', file.mime_type)
 
-        setHeader(
-            event,
-            'X-Content-Type-Options',
-            'nosniff'
-        )
-
+        setHeader(event, 'X-Content-Type-Options', 'nosniff')
 
         setHeader(
             event,
@@ -100,7 +87,7 @@ export default defineEventHandler(async (event) => {
         if (isVideo) {
             const { size } = await stat(filePath)
             const range = getHeader(event, 'range')
-            
+
             setHeader(event, 'Accept-Ranges', 'bytes')
 
             if (range) {
@@ -113,15 +100,13 @@ export default defineEventHandler(async (event) => {
                 }
 
                 const isSuffix = match[1] === ''
-                const start = isSuffix
-                    ? Math.max(0, size - Number(match[2]))
-                    : Number(match[1])
+                const start = isSuffix ? Math.max(0, size - Number(match[2])) : Number(match[1])
 
                 const end = isSuffix
                     ? size - 1
                     : match[2]
-                        ? Math.min(Number(match[2]), size - 1)
-                        : size - 1
+                      ? Math.min(Number(match[2]), size - 1)
+                      : size - 1
 
                 if (
                     !Number.isSafeInteger(start) ||
@@ -139,27 +124,18 @@ export default defineEventHandler(async (event) => {
                 setHeader(event, 'Content-Range', `bytes ${start}-${end}/${size}`)
                 setHeader(event, 'Content-Length', end - start + 1)
 
-                return await sendStream(
-                    event,
-                    createReadStream(filePath, { start, end })
-                )
+                return await sendStream(event, createReadStream(filePath, { start, end }))
             }
 
             setHeader(event, 'Content-Length', size)
         }
 
-        return await sendStream(
-            event,
-            createReadStream(filePath)
-        )
-
+        return await sendStream(event, createReadStream(filePath))
     } catch (err: any) {
         if (err.statusCode) throw err
-        if (err.code === 'ENOENT' || err.code === 'ENOTDIR') throwError(404, 'Stored file not found.')
+        if (err.code === 'ENOENT' || err.code === 'ENOTDIR')
+            throwError(404, 'Stored file not found.')
 
-        throwError(
-            500,
-            'An error occurred while previewing the shared file.'
-        )
+        throwError(500, 'An error occurred while previewing the shared file.')
     }
 })

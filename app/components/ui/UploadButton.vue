@@ -62,6 +62,7 @@ const openPicker = async () => {
 
     fileInput.value?.click()
 }
+
 const handleFileChange = (event: Event) => {
     const input = event.target as HTMLInputElement
 

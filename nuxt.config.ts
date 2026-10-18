@@ -1,4 +1,3 @@
-
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
 
@@ -6,9 +5,21 @@ export default defineNuxtConfig({
         enabled: true
     },
 
-    modules: [
-        '@nuxt/icon'
-    ],
+    modules: ['@nuxt/icon'],
+
+    vite: {
+        esbuild: {
+            target: 'es2020'
+        }
+    },
+
+    nitro: {
+        esbuild: {
+            options: {
+                target: 'es2020'
+            }
+        }
+    },
 
     imports: {
         dirs: [

@@ -5,7 +5,7 @@ import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
 import { isUuid } from "~~/server/utils/validation"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -34,12 +34,17 @@ export default defineEventHandler(async (event) => {
         setHeader(event, 'Cache-Control', 'no-store')
         const [technicalMetadata, sharedItem] = await Promise.all([
             getFileMetadata(file),
-            prisma.shared_items.findFirst({ where: { user_id: session.userId, item_id: file.id, item_type: 'file' } })
+            prisma.shared_items.findFirst({
+                where: { user_id: session.userId, item_id: file.id, item_type: 'file' }
+            })
         ])
 
         return {
             ...file,
-            folders: file.folders?.user_id === session.userId ? { id: file.folders.id, name: file.folders.name } : null,
+            folders:
+                file.folders?.user_id === session.userId
+                    ? { id: file.folders.id, name: file.folders.name }
+                    : null,
             technical_metadata: technicalMetadata,
             share: shareState(event, sharedItem),
             size: file.size.toString()

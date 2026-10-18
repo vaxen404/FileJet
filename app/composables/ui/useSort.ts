@@ -1,8 +1,5 @@
 type SortMode =
-    | 'newest'
-    | 'oldest'
-    | 'name-asc'
-    | 'name-desc'
+    | 'newest' | 'oldest' | 'name-asc' | 'name-desc'
 
 export const useSort = <T>(
     items: Ref<T[]>,
@@ -15,15 +12,13 @@ export const useSort = <T>(
 
         if (sortMode.value === 'newest') {
             return list.sort((a, b) => {
-                return new Date(getDate(b) ?? 0).getTime() -
-                    new Date(getDate(a) ?? 0).getTime()
+                return new Date(getDate(b) ?? 0).getTime() - new Date(getDate(a) ?? 0).getTime()
             })
         }
 
         if (sortMode.value === 'oldest') {
             return list.sort((a, b) => {
-                return new Date(getDate(a) ?? 0).getTime() -
-                    new Date(getDate(b) ?? 0).getTime()
+                return new Date(getDate(a) ?? 0).getTime() - new Date(getDate(b) ?? 0).getTime()
             })
         }
 

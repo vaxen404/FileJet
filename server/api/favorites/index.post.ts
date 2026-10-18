@@ -4,7 +4,7 @@ import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -16,11 +16,7 @@ export default defineEventHandler(async (event) => {
 
         const body = await readBody(event)
 
-        if (
-            !body ||
-            typeof body !== 'object' ||
-            Array.isArray(body)
-        ) {
+        if (!body || typeof body !== 'object' || Array.isArray(body)) {
             throwError(400, 'Invalid request body.')
         }
 
@@ -44,11 +40,12 @@ export default defineEventHandler(async (event) => {
             }
         }
 
-        const item = itemType === 'file'
-            ? await prisma.files.findFirst(query)
-            : itemType === 'folder'
-                ? await prisma.folders.findFirst(query)
-                : await prisma.notes.findFirst(query)
+        const item =
+            itemType === 'file'
+                ? await prisma.files.findFirst(query)
+                : itemType === 'folder'
+                    ? await prisma.folders.findFirst(query)
+                    : await prisma.notes.findFirst(query)
 
         if (!item) {
             throwError(404, 'Item not found.')
@@ -82,7 +79,6 @@ export default defineEventHandler(async (event) => {
             success: true,
             favorite
         }
-
     } catch (error: any) {
         if (error.statusCode) throw error
 

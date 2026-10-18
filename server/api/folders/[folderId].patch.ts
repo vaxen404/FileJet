@@ -4,7 +4,7 @@ import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -12,12 +12,7 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'You need to be logged in.')
         }
 
-        enforceRateLimit(
-            event,
-            `folders-rename:${session.userId}`,
-            10,
-            60 * 1000
-        )
+        enforceRateLimit(event, `folders-rename:${session.userId}`, 10, 60 * 1000)
 
         const folderId = getRouterParam(event, 'folderId')
 
@@ -27,9 +22,7 @@ export default defineEventHandler(async (event) => {
 
         const body = await readBody(event)
 
-        const name = typeof body?.newName === 'string'
-            ? body.newName.trim()
-            : ''
+        const name = typeof body?.newName === 'string' ? body.newName.trim() : ''
 
         if (
             !name ||
@@ -41,7 +34,7 @@ export default defineEventHandler(async (event) => {
             throwError(400, 'Invalid folder name.')
         }
 
-        const folder = await prisma.$transaction(async (tx) => {
+        const folder = await prisma.$transaction(async ( tx) => {
             const existing = await tx.folders.findFirst({
                 where: {
                     id: folderId,
@@ -88,20 +81,11 @@ export default defineEventHandler(async (event) => {
             folder
         }
     } catch (error: unknown) {
-        if (
-            error &&
-            typeof error === 'object' &&
-            'statusCode' in error
-        ) {
+        if (error && typeof error === 'object' && 'statusCode' in error) {
             throw error
         }
 
-        if (
-            error &&
-            typeof error === 'object' &&
-            'code' in error &&
-            error.code === 'P2002'
-        ) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
             throwError(409, 'A folder with this name already exists.')
         }
 

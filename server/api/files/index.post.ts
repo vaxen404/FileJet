@@ -1,13 +1,13 @@
-﻿
-import { prisma } from '~~/server/utils/prisma'
+﻿import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { getFileParts, getTotalUploadSize, saveFileToStorage } from '~~/server/utils/files'
 import { reserveStorage } from '~~/server/utils/storage'
+import { getUploadFolder } from '../../utils/uploadFolder'
 import { resolve, sep } from 'node:path'
 import { unlink } from 'node:fs/promises'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     const savedKeys: string[] = []
     let committed = false
 
@@ -18,14 +18,10 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'You need to be logged in.')
         }
 
-        enforceRateLimit(
-            event,
-            `files-upload:${session.userId}`,
-            10,
-            60 * 1000
-        )
+        enforceRateLimit(event, `files-upload:${session.userId}`, 10, 60 * 1000)
+        const folderId = await getUploadFolder(event, session.userId)
 
-        const formData = await readMultipartFormData(event) ?? []
+        const formData = (await readMultipartFormData(event)) ?? []
         const parts = getFileParts(formData)
 
         if (parts.length < 1 || parts.length > 6) {
@@ -71,77 +67,71 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'Invalid session.')
         }
 
-        if (
-            (user.storage_used ?? 0n) + totalSize >
-            (user.storage_limit ?? 0n)
-        ) {
+        if ((user.storage_used ?? 0n) + totalSize > (user.storage_limit ?? 0n)) {
             throwError(400, 'Not enough storage space.')
         }
 
-        const uploadedFiles = await prisma.$transaction(async (tx) => {
-            await reserveStorage(tx, session.userId, totalSize)
+        const uploadedFiles = await prisma.$transaction(
+            async tx => {
+                await reserveStorage(tx, session.userId, totalSize)
 
-            const result: {
-                id: string
-                name: string
-                original_name: string
-                mime_type: string | null
-                size: string
-                storage_key: string
-            }[] = []
+                const result: {
+                    id: string
+                    name: string
+                    original_name: string
+                    mime_type: string | null
+                    size: string
+                    storage_key: string
+                }[] = []
 
-            for (const part of parts) {
-                const existing = await tx.files.findFirst({
-                    where: {
-                        user_id: session.userId,
-                        folder_id: null,
-                        original_name: {
-                            equals: part.filename,
-                            mode: 'insensitive'
+                for (const part of parts) {
+                    const existing = await tx.files.findFirst({
+                        where: {
+                            user_id: session.userId,
+                            folder_id: folderId,
+                            original_name: {
+                                equals: part.filename,
+                                mode: 'insensitive'
+                            }
+                        },
+                        select: {
+                            id: true
                         }
-                    },
-                    select: {
-                        id: true
-                    }
-                })
+                    })
 
-                if (existing) {
-                    throwError(
-                        409,
-                        `A file named "${part.filename}" already exists.`
-                    )
+                    if (existing) {
+                        throwError(409, `A file named "${part.filename}" already exists.`)
+                    }
+
+                    const { storageKey } = await saveFileToStorage(session.userId, part)
+
+                    savedKeys.push(storageKey)
+
+                    const file = await tx.files.create({
+                        data: {
+                            user_id: session.userId,
+                            folder_id: folderId,
+                            name: part.filename,
+                            original_name: part.filename,
+                            mime_type: part.type ?? null,
+                            size: BigInt(part.data.length),
+                            storage_key: storageKey
+                        }
+                    })
+
+                    result.push({
+                        ...file,
+                        size: file.size.toString()
+                    })
                 }
 
-                const { storageKey } = await saveFileToStorage(
-                    session.userId,
-                    part
-                )
-
-                savedKeys.push(storageKey)
-
-                const file = await tx.files.create({
-                    data: {
-                        user_id: session.userId,
-                        folder_id: null,
-                        name: part.filename,
-                        original_name: part.filename,
-                        mime_type: part.type ?? null,
-                        size: BigInt(part.data.length),
-                        storage_key: storageKey
-                    }
-                })
-
-                result.push({
-                    ...file,
-                    size: file.size.toString()
-                })
+                return result
+            },
+            {
+                maxWait: 5000,
+                timeout: 60000
             }
-
-            return result
-        }, {
-            maxWait: 5000,
-            timeout: 60000
-        })
+        )
 
         committed = true
 
@@ -178,20 +168,11 @@ export default defineEventHandler(async (event) => {
             }
         }
 
-        if (
-            error &&
-            typeof error === 'object' &&
-            'statusCode' in error
-        ) {
+        if (error && typeof error === 'object' && 'statusCode' in error) {
             throw error
         }
 
-        if (
-            error &&
-            typeof error === 'object' &&
-            'code' in error &&
-            error.code === 'P2002'
-        ) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
             throwError(409, 'A file with this name already exists.')
         }
 

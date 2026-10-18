@@ -1,5 +1,8 @@
 <template>
-    <div ref="menuRef" class="item-menu">
+    <div
+        ref="menuRef"
+        class="item-menu"
+    >
         <button
             type="button"
             class="menu-trigger"
@@ -27,11 +30,13 @@
                 >
                     <Icon
                         class="menu-item-icon"
-                        :name="type === 'folder'
-                            ? 'solar:folder-open-bold'
-                            : type === 'note'
-                                ? 'solar:notebook-bold'
-                                : 'solar:document-bold'"
+                        :name="
+                            type === 'folder'
+                                ? 'solar:folder-open-bold'
+                                : type === 'note'
+                                    ? 'solar:notebook-bold'
+                                    : 'solar:document-bold'
+                        "
                     />
 
                     Open
@@ -43,7 +48,10 @@
                     class="menu-item"
                     @click="handleAction('rename')"
                 >
-                    <Icon class="menu-item-icon" name="solar:pen-bold" />
+                    <Icon
+                        class="menu-item-icon"
+                        name="solar:pen-bold"
+                    />
                     Rename
                 </button>
 
@@ -53,7 +61,10 @@
                     class="menu-item"
                     @click="handleAction('copy')"
                 >
-                    <Icon class="menu-item-icon" name="solar:copy-bold" />
+                    <Icon
+                        class="menu-item-icon"
+                        name="solar:copy-bold"
+                    />
                     Copy
                 </button>
 
@@ -63,7 +74,10 @@
                     class="menu-item"
                     @click="handleAction('edit')"
                 >
-                    <Icon class="menu-item-icon" name="solar:pen-bold" />
+                    <Icon
+                        class="menu-item-icon"
+                        name="solar:pen-bold"
+                    />
                     Edit
                 </button>
 
@@ -73,7 +87,10 @@
                     class="menu-item"
                     @click="handleAction('download')"
                 >
-                    <Icon class="menu-item-icon" name="solar:download-bold" />
+                    <Icon
+                        class="menu-item-icon"
+                        name="solar:download-bold"
+                    />
                     Download
                 </button>
 
@@ -85,9 +102,7 @@
                 >
                     <Icon
                         class="menu-item-icon"
-                        :name="isFavorite
-                            ? 'solar:star-bold'
-                            : 'solar:star-linear'"
+                        :name="isFavorite ? 'solar:star-bold' : 'solar:star-linear'"
                     />
 
                     {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
@@ -99,7 +114,10 @@
                     class="menu-item danger"
                     @click="handleAction('delete')"
                 >
-                    <Icon class="menu-item-icon" name="solar:trash-bin-trash-bold" />
+                    <Icon
+                        class="menu-item-icon"
+                        name="solar:trash-bin-trash-bold"
+                    />
                     Delete
                 </button>
             </div>
@@ -111,13 +129,7 @@
 import { onClickOutside } from '@vueuse/core'
 
 type Action =
-    | 'open'
-    | 'rename'
-    | 'copy'
-    | 'edit'
-    | 'download'
-    | 'favorite'
-    | 'delete'
+    | 'open' | 'rename' | 'copy' | 'edit' | 'download' | 'favorite' | 'delete'
 
 const props = withDefaults(
     defineProps<{
@@ -127,14 +139,7 @@ const props = withDefaults(
         canCopy?: boolean
     }>(),
     {
-        actions: () => [
-            'open',
-            'rename',
-            'copy',
-            'download',
-            'favorite',
-            'delete'
-        ],
+        actions: () => ['open', 'rename', 'copy', 'download', 'favorite', 'delete'],
         isFavorite: false,
         canCopy: false
     }
@@ -151,7 +156,9 @@ const emit = defineEmits<{
 }>()
 
 const menuId = useId()
+
 const activeMenuId = useState<string | null>('item-menu:active', () => null)
+
 const isOpen = computed({
     get: () => activeMenuId.value === menuId,
     set: (open: boolean) => {
@@ -177,7 +184,13 @@ const updatePosition = () => {
     const viewportBottom = viewportTop + viewportHeight
     const viewportRight = viewportLeft + viewportWidth
 
-    if (!contextPosition.value && (trigger.bottom <= viewportTop || trigger.top >= viewportBottom || trigger.right <= viewportLeft || trigger.left >= viewportRight)) {
+    if (
+        !contextPosition.value &&
+        (trigger.bottom <= viewportTop ||
+            trigger.top >= viewportBottom ||
+            trigger.right <= viewportLeft ||
+            trigger.left >= viewportRight)
+    ) {
         isOpen.value = false
         return
     }
@@ -187,7 +200,11 @@ const updatePosition = () => {
     const style = getComputedStyle(dropdown)
     const verticalBorder = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
     const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
-    const horizontalSpace = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
+    const horizontalSpace =
+        parseFloat(style.paddingLeft) +
+        parseFloat(style.paddingRight) +
+        parseFloat(style.borderLeftWidth) +
+        parseFloat(style.borderRightWidth)
     const maxWidth = `${Math.max(0, viewportWidth - edge * 2 - horizontalSpace)}px`
     const minWidth = `${Math.min(rootFontSize * 11, parseFloat(maxWidth))}px`
 
@@ -207,7 +224,10 @@ const updatePosition = () => {
     const visibleHeight = Math.min(height, availableHeight)
     const top = opensUp ? anchorTop - visibleHeight : anchorBottom
     const left = Math.min(
-        Math.max(viewportLeft + edge, contextPosition.value?.x ?? trigger.right - rootFontSize * 1.625 - width),
+        Math.max(
+            viewportLeft + edge,
+            contextPosition.value?.x ?? trigger.right - rootFontSize * 1.625 - width
+        ),
         viewportRight - edge - width
     )
 
@@ -233,7 +253,10 @@ watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
     const handleScroll = (event: Event) => {
         // Keep scrolling inside a tall menu available; close a pointer-anchored
         // menu when its file moves instead of leaving it over another file.
-        if (contextPosition.value && !(event.target instanceof Node && dropdownRef.value?.contains(event.target))) {
+        if (
+            contextPosition.value &&
+            !(event.target instanceof Node && dropdownRef.value?.contains(event.target))
+        ) {
             isOpen.value = false
             return
         }
@@ -323,9 +346,13 @@ const handleAction = (action: Action) => {
     isOpen.value = false
 }
 
-onClickOutside(dropdownRef, () => {
-    isOpen.value = false
-}, { ignore: [menuRef] })
+onClickOutside(
+    dropdownRef,
+    () => {
+        isOpen.value = false
+    },
+    { ignore: [menuRef] }
+)
 </script>
 
 <style scoped>

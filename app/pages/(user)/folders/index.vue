@@ -22,14 +22,33 @@
                 <SortDropdown v-model="sortMode" />
             </div>
 
-            <div v-if="selectedFolders.length" class="selection-toolbar" role="group" aria-label="Selected folders">
-                <span role="status" aria-live="polite">{{ selectedFolders.length }} selected</span>
+            <div
+                v-if="selectedFolders.length"
+                class="selection-toolbar"
+                role="group"
+                aria-label="Selected folders"
+            >
+                <span
+                    role="status"
+                    aria-live="polite"
+                    >{{ selectedFolders.length }} selected</span
+                >
 
                 <div class="selection-actions">
-                    <button type="button" class="selection-btn" :disabled="pending" @click="selectedFolders = []">
+                    <button
+                        type="button"
+                        class="selection-btn"
+                        :disabled="pending"
+                        @click="selectedFolders = []"
+                    >
                         Clear
                     </button>
-                    <button type="button" class="selection-btn delete-selected-btn" :disabled="pending" @click="handleDeleteSelected">
+                    <button
+                        type="button"
+                        class="selection-btn delete-selected-btn"
+                        :disabled="pending"
+                        @click="handleDeleteSelected"
+                    >
                         <Icon name="solar:trash-bin-trash-bold" />
                         Delete Selected
                     </button>
@@ -47,18 +66,36 @@
             @drop="handleDrop"
         >
             <template #loading>
-                <div class="loading-state" role="status" aria-live="polite">
-                    <span class="loading-spinner" aria-hidden="true" />
+                <div
+                    class="loading-state"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <span
+                        class="loading-spinner"
+                        aria-hidden="true"
+                    />
                     <span>Loading folders...</span>
                 </div>
             </template>
 
-            <template v-if="!pending && filteredFolders.length === 0" #empty>
+            <template
+                v-if="!pending && filteredFolders.length === 0"
+                #empty
+            >
                 <div class="empty-state">
-                    <Icon name="solar:folder-linear" size="2.5rem" class="empty-state-icon empty-state-folder-icon" />
+                    <Icon
+                        name="solar:folder-linear"
+                        size="2.5rem"
+                        class="empty-state-icon empty-state-folder-icon"
+                    />
                     <strong>{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
                     <span class="empty-state-description">
-                        {{ folders.length ? 'Try a different search.' : 'Create your first folder to organize your files.' }}
+                        {{
+                            folders.length
+                                ? 'Try a different search.'
+                                : 'Create your first folder to organize your files.'
+                        }}
                     </span>
                 </div>
             </template>
@@ -77,7 +114,7 @@
                                         :disabled="pending"
                                         aria-label="Select all folders on this page"
                                         @change="toggleSelectAll"
-                                    >
+                                    />
                                 </th>
 
                                 <th>
@@ -103,6 +140,7 @@
                                 :key="folder.id"
                                 :class="{ selected: selectedFolders.includes(folder.id) }"
                                 @click="openFolder(folder)"
+                                @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
                             >
                                 <td @click.stop>
                                     <input
@@ -112,7 +150,7 @@
                                         :value="folder.id"
                                         :disabled="pending"
                                         :aria-label="`Select ${folder.name}`"
-                                    >
+                                    />
                                 </td>
 
                                 <td>
@@ -136,8 +174,15 @@
 
                                 <td @click.stop>
                                     <ItemMenu
+                                        :ref="menu => setFolderMenuRef(folder.id, menu)"
                                         type="folder"
-                                        :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                                        :actions="[
+                                            'open',
+                                            'download',
+                                            'rename',
+                                            'favorite',
+                                            'delete'
+                                        ]"
                                         :is-favorite="isFolderFavorite(folder.id)"
                                         @open="openFolder(folder)"
                                         @download="downloadFolder(folder)"
@@ -153,20 +198,18 @@
             </template>
 
             <template #grid>
-                <div
-                    v-for="folder in paginatedFolders"
-                    :key="folder.id"
-                    class="folder-card"
-                    :class="{ selected: selectedFolders.includes(folder.id) }"
-                    @click="openFolder(folder)"
-                >
-                    <div class="folder-card-top">
-                        <div class="folder-card-icon">
-                            <Icon name="solar:folder-bold" />
-                        </div>
-
-                        <div class="folder-card-actions" @click.stop>
-                            <label class="folder-card-select">
+                <ItemGrid>
+                    <ItemGridCard
+                        v-for="folder in paginatedFolders"
+                        :key="folder.id"
+                        :title="folder.name"
+                        icon="solar:folder-bold"
+                        :selected="selectedFolders.includes(folder.id)"
+                        @click="openFolder(folder)"
+                        @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
+                    >
+                        <template #actions>
+                            <label class="file-select">
                                 <input
                                     v-model="selectedFolders"
                                     type="checkbox"
@@ -174,32 +217,27 @@
                                     :value="folder.id"
                                     :disabled="pending"
                                     :aria-label="`Select ${folder.name}`"
-                                >
+                                />
                             </label>
-
                             <ItemMenu
+                                :ref="menu => setFolderMenuRef(folder.id, menu)"
                                 type="folder"
-                                :actions="['open', 'download', 'rename', 'favorite', 'delete']"
+                                :actions="['open', 'rename', 'download', 'favorite', 'delete']"
                                 :is-favorite="isFolderFavorite(folder.id)"
                                 @open="openFolder(folder)"
-                                @download="downloadFolder(folder)"
                                 @rename="renameFolder(folder)"
+                                @download="downloadFolder(folder)"
                                 @favorite="favoriteFolder(folder)"
                                 @delete="deleteFolder(folder)"
                             />
-                        </div>
-                    </div>
-
-                    <div class="folder-card-info">
-                        <strong :title="folder.name">{{ folder.name }}</strong>
-                        <span>Folder</span>
-                    </div>
-
-                    <div class="folder-card-bottom">
-                        <span>{{ formatFileTime(folder.created_at) }}</span>
-                        <span>{{ formatFileTime(folder.updated_at) }}</span>
-                    </div>
-                </div>
+                        </template>
+                        <template #metadata>
+                            <span>Folder</span>
+                            &middot;
+                            <span>{{ formatFileTime(folder.created_at) }}</span>
+                        </template>
+                    </ItemGridCard>
+                </ItemGrid>
             </template>
         </DataView>
 
@@ -208,12 +246,13 @@
             :total-pages="totalPages"
             :view-mode="viewMode"
         />
-
     </div>
 </template>
 
 <script setup lang="ts">
 import { formatFileTime } from '~/utils/file'
+import type { ComponentPublicInstance } from 'vue'
+import type ItemMenu from '~/components/ui/ItemMenu.vue'
 
 definePageMeta({
     middleware: 'auth',
@@ -221,7 +260,9 @@ definePageMeta({
 })
 
 const { openToast } = useToast()
-const { uploadFolders } = useFolderActions()
+const folderActions = useFolderActions()
+const { uploadFolders } = folderActions
+const { addFavorite, removeFavorite } = useFavoriteActions()
 
 const { folders, favorites, pending, error, fetchAll } = useUser()
 type FolderItem = (typeof folders.value)[number]
@@ -232,45 +273,52 @@ if (error.value) {
     openToast(error.value, 'error')
 }
 
+const folderMenus = new Map<string, InstanceType<typeof ItemMenu>>()
+
+const setFolderMenuRef = (id: string, menu: Element | ComponentPublicInstance | null) => {
+    if (menu) folderMenus.set(id, menu as InstanceType<typeof ItemMenu>)
+    else folderMenus.delete(id)
+}
+
+const openContextMenu = (event: MouseEvent, id: string) => {
+    folderMenus.get(id)?.openAt(event.clientX, event.clientY)
+}
+
 const searchQuery = ref('')
-const viewMode = ref<'list' | 'grid'>('list')
+const viewMode = ref<'list' | 'grid'>('grid')
 
 const isDragging = ref(false)
 
 const handleDrop = (event: DragEvent) => {
     isDragging.value = false
-    
+
     const droppedFolders = event.dataTransfer?.files
-    
+
     if (!droppedFolders?.length) return
-    
-    console.log('Upload folders:', droppedFolders)
+
+    handleFolders(droppedFolders)
 }
 
 const filteredFolders = computed(() => {
     return folders.value.filter(folder => {
-        const matchesSearch = 
-            folder.name
+        const matchesSearch = folder.name
             .toLowerCase()
             .includes(searchQuery.value.trim().toLowerCase())
 
         return matchesSearch
     })
-
 })
 
-const sortMode = ref<
-    'newest' |
-    'oldest' |
-    'name-asc' |
-    'name-desc'
->('newest')
+const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
 
 const { sortedItems: sortedFolders } = useSort(
-    filteredFolders, sortMode, folder => folder.name, folder => folder.created_at
+    filteredFolders,
+    sortMode,
+    folder => folder.name,
+    folder => folder.created_at
 )
 
-const handleFolders = async (folder: FileSystemDirectoryHandle) => {
+const handleFolders = async (folder: FileSystemDirectoryHandle | FileList) => {
     try {
         await uploadFolders(folder, fetchAll)
         openToast('Folder uploaded successfully.', 'success')
@@ -279,55 +327,85 @@ const handleFolders = async (folder: FileSystemDirectoryHandle) => {
     }
 }
 
-const openFolder = (folder: FolderItem) => {
-    console.log('Open:', folder.name);
+const openFolder = (folder: FolderItem) =>
+    navigateTo({ path: '/folders/' + folder.id, query: { from: '/folders' } })
+
+const downloadFolder = (folder: FolderItem) => folderActions.downloadFolder(folder.id)
+
+const renameFolder = (folder: FolderItem) =>
+    navigateTo({ path: '/folders/' + folder.id, query: { from: '/folders', tab: 'edit' } })
+
+const favoriteFolder = async (folder: FolderItem) => {
+    try {
+        if (isFolderFavorite(folder.id)) await removeFavorite(folder.id, 'folder')
+        else await addFavorite(folder.id, 'folder')
+        await fetchAll()
+        if (error.value) throw new Error(error.value)
+        openToast('Favorite updated.', 'success')
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not update favorite.', 'error')
+    }
 }
 
-const downloadFolder = (folder: FolderItem) => {
-    console.log('Download:', folder.name);
-}
-
-const renameFolder = (folder: FolderItem) => {
-    console.log('Rename:', folder.name);
-}
-
-const favoriteFolder = (folder: FolderItem) => {
-    console.log('Favorite:', folder.name);
-}
-
-const deleteFolder = (folder: FolderItem) => {
-    console.log('Delete:', folder.name);
+const deleteFolder = async (folder: FolderItem) => {
+    if (folderActions.isDeleting.value) return
+    try {
+        await folderActions.deleteFolder(folder.id)
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not delete folder.', 'error')
+    }
 }
 
 const itemsPerPage = computed(() => {
-    return viewMode.value === 'list' ? 12 : 20
+    return viewMode.value === 'list' ? 12 : 24
 })
 
-const { currentPage, totalPages, paginatedItems: paginatedFolders } = usePagination(
-    sortedFolders,
-    itemsPerPage
-)
+const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedFolders
+} = usePagination(sortedFolders, itemsPerPage)
 
-const { selectedItems: selectedFolders, allSelected, toggleSelectAll } = useSelection(paginatedFolders)
+const {
+    selectedItems: selectedFolders,
+    allSelected,
+    toggleSelectAll
+} = useSelection(paginatedFolders)
+
 const partiallySelected = computed(() => {
-    return !allSelected.value && paginatedFolders.value.some(folder => selectedFolders.value.includes(folder.id))
+    return (
+        !allSelected.value &&
+        paginatedFolders.value.some(folder => selectedFolders.value.includes(folder.id))
+    )
 })
 
 const isFolderFavorite = (folderId: string) => {
     return favorites.value.some(favorite => favorite.folder_id === folderId)
 }
 
-const handleDeleteSelected = () => {
-    if (!selectedFolders.value.length || pending.value) return
-    console.log('Delete selected folders:', [...selectedFolders.value])
+const handleDeleteSelected = async () => {
+    if (!selectedFolders.value.length || pending.value || folderActions.isDeleting.value) return
+
+    try {
+        const result = await folderActions.deleteFolders([...selectedFolders.value])
+        const deleted = new Set(result.deletedIds)
+
+        selectedFolders.value = selectedFolders.value.filter(id => !deleted.has(id))
+
+        if (result.failedIds.length) {
+            openToast(`${result.failedIds.length} items could not be moved to Trash.`, 'error')
+        }
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not delete folders.', 'error')
+    }
 }
 
-watch(folders, (items) => {
+watch(folders, items => {
     const availableIds = new Set(items.map(folder => folder.id))
     selectedFolders.value = selectedFolders.value.filter(id => availableIds.has(id))
 })
 
-watch(totalPages, (total) => {
+watch(totalPages, total => {
     currentPage.value = Math.min(currentPage.value, Math.max(1, total))
 })
 
@@ -356,7 +434,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     overflow: hidden;
 }
 
-.folders-header  {
+.folders-header {
     display: flex;
     flex-direction: column;
 
@@ -475,7 +553,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     border: 1px solid #505057;
     border-radius: 4px;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .folder-checkbox:hover:not(:disabled) {
@@ -539,7 +619,7 @@ watch([searchQuery, sortMode, viewMode], () => {
     display: flex;
 
     align-items: center;
-    
+
     gap: 0.75rem;
 }
 
@@ -592,90 +672,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     line-height: 1.5;
 }
 
-.folder-card {
-    min-height: 10rem;
-
-    padding: 0.75rem;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-radius: 24px;
-
-    box-sizing: border-box;
-
-    cursor: pointer;
-    gap: 0.75rem;
-}
-
-.folder-card:hover {
-    background: #1f1f23;
-
-    border-color: #35353c;
-}
-
-.folder-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.folder-card-icon {
-    width: 2.7rem;
-    height: 2.7rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #6ea8ff;
-    background: #1f2d4a;
-
-    border: 1px solid #2f4770;
-    border-radius: 6px;
-
-    font-size: 1.25rem;
-}
-
-.folder-card-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.folder-card-info strong {
-    color: #ffffff;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.5;
-}
-
-.folder-card-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-    font-weight: 400;
-    line-height: 1.5;
-}
-
-.folder-card-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    color: #898991;
-
-    font-size: 0.75rem;
-    font-weight: 400;
-    line-height: 1.5;
-    gap: 0.5rem;
-}
-
 .folders-subtoolbar {
     display: flex;
     justify-content: flex-end;
@@ -718,7 +714,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
     line-height: 1.5;
     box-sizing: border-box;
 }
@@ -763,50 +761,10 @@ watch([searchQuery, sortMode, viewMode], () => {
 }
 
 .folder-info strong,
-.folder-info span,
-.folder-card-info strong {
+.folder-info span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.folder-card,
-.folder-card-info {
-    min-width: 0;
-}
-
-.folder-card {
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.folder-card.selected {
-    background: #201d2d;
-    border-color: #6055b8;
-}
-
-.folder-card-icon {
-    flex-shrink: 0;
-}
-
-.folder-card-actions {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    gap: 0.25rem;
-}
-
-.folder-card-select {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.folder-card-select:hover {
-    background: #252529;
 }
 
 .loading-state {
@@ -828,45 +786,18 @@ watch([searchQuery, sortMode, viewMode], () => {
 }
 
 @keyframes loading-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .loading-spinner { animation: none; }
-}
-
-
-.folders-page :deep(.grid-view) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-@media (max-width: 1500px) {
-    .folders-page :deep(.grid-view) {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 1100px) {
-    .folders-page :deep(.grid-view) {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .loading-spinner {
+        animation: none;
     }
 }
 
 @media (max-width: 800px) {
-    .folders-page :deep(.grid-view) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 500px) {
-    .folders-page :deep(.grid-view) {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-
-@media (max-width: 800px) {
-
     .folders-toolbar :deep(.search-box) {
         width: 100%;
         min-width: 0;

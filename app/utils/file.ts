@@ -4,10 +4,7 @@ export const canCopyFile = (mimeType: string | null | undefined, fileName = '') 
     return /^(text|image)\//.test(mimeType?.toLowerCase() ?? '')
 }
 
-export const getFileIcon = (
-    mimeType: string | null,
-    fileName: string = ''
-) => {
+export const getFileIcon = (mimeType: string | null, fileName: string = '') => {
     const name = fileName.toLowerCase()
 
     if (name.endsWith('.exe')) {
@@ -44,10 +41,7 @@ export const getFileIcon = (
         return 'solar:code-file-bold'
     }
 
-    if (
-        mimeType === 'application/zip' ||
-        mimeType === 'application/x-rar-compressed'
-    ) {
+    if (mimeType === 'application/zip' || mimeType === 'application/x-rar-compressed') {
         return 'solar:archive-bold'
     }
 

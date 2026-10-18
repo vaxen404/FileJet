@@ -1,10 +1,10 @@
 import { prisma } from "~~/server/utils/prisma";
 import { getAuthSession } from "~~/server/utils/auth"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
-    
+
         if (!session) {
             throw createError({
                 statusCode: 401,
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
                 created_at: 'desc'
             }
         })
-    
+
         return {
             files: files.map(file => ({
                 ...file,

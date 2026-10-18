@@ -1,9 +1,16 @@
-export const useFileDrop = (onDrop: (event: DragEvent) => void, enabled: () => boolean = () => true) => {
+export const useFileDrop = (
+    onDrop: (event: DragEvent) => void,
+    enabled: () => boolean = () => true
+) => {
     const isDragging = ref(false)
     let depth = 0
-    const hasFiles = (event: DragEvent) => Array.from(event.dataTransfer?.types ?? []).includes('Files')
-        || Array.from(event.dataTransfer?.items ?? []).some(item => item.kind === 'file')
-    const reset = () => { depth = 0; isDragging.value = false }
+    const hasFiles = (event: DragEvent) =>
+        Array.from(event.dataTransfer?.types ?? []).includes('Files') ||
+        Array.from(event.dataTransfer?.items ?? []).some(item => item.kind === 'file')
+    const reset = () => {
+        depth = 0;
+        isDragging.value = false
+    }
     const dragenter = (event: DragEvent) => {
         if (!enabled() || !hasFiles(event)) return
         event.preventDefault()
@@ -34,9 +41,18 @@ export const useFileDrop = (onDrop: (event: DragEvent) => void, enabled: () => b
         if (event.type === 'drop') reset()
     }
     const leaveWindow = (event: DragEvent) => {
-        if (!event.relatedTarget && (event.clientX <= 0 || event.clientY <= 0 || event.clientX >= window.innerWidth || event.clientY >= window.innerHeight)) reset()
+        if (
+            !event.relatedTarget &&
+            (event.clientX <= 0 ||
+                event.clientY <= 0 ||
+                event.clientX >= window.innerWidth ||
+                event.clientY >= window.innerHeight)
+        )
+            reset()
     }
-    const keydown = (event: KeyboardEvent) => { if (event.key === 'Escape') reset() }
+    const keydown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') reset()
+    }
     onMounted(() => {
         window.addEventListener('dragover', preventNavigation, true)
         window.addEventListener('drop', preventNavigation, true)

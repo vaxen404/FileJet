@@ -10,12 +10,23 @@ export default defineEventHandler(async event => {
     const session = getAuthSession(event)
     if (!session) throw createError({ statusCode: 401, message: 'You need to be logged in.' })
     enforceRateLimit(event, `share-settings:${session.userId}`, 10, 60 * 1000)
-    const { itemId, itemType } = await requireOwnedShareItem(session.userId, getRouterParam(event, 'itemId'), getRouterParam(event, 'itemType'))
-    const existing = await prisma.shared_items.findFirst({ where: { user_id: session.userId, item_id: itemId, item_type: itemType } })
+    const { itemId, itemType } = await requireOwnedShareItem(
+        session.userId,
+        getRouterParam(event, 'itemId'),
+        getRouterParam(event, 'itemType')
+    )
+    const existing = await prisma.shared_items.findFirst({
+        where: { user_id: session.userId, item_id: itemId, item_type: itemType }
+    })
     if (!existing) throw createError({ statusCode: 404, message: 'Share link not found.' })
     const data = await parseShareSettings(await readShareBody(event), existing.expires_at)
-    const updated = await prisma.shared_items.updateMany({ where: { id: existing.id, user_id: session.userId }, data })
+    const updated = await prisma.shared_items.updateMany({
+        where: { id: existing.id, user_id: session.userId },
+        data
+    })
     if (!updated.count) throw createError({ statusCode: 404, message: 'Share link not found.' })
-    const result = await prisma.shared_items.findFirst({ where: { id: existing.id, user_id: session.userId } })
+    const result = await prisma.shared_items.findFirst({
+        where: { id: existing.id, user_id: session.userId }
+    })
     return shareState(event, result)
 })

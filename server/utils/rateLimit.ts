@@ -7,12 +7,7 @@ type Bucket = {
 
 const buckets = new Map<string, Bucket>()
 
-export function enforceRateLimit(
-    event: H3Event,
-    key: string,
-    limit: number,
-    windowMs: number
-) {
+export function enforceRateLimit(event: H3Event, key: string, limit: number, windowMs: number) {
     const now = Date.now()
 
     if (buckets.size >= 10000) {
@@ -21,16 +16,17 @@ export function enforceRateLimit(
         }
     }
 
-    const ip =
-        getRequestIP(event) ||
-        'unknown'
+    const ip = getRequestIP(event) || 'unknown'
 
     const bucketKey = `${key}:${ip}`
     const current = buckets.get(bucketKey)
 
     if (!current || current.resetAt <= now) {
         if (!current && buckets.size >= 10000) {
-            throw createError({ statusCode: 429, message: 'Too many requests. Please try again later.' })
+            throw createError({
+                statusCode: 429,
+                message: 'Too many requests. Please try again later.'
+            })
         }
         buckets.set(bucketKey, {
             count: 1,
@@ -43,15 +39,9 @@ export function enforceRateLimit(
     current.count += 1
 
     if (current.count > limit) {
-        const retryAfter = Math.ceil(
-            (current.resetAt - now) / 1000
-        )
+        const retryAfter = Math.ceil((current.resetAt - now) / 1000)
 
-        setResponseHeader(
-            event,
-            'Retry-After',
-            retryAfter
-        )
+        setResponseHeader(event, 'Retry-After', retryAfter)
 
         throw createError({
             statusCode: 429,

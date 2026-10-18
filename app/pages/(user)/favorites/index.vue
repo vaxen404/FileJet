@@ -13,7 +13,10 @@
             </div>
 
             <div class="favorites-subtoolbar">
-                <div class="favorites-filters" aria-label="Favorite categories">
+                <div
+                    class="favorites-filters"
+                    aria-label="Favorite categories"
+                >
                     <button
                         type="button"
                         class="filter-btn"
@@ -60,7 +63,10 @@
         </div>
 
         <DataView :view-mode="viewMode">
-            <template v-if="filteredFavorites.length === 0" #empty>
+            <template
+                v-if="filteredFavorites.length === 0"
+                #empty
+            >
                 <div class="empty-state">
                     <Icon
                         name="solar:star-bold"
@@ -87,7 +93,7 @@
                                         aria-label="Select all favorites on this page"
                                         :checked="allSelected"
                                         @change="toggleSelectAll"
-                                    >
+                                    />
                                 </th>
 
                                 <th scope="col">
@@ -112,6 +118,7 @@
                                 v-for="item in paginatedItems"
                                 :key="item.id"
                                 :class="{ selected: selectedFavorites.includes(item.id) }"
+                                @dblclick="openItem(item)"
                             >
                                 <td>
                                     <input
@@ -120,21 +127,28 @@
                                         class="favorite-checkbox"
                                         :value="item.id"
                                         :aria-label="'Select ' + getItemName(item)"
-                                    >
+                                    />
                                 </td>
 
                                 <td>
-                                    <input 
-                                        type="text" 
-                                        class="name-input" 
+                                    <input
+                                        type="text"
+                                        class="name-input"
                                         :data-file-id="item.id"
-                                        :class="{ active: editingItemId === item.id}"
-                                        :value="editingItemId === item.id ? editingItemName : getItemName(item)"
+                                        :class="{ active: editingItemId === item.id }"
+                                        :value="
+                                            editingItemId === item.id
+                                                ? editingItemName
+                                                : getItemName(item)
+                                        "
                                         :disabled="editingItemId !== item.id"
-                                        @input="editingItemName = ($event.target as HTMLInputElement).value"
+                                        @input="
+                                            editingItemName = ($event.target as HTMLInputElement)
+                                                .value
+                                        "
                                         @keyup.enter="saveRename(item)"
                                         @blur="editingItemId === item.id && saveRename(item)"
-                                    >
+                                    />
                                 </td>
 
                                 <td class="favorite-type">{{ getItemType(item) }}</td>
@@ -146,8 +160,13 @@
                                         :type="getItemType(item)"
                                         :actions="[...getItemActions(item)]"
                                         :is-favorite="true"
+                                        @click.stop
+                                        @dblclick.stop
+                                        @open="openItem(item)"
+                                        @edit="openItem(item)"
                                         @rename="startRename(item)"
-                                        @delete="handleRemove(item)"
+                                        @favorite="handleRemove(item)"
+                                        @delete="handleDelete(item)"
                                         @download="handleDownload(item)"
                                     />
                                 </td>
@@ -162,6 +181,7 @@
                     v-for="item in paginatedItems"
                     :key="item.id"
                     class="favorite-card"
+                    @click="openItem(item)"
                 >
                     <div class="favorite-card-top">
                         <div class="favorite-card-icon">
@@ -172,24 +192,29 @@
                             :type="getItemType(item)"
                             :actions="[...getItemActions(item)]"
                             :is-favorite="true"
+                            @click.stop
+                            @dblclick.stop
+                            @open="openItem(item)"
+                            @edit="openItem(item)"
                             @rename="startRename(item)"
-                            @delete="handleRemove(item)"
+                            @favorite="handleRemove(item)"
+                            @delete="handleDelete(item)"
                             @download="handleDownload(item)"
                         />
                     </div>
 
                     <div class="favorite-card-info">
-                        <input 
-                            type="text" 
-                            class="name-input" 
+                        <input
+                            type="text"
+                            class="name-input"
                             :data-file-id="item.id"
-                            :class="{ active: editingItemId === item.id}"
+                            :class="{ active: editingItemId === item.id }"
                             :value="editingItemId === item.id ? editingItemName : getItemName(item)"
                             :disabled="editingItemId !== item.id"
                             @input="editingItemName = ($event.target as HTMLInputElement).value"
                             @keyup.enter="saveRename(item)"
                             @blur="editingItemId === item.id && saveRename(item)"
-                        >
+                        />
                         <span class="favorite-type">{{ getItemType(item) }}</span>
                     </div>
 
@@ -228,7 +253,13 @@ const { toastMessage, toastType, showToast, openToast } = useToast()
 
 const { addFavorite, removeFavorite } = useFavoriteActions()
 
-const { renameFile, downloadFile } = useFileActions()
+const { renameFile, downloadFile, deleteFile, isDeleting: isDeletingFile } = useFileActions()
+const { deleteFolder, isDeleting: isDeletingFolder } = useFolderActions()
+const { deleteNote, isDeleting: isDeletingNote } = useNoteActions()
+
+const isDeleting = computed(
+    () => isDeletingFile.value || isDeletingFolder.value || isDeletingNote.value
+)
 
 const { favorites, error, fetchAll } = useUser()
 
@@ -244,14 +275,12 @@ const activeCategory = ref('All')
 
 const filteredFavorites = computed(() => {
     return favorites.value.filter(item => {
-
         const itemType = getItemType(item)
         const matchesCategory =
             activeCategory.value === 'All' ||
             activeCategory.value === `${itemType.charAt(0).toUpperCase()}${itemType.slice(1)}s`
-        
-        const matchesSearch =
-            getItemName(item)
+
+        const matchesSearch = getItemName(item)
             .toLowerCase()
             .includes(searchQuery.value.toLowerCase())
 
@@ -259,16 +288,29 @@ const filteredFavorites = computed(() => {
     })
 })
 
-const sortMode = ref<
-    'newest' |
-    'oldest' |
-    'name-asc' |
-    'name-desc'
->('newest')
+const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
 
 const { sortedItems: sortedFavorites } = useSort(
-    filteredFavorites, sortMode, item => getItemName(item), item => item.created_at
+    filteredFavorites,
+    sortMode,
+    item => getItemName(item),
+    item => item.created_at
 )
+
+const handleDelete = async (item: any) => {
+    if (isDeleting.value) return
+
+    try {
+        const type = getItemType(item)
+        const itemId = getItemId(item)
+
+        if (type === 'file') await deleteFile(itemId)
+        else if (type === 'folder') await deleteFolder(itemId)
+        else await deleteNote(itemId)
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not move item to Trash.', 'error')
+    }
+}
 
 const handleRemove = async (item: any) => {
     try {
@@ -280,11 +322,20 @@ const handleRemove = async (item: any) => {
 
         openToast('Removed from favorites.', 'success')
     } catch (err: any) {
-        openToast(
-            err.data?.message || err.message || 'Could not remove from favorites.',
-            'error'
-        )
+        openToast(err.data?.message || err.message || 'Could not remove from favorites.', 'error')
     }
+}
+
+const openItem = (item: any) => {
+    const type = getItemType(item)
+    return navigateTo({
+        path:
+            '/' +
+            (type === 'file' ? 'files' : type === 'folder' ? 'folders' : 'notes') +
+            '/' +
+            getItemId(item),
+        query: { from: '/favorites' }
+    })
 }
 
 const editingItemId = ref<string | null>(null)
@@ -293,12 +344,10 @@ const editingItemName = ref('')
 const startRename = async (item: any) => {
     editingItemId.value = item.id
     editingItemName.value = getItemName(item)
-    
+
     await nextTick()
 
-    const input = document.querySelector(
-        `[data-file-id="${item.id}"]`
-    ) as HTMLInputElement | null
+    const input = document.querySelector(`[data-file-id="${item.id}"]`) as HTMLInputElement | null
 
     input?.focus()
     input?.select()
@@ -341,10 +390,7 @@ const saveRename = async (item: any) => {
 
         openToast('Item renamed successfully', 'success')
     } catch (err: any) {
-        openToast(
-            err.data?.message || err.message || 'Item could not be renamed.',
-            'error'
-        )
+        openToast(err.data?.message || err.message || 'Item could not be renamed.', 'error')
     }
 }
 
@@ -376,12 +422,13 @@ const itemsPerPage = computed(() => {
     return viewMode.value === 'list' ? 12 : 20
 })
 
-const { currentPage, totalPages, paginatedItems } = usePagination(
-    sortedFavorites,
-    itemsPerPage
-)
+const { currentPage, totalPages, paginatedItems } = usePagination(sortedFavorites, itemsPerPage)
 
-const { selectedItems: selectedFavorites, allSelected, toggleSelectAll } = useSelection(paginatedItems) 
+const {
+    selectedItems: selectedFavorites,
+    allSelected,
+    toggleSelectAll
+} = useSelection(paginatedItems)
 
 type FavoriteResource = (typeof favorites.value)[number] & {
     files?: { size?: number | string | null } | null
@@ -389,11 +436,7 @@ type FavoriteResource = (typeof favorites.value)[number] & {
 }
 
 const getItemSize = (item: FavoriteResource) => {
-    const size = item.file_id
-        ? item.files?.size
-        : item.note_id
-            ? item.notes?.size
-            : null
+    const size = item.file_id ? item.files?.size : item.note_id ? item.notes?.size : null
 
     return size == null ? '-' : formatFileSize(size)
 }
@@ -472,7 +515,6 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
     gap: 0.5rem;
     flex-wrap: wrap;
-
 }
 
 .filter-btn {
@@ -679,12 +721,11 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     border: 1px solid transparent;
     border-radius: 6px;
 
-    
     font-size: 0.875rem;
     font-weight: 600;
 
     white-space: nowrap;
-    
+
     outline: none;
     line-height: 1.5;
     font-family: 'Inter', sans-serif;
@@ -765,7 +806,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     border-radius: 24px;
 
     box-sizing: border-box;
-    
+
     cursor: pointer;
     gap: 0.75rem;
 }

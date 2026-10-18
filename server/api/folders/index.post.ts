@@ -1,13 +1,13 @@
-﻿
-import { prisma } from '~~/server/utils/prisma'
+﻿import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { getFileParts, getTotalUploadSize, saveFileToStorage } from '~~/server/utils/files'
 import { reserveStorage } from '~~/server/utils/storage'
+import { getUploadFolder } from '../../utils/uploadFolder'
 import { resolve, sep } from 'node:path'
 import { unlink } from 'node:fs/promises'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     const savedKeys: string[] = []
 
     try {
@@ -17,14 +17,10 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'You need to be logged in.')
         }
 
-        enforceRateLimit(
-            event,
-            `folders-upload:${session.userId}`,
-            10,
-            60 * 1000
-        )
+        enforceRateLimit(event, `folders-upload:${session.userId}`, 10, 60 * 1000)
+        const targetFolderId = await getUploadFolder(event, session.userId)
 
-        const formData = await readMultipartFormData(event) ?? []
+        const formData = (await readMultipartFormData(event)) ?? []
         const files = getFileParts(formData)
 
         const paths = formData
@@ -44,19 +40,18 @@ export default defineEventHandler(async (event) => {
                 throwError(400, 'Invalid folder path.')
             }
 
-            const segments = relativePath
-                .replace(/\\/g, '/')
-                .split('/')
+            const segments = relativePath.replace(/\\/g, '/').split('/')
 
             if (
                 segments.length < 2 ||
                 segments.length > 20 ||
-                segments.some(segment =>
-                    !segment ||
-                    segment === '.' ||
-                    segment === '..' ||
-                    /[\0:]/.test(segment) ||
-                    Buffer.byteLength(segment, 'utf8') > 255
+                segments.some(
+                    segment =>
+                        !segment ||
+                        segment === '.' ||
+                        segment === '..' ||
+                        /[\0:]/.test(segment) ||
+                        Buffer.byteLength(segment, 'utf8') > 255
                 )
             ) {
                 throwError(400, 'Invalid folder path.')
@@ -95,37 +90,32 @@ export default defineEventHandler(async (event) => {
             throwError(401, 'Invalid session.')
         }
 
-        if (
-            (user.storage_used ?? 0n) + totalSize >
-            (user.storage_limit ?? 0n)
-        ) {
+        if ((user.storage_used ?? 0n) + totalSize > (user.storage_limit ?? 0n)) {
             throwError(400, 'Not enough storage space.')
         }
 
-        const result = await prisma.$transaction(async (tx) => {
-            await reserveStorage(tx, session.userId, totalSize)
+        const result = await prisma.$transaction(
+            async tx => {
+                await reserveStorage(tx, session.userId, totalSize)
 
-            const cache = new Map<string, string>()
-            let foldersCreated = 0
+                const cache = new Map<string, string>()
+                let foldersCreated = 0
 
-            for (const item of items) {
-                let parentId: string | null = null
-                let currentPath = ''
+                for (const item of items) {
+                    let parentId: string | null = targetFolderId
+                    let currentPath = ''
 
-                for (const name of item.segments) {
-                    currentPath = currentPath
-                        ? `${currentPath}/${name}`
-                        : name
+                    for (const name of item.segments) {
+                        currentPath = currentPath ? `${currentPath}/${name}` : name
 
-                    const cachedId = cache.get(currentPath)
+                        const cachedId = cache.get(currentPath)
 
-                    if (cachedId) {
-                        parentId = cachedId
-                        continue
-                    }
+                        if (cachedId) {
+                            parentId = cachedId
+                            continue
+                        }
 
-                    const existingFolder: { id: string } | null =
-                        await tx.folders.findFirst({
+                        const existingFolder: { id: string } | null = await tx.folders.findFirst({
                             where: {
                                 user_id: session.userId,
                                 parent_folder_id: parentId,
@@ -136,13 +126,12 @@ export default defineEventHandler(async (event) => {
                             }
                         })
 
-                    let folderId: string
+                        let folderId: string
 
-                    if (existingFolder) {
-                        folderId = existingFolder.id
-                    } else {
-                        const createdFolder: { id: string } =
-                            await tx.folders.create({
+                        if (existingFolder) {
+                            folderId = existingFolder.id
+                        } else {
+                            const createdFolder: { id: string } = await tx.folders.create({
                                 data: {
                                     user_id: session.userId,
                                     parent_folder_id: parentId,
@@ -153,67 +142,66 @@ export default defineEventHandler(async (event) => {
                                 }
                             })
 
-                        folderId = createdFolder.id
-                        foldersCreated++
-                    }
-
-                    parentId = folderId
-                    cache.set(currentPath, folderId)
-                }
-
-                if (!parentId) {
-                    throwError(400, 'Invalid folder path.')
-                }
-
-                const existingFile = await tx.files.findFirst({
-                    where: {
-                        user_id: session.userId,
-                        folder_id: parentId,
-                        original_name: {
-                            equals: item.fileName,
-                            mode: 'insensitive'
+                            folderId = createdFolder.id
+                            foldersCreated++
                         }
-                    },
-                    select: {
-                        id: true
-                    }
-                })
 
-                if (existingFile) {
-                    throwError(
-                        409,
-                        `A file named "${item.fileName}" already exists in this folder.`
-                    )
+                        parentId = folderId
+                        cache.set(currentPath, folderId)
+                    }
+
+                    if (!parentId) {
+                        throwError(400, 'Invalid folder path.')
+                    }
+
+                    const existingFile = await tx.files.findFirst({
+                        where: {
+                            user_id: session.userId,
+                            folder_id: parentId,
+                            original_name: {
+                                equals: item.fileName,
+                                mode: 'insensitive'
+                            }
+                        },
+                        select: {
+                            id: true
+                        }
+                    })
+
+                    if (existingFile) {
+                        throwError(
+                            409,
+                            `A file named "${item.fileName}" already exists in this folder.`
+                        )
+                    }
+
+                    const { storageKey } = await saveFileToStorage(session.userId, item.part)
+
+                    savedKeys.push(storageKey)
+
+                    await tx.files.create({
+                        data: {
+                            user_id: session.userId,
+                            folder_id: parentId,
+                            name: item.fileName,
+                            original_name: item.fileName,
+                            mime_type: item.part.type ?? null,
+                            size: BigInt(item.part.data.length),
+                            storage_key: storageKey
+                        }
+                    })
                 }
 
-                const { storageKey } = await saveFileToStorage(
-                    session.userId,
-                    item.part
-                )
-
-                savedKeys.push(storageKey)
-
-                await tx.files.create({
-                    data: {
-                        user_id: session.userId,
-                        folder_id: parentId,
-                        name: item.fileName,
-                        original_name: item.fileName,
-                        mime_type: item.part.type ?? null,
-                        size: BigInt(item.part.data.length),
-                        storage_key: storageKey
-                    }
-                })
+                return {
+                    filesUploaded: items.length,
+                    foldersCreated
+                }
+            },
+            {
+                maxWait: 5000,
+                timeout: 60000
             }
-
-            return {
-                filesUploaded: items.length,
-                foldersCreated
-            }
-        }, {
-            maxWait: 5000,
-            timeout: 60000
-        })
+        )
 
         setResponseStatus(event, 201)
 
@@ -246,20 +234,11 @@ export default defineEventHandler(async (event) => {
             }
         }
 
-        if (
-            error &&
-            typeof error === 'object' &&
-            'statusCode' in error
-        ) {
+        if (error && typeof error === 'object' && 'statusCode' in error) {
             throw error
         }
 
-        if (
-            error &&
-            typeof error === 'object' &&
-            'code' in error &&
-            error.code === 'P2002'
-        ) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
             throwError(409, 'A folder or file with this name already exists.')
         }
 

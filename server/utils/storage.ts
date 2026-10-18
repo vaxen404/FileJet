@@ -2,14 +2,13 @@
 import type { Prisma } from '~~/src/generated/prisma/client'
 import { throwError } from './error'
 
-export const lockStorageUser = async (
-    tx: Prisma.TransactionClient,
-    userId: string
-) => {
-    const users = await tx.$queryRaw<{
-        storage_used: bigint | null
-        storage_limit: bigint | null
-    }[]>`
+export const lockStorageUser = async (tx: Prisma.TransactionClient, userId: string) => {
+    const users = await tx.$queryRaw<
+        {
+            storage_used: bigint | null
+            storage_limit: bigint | null
+        }[]
+    >`
         SELECT storage_used, storage_limit
         FROM users
         WHERE id = ${userId}::uuid

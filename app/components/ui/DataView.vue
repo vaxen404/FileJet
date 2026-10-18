@@ -1,15 +1,38 @@
 <template>
-    <div class="data-view" :aria-busy="isLoading" :class="{ 'drag-active': isDragging }"
-        @dragenter="dragenter" @dragover="handleDragover" @dragleave="handleDragleave" @drop="drop">
-        <div class="view-content" :class="[
-            viewMode === 'list' ? 'list-view' : 'grid-view',
-            { 'empty-view': $slots.empty && !isLoading, 'loading-view': isLoading }
-        ]">
-            <slot v-if="isLoading" name="loading" />
-            <slot v-else-if="$slots.empty" name="empty" />
-            <slot v-else :name="viewMode" />
+    <div
+        class="data-view"
+        :aria-busy="isLoading"
+        :class="{ 'drag-active': isDragging }"
+        @dragenter="dragenter"
+        @dragover="handleDragover"
+        @dragleave="handleDragleave"
+        @drop="drop"
+    >
+        <div
+            class="view-content"
+            :class="[
+                viewMode === 'list' ? 'list-view' : 'grid-view',
+                { 'empty-view': $slots.empty && !isLoading, 'loading-view': isLoading }
+            ]"
+        >
+            <slot
+                v-if="isLoading"
+                name="loading"
+            />
+            <slot
+                v-else-if="$slots.empty"
+                name="empty"
+            />
+            <slot
+                v-else
+                :name="viewMode"
+            />
         </div>
-        <div v-if="isDragging" class="drop-overlay" role="status">
+        <div
+            v-if="isDragging"
+            class="drop-overlay"
+            role="status"
+        >
             <span class="drop-message"><Icon name="solar:cloud-upload-bold" />{{ dropText }}</span>
         </div>
     </div>
@@ -27,9 +50,21 @@ const emit = defineEmits<{
     dragleave: [event: DragEvent]
     drop: [event: DragEvent]
 }>()
-const { isDragging, dragenter, dragover, dragleave, drop } = useFileDrop(event => emit('drop', event), () => Boolean(props.dropText))
-const handleDragover = (event: DragEvent) => { dragover(event); if (isDragging.value) emit('dragover', event) }
-const handleDragleave = (event: DragEvent) => { dragleave(event); if (!isDragging.value) emit('dragleave', event) }
+
+const { isDragging, dragenter, dragover, dragleave, drop } = useFileDrop(
+    event => emit('drop', event),
+    () => Boolean(props.dropText)
+)
+
+const handleDragover = (event: DragEvent) => {
+    dragover(event);
+    if (isDragging.value) emit('dragover', event)
+}
+
+const handleDragleave = (event: DragEvent) => {
+    dragleave(event);
+    if (!isDragging.value) emit('dragleave', event)
+}
 </script>
 
 <style scoped>
@@ -42,8 +77,16 @@ const handleDragleave = (event: DragEvent) => { dragleave(event); if (!isDraggin
     min-height: 0;
 }
 
-.view-content { flex: 1; min-height: 0; min-width: 0; }
-.data-view :deep(.loading-state) { color: #a8a8b0; font-size: 0.85rem; }
+.view-content {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+.data-view :deep(.loading-state) {
+    color: #a8a8b0;
+    font-size: 0.85rem;
+}
 
 .list-view {
     display: flex;
@@ -135,8 +178,26 @@ const handleDragleave = (event: DragEvent) => { dragleave(event); if (!isDraggin
     pointer-events: none;
     z-index: 20;
 }
-.drop-message { display: flex; align-items: center; gap: 0.5rem; max-width: calc(100% - 2rem); padding: 0.75rem 1rem; color: #d5d5da; background: #1a1a1d; border: 1px solid #29292e; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-align: center; }
-.drop-message :deep(.iconify) { color: #8b7cff; flex-shrink: 0; }
+
+.drop-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: calc(100% - 2rem);
+    padding: 0.75rem 1rem;
+    color: #d5d5da;
+    background: #1a1a1d;
+    border: 1px solid #29292e;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.drop-message :deep(.iconify) {
+    color: #8b7cff;
+    flex-shrink: 0;
+}
 
 @media (max-width: 1500px) {
     .grid-view {

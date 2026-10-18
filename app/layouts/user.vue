@@ -1,116 +1,120 @@
 <script setup lang="ts">
 import Sidebar from '~/components/layout/Sidebar.vue'
 import HeaderBar from '~/components/layout/HeaderBar.vue'
+
 const route = useRoute()
 
 const pageTitle = computed(() => {
-  const titles: Record<string, string> = {
-    '/home': 'Dashboard',
-    '/files': 'Files',
-    '/folders': 'Folders',
-    '/notes': 'Notes',
-    '/favorites': 'Favorites',
-    '/shared': 'Shared',
-    '/trash': 'Trash',
-    '/settings/preferences': 'Preferences',
-    '/settings/personalization': 'Personalization'
-  }
+    const titles: Record<string, string> = {
+        '/home': 'Dashboard',
+        '/files': 'Files',
+        '/folders': 'Folders',
+        '/notes': 'Notes',
+        '/favorites': 'Favorites',
+        '/shared': 'Shared',
+        '/trash': 'Trash',
+        '/settings/preferences': 'Preferences',
+        '/settings/personalization': 'Personalization'
+    }
 
-  return titles[route.path] || 'FileJet'
+    return titles[route.path] || 'FileJet'
 })
 
 const contentClass = computed(() => ({
-  'home-content': route.path === '/home',
-  'files-content': route.path === '/files',
-  'folders-content': route.path === '/folders',
-  'notes-content': route.path === '/notes',
-  'favorites-content': route.path === '/favorites'
+    'home-content': route.path === '/home',
+    'files-content': route.path === '/files',
+    'folders-content': route.path === '/folders',
+    'notes-content': route.path === '/notes',
+    'favorites-content': route.path === '/favorites'
 }))
-
 </script>
 
 <template>
-  <div class="user-layout">
-    <Sidebar />
+    <div class="user-layout">
+        <Sidebar />
 
-    <div class="user-main">
-      <HeaderBar :title="pageTitle" class="user-header" />
+        <div class="user-main">
+            <HeaderBar
+                :title="pageTitle"
+                class="user-header"
+            />
 
-      <main class="user-content" :class="contentClass">
-        <slot />
-      </main>
+            <main
+                class="user-content"
+                :class="contentClass"
+            >
+                <slot />
+            </main>
+        </div>
     </div>
-  </div>
 </template>
 
 <style>
 html,
 body,
 #__nuxt {
-  margin: 0;
-  width: 100%;
-  height: 100%;
+    margin: 0;
+    width: 100%;
+    height: 100%;
 }
 
 body {
-  overflow: hidden;
+    overflow: hidden;
 }
 </style>
 
 <style scoped>
 .user-layout {
-  display: flex;
-  gap: 1.25rem;
+    display: flex;
+    gap: 1.25rem;
 
-  height: 100vh;
-  padding: 1.25rem;
+    height: 100vh;
+    padding: 1.25rem;
 
-  box-sizing: border-box;
+    box-sizing: border-box;
 
-  background: #121214;
-  color: white;
+    background: #121214;
+    color: white;
 }
 
 .user-main {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
 
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .user-content {
-  flex: 1;
-  min-height: 0;
+    flex: 1;
+    min-height: 0;
 
-  padding: 0rem;
+    padding: 0rem;
 
-  overflow: auto;
+    overflow: auto;
 }
 
 .user-header {
-  flex-shrink: 0;
+    flex-shrink: 0;
 }
 
 .files-content,
 .folders-content,
 .notes-content {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
 
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-  overflow: hidden;
+    overflow: hidden;
 }
 
 .home-content {
-  padding: 0.5rem;
-  overflow: hidden;
+    padding: 0.5rem;
+    overflow: hidden;
 }
-
-
 </style>

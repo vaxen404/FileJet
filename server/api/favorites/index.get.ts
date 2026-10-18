@@ -2,7 +2,7 @@ import { prisma } from "~~/server/utils/prisma"
 import { getAuthSession } from "~~/server/utils/auth"
 import { throwError } from "~~/server/utils/error"
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         const session = getAuthSession(event)
 
@@ -20,10 +20,19 @@ export default defineEventHandler(async (event) => {
                 ]
             },
             include: {
-                files: { select: {
-                    id: true, user_id: true, folder_id: true, name: true, original_name: true,
-                    mime_type: true, size: true, created_at: true, updated_at: true
-                } },
+                files: {
+                    select: {
+                        id: true,
+                        user_id: true,
+                        folder_id: true,
+                        name: true,
+                        original_name: true,
+                        mime_type: true,
+                        size: true,
+                        created_at: true,
+                        updated_at: true
+                    }
+                },
                 folders: true,
                 notes: true
             },
@@ -32,21 +41,20 @@ export default defineEventHandler(async (event) => {
             }
         })
 
-
         return {
             favorites: favorites.map((item) => ({
                 ...item,
                 files: item.files
                     ? {
-                        ...item.files,
-                        size: item.files.size.toString()
-                    }
+                            ...item.files,
+                            size: item.files.size.toString()
+                        }
                     : null,
                 notes: item.notes
                     ? {
-                        ...item.notes,
-                        size: item.notes.size.toString()
-                    }
+                            ...item.notes,
+                            size: item.notes.size.toString()
+                        }
                     : null
             }))
         }
@@ -54,9 +62,6 @@ export default defineEventHandler(async (event) => {
         console.log(err.message);
         if (err.statusCode) throw err
 
-        throwError(
-            500,
-            'An unknown error occurred while fetching favorites.'
-        )
+        throwError(500, 'An unknown error occurred while fetching favorites.')
     }
 })

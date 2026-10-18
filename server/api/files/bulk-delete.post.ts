@@ -3,7 +3,7 @@ import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -13,7 +13,12 @@ export default defineEventHandler(async (event) => {
 
         const body = await readBody(event)
 
-        if (!body || !Array.isArray(body.fileIds) || !body.fileIds.length || body.fileIds.length > 200) {
+        if (
+            !body ||
+            !Array.isArray(body.fileIds) ||
+            !body.fileIds.length ||
+            body.fileIds.length > 200
+        ) {
             throwError(400, 'Select between 1 and 200 files.')
         }
 
@@ -22,14 +27,14 @@ export default defineEventHandler(async (event) => {
         }
 
         const fileIds = [...new Set<string>(body.fileIds.map((id: string) => id.toLowerCase()))]
-        
-        const deletedIds = await prisma.$transaction(async (tx) => {
+
+        const result = await prisma.$transaction(async tx => {
             const files = await tx.files.findMany({
-                where: { 
-                    id: { 
-                        in: fileIds 
-                    }, 
-                    user_id: session.userId 
+                where: {
+                    id: {
+                        in: fileIds
+                    },
+                    user_id: session.userId
                 }
             })
 
@@ -37,8 +42,17 @@ export default defineEventHandler(async (event) => {
                 throwError(404, 'One or more selected files could not be found.')
             }
 
+            await tx.favorites.deleteMany({
+                where: {
+                    user_id: session.userId,
+                    file_id: { in: fileIds }
+                }
+            })
+
+            const trashIds: string[] = []
+
             for (const file of files) {
-                await tx.trash.create({
+                const trashed = await tx.trash.create({
                     data: {
                         user_id: session.userId,
                         item_id: file.id,
@@ -52,31 +66,32 @@ export default defineEventHandler(async (event) => {
                     }
                 })
 
+                trashIds.push(trashed.id)
+
                 await tx.shared_items.deleteMany({
-                    where: { 
-                        user_id: session.userId, 
-                        item_id: file.id, 
-                        item_type: 'file' 
+                    where: {
+                        user_id: session.userId,
+                        item_id: file.id,
+                        item_type: 'file'
                     }
                 })
 
-                await tx.files.delete({ 
-                    where: { 
-                        id: file.id ,
+                await tx.files.delete({
+                    where: {
+                        id: file.id,
                         user_id: session.userId
-                    } 
+                    }
                 })
             }
 
-            return files.map(file => file.id)
+            return { deletedIds: files.map(file => file.id), trashIds }
         })
 
         return {
             success: true,
-            deletedIds,
+            ...result,
             failedIds: []
         }
-
     } catch (err: any) {
         if (err.statusCode) throw err
 

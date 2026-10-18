@@ -6,5 +6,8 @@ export interface ShareState {
 }
 
 export const emptyShareState = (): ShareState => ({
-    url: null, hasPassword: false, expiresAt: null, isExpired: false
+    url: null,
+    hasPassword: false,
+    expiresAt: null,
+    isExpired: false
 })

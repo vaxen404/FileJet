@@ -1,7 +1,10 @@
 <template>
     <aside class="sidebar-area">
         <div class="logo-area">
-            <img src="/images/filejetlogo.png" alt="FileJet">
+            <img
+                src="/images/filejetlogo.png"
+                alt="FileJet"
+            >
         </div>
 
         <div class="menu-section">
@@ -9,52 +12,48 @@
 
             <NuxtLink
                 to="/home"
-                :class="{ active: route.path === '/home'}"
+                :class="{ active: route.path === '/home' }"
             >
                 <Icon
                     class="menu-icon"
-                    :name="route.path === '/home'
-                        ? 'solar:home-2-bold'
-                        : 'solar:home-2-linear'"
+                    :name="route.path === '/home' ? 'solar:home-2-bold' : 'solar:home-2-linear'"
                 />
                 Home
             </NuxtLink>
 
             <NuxtLink
                 to="/files"
-                :class="{ active: route.path === '/files'}"
+                :class="{ active: route.path === '/files' }"
             >
                 <Icon
                     class="menu-icon"
-                    :name="route.path === '/files'
-                        ? 'solar:document-bold'
-                        : 'solar:document-linear'"
+                    :name="
+                        route.path === '/files' ? 'solar:document-bold' : 'solar:document-linear'
+                    "
                 />
                 Files
             </NuxtLink>
 
             <NuxtLink
                 to="/folders"
-                :class="{ active: route.path === '/folders'}"
+                :class="{ active: route.path === '/folders' }"
             >
                 <Icon
                     class="menu-icon"
-                    :name="route.path === '/folders'
-                        ? 'solar:folder-bold'
-                        : 'solar:folder-linear'"
+                    :name="route.path === '/folders' ? 'solar:folder-bold' : 'solar:folder-linear'"
                 />
                 Folders
             </NuxtLink>
 
             <NuxtLink
                 to="/notes"
-                :class="{ active: route.path === '/notes'}"
+                :class="{ active: route.path === '/notes' }"
             >
                 <Icon
                     class="menu-icon"
-                    :name="route.path === '/notes'
-                        ? 'solar:notebook-bold'
-                        : 'solar:notebook-linear'"
+                    :name="
+                        route.path === '/notes' ? 'solar:notebook-bold' : 'solar:notebook-linear'
+                    "
                 />
                 Notes
             </NuxtLink>
@@ -63,41 +62,43 @@
         <div class="menu-section">
             <span class="menu-title">OTHERS</span>
 
-                <NuxtLink
-                    :class="{ active: route.path === '/favorites'}"
-                    to="/favorites"
-                >
-                    <Icon
-                        class="menu-icon"
-                        :name="route.path === '/favorites'
-                            ? 'solar:star-bold'
-                            : 'solar:star-outline'"
-                    />
-                    Favorites
-                 </NuxtLink>
-
             <NuxtLink
-                to="/shared"
-                :class="{ active: route.path === '/shared'}"
+                :class="{ active: route.path === '/favorites' }"
+                to="/favorites"
             >
                 <Icon
                     class="menu-icon"
-                    :name="route.path === '/shared'
-                        ? 'solar:share-circle-bold'
-                        : 'solar:share-circle-linear'"
+                    :name="route.path === '/favorites' ? 'solar:star-bold' : 'solar:star-outline'"
+                />
+                Favorites
+            </NuxtLink>
+
+            <NuxtLink
+                to="/shared"
+                :class="{ active: route.path === '/shared' }"
+            >
+                <Icon
+                    class="menu-icon"
+                    :name="
+                        route.path === '/shared'
+                            ? 'solar:share-circle-bold'
+                            : 'solar:share-circle-linear'
+                    "
                 />
                 Shared
             </NuxtLink>
 
             <NuxtLink
                 to="/trash"
-                :class="{ active: route.path === '/trash'}"
+                :class="{ active: route.path === '/trash' }"
             >
                 <Icon
                     class="menu-icon"
-                    :name="route.path === '/trash'
-                        ? 'material-symbols:delete-rounded'
-                        : 'material-symbols:delete-outline-rounded'"
+                    :name="
+                        route.path === '/trash'
+                            ? 'material-symbols:delete-rounded'
+                            : 'material-symbols:delete-outline-rounded'
+                    "
                 />
                 Trash
             </NuxtLink>
@@ -106,44 +107,47 @@
         <div class="menu-section">
             <span class="menu-title">SETTINGS</span>
 
-                <NuxtLink
-                    :class="{ active: route.path === '/settings/preferences'}"
-                    to="/settings/preferences"
-                >
-                    <Icon
-                        class="menu-icon"
-                        :name="route.path === '/settings/preferences'
+            <NuxtLink
+                :class="{ active: route.path === '/settings/preferences' }"
+                to="/settings/preferences"
+            >
+                <Icon
+                    class="menu-icon"
+                    :name="
+                        route.path === '/settings/preferences'
                             ? 'solar:settings-bold'
-                            : 'solar:settings-linear'"
-                    />
-                    Preferences
-                </NuxtLink>
+                            : 'solar:settings-linear'
+                    "
+                />
+                Preferences
+            </NuxtLink>
 
-                <NuxtLink
-                    :class="{ active: route.path === '/settings/personalization'}"
-                    to="/settings/personalization"
-                >
-                    <Icon
-                        class="menu-icon"
-                        :name="route.path === '/settings/personalization'
+            <NuxtLink
+                :class="{ active: route.path === '/settings/personalization' }"
+                to="/settings/personalization"
+            >
+                <Icon
+                    class="menu-icon"
+                    :name="
+                        route.path === '/settings/personalization'
                             ? 'solar:palette-bold'
-                            : 'solar:palette-linear'"
-                    />
-                    Personalization
-                </NuxtLink>
+                            : 'solar:palette-linear'
+                    "
+                />
+                Personalization
+            </NuxtLink>
 
-            <button 
-                class="logout-btn" 
+            <button
+                class="logout-btn"
                 type="button"
                 @click="showLogoutModal = true"
                 @mouseenter="isLogoutHover = true"
                 @mouseleave="isLogoutHover = false"
             >
-                <Icon 
-                    class="menu-icon" 
-                    :name="isLogoutHover
-                        ? 'solar:logout-2-bold'
-                        : 'solar:logout-2-linear'" />
+                <Icon
+                    class="menu-icon"
+                    :name="isLogoutHover ? 'solar:logout-2-bold' : 'solar:logout-2-linear'"
+                />
                 Logout
             </button>
         </div>

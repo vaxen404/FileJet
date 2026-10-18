@@ -3,7 +3,7 @@ import { prisma } from '~~/server/utils/prisma'
 import { enforceRateLimit } from "~~/server/utils/rateLimit"
 import { setAuthSession } from '~~/server/utils/auth'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async ( event) => {
     try {
         enforceRateLimit(event, 'auth-login', 10, 10 * 60 * 1000)
 
@@ -34,10 +34,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const isPasswordCorrect = await argon2.verify(
-            user.password_hash,
-            password
-        )
+        const isPasswordCorrect = await argon2.verify(user.password_hash, password)
 
         if (!isPasswordCorrect) {
             throw createError({
@@ -58,10 +55,9 @@ export default defineEventHandler(async (event) => {
                 storageUsed: user.storage_used?.toString() ?? '0'
             }
         }
-
     } catch (err: any) {
         console.error('[AUTH LOGIN ERROR]', err)
-        
+
         if (err.statusCode) throw err
 
         throw createError({

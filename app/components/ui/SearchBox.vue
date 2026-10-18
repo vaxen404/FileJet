@@ -1,6 +1,9 @@
 <template>
     <div class="search-box">
-        <Icon name="lucide:search" class="search-icon" />
+        <Icon
+            name="lucide:search"
+            class="search-icon"
+        />
 
         <input
             type="text"

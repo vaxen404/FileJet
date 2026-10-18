@@ -63,9 +63,7 @@ const currentLabel = computed(() => {
     return options.find(option => option.value === model.value)?.label
 })
 
-const selectOption = (
-    value: 'newest' | 'oldest' | 'name-asc' | 'name-desc'
-) => {
+const selectOption = (value: 'newest' | 'oldest' | 'name-asc' | 'name-desc') => {
     model.value = value
     isOpen.value = false
 }
