@@ -3,6 +3,7 @@ import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
+import { folderNameSchema } from '~~/shared/schemas/folder'
 
 export default defineEventHandler(async ( event) => {
     try {
@@ -22,17 +23,9 @@ export default defineEventHandler(async ( event) => {
 
         const body = await readBody(event)
 
-        const name = typeof body?.newName === 'string' ? body.newName.trim() : ''
-
-        if (
-            !name ||
-            name === '.' ||
-            name === '..' ||
-            /[/\\\0]/.test(name) ||
-            Buffer.byteLength(name, 'utf8') > 255
-        ) {
-            throwError(400, 'Invalid folder name.')
-        }
+        const parsed = folderNameSchema.safeParse(body?.newName)
+        if (!parsed.success) throwError(400, parsed.error.issues[0]?.message || 'Invalid folder name.')
+        const name = parsed.data
 
         const folder = await prisma.$transaction(async ( tx) => {
             const existing = await tx.folders.findFirst({

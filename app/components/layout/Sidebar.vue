@@ -272,7 +272,7 @@ const handleLogout = async () => {
 }
 
 .menu-section a.active {
-    background: #5a5aff;
+    background: #3c47be;
     color: white;
     font-weight: 600;
 }

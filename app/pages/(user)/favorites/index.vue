@@ -452,10 +452,6 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     height: 100%;
     min-height: 0;
 
-    padding: 0 0.5rem;
-
-    border-radius: 12px;
-
     display: flex;
     flex-direction: column;
 

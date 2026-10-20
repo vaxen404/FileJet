@@ -28,7 +28,7 @@ const emit = defineEmits<{
 <style scoped>
 .search-box {
     width: 32rem;
-    height: 2.5rem;
+    height: var(--ui-control-height, 2.5rem);
 
     display: flex;
     align-items: center;
@@ -38,7 +38,7 @@ const emit = defineEmits<{
     padding: 0 0.75rem;
 
     border: 1px solid #29292e;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 
     gap: 0.5rem;
 
@@ -62,7 +62,7 @@ const emit = defineEmits<{
 
     color: #dadada;
 
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     line-height: 1.5;
@@ -71,7 +71,11 @@ const emit = defineEmits<{
 }
 
 .search-icon {
+    display: block;
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    flex-shrink: 0;
     color: #a3a3a3;
-    font-size: 1.3rem;
+    font-size: var(--ui-control-icon-size, 1.125rem);
 }
 </style>

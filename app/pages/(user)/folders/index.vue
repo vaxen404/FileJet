@@ -8,52 +8,31 @@
                 />
 
                 <div class="toolbar-actions">
+                    <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
-
                     <UploadButton
                         text="Upload"
                         mode="folder"
                         @folder="handleFolders"
                     />
-                </div>
-            </div>
 
-            <div class="folders-subtoolbar">
-                <SortDropdown v-model="sortMode" />
-            </div>
-
-            <div
-                v-if="selectedFolders.length"
-                class="selection-toolbar"
-                role="group"
-                aria-label="Selected folders"
-            >
-                <span
-                    role="status"
-                    aria-live="polite"
-                    >{{ selectedFolders.length }} selected</span
-                >
-
-                <div class="selection-actions">
                     <button
                         type="button"
-                        class="selection-btn"
-                        :disabled="pending"
-                        @click="selectedFolders = []"
+                        class="new-folder-button"
+                        :disabled="pending || folderActions.isLoading.value"
+                        @click="createFolder"
                     >
-                        Clear
-                    </button>
-                    <button
-                        type="button"
-                        class="selection-btn delete-selected-btn"
-                        :disabled="pending"
-                        @click="handleDeleteSelected"
-                    >
-                        <Icon name="solar:trash-bin-trash-bold" />
-                        Delete Selected
+                        <Icon
+                            name="solar:add-folder-bold"
+                            class="new-folder-icon"
+                            aria-hidden="true"
+                        />
+                        <span>New Folder</span>
                     </button>
                 </div>
             </div>
+
+
         </div>
 
         <DataView
@@ -233,7 +212,7 @@
                         </template>
                         <template #metadata>
                             <span>Folder</span>
-                            &middot;
+                            ·
                             <span>{{ formatFileTime(folder.created_at) }}</span>
                         </template>
                     </ItemGridCard>
@@ -246,12 +225,26 @@
             :total-pages="totalPages"
             :view-mode="viewMode"
         />
+        <SelectionToolbar
+            :items="selectionItems"
+            :busy="pending || folderActions.isLoading.value"
+            :current-folder-id="null"
+            @clear="selectedFolders = []"
+            @delete="handleDeleteSelected"
+            @moved="handleSelectionMoved"
+        />
+        <FolderFormModal
+            :open="folderModalOpen"
+            @close="folderModalOpen = false"
+            @saved="handleFolderSaved"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
 import { formatFileTime } from '~/utils/file'
-import type { ComponentPublicInstance } from 'vue'
+import { ref, type ComponentPublicInstance } from 'vue'
+import FolderFormModal from '~/components/ui/FolderFormModal.vue'
 import type ItemMenu from '~/components/ui/ItemMenu.vue'
 
 definePageMeta({
@@ -266,6 +259,12 @@ const { addFavorite, removeFavorite } = useFavoriteActions()
 
 const { folders, favorites, pending, error, fetchAll } = useUser()
 type FolderItem = (typeof folders.value)[number]
+const folderModalOpen = ref(false)
+
+const createFolder = (): void => {
+    if (pending.value || folderActions.isLoading.value) return
+    folderModalOpen.value = true
+}
 
 await fetchAll()
 
@@ -366,11 +365,26 @@ const {
     paginatedItems: paginatedFolders
 } = usePagination(sortedFolders, itemsPerPage)
 
+const handleFolderSaved = async (): Promise<void> => {
+    searchQuery.value = ''
+    sortMode.value = 'newest'
+    currentPage.value = 1
+    await fetchAll()
+    if (error.value) openToast(error.value, 'error')
+}
+
 const {
     selectedItems: selectedFolders,
     allSelected,
     toggleSelectAll
 } = useSelection(paginatedFolders)
+
+const selectionItems = computed(() => selectedFolders.value.map(id => ({ id, type: 'folder' as const })))
+const handleSelectionMoved = async () => {
+    selectedFolders.value = []
+    await fetchAll()
+    if (error.value) openToast(error.value, 'error')
+}
 
 const partiallySelected = computed(() => {
     return (
@@ -420,10 +434,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     flex: 1;
     min-height: 0;
 
-    padding: 0 0.5rem;
-
-    border-radius: 12px;
-
     display: flex;
     flex-direction: column;
 
@@ -465,6 +475,64 @@ watch([searchQuery, sortMode, viewMode], () => {
     gap: 0.5rem;
     flex-wrap: wrap;
     min-width: 0;
+}
+
+.new-folder-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 0.5rem;
+    height: var(--ui-control-height, 2.5rem);
+    padding: 0 0.875rem;
+    box-sizing: border-box;
+    color: #fff;
+    background: #424dcc;
+    border: 1px solid #626de5;
+    border-radius: var(--ui-control-radius, 8px);
+    box-shadow: inset 0 1px 0 #ffffff12, 0 2px 6px #0003;
+    font-family: 'Inter', sans-serif;
+    font-size: var(--ui-control-font-size, 0.875rem);
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.new-folder-icon {
+    display: block;
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    flex-shrink: 0;
+    color: #ffffff;
+    font-size: var(--ui-control-icon-size, 1.125rem);
+}
+
+.new-folder-button:hover:not(:disabled) {
+    background: #505ed8;
+    border-color: #818bf3;
+    transform: translateY(-1px);
+}
+
+.new-folder-button:active:not(:disabled) {
+    background: #3944b8;
+    transform: translateY(0);
+    box-shadow: inset 0 1px 3px #0003;
+}
+
+.new-folder-button:focus-visible {
+    outline: 2px solid #d3d7ff;
+    outline-offset: -4px;
+}
+
+.new-folder-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .table-scroll {
@@ -633,10 +701,10 @@ watch([searchQuery, sortMode, viewMode], () => {
 
     flex-shrink: 0;
 
-    color: #6ea8ff;
-    background: #1f2d4a;
+    color: #ffffff;
+    background: #3c47be;
 
-    border: 1px solid #2f4770;
+    border: 1px solid #3c47be;
     border-radius: 6px;
 
     font-size: 1.2rem;
@@ -670,81 +738,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     white-space: nowrap;
     font-weight: 400;
     line-height: 1.5;
-}
-
-.folders-subtoolbar {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.selection-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    color: #a8a8b0;
-    font-size: 0.875rem;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    line-height: 1.5;
-}
-
-.selection-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.selection-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    height: 2.5rem;
-    padding: 0 0.75rem;
-    color: #a8a8b0;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 6px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-    line-height: 1.5;
-    box-sizing: border-box;
-}
-
-.selection-btn:hover:not(:disabled) {
-    color: #ffffff;
-    background: #242429;
-    border-color: #35353c;
-}
-
-.delete-selected-btn {
-    color: #ff6b6b;
-}
-
-.delete-selected-btn:hover:not(:disabled) {
-    color: #ff7d7d;
-    background: #3a2024;
-    border-color: #4a292d;
-}
-
-.selection-btn:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 3px;
-}
-
-.selection-btn:disabled {
-    opacity: 0.6;
-    cursor: wait;
 }
 
 .table-scroll {
@@ -792,6 +785,14 @@ watch([searchQuery, sortMode, viewMode], () => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .new-folder-button {
+        transition: none;
+    }
+
+    .new-folder-button:hover:not(:disabled) {
+        transform: none;
+    }
+
     .loading-spinner {
         animation: none;
     }

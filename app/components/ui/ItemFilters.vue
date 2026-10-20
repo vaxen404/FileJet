@@ -41,14 +41,14 @@ const model = defineModel<string>({ required: true })
 
 .filter-btn {
     flex-shrink: 0;
-    height: 2.5rem;
+    height: var(--ui-control-height, 2.5rem);
     padding: 0 0.75rem;
     color: #a8a8b0;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
     font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
     font-weight: 500;
     cursor: pointer;
     transition:

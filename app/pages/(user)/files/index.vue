@@ -27,40 +27,6 @@
                 <SortDropdown v-model="sortMode" />
             </div>
 
-            <div
-                v-if="selectedFiles.length"
-                class="selection-toolbar"
-                role="group"
-                aria-label="Selected files"
-            >
-                <span
-                    role="status"
-                    aria-live="polite"
-                    >{{ selectedFiles.length }} selected</span
-                >
-
-                <div class="selection-actions">
-                    <button
-                        type="button"
-                        class="filter-btn"
-                        :disabled="isLoading || isBulkDeleting"
-                        @click="selectedFiles = []"
-                    >
-                        Clear
-                    </button>
-
-                    <button
-                        type="button"
-                        class="filter-btn delete-selected-btn"
-                        :disabled="isLoading || isBulkDeleting"
-                        :aria-busy="isBulkDeleting"
-                        @click="handleDeleteSelected"
-                    >
-                        <Icon name="solar:trash-bin-trash-bold" />
-                        {{ isBulkDeleting ? 'Deleting...' : 'Delete Selected' }}
-                    </button>
-                </div>
-            </div>
         </div>
 
         <DataView
@@ -320,6 +286,14 @@
             :total-pages="totalPages"
             :view-mode="viewMode"
         />
+        <SelectionToolbar
+            :items="selectionItems"
+            :busy="pending || isLoading || isBulkDeleting"
+            :current-folder-id="null"
+            @clear="selectedFiles = []"
+            @delete="handleDeleteSelected"
+            @moved="handleSelectionMoved"
+        />
     </div>
 </template>
 
@@ -538,6 +512,13 @@ const {
 } = usePagination(sortedFiles, itemsPerPage)
 
 const { selectedItems: selectedFiles, allSelected, toggleSelectAll } = useSelection(paginatedFiles)
+
+const selectionItems = computed(() => selectedFiles.value.map(id => ({ id, type: 'file' as const })))
+const handleSelectionMoved = async () => {
+    selectedFiles.value = []
+    await fetchAll()
+    if (error.value) openToast(error.value, 'error')
+}
 const isBulkDeleting = ref(false)
 
 const partiallySelected = computed(
@@ -586,52 +567,10 @@ watch([searchQuery, activeCategory, sortMode, viewMode], () => {
 </script>
 
 <style scoped>
-.selection-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    color: #a8a8b0;
-    font-size: 0.875rem;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    line-height: 1.5;
-}
-
-.selection-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.selection-actions .delete-selected-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: #ff6b6b;
-}
-
-.selection-actions .delete-selected-btn:hover {
-    background: #3a2024;
-    border-color: #4a292d;
-    color: #ff7d7d;
-}
-
-.selection-actions button:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
-
 .files-page {
     width: 100%;
     flex: 1;
     min-height: 0;
-
-    padding: 0 0.5rem;
-
-    border-radius: 12px;
 
     display: flex;
     flex-direction: column;
@@ -910,9 +849,9 @@ watch([searchQuery, activeCategory, sortMode, viewMode], () => {
 
     flex-shrink: 0;
 
-    color: #8b7cff;
+    color: #ffffff;
 
-    background: #29215c;
+    background: #3c47be;
 
     border-radius: 6px;
 

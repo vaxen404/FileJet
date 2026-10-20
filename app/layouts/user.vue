@@ -89,23 +89,10 @@ body {
 
 .user-content {
     flex: 1;
+    min-width: 0;
     min-height: 0;
 
     padding: 0rem;
-
-    overflow: auto;
-}
-
-.user-header {
-    flex-shrink: 0;
-}
-
-.files-content,
-.folders-content,
-.notes-content {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
 
     display: flex;
     flex-direction: column;
@@ -113,8 +100,8 @@ body {
     overflow: hidden;
 }
 
-.home-content {
-    padding: 0.5rem;
-    overflow: hidden;
+.user-header {
+    flex-shrink: 0;
 }
+
 </style>

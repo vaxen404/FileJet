@@ -241,7 +241,7 @@ const isFileDetails = computed(
     align-items: center;
     justify-content: center;
 
-    background: #5a5aff;
+    background: #3c47be;
     border-radius: 50%;
 
     font-size: 0.75rem;

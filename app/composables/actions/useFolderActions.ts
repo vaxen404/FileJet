@@ -79,7 +79,7 @@ export const useFolderActions = () => {
                 ? await getFolderFiles(input)
                 : Array.from(input as FileList | File[])
 
-        if (files.length === 0) return
+        if (files.length === 0) throw new Error('This folder is empty. Use New Folder to create an empty folder.')
 
         const uploadId = Symbol()
 
@@ -160,6 +160,19 @@ export const useFolderActions = () => {
         }
     }
 
+    const createFolder = async (name: string, parentFolderId?: string) => {
+        startLoading()
+        try {
+            return await $fetch('/api/folders', {
+                method: 'POST',
+                query: parentFolderId ? { folderId: parentFolderId } : undefined,
+                body: { name }
+            })
+        } finally {
+            stopLoading()
+        }
+    }
+
     const deleteFolder = async (
         folderId: string,
         onSuccess?: () => Promise<void>,
@@ -229,7 +242,7 @@ export const useFolderActions = () => {
         startLoading()
 
         try {
-            await $fetch(`/api/folders/${encodeURIComponent(folderId)}`, {
+            return await $fetch(`/api/folders/${encodeURIComponent(folderId)}`, {
                 method: 'PATCH',
                 body: {
                     newName
@@ -256,6 +269,7 @@ export const useFolderActions = () => {
         isUploading,
         isDeleting,
         uploadProgress,
+        createFolder,
         uploadFolders,
         deleteFolder,
         deleteFolders,

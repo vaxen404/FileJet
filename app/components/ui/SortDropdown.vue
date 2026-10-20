@@ -5,13 +5,14 @@
             class="sort-trigger"
             @click="isOpen = !isOpen"
         >
-            <Icon name="solar:sort-vertical-linear" />
+            <Icon name="solar:sort-vertical-linear" class="sort-icon" aria-hidden="true" />
 
             <span>{{ currentLabel }}</span>
 
             <Icon
                 name="solar:alt-arrow-down-linear"
                 class="arrow-icon"
+                aria-hidden="true"
             />
         </button>
 
@@ -72,10 +73,11 @@ const selectOption = (value: 'newest' | 'oldest' | 'name-asc' | 'name-desc') => 
 <style scoped>
 .sort-dropdown {
     position: relative;
+    flex-shrink: 0;
 }
 
 .sort-trigger {
-    height: 2.5rem;
+    height: var(--ui-control-height, 2.5rem);
 
     padding: 0 0.75rem;
 
@@ -89,10 +91,11 @@ const selectOption = (value: 'newest' | 'oldest' | 'name-asc' | 'name-desc') => 
     background: transparent;
 
     border: none;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 
     font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
+    white-space: nowrap;
 
     cursor: pointer;
     font-weight: 500;
@@ -106,8 +109,13 @@ const selectOption = (value: 'newest' | 'oldest' | 'name-asc' | 'name-desc') => 
     background: #1f1f23;
 }
 
+.sort-icon,
 .arrow-icon {
-    font-size: 0.85rem;
+    display: block;
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    font-size: var(--ui-control-icon-size, 1.125rem);
+    flex-shrink: 0;
 }
 
 .sort-menu {
@@ -118,7 +126,7 @@ const selectOption = (value: 'newest' | 'oldest' | 'name-asc' | 'name-desc') => 
 
     width: 10rem;
 
-    padding: 0.25rem;
+    padding: 3px;
 
     display: flex;
     flex-direction: column;
@@ -126,7 +134,8 @@ const selectOption = (value: 'newest' | 'oldest' | 'name-asc' | 'name-desc') => 
     background: #1f1f23;
 
     border: 1px solid #303036;
-    border-radius: 24px;
+    border-radius: var(--ui-menu-radius, 12px);
+    box-sizing: border-box;
 
     box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.35);
 
@@ -143,10 +152,10 @@ const selectOption = (value: 'newest' | 'oldest' | 'name-asc' | 'name-desc') => 
     background: transparent;
 
     border: none;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 
     font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
 
     text-align: left;
 

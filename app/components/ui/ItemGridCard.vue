@@ -43,7 +43,7 @@ withDefaults(defineProps<{ selected?: boolean, title?: string, icon?: string }>(
     justify-content: flex-start;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 24px;
+    border-radius: var(--ui-panel-radius, 24px);
     box-sizing: border-box;
     cursor: pointer;
     transition:
@@ -58,14 +58,24 @@ withDefaults(defineProps<{ selected?: boolean, title?: string, icon?: string }>(
 }
 
 .file-card.selected {
-    border-color: #7063d8;
-    background: #211f30;
+    border-color: #454550;
+}
+
+.file-card.selected .file-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    border: 2px solid #7865ee;
+    border-radius: inherit;
+    pointer-events: none;
 }
 
 .file-preview {
     position: relative;
     width: 100%;
-    border-radius: 0.875rem;
+    border-radius: max(0px, calc(var(--ui-panel-radius, 24px) - 0.75rem - 1px));
     aspect-ratio: 4 / 3;
     overflow: hidden;
     background: #141417;
@@ -119,9 +129,9 @@ withDefaults(defineProps<{ selected?: boolean, title?: string, icon?: string }>(
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #242429;
+    background: #36363ee6;
     border: 1px solid #3a3a42;
-    border-radius: 6px;
+    border-radius: 50%;
     cursor: pointer;
 }
 

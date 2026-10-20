@@ -18,7 +18,14 @@
         @delete="removeFolder"
         @share-changed="folder.share = $event"
     >
-        <div class="folder-workspace">
+        <div
+            class="folder-workspace"
+            :aria-busy="busy"
+            @dragenter="dragenter"
+            @dragover="dragover"
+            @dragleave="dragleave"
+            @drop="drop"
+        >
             <NuxtLink
                 v-if="folder.parent"
                 class="parent-link"
@@ -29,6 +36,7 @@
             </NuxtLink>
             <FolderBrowser
                 :key="id"
+                :current-folder-id="id"
                 :items="folder.items"
                 :favorite-ids="favoriteIds"
                 :pending="pending"
@@ -37,24 +45,39 @@
                 @open="openItem"
                 @action="itemAction"
                 @delete-selected="deleteSelected"
+                @moved="refreshContents"
             >
                 <template #controls>
                     <UploadButton
                         text="Upload Files"
                         mode="file"
+                        :disabled="busy || pending"
                         @files="uploadFilesHere"
                     />
                     <UploadButton
                         text="Upload Folder"
                         mode="folder"
+                        :disabled="busy || pending"
                         @folder="uploadFolderHere"
                     />
                 </template>
             </FolderBrowser>
+            <div
+                v-if="isDragging && !busy && !pending"
+                class="folder-drop-overlay"
+                role="status"
+            >
+                <div class="folder-drop-message">
+                    <Icon name="solar:cloud-upload-bold" aria-hidden="true" />
+                    <strong>Drop files or folders to upload</strong>
+                    <span>Upload to {{ folder.name }}</span>
+                </div>
+            </div>
             <UploadProgress
                 :active="isUploading || folderActions.isUploading.value"
                 :progress="isUploading ? uploadProgress : folderActions.uploadProgress.value"
-                :processing="isProcessing"
+                :processing="isProcessing || folderActions.uploadProgress.value === 100"
+                label="Uploading files and folders..."
             />
         </div>
         <template #edit>
@@ -126,6 +149,8 @@
 import type { FolderDetails, LibraryItem } from '~~/shared/types/library'
 import { formatFileSize, formatFileTime } from '~/utils/file'
 import { getFileReturnPage } from '~/utils/fileNavigation'
+import { getDroppedUploadItems } from '~/utils/folderUpload'
+import { useFileDrop } from '~/composables/ui/useFileDrop'
 
 definePageMeta({ middleware: 'auth', layout: 'user', key: route => route.path })
 
@@ -397,8 +422,60 @@ const deleteSelected = async (items: LibraryItem[]) => {
     }
 }
 
+const handleDrop = async (event: DragEvent) => {
+    if (busy.value || pending.value || !folder.value || !event.dataTransfer) return
+
+    working.value = true
+    try {
+        const { files, folderFiles } = await getDroppedUploadItems(event.dataTransfer)
+        if (!files.length && !folderFiles.length) {
+            openToast('The dropped folders contain no files to upload.', 'error')
+            return
+        }
+
+        const uploads: Array<() => Promise<unknown>> = []
+        // The files endpoint accepts up to six files per request.
+        for (let index = 0; index < files.length; index += 6) {
+            const batch = files.slice(index, index + 6)
+            uploads.push(() => fileActions.uploadFiles(batch))
+        }
+        if (folderFiles.length) {
+            uploads.push(() => folderActions.uploadFolders(folderFiles, undefined, id))
+        }
+
+        let completed = 0
+        const failures: string[] = []
+        for (const upload of uploads) {
+            try {
+                await upload()
+                completed++
+            } catch (error: any) {
+                failures.push(error.data?.message || error.message || 'Upload failed.')
+            }
+        }
+
+        if (completed) {
+            openToast(
+                failures.length ? 'Some items were uploaded successfully.' : 'Files and folders uploaded successfully.',
+                'success'
+            )
+        }
+        for (const message of new Set(failures)) openToast(message, 'error')
+        if (completed) await refreshContents()
+    } catch (error: any) {
+        openToast(error.data?.message || error.message || 'Could not read the dropped items.', 'error')
+    } finally {
+        working.value = false
+    }
+}
+
+const { isDragging, dragenter, dragover, dragleave, drop } = useFileDrop(
+    event => { void handleDrop(event) },
+    () => Boolean(folder.value)
+)
+
 const uploadFilesHere = async (files: FileList) => {
-    if (busy.value) return
+    if (busy.value || pending.value) return
 
     try {
         await fileActions.uploadFiles(files, refreshContents)
@@ -409,8 +486,8 @@ const uploadFilesHere = async (files: FileList) => {
     }
 }
 
-const uploadFolderHere = async (directory: FileSystemDirectoryHandle) => {
-    if (busy.value) return
+const uploadFolderHere = async (directory: FileSystemDirectoryHandle | FileList) => {
+    if (busy.value || pending.value) return
 
     try {
         await folderActions.uploadFolders(directory, refreshContents, id)
@@ -453,12 +530,46 @@ const metadataRows = computed(() => {
 
 <style scoped>
 .folder-workspace {
+    position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
     min-width: 0;
 }
+
+.folder-drop-overlay {
+    position: absolute;
+    inset: 0.5rem;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    color: #f3f3f5;
+    background: #121214e8;
+    border: 2px dashed #8b7cff;
+    border-radius: 18px;
+    pointer-events: none;
+}
+
+.folder-drop-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    max-width: 100%;
+    text-align: center;
+}
+
+.folder-drop-message > :first-child {
+    color: #8b7cff;
+    font-size: 2.5rem;
+}
+
+.folder-drop-message strong { font-size: 0.9375rem; }
+.folder-drop-message span { max-width: 100%; color: #a3a3ab; font-size: 0.8125rem; overflow-wrap: anywhere; }
 
 .parent-link {
     display: flex;

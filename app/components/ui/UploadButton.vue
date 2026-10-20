@@ -1,27 +1,31 @@
 <template>
-    <div>
+    <div class="upload-control">
         <input
             ref="fileInput"
             type="file"
             class="file-input"
             multiple
             :accept="accept"
+            :webkitdirectory="mode === 'folder' ? '' : undefined"
+            :disabled="disabled"
             @change="handleFileChange"
         >
 
         <button
             type="button"
             class="upload-button"
+            :disabled="disabled"
             @click="openPicker"
         >
-            <div class="upload-left">
-                <Icon name="solar:cloud-upload-bold" />
-                {{ text }}
-            </div>
+            <span class="upload-left">
+                <Icon name="solar:cloud-upload-bold" class="upload-icon" aria-hidden="true" />
+                <span>{{ text }}</span>
+            </span>
 
             <Icon
                 name="solar:alt-arrow-down-linear"
                 class="small-arrow"
+                aria-hidden="true"
             />
         </button>
     </div>
@@ -33,6 +37,7 @@ const props = withDefaults(
         text?: string
         mode?: 'file' | 'folder'
         accept?: string
+        disabled?: boolean
     }>(),
     {
         text: 'Upload',
@@ -42,61 +47,60 @@ const props = withDefaults(
 
 const emit = defineEmits<{
     files: [files: FileList]
-    folder: [handle: FileSystemDirectoryHandle]
+    folder: [files: FileList]
 }>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
-const openPicker = async () => {
-    if (props.mode === 'folder') {
-        if ('showDirectoryPicker' in window) {
-            const handle = await (window as any).showDirectoryPicker()
-
-            emit('folder', handle)
-            return
-        }
-
-        alert('Your browser does not support folder selection. Please use Chrome or Edge.')
-        return
-    }
-
+const openPicker = () => {
+    if (props.disabled) return
     fileInput.value?.click()
 }
 
 const handleFileChange = (event: Event) => {
     const input = event.target as HTMLInputElement
 
-    if (!input.files) return
+    if (props.disabled || !input.files?.length) return
 
-    emit('files', input.files)
+    if (props.mode === 'folder') emit('folder', input.files)
+    else emit('files', input.files)
 
     input.value = ''
 }
 </script>
 
 <style scoped>
+.upload-control {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
 .file-input {
     display: none;
 }
 
 .upload-button {
-    width: 8rem;
-    height: 2.5rem;
+    width: max-content;
+    min-width: 8rem;
+    height: var(--ui-control-height, 2.5rem);
 
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.75rem;
 
     background: #3c47be;
     color: #ffffff;
 
     padding: 0 0.75rem;
 
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
     font-weight: 500;
 
     border: none;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
+    white-space: nowrap;
+    flex-shrink: 0;
 
     cursor: pointer;
 
@@ -107,7 +111,17 @@ const handleFileChange = (event: Event) => {
     line-height: 1.5;
 }
 
-.upload-button:hover {
+.upload-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.upload-button:focus-visible {
+    outline: 2px solid #8b7cff;
+    outline-offset: 3px;
+}
+
+.upload-button:hover:not(:disabled) {
     background: #4a56d4;
     transform: translateY(-0.5px);
 }
@@ -117,17 +131,17 @@ const handleFileChange = (event: Event) => {
 }
 
 .upload-left {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.upload-left svg {
-    font-size: 1.05rem;
-}
-
+.upload-icon,
 .small-arrow {
-    font-size: 1rem;
+    display: block;
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    font-size: var(--ui-control-icon-size, 1.125rem);
     flex-shrink: 0;
 }
 </style>

@@ -6,6 +6,7 @@ import { reserveStorage } from '~~/server/utils/storage'
 import { getUploadFolder } from '../../utils/uploadFolder'
 import { resolve, sep } from 'node:path'
 import { unlink } from 'node:fs/promises'
+import { folderSchema } from '~~/shared/schemas/folder'
 
 export default defineEventHandler(async event => {
     const savedKeys: string[] = []
@@ -17,8 +18,37 @@ export default defineEventHandler(async event => {
             throwError(401, 'You need to be logged in.')
         }
 
-        enforceRateLimit(event, `folders-upload:${session.userId}`, 10, 60 * 1000)
+        const isCreate = getHeader(event, 'content-type')?.split(';')[0]?.trim() === 'application/json'
+        enforceRateLimit(event, `folders-${isCreate ? 'create' : 'upload'}:${session.userId}`, 10, 60 * 1000)
         const targetFolderId = await getUploadFolder(event, session.userId)
+
+        if (isCreate) {
+            const parsed = folderSchema.safeParse(await readBody(event))
+            if (!parsed.success) throwError(400, parsed.error.issues[0]?.message || 'Invalid folder name.')
+
+            const folder = await prisma.$transaction(async tx => {
+                const duplicate = await tx.folders.findFirst({
+                    where: {
+                        user_id: session.userId,
+                        parent_folder_id: targetFolderId,
+                        name: { equals: parsed.data.name, mode: 'insensitive' }
+                    },
+                    select: { id: true }
+                })
+                if (duplicate) throwError(409, 'A folder with this name already exists.')
+
+                return tx.folders.create({
+                    data: {
+                        user_id: session.userId,
+                        parent_folder_id: targetFolderId,
+                        name: parsed.data.name
+                    }
+                })
+            })
+
+            setResponseStatus(event, 201)
+            return { success: true, folder }
+        }
 
         const formData = (await readMultipartFormData(event)) ?? []
         const files = getFileParts(formData)
@@ -242,8 +272,8 @@ export default defineEventHandler(async event => {
             throwError(409, 'A folder or file with this name already exists.')
         }
 
-        console.error('[FOLDER UPLOAD ERROR]', error)
+        console.error('[FOLDER SAVE ERROR]', error)
 
-        throwError(500, 'An unknown error occurred while uploading the folder.')
+        throwError(500, 'Could not save folder.')
     }
 })

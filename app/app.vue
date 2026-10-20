@@ -30,6 +30,16 @@ onMounted(resumeToasts)
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+:root {
+    --ui-control-height: 2.5rem;
+    --ui-control-font-size: 0.875rem;
+    --ui-control-icon-size: 1.125rem;
+    --ui-control-radius: 8px;
+    --ui-control-inner-radius: 4px;
+    --ui-menu-radius: 12px;
+    --ui-panel-radius: 24px;
+}
+
 .toast-stack {
     position: fixed;
     right: calc(1rem + env(safe-area-inset-right, 0px));
@@ -46,7 +56,7 @@ onMounted(resumeToasts)
 }
 
 :where(button, input[type='button'], input[type='submit'], input[type='reset']) {
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius);
 }
 
 :where(
@@ -54,7 +64,7 @@ onMounted(resumeToasts)
     textarea,
     select
 ) {
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius);
 }
 
 :where(input[type='checkbox']) {

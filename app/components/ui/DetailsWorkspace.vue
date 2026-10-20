@@ -236,7 +236,7 @@ const navigateTabs = async (event: KeyboardEvent) => {
     display: flex;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 24px;
+    border-radius: var(--ui-panel-radius, 24px);
     overflow: hidden;
 }
 
@@ -254,7 +254,7 @@ const navigateTabs = async (event: KeyboardEvent) => {
     padding: 0.875rem;
     background: #1a1a1d;
     border: 1px solid #29292e;
-    border-radius: 12px;
+    border-radius: var(--ui-panel-radius, 24px);
     box-sizing: border-box;
 }
 
@@ -299,6 +299,7 @@ const navigateTabs = async (event: KeyboardEvent) => {
     color: #cfcfd5;
     background: transparent;
     border: none;
+    border-radius: var(--ui-control-radius, 8px);
     cursor: pointer;
 }
 
@@ -324,9 +325,9 @@ const navigateTabs = async (event: KeyboardEvent) => {
     color: #cfcfd5;
     background: #202024;
     border: 1px solid #303036;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
     box-sizing: border-box;
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
     font-weight: 500;
     line-height: 1.5;
     cursor: pointer;
@@ -387,10 +388,10 @@ const navigateTabs = async (event: KeyboardEvent) => {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.25rem;
-    padding: 0.25rem;
+    padding: 3px;
     background: #151518;
     border: 1px solid #29292e;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 }
 
 .detail-tabs button {
@@ -399,8 +400,8 @@ const navigateTabs = async (event: KeyboardEvent) => {
     color: #898991;
     background: transparent;
     border: none;
-    border-radius: 6px;
-    font-size: 0.875rem;
+    border-radius: var(--ui-control-inner-radius, 4px);
+    font-size: var(--ui-control-font-size, 0.875rem);
     font-weight: 500;
     line-height: 1.5;
     cursor: pointer;

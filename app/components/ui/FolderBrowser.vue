@@ -14,34 +14,6 @@
                 <slot name="controls" />
             </div>
         </div>
-        <div
-            v-if="selected.length && !readOnly"
-            class="selection-toolbar"
-        >
-            <span>{{ selected.length }} selected</span>
-            <div class="contents-controls">
-                <button
-                    type="button"
-                    :disabled="busy"
-                    @click="selected = []"
-                >
-                    Clear
-                </button>
-                <button
-                    type="button"
-                    class="delete-selected"
-                    :disabled="busy"
-                    @click="
-                        $emit(
-                            'deleteSelected',
-                            items.filter(item => selected.includes(item.id))
-                        )
-                    "
-                >
-                    Delete Selected
-                </button>
-            </div>
-        </div>
         <DataView
             :view-mode="view"
             :is-loading="pending"
@@ -232,6 +204,15 @@
             :total-pages="totalPages"
             :view-mode="view"
         />
+        <SelectionToolbar
+            v-if="!readOnly"
+            :items="selectionItems"
+            :busy="busy || pending"
+            :current-folder-id="currentFolderId"
+            @clear="selected = []"
+            @delete="$emit('deleteSelected', items.filter(item => selected.includes(item.id)))"
+            @moved="handleSelectionMoved"
+        />
     </div>
 </template>
 
@@ -248,15 +229,17 @@ const props = withDefaults(
         pending?: boolean
         busy?: boolean
         readOnly?: boolean
+        currentFolderId?: string | null
         previewUrl?: (item: LibraryItem) => string
     }>(),
     { favoriteIds: () => [], pending: false, busy: false, readOnly: false }
 )
 
-defineEmits<{
+const emit = defineEmits<{
     open: [item: LibraryItem]
     action: [action: string, item: LibraryItem]
     deleteSelected: [items: LibraryItem[]]
+    moved: []
 }>()
 
 const search = ref('')
@@ -274,6 +257,11 @@ const { sortedItems } = useSort(
 const perPage = computed(() => (view.value === 'list' ? 12 : 24))
 const { currentPage, totalPages, paginatedItems } = usePagination(sortedItems, perPage)
 const { selectedItems: selected, allSelected, toggleSelectAll } = useSelection(paginatedItems)
+const selectionItems = computed(() => props.items.filter(item => selected.value.includes(item.id)).map(item => ({ id: item.id, type: item.type })))
+const handleSelectionMoved = () => {
+    selected.value = []
+    emit('moved')
+}
 const partiallySelected = computed(
     () => !allSelected.value && paginatedItems.value.some(item => selected.value.includes(item.id))
 )
@@ -331,16 +319,14 @@ watch(
 }
 
 .contents-toolbar,
-.contents-controls,
-.selection-toolbar {
+.contents-controls {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
-.contents-toolbar,
-.selection-toolbar {
+.contents-toolbar {
     justify-content: space-between;
 }
 
@@ -421,6 +407,7 @@ tbody tr.selected {
     border-radius: 10px;
     background: #282354;
     color: #8b7cff;
+    font-size: var(--ui-control-icon-size, 1.125rem);
 }
 
 .item-checkbox {
@@ -487,25 +474,6 @@ tbody tr.selected {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.selection-toolbar {
-    color: #a8a8b0;
-    font-size: 0.85rem;
-}
-
-.selection-toolbar button {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    background: #202024;
-    color: #cfcfd5;
-    font: inherit;
-    cursor: pointer;
-}
-
-.selection-toolbar button.delete-selected {
-    color: #ff6b6b;
 }
 
 @media (max-width: 500px) {

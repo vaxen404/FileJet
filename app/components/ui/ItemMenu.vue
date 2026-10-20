@@ -373,14 +373,17 @@ onClickOutside(
     color: #a8a8b0;
 
     border: none;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 
-    font-size: 1.1rem;
+    font-size: var(--ui-control-icon-size, 1.125rem);
 
     cursor: pointer;
 }
 
-.menu-trigger :deep(svg) {
+.menu-trigger :deep(.iconify) {
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    flex-shrink: 0;
     transform: rotate(90deg);
 }
 
@@ -395,7 +398,7 @@ onClickOutside(
     width: max-content;
     min-width: min(11rem, calc(100vw - 2rem));
 
-    padding: 0.25rem;
+    padding: 3px;
 
     display: flex;
     flex-direction: column;
@@ -403,7 +406,7 @@ onClickOutside(
     background: #1f1f23;
 
     border: 1px solid #303036;
-    border-radius: 24px;
+    border-radius: var(--ui-menu-radius, 12px);
 
     box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.35);
 
@@ -427,9 +430,9 @@ onClickOutside(
     color: #d5d5da;
 
     border: none;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
 
     cursor: pointer;
 
@@ -442,9 +445,10 @@ onClickOutside(
 }
 
 .menu-item :deep(.menu-item-icon) {
-    width: 1rem;
-    height: 1rem;
-    flex: 0 0 1rem;
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    font-size: var(--ui-control-icon-size, 1.125rem);
+    flex: 0 0 var(--ui-control-icon-size, 1.125rem);
 }
 
 .menu-item:hover {

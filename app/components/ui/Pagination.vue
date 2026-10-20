@@ -111,8 +111,8 @@ const goToPage = (page: number) => {
     border: 1px solid #29292e;
     border-top: none;
 
-    border-bottom-left-radius: 24px;
-    border-bottom-right-radius: 24px;
+    border-bottom-left-radius: var(--ui-panel-radius, 24px);
+    border-bottom-right-radius: var(--ui-panel-radius, 24px);
 }
 
 .grid-pagination {
@@ -134,13 +134,21 @@ const goToPage = (page: number) => {
     color: #a8a8b0;
 
     border: 1px solid #29292e;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     line-height: 1.5;
+}
+
+.page-button :deep(.iconify) {
+    display: block;
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    font-size: var(--ui-control-icon-size, 1.125rem);
+    flex-shrink: 0;
 }
 
 .page-button:hover:not(:disabled) {
@@ -149,7 +157,7 @@ const goToPage = (page: number) => {
 }
 
 .page-button.active {
-    background: #343c8f;
+    background: #3c47be;
     color: #ffffff;
     border-color: #3c47be;
 }

@@ -75,6 +75,12 @@ const handleDragleave = (event: DragEvent) => {
     flex: 1;
     min-width: 0;
     min-height: 0;
+    border-radius: var(--ui-panel-radius, 24px);
+}
+
+.data-view:has(+ .pagination:not(.grid-pagination)) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .view-content {
@@ -95,8 +101,7 @@ const handleDragleave = (event: DragEvent) => {
     background: #1a1a1d;
 
     border: 1px solid #29292e;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
+    border-radius: inherit;
 
     overflow: hidden;
 }
@@ -174,7 +179,7 @@ const handleDragleave = (event: DragEvent) => {
     align-items: center;
     justify-content: center;
     border: 2px dashed #5a5aff;
-    border-radius: 24px;
+    border-radius: inherit;
     pointer-events: none;
     z-index: 20;
 }

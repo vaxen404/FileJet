@@ -22,44 +22,12 @@
                         class="new-note-button"
                         @click="createNote"
                     >
-                        <Icon name="solar:add-circle-bold" />
+                        <Icon name="solar:add-circle-bold" class="new-note-icon" aria-hidden="true" />
                         New Note
                     </button>
                 </div>
             </div>
 
-            <div
-                v-if="selectedNotes.length"
-                class="selection-toolbar"
-                role="group"
-                aria-label="Selected notes"
-            >
-                <span
-                    role="status"
-                    aria-live="polite"
-                    >{{ selectedNotes.length }} selected</span
-                >
-
-                <div class="selection-actions">
-                    <button
-                        type="button"
-                        class="selection-btn"
-                        :disabled="busy"
-                        @click="selectedNotes = []"
-                    >
-                        Clear
-                    </button>
-                    <button
-                        type="button"
-                        class="selection-btn delete-selected-btn"
-                        :disabled="busy"
-                        @click="handleDeleteSelected"
-                    >
-                        <Icon name="solar:trash-bin-trash-bold" />
-                        Delete Selected
-                    </button>
-                </div>
-            </div>
         </div>
 
         <DataView
@@ -247,7 +215,7 @@
                         </template>
                         <template #metadata>
                             <span>{{ formatFileSize(note.size) }}</span>
-                            ?
+                            ·
                             <span>{{ formatFileTime(note.created_at) }}</span>
                         </template>
                     </ItemGridCard>
@@ -272,6 +240,13 @@
             v-model="currentPage"
             :total-pages="totalPages"
             :view-mode="viewMode"
+        />
+        <SelectionToolbar
+            :items="selectionItems"
+            :busy="busy"
+            @clear="selectedNotes = []"
+            @delete="handleDeleteSelected"
+            @moved="handleSelectionMoved"
         />
     </div>
 </template>
@@ -334,6 +309,13 @@ const {
 } = usePagination(sortedNotes, itemsPerPage)
 
 const { selectedItems: selectedNotes, allSelected, toggleSelectAll } = useSelection(paginatedNotes)
+
+const selectionItems = computed(() => selectedNotes.value.map(id => ({ id, type: 'note' as const })))
+const handleSelectionMoved = async () => {
+    selectedNotes.value = []
+    await fetchAll()
+    if (error.value) openToast(error.value, 'error')
+}
 
 const partiallySelected = computed(() => {
     return (
@@ -494,10 +476,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     flex: 1;
     min-height: 0;
 
-    padding: 0 0.5rem;
-
-    border-radius: 12px;
-
     display: flex;
     flex-direction: column;
 
@@ -544,7 +522,9 @@ watch([searchQuery, sortMode, viewMode], () => {
 }
 
 .new-note-button {
-    height: 2.5rem;
+    height: var(--ui-control-height, 2.5rem);
+    flex-shrink: 0;
+    white-space: nowrap;
 
     display: flex;
     align-items: center;
@@ -558,9 +538,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     color: #ffffff;
 
     border: none;
-    border-radius: 6px;
+    border-radius: var(--ui-control-radius, 8px);
 
-    font-size: 0.875rem;
+    font-size: var(--ui-control-font-size, 0.875rem);
     font-weight: 500;
 
     cursor: pointer;
@@ -571,6 +551,14 @@ watch([searchQuery, sortMode, viewMode], () => {
     font-family: 'Inter', sans-serif;
     line-height: 1.5;
     box-sizing: border-box;
+}
+
+.new-note-icon {
+    display: block;
+    width: var(--ui-control-icon-size, 1.125rem);
+    height: var(--ui-control-icon-size, 1.125rem);
+    font-size: var(--ui-control-icon-size, 1.125rem);
+    flex-shrink: 0;
 }
 
 .new-note-button:hover {
@@ -780,74 +768,6 @@ watch([searchQuery, sortMode, viewMode], () => {
     white-space: nowrap;
     font-weight: 400;
     line-height: 1.5;
-}
-
-.selection-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    color: #a8a8b0;
-    font-size: 0.875rem;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    line-height: 1.5;
-}
-
-.selection-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.selection-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    height: 2.5rem;
-    padding: 0 0.75rem;
-    color: #a8a8b0;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 6px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-    line-height: 1.5;
-    box-sizing: border-box;
-}
-
-.selection-btn:hover:not(:disabled) {
-    color: #ffffff;
-    background: #242429;
-    border-color: #35353c;
-}
-
-.delete-selected-btn {
-    color: #ff6b6b;
-}
-
-.delete-selected-btn:hover:not(:disabled) {
-    color: #ff7d7d;
-    background: #3a2024;
-    border-color: #4a292d;
-}
-
-.selection-btn:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 3px;
-}
-
-.selection-btn:disabled {
-    opacity: 0.6;
-    cursor: wait;
 }
 
 .table-scroll {
