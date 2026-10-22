@@ -1,16 +1,17 @@
 <template>
     <div
-        class="details-view"
+        class="details-view w-full with-preview:grid with-preview:grid-cols-[minmax(0,_1fr)_28rem]
+        with-preview:gap-4 max-preview:with-preview:grid-cols-[1fr]"
         :class="{ 'with-preview': previewable }"
     >
         <div
             v-if="previewable"
-            class="previewable-side"
+            class="previewable-side min-w-0 min-h-0"
         >
             <slot name="preview" />
         </div>
 
-        <div class="details-side">
+        <div class="details-side min-w-0 min-h-0 overflow-auto">
             <slot name="details" />
         </div>
     </div>
@@ -26,31 +27,3 @@ withDefaults(
     }
 )
 </script>
-
-<style scoped>
-.details-view {
-    width: 100%;
-}
-
-.details-view.with-preview {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 28rem;
-    gap: 1rem;
-}
-
-.previewable-side,
-.details-side {
-    min-width: 0;
-    min-height: 0;
-}
-
-.details-side {
-    overflow: auto;
-}
-
-@media (max-width: 900px) {
-    .details-view.with-preview {
-        grid-template-columns: 1fr;
-    }
-}
-</style>

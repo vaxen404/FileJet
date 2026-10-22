@@ -1,18 +1,35 @@
 <template>
-    <Transition name="toast">
+    <Transition
+        name="toast"
+        enter-active-class="transition-opacity duration-150 ease-[ease] motion-reduce:transition-none"
+        leave-active-class="transition-opacity duration-150 ease-[ease] motion-reduce:transition-none"
+        enter-from-class="opacity-0"
+        leave-to-class="opacity-0"
+    >
         <div
             v-if="show"
-            class="toast"
-            :class="[type, { 'toast--trash-inline': actionVariant === 'trash-undo' }]"
+            class="toast group/toast relative pointer-events-auto flex-none flex items-center border
+            [font-family:inherit] z-9999 is-error:bg-[#301d22] is-error:border-[#593039] is-error:text-[#ffc5cd]"
+            :class="[
+                type,
+                { 'toast--trash-inline': actionVariant === 'trash-undo' },
+                actionVariant === 'trash-undo'
+                    ? 'flex-nowrap gap-4 w-100 max-w-[calc(100vw_-_2rem)] min-h-16 px-4 py-3.5 bg-[#16161c] border-[#34343f] rounded-lg shadow-none text-[#ededf0]'
+                    : 'gap-[0.6rem] w-max max-w-[min(28rem,_calc(100vw_-_2rem))] px-4 py-3 bg-[#17263a] border-[#294568] rounded-3xl shadow-[0_0.25rem_1rem_#00000026] text-[#c5dcff]'
+            ]"
         >
             <template v-if="actionVariant === 'trash-undo'">
-                <span class="trash-toast-message">{{ message }}</span>
+                <span class="trash-toast-message flex-auto min-w-0 overflow-hidden text-[#ededf0] text-sm font-normal
+                    leading-normal text-ellipsis whitespace-nowrap">{{ message }}</span>
 
-                <div class="trash-toast-controls">
+                <div class="trash-toast-controls flex-none flex flex-nowrap items-center gap-3.5">
                     <button
                         v-if="actionLabel"
                         type="button"
-                        class="trash-toast-undo"
+                        class="trash-toast-undo flex-none inline-flex items-center justify-center min-h-7 py-1 px-3.5 border
+                        border-[#414149] rounded-full bg-transparent text-[#ededf0] text-sm font-normal leading-tight
+                        whitespace-nowrap cursor-pointer hover:enabled:bg-[#ffffff08] disabled:opacity-65
+                        disabled:cursor-wait"
                         :disabled="pending"
                         @click="$emit('action')"
                     >
@@ -21,7 +38,8 @@
 
                     <button
                         type="button"
-                        class="trash-toast-close"
+                        class="trash-toast-close flex-none inline-flex items-center justify-center p-0 border-0 bg-transparent
+                        text-[#9393a3] cursor-pointer hover:text-[#ededf0] size-5"
                         @click="$emit('close')"
                     >
                         <svg
@@ -43,19 +61,20 @@
 
             <template v-else>
                 <Icon
-                    class="toast-icon"
+                    class="toast-icon flex-none text-[#7bb5ff] group-[.error]/toast:text-[#ff8998]"
                     :name="
                         type === 'error' ? 'solar:close-circle-linear' : 'solar:check-circle-linear'
                     "
                     size="1rem"
                 />
 
-                <span class="toast-message">{{ message }}</span>
+                <span class="toast-message min-w-0 text-[0.8rem] leading-normal whitespace-pre-line wrap-anywhere">{{ message }}</span>
 
                 <button
                     v-if="actionLabel"
                     type="button"
-                    class="toast-action"
+                    class="toast-action flex-none ml-3 py-1 px-0 border-0 bg-transparent text-inherit text-[0.8rem]
+                    font-semibold cursor-pointer hover:enabled:underline disabled:opacity-65 disabled:cursor-wait"
                     :disabled="pending"
                     @click="$emit('action')"
                 >
@@ -81,174 +100,3 @@ withDefaults(
 
 defineEmits<{ action: []; close: [] }>()
 </script>
-
-<style scoped>
-.toast {
-    position: relative;
-    pointer-events: auto;
-    flex: 0 0 auto;
-
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-
-    width: max-content;
-    max-width: min(28rem, calc(100vw - 2rem));
-    padding: 0.75rem 1rem;
-    box-sizing: border-box;
-
-    background: #17263a;
-    border: 1px solid #294568;
-    border-radius: 24px;
-    box-shadow: 0 0.25rem 1rem #00000026;
-
-    color: #c5dcff;
-    font-family: inherit;
-
-    z-index: 9999;
-}
-
-.toast-icon {
-    flex: 0 0 auto;
-    color: #7bb5ff;
-}
-
-.toast.error {
-    background: #301d22;
-    border-color: #593039;
-    color: #ffc5cd;
-}
-
-.toast.error .toast-icon {
-    color: #ff8998;
-}
-
-.toast-message {
-    min-width: 0;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    white-space: pre-line;
-    overflow-wrap: anywhere;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-    transition: opacity 0.15s ease;
-}
-
-.toast-action {
-    flex: 0 0 auto;
-    margin-left: 0.75rem;
-    padding: 0.25rem 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.toast-action:hover:not(:disabled) {
-    text-decoration: underline;
-}
-
-.toast-action:disabled {
-    opacity: 0.65;
-    cursor: wait;
-}
-
-.toast--trash-inline {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 1rem;
-    width: 25rem;
-    max-width: calc(100vw - 2rem);
-    min-height: 4rem;
-    padding: 0.875rem 1rem;
-    background: #16161c;
-    border: 1px solid #34343f;
-    border-radius: 0.5rem;
-    box-shadow: none;
-    color: #ededf0;
-}
-
-.trash-toast-message {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    color: #ededf0;
-    font-size: 0.875rem;
-    font-weight: 400;
-    line-height: 1.5;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.trash-toast-controls {
-    flex: 0 0 auto;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 0.875rem;
-}
-
-.trash-toast-undo {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 1.75rem;
-    padding: 4px 14px;
-    border: 1px solid #414149;
-    border-radius: 999px;
-    background: transparent;
-    color: #ededf0;
-    font: inherit;
-    font-size: 0.875rem;
-    font-weight: 400;
-    line-height: 1.25;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.trash-toast-undo:hover:not(:disabled) {
-    background: #ffffff08;
-}
-
-.trash-toast-undo:disabled {
-    opacity: 0.65;
-    cursor: wait;
-}
-
-.trash-toast-close {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #9393a3;
-    cursor: pointer;
-}
-
-.trash-toast-close:hover {
-    color: #ededf0;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-    opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .toast-enter-active,
-    .toast-leave-active {
-        transition: none;
-    }
-}
-</style>

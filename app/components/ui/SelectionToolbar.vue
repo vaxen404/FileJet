@@ -1,52 +1,77 @@
 <template>
     <div
         v-if="items.length"
-        class="selection-region"
+        class="selection-region @container w-full shrink-0"
     >
-        <div class="selection-dock">
-            <span class="selection-count">{{ items.length }} selected</span>
-            <div class="selection-buttons">
-                <button
+        <div class="selection-dock flex items-center self-center flex-none gap-3 w-max max-w-full mt-3 mr-auto mb-0
+            ml-auto pt-2 pr-3 pb-2 pl-4 text-foreground bg-surface border border-[#35353c] rounded-full
+            shadow-[0_6px_24px_#0003] dock-compact:flex-wrap dock-compact:justify-between dock-compact:gap-2
+            dock-compact:p-3 dock-compact:rounded-[18px]">
+            <span class="selection-count shrink-0 text-control-size font-medium whitespace-nowrap">{{ items.length }} selected</span>
+            <div class="selection-buttons flex items-stretch overflow-hidden bg-control border border-[#35353c] rounded-full
+                dock-compact:order-3 dock-compact:[flex:1_1_100%] dock-compact:flex-wrap dock-compact:rounded-xl">
+                <button class="inline-flex items-center justify-center shrink-0 gap-[0.4rem] min-h-9 py-0 px-3 text-[#d5d5da]
+                    bg-transparent border-0 rounded-none text-control-size font-medium whitespace-nowrap cursor-pointer
+                    not-first:border-l not-first:border-l-[#35353c] hover:enabled:text-white hover:enabled:bg-[#2d2d33]
+                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-3
+                    disabled:opacity-45 disabled:cursor-not-allowed dock-compact:flex-auto dock-compact:min-h-10"
                     type="button"
                     :disabled="working"
                     @click="$emit('clear')"
                 >
-                    <Icon name="solar:checklist-minimalistic-linear" />
+                    <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:checklist-minimalistic-linear" />
                     Deselect all
                 </button>
-                <button
+                <button class="inline-flex items-center justify-center shrink-0 gap-[0.4rem] min-h-9 py-0 px-3 text-[#d5d5da]
+                    bg-transparent border-0 rounded-none text-control-size font-medium whitespace-nowrap cursor-pointer
+                    not-first:border-l not-first:border-l-[#35353c] hover:enabled:text-white hover:enabled:bg-[#2d2d33]
+                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-3
+                    disabled:opacity-45 disabled:cursor-not-allowed dock-compact:flex-auto dock-compact:min-h-10"
                     type="button"
                     :disabled="working"
                     @click="moveModalOpen = true"
                 >
-                    <Icon name="solar:folder-path-connect-linear" />
+                    <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:folder-path-connect-linear" />
                     Move
                 </button>
-                <button
+                <button class="inline-flex items-center justify-center shrink-0 gap-[0.4rem] min-h-9 py-0 px-3 text-[#d5d5da]
+                    bg-transparent border-0 rounded-none text-control-size font-medium whitespace-nowrap cursor-pointer
+                    not-first:border-l not-first:border-l-[#35353c] hover:enabled:text-white hover:enabled:bg-[#2d2d33]
+                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-3
+                    disabled:opacity-45 disabled:cursor-not-allowed dock-compact:flex-auto dock-compact:min-h-10"
                     type="button"
                     :disabled="working"
                     @click="download"
                 >
-                    <Icon name="solar:download-linear" />
+                    <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:download-linear" />
                     {{ isDownloading ? 'Preparing...' : 'Download' }}
                 </button>
                 <button
                     type="button"
-                    class="delete-button"
+                    class="delete-button inline-flex items-center justify-center shrink-0 gap-[0.4rem] min-h-9 py-0 px-3
+                    text-[#ff6b7b] bg-transparent border-0 rounded-none text-control-size font-medium whitespace-nowrap
+                    cursor-pointer not-first:border-l not-first:border-l-[#35353c] hover:enabled:text-[#ff8793]
+                    hover:enabled:bg-[#3a2024] focus-visible:outline-2 focus-visible:outline-accent
+                    focus-visible:-outline-offset-3 disabled:opacity-45 disabled:cursor-not-allowed
+                    dock-compact:flex-auto dock-compact:min-h-10"
                     :disabled="working"
                     @click="$emit('delete')"
                 >
-                    <Icon name="solar:trash-bin-trash-linear" />
+                    <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:trash-bin-trash-linear" />
                     Delete
                 </button>
             </div>
             <button
                 type="button"
-                class="dismiss-button"
+                class="dismiss-button inline-flex items-center justify-center shrink-0 gap-[0.4rem] min-h-9 p-0
+                text-[#d5d5da] bg-transparent border-0 rounded-full text-control-size font-medium whitespace-nowrap
+                cursor-pointer w-9 hover:enabled:text-white hover:enabled:bg-[#2d2d33] focus-visible:outline-2
+                focus-visible:outline-accent focus-visible:-outline-offset-3 disabled:opacity-45
+                disabled:cursor-not-allowed"
                 :disabled="working"
                 @click="$emit('clear')"
             >
-                <Icon name="solar:close-circle-linear" />
+                <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:close-circle-linear" />
             </button>
         </div>
     </div>
@@ -92,128 +117,3 @@ const download = async () => {
     }
 }
 </script>
-
-<style scoped>
-.selection-region {
-    container-type: inline-size;
-    width: 100%;
-    flex-shrink: 0;
-}
-
-.selection-dock {
-    display: flex;
-    align-items: center;
-    align-self: center;
-    flex: 0 0 auto;
-    gap: 0.75rem;
-    width: max-content;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin: 0.75rem auto 0;
-    padding: 0.5rem 0.75rem 0.5rem 1rem;
-    color: #f3f3f5;
-    background: #1a1a1d;
-    border: 1px solid #35353c;
-    border-radius: 999px;
-    box-shadow: 0 6px 24px #0003;
-}
-
-.selection-count {
-    flex-shrink: 0;
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.selection-buttons {
-    display: flex;
-    align-items: stretch;
-    overflow: hidden;
-    background: #202024;
-    border: 1px solid #35353c;
-    border-radius: 999px;
-}
-
-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    gap: 0.4rem;
-    min-height: 2.25rem;
-    padding: 0 0.75rem;
-    color: #d5d5da;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    font: inherit;
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-weight: 500;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.selection-buttons button + button {
-    border-left: 1px solid #35353c;
-}
-
-button:hover:not(:disabled) {
-    color: #fff;
-    background: #2d2d33;
-}
-
-button:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: -3px;
-}
-
-button:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-button .iconify {
-    display: block;
-    width: var(--ui-control-icon-size, 1.125rem);
-    height: var(--ui-control-icon-size, 1.125rem);
-    font-size: var(--ui-control-icon-size, 1.125rem);
-    flex-shrink: 0;
-}
-
-.delete-button {
-    color: #ff6b7b;
-}
-
-.delete-button:hover:not(:disabled) {
-    color: #ff8793;
-    background: #3a2024;
-}
-
-.dismiss-button {
-    width: 2.25rem;
-    padding: 0;
-    border-radius: 50%;
-}
-
-@container (max-width: 700px) {
-    .selection-dock {
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        border-radius: 18px;
-    }
-
-    .selection-buttons {
-        order: 3;
-        flex: 1 1 100%;
-        flex-wrap: wrap;
-        border-radius: 12px;
-    }
-
-    .selection-buttons button {
-        flex: 1 1 auto;
-        min-height: 2.5rem;
-    }
-}
-</style>

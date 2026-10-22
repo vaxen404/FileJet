@@ -1,0 +1,140 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+/* Shared design values. Component layouts use Tailwind classes in Vue templates. */
+@theme {
+    --font-sans: Inter, sans-serif;
+    --font-mono: monospace;
+    --color-surface: #1a1a1d;
+    --color-canvas: #121214;
+    --color-divider: #29292e;
+    --color-primary: #3c47be;
+    --color-accent: #8b7cff;
+    --color-muted: #898991;
+    --color-label: #a8a8b0;
+    --color-control: #202024;
+    --color-surface-hover: #1f1f23;
+    --color-raised: #242429;
+    --color-control-border: #303036;
+    --color-secondary: #b5b5bd;
+    --color-heading-muted: #a3a3ab;
+    --color-foreground: #f3f3f5;
+    --color-highlight: #5a5aff;
+    --spacing-control: var(--ui-control-height, 2.5rem);
+    --spacing-control-icon: var(--ui-control-icon-size, 1.125rem);
+    --text-control-size: var(--ui-control-font-size, 0.875rem);
+    --text-control-icon: var(--ui-control-icon-size, 1.125rem);
+    --radius-control: var(--ui-control-radius, 8px);
+    --radius-control-inner: var(--ui-control-inner-radius, 4px);
+    --radius-menu: var(--ui-menu-radius, 12px);
+    --radius-panel: var(--ui-panel-radius, 24px);
+    --radius-preview: max(0px, calc(var(--ui-panel-radius, 24px) - 0.75rem - 1px));
+}
+
+/* Preserve the original breakpoints and existing Vue state classes. */
+@custom-variant max-desktop (@media (max-width: 1500px));
+@custom-variant max-laptop (@media (max-width: 1100px));
+@custom-variant max-preview (@media (max-width: 900px));
+@custom-variant max-tablet (@media (max-width: 800px));
+@custom-variant max-mobile (@media (max-width: 600px));
+@custom-variant max-phone (@media (max-width: 500px));
+@custom-variant max-tiny (@media (max-width: 360px));
+@custom-variant short-screen (@media (max-height: 500px));
+@custom-variant touch (@media (hover: none));
+@custom-variant details-middle (@media (max-width: 1100px) and (min-width: 901px));
+@custom-variant is-active (&.active);
+@custom-variant selected (&.selected);
+@custom-variant favorite (&.is-favorite);
+@custom-variant busy (&.is-busy);
+@custom-variant is-invalid (&.invalid);
+@custom-variant with-preview (&.with-preview);
+@custom-variant grid-pagination (&.grid-pagination);
+@custom-variant is-list-view (&.list-view);
+@custom-variant is-grid-view (&.grid-view);
+@custom-variant empty-view (&.empty-view);
+@custom-variant loading-view (&.loading-view);
+@custom-variant embedded (&.embedded);
+@custom-variant expanded (&.is-expanded);
+@custom-variant files-empty (&.files-list-empty);
+@custom-variant text-preview (&.text-preview);
+@custom-variant media-content (&.media-content);
+@custom-variant image-content (&.image-content);
+@custom-variant text-content (&.text-content);
+@custom-variant is-error (&.error);
+@custom-variant is-file (&.file);
+@custom-variant is-folder (&.folder);
+@custom-variant is-indeterminate (&.indeterminate);
+@custom-variant with-list-pagination (&:has(+ .pagination:not(.grid-pagination)));
+@custom-variant valid-field (&:not(.invalid));
+@custom-variant dock-compact (@container (max-width: 700px));
+@custom-variant has-unlock (&:has(.share-unlock));
+@custom-variant folder-overlay-empty (.folder-browser &:empty);
+@custom-variant fullscreen (&:fullscreen);
+
+@layer base {
+    html:has(.user-layout), body:has(.user-layout), #__nuxt:has(.user-layout) { @apply m-0 h-full w-full; }
+    body:has(.user-layout) { @apply overflow-hidden; }
+    :root {
+        --ui-control-height: 2.5rem;
+        --ui-control-font-size: 0.875rem;
+        --ui-control-icon-size: 1.125rem;
+        --ui-control-radius: 8px;
+        --ui-control-inner-radius: 4px;
+        --ui-menu-radius: 12px;
+        --ui-panel-radius: 24px;
+    }
+
+    * { @apply font-sans; }
+    body { @apply m-0 p-0; }
+    button, input[type="button"], input[type="submit"], input[type="reset"], input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), textarea, select {
+        @apply rounded-control;
+    }
+    :where(input[type="checkbox"]) { @apply rounded-sm; }
+    :where(dialog, .note-modal-conteiner, .preview-overlay) { @apply rounded-xl; }
+}
+
+/* The same custom checkbox is used in file, folder, note and favorite views. */
+@utility file-checkbox {
+    @apply relative m-0 grid size-[1.1rem] shrink-0 cursor-pointer appearance-none place-items-center rounded-sm border border-[#505057] bg-control;
+    @apply transition-colors duration-200 ease-[ease] enabled:hover:border-accent;
+    @apply checked:border-[#5965ed] checked:bg-primary indeterminate:border-[#5965ed] indeterminate:bg-primary;
+    @apply checked:after:-mt-[0.15rem] checked:after:h-[0.55rem] checked:after:w-[0.3rem] checked:after:rotate-45;
+    @apply checked:after:border-r-2 checked:after:border-b-2 checked:after:border-white checked:after:content-[''];
+    @apply indeterminate:after:m-0 indeterminate:after:h-[2px] indeterminate:after:w-[0.55rem] indeterminate:after:rotate-0;
+    @apply indeterminate:after:border-0 indeterminate:after:bg-white indeterminate:after:content-[''];
+    @apply focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+/* Shared table and grid title styles avoid repeating the same long class lists. */
+@utility file-table-cell {
+    @apply border-b border-b-divider px-4 py-0 text-left align-middle;
+}
+
+@utility file-table-heading {
+    @apply file-table-cell sticky top-0 z-2 h-[3.8rem] bg-surface text-heading-muted text-[0.8rem] font-medium;
+}
+
+@utility grid-name-input {
+    @apply block w-full min-w-0 min-h-6 overflow-hidden text-ellipsis whitespace-nowrap;
+    @apply rounded-md border border-transparent bg-transparent p-0 text-sm leading-normal font-semibold text-foreground outline-none;
+    @apply disabled:opacity-100 disabled:[-webkit-text-fill-color:#f3f3f5] disabled:cursor-pointer;
+    @apply is-active:border-[#7063d8] is-active:px-1 is-active:py-0;
+}
+
+/* Preserve DetailsPanel's public slot classes and optional SVG icon mode. */
+@utility details-action-icons {
+    @apply [&_svg]:size-[0.95rem] [&_svg]:shrink-0 [&_.icon]:size-[0.95rem] [&_.icon]:shrink-0;
+}
+
+@utility info-row {
+    @apply flex h-11 w-full items-center justify-between gap-4 border-b border-b-divider px-[0.9rem] py-0 last:border-b-0;
+}
+
+@utility info-label {
+    @apply shrink-0 text-xs leading-normal text-muted;
+}
+
+@utility info-value {
+    @apply min-w-0 max-w-[68%] overflow-hidden text-ellipsis whitespace-nowrap text-right text-xs leading-normal font-medium text-[#d5d5da];
+}

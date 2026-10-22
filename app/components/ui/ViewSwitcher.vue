@@ -1,26 +1,33 @@
 <template>
-    <div class="view-switcher">
+    <div class="view-switcher w-24 h-control shrink-0 flex items-center justify-center bg-surface-hover p-[3px]
+        gap-[3px] border border-divider rounded-control">
         <button
             type="button"
-            class="view-button"
+            class="view-button flex-1 h-full min-w-0 p-0 flex items-center justify-center text-white bg-transparent
+            border-0 rounded-control-inner cursor-pointer text-control-size font-medium leading-normal
+            hover:bg-[#2a2a2f] is-active:bg-primary focus-visible:outline-2 focus-visible:outline-[#b0a5ff]
+            focus-visible:-outline-offset-2"
             :class="{ active: modelValue === 'grid' }"
             @click="emit('update:modelValue', 'grid')"
         >
             <Icon
                 name="solar:widget-4-linear"
-                class="view-icon"
+                class="view-icon block text-control-icon shrink-0 text-white size-control-icon"
             />
         </button>
 
         <button
             type="button"
-            class="view-button"
+            class="view-button flex-1 h-full min-w-0 p-0 flex items-center justify-center text-white bg-transparent
+            border-0 rounded-control-inner cursor-pointer text-control-size font-medium leading-normal
+            hover:bg-[#2a2a2f] is-active:bg-primary focus-visible:outline-2 focus-visible:outline-[#b0a5ff]
+            focus-visible:-outline-offset-2"
             :class="{ active: modelValue === 'list' }"
             @click="emit('update:modelValue', 'list')"
         >
             <Icon
                 name="solar:list-linear"
-                class="view-icon"
+                class="view-icon block text-control-icon shrink-0 text-white size-control-icon"
             />
         </button>
     </div>
@@ -35,69 +42,3 @@ const emit = defineEmits<{
     'update:modelValue': [value: 'grid' | 'list']
 }>()
 </script>
-
-<style scoped>
-.view-switcher {
-    width: 6rem;
-    height: var(--ui-control-height, 2.5rem);
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #1f1f23;
-
-    padding: 3px;
-    gap: 3px;
-
-    border: 1px solid #29292e;
-    border-radius: var(--ui-control-radius, 8px);
-    box-sizing: border-box;
-}
-
-.view-button {
-    flex: 1;
-    height: 100%;
-    min-width: 0;
-    padding: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #ffffff;
-    background: transparent;
-
-    border: none;
-    border-radius: var(--ui-control-inner-radius, 4px);
-
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-weight: 500;
-    line-height: 1.5;
-}
-
-.view-button:hover {
-    background: #2a2a2f;
-}
-
-.view-button.active {
-    background: #3c47be;
-}
-
-.view-icon {
-    display: block;
-    width: var(--ui-control-icon-size, 1.125rem);
-    height: var(--ui-control-icon-size, 1.125rem);
-    font-size: var(--ui-control-icon-size, 1.125rem);
-    flex-shrink: 0;
-    color: #ffffff;
-}
-
-.view-button:focus-visible {
-    outline: 2px solid #b0a5ff;
-    outline-offset: -2px;
-}
-</style>

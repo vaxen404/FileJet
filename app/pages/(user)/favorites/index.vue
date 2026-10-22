@@ -1,18 +1,18 @@
 <template>
-    <div class="favorites-page">
-        <div class="favorites-header">
-            <div class="favorites-toolbar">
-                <SearchBox
+    <div class="favorites-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
+        <div class="favorites-header flex flex-col shrink-0 p-0 gap-3 mb-3">
+            <div class="favorites-toolbar flex items-center justify-between flex-wrap gap-2 min-w-0">
+                <SearchBox class="[flex:1_1_18rem] min-w-0 max-w-128 max-tablet:basis-full max-tablet:max-w-none"
                     v-model="searchQuery"
                     placeholder="Search favorites..."
                 />
 
-                <div class="toolbar-actions">
+                <div class="toolbar-actions flex items-center flex-wrap gap-2 min-w-0">
                     <ViewSwitcher v-model="viewMode" />
                 </div>
             </div>
 
-            <div class="favorites-subtoolbar">
+            <div class="favorites-subtoolbar flex items-center justify-between flex-wrap gap-2">
                 <ItemFilters
                     v-model="activeCategory"
                     :options="filterOptions"
@@ -27,94 +27,97 @@
             :is-loading="isInitialLoading"
         >
             <template #loading>
-                <div class="loading-state">Loading favorites...</div>
+                <div class="loading-state text-label text-[0.85rem]">Loading favorites...</div>
             </template>
 
             <template
                 v-if="!isInitialLoading && filteredFavorites.length === 0"
                 #empty
             >
-                <div class="empty-state">
+                <div class="empty-state w-full min-h-48 py-8 px-4 flex flex-col items-center justify-center gap-2 text-center">
                     <Icon
                         name="solar:star-bold"
-                        class="empty-state-icon"
+                        class="empty-state-icon block shrink-0 mb-2 text-accent text-[2.5rem]"
                     />
-                    <strong>{{ emptyTitle }}</strong>
-                    <span class="empty-state-description">{{ emptyDescription }}</span>
+                    <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{ emptyTitle }}</strong>
+                    <span class="empty-state-description text-muted text-sm font-normal leading-normal">{{ emptyDescription }}</span>
                 </div>
             </template>
 
             <template #list>
-                <div class="table-scroll">
-                    <table class="favorites-table">
+                <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
+                    <table class="favorites-table w-full border-separate border-spacing-0 bg-transparent border-0 min-w-176 table-fixed">
                         <thead>
                             <tr>
-                                <th scope="col">
+                                <th class="w-14 pl-4 pr-3 text-center file-table-heading" scope="col">
                                     <input
                                         type="checkbox"
-                                        class="favorite-checkbox"
+                                        class="favorite-checkbox file-checkbox"
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
                                         :disabled="busy"
                                         @change="toggleSelectAll"
                                     />
                                 </th>
-                                <th scope="col">
-                                    <div class="name-header">
+                                <th class="w-[42%] file-table-heading" scope="col">
+                                    <div class="name-header flex items-center gap-[0.3rem]">
                                         Name
                                         <Icon
                                             name="solar:sort-vertical-linear"
-                                            class="sort-icon"
+                                            class="sort-icon text-base leading-[inherit]"
                                         />
                                     </div>
                                 </th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Size</th>
-                                <th scope="col">Added</th>
-                                <th scope="col">Actions</th>
+                                <th class="file-table-heading" scope="col">Type</th>
+                                <th class="file-table-heading" scope="col">Size</th>
+                                <th class="file-table-heading" scope="col">Added</th>
+                                <th class="file-table-heading" scope="col">Actions</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            <tr
+                            <tr class="hover:bg-surface-hover selected:bg-[#201d2d]"
                                 v-for="item in paginatedItems"
                                 :key="item.id"
                                 :class="{ selected: selectedFavorites.includes(item.id) }"
                                 @dblclick="openItem(item)"
                                 @contextmenu.prevent.stop="openContextMenu($event, item.id)"
                             >
-                                <td @dblclick.stop>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @dblclick.stop>
                                     <input
                                         v-model="selectedFavorites"
                                         type="checkbox"
-                                        class="favorite-checkbox"
+                                        class="favorite-checkbox file-checkbox"
                                         :value="item.id"
                                         :disabled="busy"
                                     />
                                 </td>
-                                <td>
-                                    <div class="favorite-name">
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
+                                    <div class="favorite-name flex items-center gap-3 min-w-0">
                                         <div
-                                            class="favorite-icon"
+                                            class="favorite-icon flex items-center justify-center shrink-0 text-[#9c8cff] bg-[#29215c] border
+                                            border-[#443b82] rounded-md text-[1.2rem] is-file:text-accent is-file:bg-[#252543]
+                                            is-file:border-[#3a3a64] is-folder:text-[#63a8ff] is-folder:bg-[#1c2d49] is-folder:border-[#345580]
+                                            size-10"
                                             :class="getItemType(item)"
                                         >
                                             <Icon :name="itemIcon(item)" />
                                         </div>
-                                        <div class="favorite-info">
-                                            <strong :title="getItemName(item)">{{
+                                        <div class="favorite-info min-w-0 flex flex-col gap-1">
+                                            <strong class="text-white text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="getItemName(item)">{{
                                                 getItemName(item)
                                             }}</strong>
-                                            <span
+                                            <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis"
                                                 >{{ getItemSize(item) }} ·
                                                 {{ formatFileTime(item.created_at) }}</span
                                             >
                                         </div>
                                     </div>
                                 </td>
-                                <td class="favorite-type">{{ getItemType(item) }}</td>
-                                <td>{{ getItemSize(item) }}</td>
-                                <td>{{ formatFileTime(item.created_at) }}</td>
-                                <td
+                                <td class="favorite-type h-[4.2rem] text-secondary text-[0.85rem] capitalize file-table-cell">{{ getItemType(item) }}</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ getItemSize(item) }}</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(item.created_at) }}</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell"
                                     @click.stop
                                     @dblclick.stop
                                 >
@@ -157,13 +160,16 @@
                                 :src="`/api/files/${item.file_id}/preview`"
                                 :alt="getItemName(item)"
                                 loading="lazy"
-                                class="file-preview-image"
+                                class="file-preview-image object-cover block transition-transform duration-250 ease-[ease]
+                                group-hover/file-card:scale-[1.035] size-full"
                             />
                             <template v-else>
-                                <div class="video-play-icon"><Icon name="solar:play-bold" /></div>
+                                <div class="video-play-icon absolute inset-0 z-1 grid place-items-center text-white text-[2.5rem]
+                                    pointer-events-none"><Icon name="solar:play-bold" /></div>
                                 <video
                                     :src="`/api/files/${item.file_id}/preview`"
-                                    class="file-preview-image"
+                                    class="file-preview-image object-cover block transition-transform duration-250 ease-[ease]
+                                    group-hover/file-card:scale-[1.035] size-full"
                                     preload="metadata"
                                     muted
                                     playsinline
@@ -172,11 +178,12 @@
                         </template>
 
                         <template #actions>
-                            <label class="file-select">
+                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                                cursor-pointer size-8">
                                 <input
                                     v-model="selectedFavorites"
                                     type="checkbox"
-                                    class="favorite-checkbox"
+                                    class="favorite-checkbox file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
                                     :value="item.id"
                                     :disabled="busy"
                                 />
@@ -196,11 +203,11 @@
                         </template>
 
                         <template #metadata>
-                            <span class="favorite-type">{{ getItemType(item) }}</span>
+                            <span class="favorite-type min-w-0 overflow-hidden text-ellipsis whitespace-nowrap capitalize first:shrink-0">{{ getItemType(item) }}</span>
                             ·
-                            <span>{{ getItemSize(item) }}</span>
+                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ getItemSize(item) }}</span>
                             ·
-                            <span>{{ formatFileTime(item.created_at) }}</span>
+                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileTime(item.created_at) }}</span>
                         </template>
                     </ItemGridCard>
                 </ItemGrid>
@@ -498,321 +505,3 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     currentPage.value = 1
 })
 </script>
-
-<style scoped>
-.favorites-page {
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    background: transparent;
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-}
-
-.favorites-header {
-    display: flex;
-    flex-direction: column;
-
-    flex-shrink: 0;
-
-    padding: 0;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-
-.favorites-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    min-width: 0;
-}
-
-.favorites-toolbar :deep(.search-box) {
-    flex: 1 1 18rem;
-    min-width: 0;
-    max-width: 32rem;
-    box-sizing: border-box;
-}
-
-.toolbar-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    min-width: 0;
-}
-
-.table-scroll {
-    flex: 1;
-    min-height: 0;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.favorites-table {
-    width: 100%;
-
-    border-collapse: separate;
-    border-spacing: 0;
-
-    background: transparent;
-
-    border: none;
-}
-
-.favorites-table th,
-.favorites-table td {
-    padding: 0 1rem;
-
-    text-align: left;
-    vertical-align: middle;
-
-    border-bottom: 1px solid #29292e;
-
-    box-sizing: border-box;
-}
-
-.favorites-table thead th {
-    height: 3.8rem;
-
-    position: sticky;
-    top: 0;
-
-    z-index: 2;
-
-    background: #1a1a1d;
-
-    color: #a3a3ab;
-
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.favorites-table tbody td {
-    height: 4.2rem;
-
-    color: #b5b5bd;
-
-    font-size: 0.85rem;
-}
-
-.favorites-table tbody tr:hover {
-    background: #1f1f23;
-}
-
-.favorites-table th:first-child,
-.favorites-table td:first-child {
-    width: 3.5rem;
-
-    padding-left: 1rem;
-    padding-right: 0.75rem;
-
-    text-align: center;
-}
-
-.favorites-table th:nth-child(2),
-.favorites-table td:nth-child(2) {
-    width: 42%;
-}
-
-.favorite-checkbox {
-    position: relative;
-    appearance: none;
-    -webkit-appearance: none;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: 0;
-    box-sizing: border-box;
-    background: #202024;
-    border: 1px solid #505057;
-    border-radius: 4px;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.favorite-checkbox:hover:not(:disabled) {
-    border-color: #8b7cff;
-}
-
-.favorite-checkbox:checked,
-.favorite-checkbox:indeterminate {
-    background: #3c47be;
-    border-color: #5965ed;
-}
-
-.favorite-checkbox:checked::after {
-    content: '';
-    width: 0.3rem;
-    height: 0.55rem;
-    margin-top: -0.15rem;
-    border: solid #ffffff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.favorite-checkbox:indeterminate::after {
-    content: '';
-    width: 0.55rem;
-    height: 2px;
-    margin: 0;
-    background: #ffffff;
-    border: 0;
-    transform: none;
-}
-
-.favorite-checkbox:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 3px;
-}
-
-.favorite-checkbox:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.name-header {
-    display: flex;
-    align-items: center;
-
-    gap: 0.3rem;
-}
-
-.sort-icon {
-    font-size: 1rem;
-}
-
-.favorite-name {
-    display: flex;
-    align-items: center;
-
-    gap: 0.75rem;
-}
-
-.favorite-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    color: #9c8cff;
-    background: #29215c;
-
-    border: 1px solid #443b82;
-    border-radius: 6px;
-
-    font-size: 1.2rem;
-}
-
-.favorite-info {
-    min-width: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 0.25rem;
-}
-
-.favorite-info strong {
-    color: #ffffff;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-
-    white-space: nowrap;
-    line-height: 1.5;
-}
-
-.favorite-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-
-    white-space: nowrap;
-    font-weight: 400;
-    line-height: 1.5;
-}
-
-.table-scroll {
-    overflow-x: auto;
-}
-
-.favorites-table {
-    min-width: 44rem;
-    table-layout: fixed;
-}
-
-.favorites-table tbody tr.selected {
-    background: #201d2d;
-}
-
-.favorite-info strong,
-.favorite-info span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-@media (max-width: 800px) {
-    .favorites-toolbar :deep(.search-box) {
-        flex-basis: 100%;
-        max-width: none;
-    }
-}
-
-.favorites-subtoolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.favorite-type {
-    text-transform: capitalize;
-}
-
-.favorite-name {
-    min-width: 0;
-}
-
-.favorite-icon.file {
-    color: #8b7cff;
-    background: #252543;
-    border-color: #3a3a64;
-}
-
-.favorite-icon.folder {
-    color: #63a8ff;
-    background: #1c2d49;
-    border-color: #345580;
-}
-
-.video-play-icon {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font-size: 2.5rem;
-    pointer-events: none;
-}
-</style>

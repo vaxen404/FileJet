@@ -18,7 +18,7 @@
         @share-changed="folder.share = $event"
     >
         <div
-            class="folder-workspace"
+            class="folder-workspace relative flex-1 flex flex-col min-h-0 min-w-0"
             @dragenter="dragenter"
             @dragover="dragover"
             @dragleave="dragleave"
@@ -26,7 +26,8 @@
         >
             <NuxtLink
                 v-if="folder.parent"
-                class="parent-link"
+                class="parent-link flex gap-2 items-center pt-5 pr-5 pb-0 pl-5 text-accent no-underline text-sm
+                leading-[inherit]"
                 :to="`/folders/${folder.parent.id}`"
             >
                 <Icon name="solar:arrow-left-linear" />
@@ -62,12 +63,13 @@
             </FolderBrowser>
             <div
                 v-if="isDragging && !busy && !pending"
-                class="folder-drop-overlay"
+                class="folder-drop-overlay absolute inset-2 z-20 flex items-center justify-center p-4 text-foreground
+                bg-[#121214e8] border-2 border-dashed border-accent rounded-[18px] pointer-events-none"
             >
-                <div class="folder-drop-message">
-                    <Icon name="solar:cloud-upload-bold" />
-                    <strong>Drop files or folders to upload</strong>
-                    <span>Upload to {{ folder.name }}</span>
+                <div class="folder-drop-message flex flex-col items-center gap-[0.65rem] max-w-full text-center">
+                    <Icon class="max-w-full text-heading-muted text-[0.8125rem] wrap-anywhere first:text-accent first:text-[2.5rem]" name="solar:cloud-upload-bold" />
+                    <strong class="text-[0.9375rem] first:text-accent first:text-[2.5rem]">Drop files or folders to upload</strong>
+                    <span class="max-w-full text-heading-muted text-[0.8125rem] wrap-anywhere first:text-accent first:text-[2.5rem]">Upload to {{ folder.name }}</span>
                 </div>
             </div>
             <UploadProgress
@@ -79,11 +81,12 @@
         </div>
         <template #edit>
             <form
-                class="folder-edit"
+                class="folder-edit flex flex-col gap-3"
                 @submit.prevent="saveRename"
             >
-                <label for="folder-name">Folder name</label>
-                <input
+                <label class="text-white text-sm leading-[inherit]" for="folder-name">Folder name</label>
+                <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
+                    focus:outline-none focus:border-[#5965ed]"
                     id="folder-name"
                     ref="nameInput"
                     v-model="draftName"
@@ -93,18 +96,19 @@
                 />
                 <span
                     v-if="dirty"
-                    class="muted"
+                    class="muted text-muted text-[0.8125rem]"
                 >
                     Unsaved changes
                 </span>
                 <p
                     v-if="saveError"
-                    class="error"
+                    class="error text-[#ff6b6b] m-0"
                 >
                     {{ saveError }}
                 </p>
-                <div class="edit-actions">
-                    <button
+                <div class="edit-actions flex justify-end flex-wrap gap-3">
+                    <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                        hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                         type="button"
                         :disabled="busy"
                         @click="cancelRename"
@@ -113,7 +117,8 @@
                     </button>
                     <button
                         type="submit"
-                        class="primary"
+                        class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
+                        hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
                         {{ isSaving ? 'Saving...' : 'Save' }}
@@ -124,17 +129,18 @@
     </DetailsWorkspace>
     <div
         v-else
-        class="detail-error"
+        class="detail-error p-5 text-[#d5d5da]"
     >
         <h1>Unable to load folder</h1>
         <p>The folder could not be found or accessed.</p>
-        <button
+        <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+            hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
             type="button"
             @click="refresh()"
         >
             Try again
         </button>
-        <NuxtLink :to="returnPage.path">Back to {{ returnPage.name }}</NuxtLink>
+        <NuxtLink class="text-accent ml-3" :to="returnPage.path">Back to {{ returnPage.name }}</NuxtLink>
     </div>
 </template>
 
@@ -541,143 +547,3 @@ const metadataRows = computed(() => {
     ]
 })
 </script>
-
-<style scoped>
-.folder-workspace {
-    position: relative;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    min-width: 0;
-}
-
-.folder-drop-overlay {
-    position: absolute;
-    inset: 0.5rem;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    box-sizing: border-box;
-    color: #f3f3f5;
-    background: #121214e8;
-    border: 2px dashed #8b7cff;
-    border-radius: 18px;
-    pointer-events: none;
-}
-
-.folder-drop-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.65rem;
-    max-width: 100%;
-    text-align: center;
-}
-
-.folder-drop-message > :first-child {
-    color: #8b7cff;
-    font-size: 2.5rem;
-}
-
-.folder-drop-message strong {
-    font-size: 0.9375rem;
-}
-
-.folder-drop-message span {
-    max-width: 100%;
-    color: #a3a3ab;
-    font-size: 0.8125rem;
-    overflow-wrap: anywhere;
-}
-
-.parent-link {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    padding: 1.25rem 1.25rem 0;
-    color: #8b7cff;
-    text-decoration: none;
-    font-size: 0.875rem;
-}
-
-.folder-edit {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-label {
-    color: #ffffff;
-    font-size: 0.875rem;
-}
-
-input,
-button {
-    color: #cfcfd5;
-    background: #202024;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    padding: 0.625rem 0.75rem;
-    font: inherit;
-    box-sizing: border-box;
-    min-width: 0;
-}
-
-button {
-    cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-    background: #29292e;
-}
-
-input:focus {
-    outline: none;
-    border-color: #5965ed;
-}
-
-button.primary {
-    color: #ffffff;
-    background: #3c47be;
-    border-color: #3c47be;
-}
-
-button.primary:hover:not(:disabled) {
-    background: #4652d1;
-}
-
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.edit-actions {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-.muted {
-    color: #898991;
-    font-size: 0.8125rem;
-}
-
-.error {
-    color: #ff6b6b;
-    margin: 0;
-}
-
-.detail-error {
-    padding: 1.25rem;
-    color: #d5d5da;
-}
-
-.detail-error a {
-    color: #8b7cff;
-    margin-left: 0.75rem;
-}
-</style>

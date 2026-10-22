@@ -3,27 +3,28 @@
         <Transition name="note-modal">
             <div
                 v-if="open"
-                class="note-overlay"
+                class="note-overlay fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/65"
                 @click.self="closeModal"
             >
                 <div
                     ref="dialog"
-                    class="note-modal-conteiner"
+                    class="note-modal-conteiner w-full max-w-144 max-h-[calc(100dvh_-_2rem)] overflow-y-auto bg-surface border
+                    border-divider rounded-xl p-6 text-[#d5d5da] max-phone:p-4"
                     @keydown.esc="closeModal"
                     @keydown.tab="trapFocus"
                 >
-                    <div class="note-modal-header">
-                        <div class="header-left">
-                            <div class="note-icon">
+                    <div class="note-modal-header flex items-center gap-3 justify-between">
+                        <div class="header-left flex items-center gap-3">
+                            <div class="note-icon flex items-center justify-center shrink-0 text-accent bg-[#29215c] rounded-md size-10">
                                 <Icon name="solar:notes-bold-duotone" />
                             </div>
 
-                            <div class="header-text">
-                                <h2 id="note-modal-title">
+                            <div class="header-text min-w-0">
+                                <h2 class="m-0 text-white text-[1.1rem] font-semibold" id="note-modal-title">
                                     {{ isEditing ? 'Edit note' : 'Create a note' }}
                                 </h2>
 
-                                <p>
+                                <p class="mt-1 mr-0 mb-0 ml-0 text-muted text-sm leading-normal">
                                     {{
                                         isEditing
                                             ? 'Make changes to your note.'
@@ -35,7 +36,10 @@
 
                         <button
                             type="button"
-                            class="clouse-button"
+                            class="clouse-button flex items-center justify-center shrink-0 p-0 text-label border border-control-border
+                            bg-raised rounded-md cursor-pointer hover:enabled:bg-[#2a2a2f] disabled:opacity-60
+                            disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:outline-offset-2 size-8"
                             :disabled="isLoading"
                             @click="closeModal"
                         >
@@ -44,15 +48,16 @@
                     </div>
 
                     <form @submit.prevent="saveNote">
-                        <div class="note-modal-body">
-                            <div class="form-field">
-                                <div class="fielad-header">
+                        <div class="note-modal-body flex flex-col gap-4 py-4 px-0">
+                            <div class="form-field flex flex-col gap-2">
+                                <div class="fielad-header flex items-center justify-between gap-2 text-sm leading-normal">
                                     <label for="note-form-title"> Title </label>
 
-                                    <span>{{ title.length }} / 32</span>
+                                    <span class="text-muted text-xs leading-[inherit]">{{ title.length }} / 32</span>
                                 </div>
 
-                                <input
+                                <input class="w-full min-w-0 p-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md text-sm
+                                    leading-normal outline-none focus:border-[#5965ed] disabled:opacity-60 disabled:cursor-wait"
                                     id="note-form-title"
                                     ref="titleInput"
                                     v-model="title"
@@ -65,14 +70,16 @@
                                 />
                             </div>
 
-                            <div class="form-field">
-                                <div class="field-header">
+                            <div class="form-field flex flex-col gap-2">
+                                <div class="field-header flex items-center justify-between gap-2 text-sm leading-normal">
                                     <label for="note-form-content"> Content </label>
 
-                                    <span>{{ content.length }} characters</span>
+                                    <span class="text-muted text-xs leading-[inherit]">{{ content.length }} characters</span>
                                 </div>
 
-                                <textarea
+                                <textarea class="w-full min-w-0 p-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md text-sm
+                                    leading-normal outline-none resize-y min-h-32 focus:border-[#5965ed] disabled:opacity-60
+                                    disabled:cursor-wait"
                                     id="note-form-content"
                                     v-model="content"
                                     placeholder="Start writing your note..."
@@ -83,16 +90,19 @@
                             </div>
                         </div>
 
-                        <div class="note-modal-footer">
-                            <div class="footer-info">
+                        <div class="note-modal-footer flex items-center gap-3 justify-between max-phone:flex-wrap">
+                            <div class="footer-info flex items-center gap-3 text-muted text-xs leading-[inherit]">
                                 <Icon name="solar:document-text-linear" />
                                 <span>Plain text note</span>
                             </div>
 
-                            <div class="footer-actions">
+                            <div class="footer-actions flex items-center gap-3 max-phone:ml-auto">
                                 <button
                                     type="button"
-                                    class="cancel-btn"
+                                    class="cancel-btn inline-flex items-center justify-center gap-2 min-h-10 py-2 px-3 border
+                                    border-control-border rounded-md text-white bg-raised [font-family:inherit] text-sm font-medium
+                                    leading-normal cursor-pointer hover:enabled:bg-[#2a2a2f] disabled:opacity-60 disabled:cursor-wait
+                                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                                     :disabled="isLoading"
                                     @click="closeModal"
                                 >
@@ -101,7 +111,10 @@
 
                                 <button
                                     type="submit"
-                                    class="save-btn"
+                                    class="save-btn inline-flex items-center justify-center gap-2 min-h-10 py-2 px-3 border rounded-md
+                                    text-white bg-primary [font-family:inherit] text-sm font-medium leading-normal cursor-pointer
+                                    border-primary hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-wait
+                                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                                     :disabled="!canSubmit"
                                 >
                                     <Icon
@@ -256,205 +269,3 @@ const saveNote = async () => {
     }
 }
 </script>
-
-<style scoped>
-.note-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background: rgba(0, 0, 0, 0.65);
-    box-sizing: border-box;
-}
-
-.note-modal-conteiner {
-    width: 100%;
-    max-width: 36rem;
-    max-height: calc(100dvh - 2rem);
-    overflow-y: auto;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-sizing: border-box;
-    color: #d5d5da;
-}
-
-.note-modal-header,
-.header-left,
-.note-modal-footer,
-.footer-info,
-.footer-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.note-modal-header,
-.note-modal-footer {
-    justify-content: space-between;
-}
-
-.header-text {
-    min-width: 0;
-}
-
-.header-text h2 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.header-text p {
-    margin: 0.25rem 0 0;
-    color: #898991;
-    font-size: 0.875rem;
-    line-height: 1.5;
-}
-
-.note-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    color: #8b7cff;
-    background: #29215c;
-    border-radius: 6px;
-}
-
-.clouse-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    color: #a8a8b0;
-    border: 1px solid #303036;
-    background: #242429;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.note-modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem 0;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.fielad-header,
-.field-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-}
-
-.fielad-header span,
-.field-header span,
-.footer-info {
-    color: #898991;
-    font-size: 0.75rem;
-}
-
-.form-field input,
-.form-field textarea {
-    width: 100%;
-    min-width: 0;
-    padding: 0.75rem;
-    color: #d5d5da;
-    background: #151518;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    font: inherit;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    box-sizing: border-box;
-    outline: none;
-}
-
-.form-field textarea {
-    resize: vertical;
-    min-height: 8rem;
-}
-
-.form-field input:focus,
-.form-field textarea:focus {
-    border-color: #5965ed;
-}
-
-.cancel-btn,
-.save-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-height: 2.5rem;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    color: #ffffff;
-    background: #242429;
-    font-family: inherit;
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.5;
-    cursor: pointer;
-}
-
-.save-btn {
-    background: #3c47be;
-    border-color: #3c47be;
-}
-
-.save-btn:hover:not(:disabled) {
-    background: #4652d1;
-}
-
-.cancel-btn:hover:not(:disabled),
-.clouse-button:hover:not(:disabled) {
-    background: #2a2a2f;
-}
-
-button:disabled,
-input:disabled,
-textarea:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
-
-button:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 2px;
-}
-
-@media (max-width: 500px) {
-    .note-modal-conteiner {
-        padding: 1rem;
-    }
-
-    .note-modal-footer {
-        flex-wrap: wrap;
-    }
-
-    .footer-actions {
-        margin-left: auto;
-    }
-}
-</style>

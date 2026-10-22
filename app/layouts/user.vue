@@ -30,17 +30,17 @@ const contentClass = computed(() => ({
 </script>
 
 <template>
-    <div class="user-layout">
+    <div class="user-layout flex gap-5 h-screen p-5 bg-canvas text-white">
         <Sidebar />
 
-        <div class="user-main">
+        <div class="user-main flex-1 min-w-0 min-h-0 flex flex-col gap-3">
             <HeaderBar
                 :title="pageTitle"
-                class="user-header"
+                class="user-header shrink-0"
             />
 
             <main
-                class="user-content"
+                class="user-content flex-1 min-w-0 min-h-0 p-0 flex flex-col overflow-hidden"
                 :class="contentClass"
             >
                 <slot />
@@ -48,59 +48,3 @@ const contentClass = computed(() => ({
         </div>
     </div>
 </template>
-
-<style>
-html,
-body,
-#__nuxt {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-}
-
-body {
-    overflow: hidden;
-}
-</style>
-
-<style scoped>
-.user-layout {
-    display: flex;
-    gap: 1.25rem;
-
-    height: 100vh;
-    padding: 1.25rem;
-
-    box-sizing: border-box;
-
-    background: #121214;
-    color: white;
-}
-
-.user-main {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.user-content {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-
-    padding: 0rem;
-
-    display: flex;
-    flex-direction: column;
-
-    overflow: hidden;
-}
-
-.user-header {
-    flex-shrink: 0;
-}
-</style>

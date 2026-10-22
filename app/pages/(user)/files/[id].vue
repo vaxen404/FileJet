@@ -1,26 +1,31 @@
 <template>
     <div
         v-if="file"
-        class="file-page"
+        class="file-page min-w-0 min-h-0 grid grid-cols-[minmax(0,_1fr)_27rem] gap-4
+        details-middle:grid-cols-[minmax(0,_1fr)_22rem] details-middle:gap-3 max-preview:h-auto
+        max-preview:min-h-full max-preview:grid-cols-1 size-full"
     >
-        <section class="file-workspace">
-            <div class="preview-card">
+        <section class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
+            <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-3xl overflow-hidden
+                max-preview:flex-none max-preview:h-144 max-phone:h-96">
                 <div
-                    class="preview-content"
+                    class="preview-content flex-1 min-w-0 min-h-0 flex items-center justify-center p-5 overflow-auto
+                    text-preview:block text-preview:overscroll-contain max-phone:p-3"
                     :class="{ 'text-preview': isText && !previewError }"
                 >
                     <div
                         v-if="previewError"
-                        class="preview-message"
+                        class="preview-message flex flex-col items-center gap-3 max-w-96 text-muted text-center text-[0.8125rem]
+                        leading-normal"
                     >
-                        <Icon
+                        <Icon class="text-accent"
                             name="solar:document-linear"
                             size="3rem"
                         />
-                        <p>{{ previewError }}</p>
+                        <p class="m-0 text-[#d5d5da] text-sm leading-[inherit]">{{ previewError }}</p>
                         <span>Use the Download button to download this file.</span>
                     </div>
-                    <img
+                    <img class="block min-h-0 object-contain rounded-md border-0 size-full"
                         v-else-if="isImage"
                         ref="imagePreview"
                         :src="previewUrl"
@@ -28,13 +33,13 @@
                         @load="captureImageMetadata"
                         @error="handlePreviewError"
                     />
-                    <pre v-else-if="isText">{{ textContent }}</pre>
-                    <iframe
+                    <pre class="m-0 text-[#d5d5da] whitespace-pre-wrap wrap-anywhere font-mono text-[0.85rem] leading-[1.7]" v-else-if="isText">{{ textContent }}</pre>
+                    <iframe class="block min-h-0 object-contain rounded-md border-0 size-full"
                         v-else-if="isPdf"
                         :src="previewUrl"
                         title="PDF preview"
                     />
-                    <video
+                    <video class="block min-h-0 object-contain rounded-md border-0 bg-black size-full"
                         v-else-if="isVideo"
                         ref="videoPreview"
                         :src="previewUrl"
@@ -47,25 +52,29 @@
                     />
                     <div
                         v-else
-                        class="preview-message"
+                        class="preview-message flex flex-col items-center gap-3 max-w-96 text-muted text-center text-[0.8125rem]
+                        leading-normal"
                     >
-                        <Icon
+                        <Icon class="text-accent"
                             :name="getFileIcon(file.mime_type, file.original_name)"
                             size="3.75rem"
                         />
-                        <p>Preview is not available for this file type.</p>
+                        <p class="m-0 text-[#d5d5da] text-sm leading-[inherit]">Preview is not available for this file type.</p>
                         <span>Use the Download button to download this file.</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <aside class="file-panel">
-            <section class="file-information">
-                <div class="file-heading">
-                    <div class="file-heading-text">
-                        <h1 id="file-detail-title">{{ displayFileName }}</h1>
-                        <p class="file-summary">
+        <aside class="file-panel min-w-0 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain
+            max-preview:overflow-visible">
+            <section class="file-information flex-none min-w-0 flex flex-col gap-3 p-3.5 bg-surface border border-divider
+                rounded-xl max-preview:flex-none max-phone:p-3">
+                <div class="file-heading flex items-start gap-3">
+                    <div class="file-heading-text flex-1 min-w-0">
+                        <h1 class="m-0 text-white text-xl font-semibold leading-[1.35] wrap-anywhere" id="file-detail-title">{{ displayFileName }}</h1>
+                        <p class="file-summary flex items-center flex-wrap gap-1.5 mt-1.5 mr-0 mb-0 ml-0 text-muted text-[0.8125rem]
+                            leading-normal">
                             <span>{{ formatFileSize(file.size) }}</span>
                             <template v-if="file.created_at">
                                 <span>·</span>
@@ -75,7 +84,9 @@
                     </div>
                     <button
                         type="button"
-                        class="close-details"
+                        class="close-details shrink-0 grid place-items-center p-0 text-[#cfcfd5] bg-transparent border-0
+                        cursor-pointer hover:bg-divider hover:text-white focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 size-7"
                         :title="`Back to ${returnPage.name}`"
                         @click="goBack"
                     >
@@ -95,10 +106,16 @@
                     </button>
                 </div>
 
-                <div class="file-actions">
+                <div class="file-actions grid grid-cols-[minmax(0,_1fr)_repeat(3,_3.25rem)] gap-3 details-middle:gap-2
+                    max-phone:grid-cols-3 max-phone:gap-2">
                     <button
                         type="button"
-                        class="action-button download-button"
+                        class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
+                        px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
+                        transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
+                        hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                        disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
                         :class="{ 'is-busy': isDownloading }"
                         :disabled="isDownloading || isDeleting || isSavingRename"
                         @click="handleDownload(file.id)"
@@ -111,7 +128,12 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action"
+                        class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
+                        text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 hover:enabled:bg-divider
+                        hover:enabled:text-white hover:enabled:border-[#3a3a41] favorite:text-accent disabled:opacity-60
+                        disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :class="{
                             'is-favorite': isFileFavorite(file.id),
                             'is-busy': isUpdatingFavorite
@@ -131,7 +153,12 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action"
+                        class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
+                        text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 hover:enabled:bg-divider
+                        hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="isDeleting || isSavingRename"
                         title="Rename"
                         @click="startRename"
@@ -143,7 +170,13 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action delete-button"
+                        class="action-button icon-action delete-button min-w-0 min-h-11 inline-flex items-center justify-center
+                        gap-2 p-0 text-[#ff6b6b] bg-[#352024] border rounded-md text-sm font-medium leading-normal
+                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-[#4a292d]
+                        hover:enabled:bg-[#3a2024] hover:enabled:text-[#ff7d7d] hover:enabled:border-[#4a292d]
+                        disabled:opacity-60 disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2
+                        focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2
+                        max-phone:pr-2"
                         :class="{ 'is-busy': isDeleting }"
                         :disabled="isDeleting || isSavingRename"
                         title="Delete file"
@@ -157,10 +190,13 @@
                 </div>
 
                 <div
-                    class="detail-tabs"
+                    class="detail-tabs grid grid-cols-3 gap-1 p-1 bg-[#151518] border border-divider rounded-md"
                     @keydown="handleTabKeydown"
                 >
-                    <button
+                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
+                        cursor-pointer hover:text-white is-active:bg-raised is-active:text-white is-active:font-semibold
+                        disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                         id="file-details-tab"
                         type="button"
                         :tabindex="activeTab === 'details' ? 0 : -1"
@@ -170,7 +206,10 @@
                     >
                         Details
                     </button>
-                    <button
+                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
+                        cursor-pointer hover:text-white is-active:bg-raised is-active:text-white is-active:font-semibold
+                        disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                         id="file-edit-tab"
                         type="button"
                         :tabindex="activeTab === 'edit' ? 0 : -1"
@@ -180,7 +219,10 @@
                     >
                         Edit
                     </button>
-                    <button
+                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
+                        cursor-pointer hover:text-white is-active:bg-raised is-active:text-white is-active:font-semibold
+                        disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                         id="file-share-tab"
                         type="button"
                         :tabindex="activeTab === 'share' ? 0 : -1"
@@ -196,16 +238,18 @@
                     v-show="activeTab === 'details'"
                     id="file-details-panel"
                     tabindex="0"
-                    class="tab-panel"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                 >
-                    <dl class="file-metadata">
+                    <dl class="file-metadata m-0 border border-divider rounded-md overflow-hidden">
                         <div
                             v-for="row in metadataRows"
                             :key="row.label"
-                            class="metadata-row"
+                            class="metadata-row grid grid-cols-[minmax(0,_3fr)_minmax(0,_2fr)] items-start gap-3 py-2 px-3.5 border-b
+                            border-b-divider text-[0.8125rem] leading-normal last:border-b-0 max-phone:gap-2 max-phone:py-2
+                            max-phone:px-2.5"
                         >
-                            <dt>{{ row.label }}</dt>
-                            <dd>{{ row.value }}</dd>
+                            <dt class="text-muted">{{ row.label }}</dt>
+                            <dd class="min-w-0 m-0 text-[#d5d5da] wrap-anywhere">{{ row.value }}</dd>
                         </div>
                     </dl>
                 </div>
@@ -214,25 +258,28 @@
                     v-show="activeTab === 'edit'"
                     id="file-edit-panel"
                     tabindex="0"
-                    class="tab-panel edit-panel"
+                    class="tab-panel edit-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent
+                    focus-visible:outline-offset-2"
                 >
                     <form
-                        class="rename-form"
+                        class="rename-form flex flex-col gap-4"
                         @submit.prevent="saveRename"
                     >
-                        <div class="rename-field">
-                            <label for="file-rename-input">Filename</label>
-                            <p>
+                        <div class="rename-field flex flex-col gap-2">
+                            <label class="text-white text-sm leading-[inherit] font-medium" for="file-rename-input">Filename</label>
+                            <p class="m-0 text-muted text-[0.8125rem] leading-normal">
                                 Update the filename. The existing extension is preserved
                                 automatically.
                             </p>
-                            <div class="rename-input-group">
+                            <div class="rename-input-group flex items-stretch min-w-0 border border-control-border rounded-md overflow-hidden
+                                focus-within:border-[#5965ed]">
                                 <input
                                     id="file-rename-input"
                                     ref="nameInput"
                                     v-model="editingFileName"
                                     type="text"
-                                    class="name-input"
+                                    class="name-input w-full min-w-0 min-h-11 py-2.5 px-3 text-white bg-control border-0 rounded-md text-sm
+                                    leading-normal outline-none flex-1 focus:border-[#5965ed] is-invalid:border-[#ff6b6b]"
                                     :class="{ invalid: Boolean(renameError) }"
                                     maxlength="255"
                                     required
@@ -241,22 +288,28 @@
                                     @input="renameError = ''"
                                     @keydown.esc.prevent="cancelRename"
                                 />
-                                <span class="rename-extension">{{
+                                <span class="rename-extension flex items-center shrink-0 max-w-[35%] overflow-hidden py-0 px-2.5 bg-[#151518]
+                                    border-l border-l-control-border text-muted text-[0.8125rem] whitespace-nowrap">{{
                                     originalExtension || 'No extension'
                                 }}</span>
                             </div>
                             <p
                                 v-if="renameError"
                                 id="file-rename-error"
-                                class="rename-error"
+                                class="rename-error m-0 text-[#ff6b6b] text-[0.8125rem] leading-normal"
                             >
                                 {{ renameError }}
                             </p>
                         </div>
-                        <div class="edit-actions">
+                        <div class="edit-actions flex justify-end flex-wrap gap-2">
                             <button
                                 type="button"
-                                class="action-button"
+                                class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
+                                text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                                cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
+                                hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                                disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                                focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                                 :disabled="isSavingRename"
                                 @click="cancelRename"
                             >
@@ -264,7 +317,12 @@
                             </button>
                             <button
                                 type="submit"
-                                class="action-button download-button"
+                                class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
+                                px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
+                                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
+                                hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                                disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                                focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                                 :class="{ 'is-busy': isSavingRename }"
                                 :disabled="!canSaveRename || isDeleting"
                             >
@@ -274,11 +332,16 @@
                     </form>
                     <div
                         v-if="canCopy"
-                        class="copy-content"
+                        class="copy-content mt-4 pt-4 border-t border-t-divider"
                     >
                         <button
                             type="button"
-                            class="action-button"
+                            class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
+                            text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                            cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
+                            hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                            disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                             :class="{ 'is-busy': isCopying }"
                             :disabled="isCopying || isDeleting || isSavingRename"
                             @click="handleCopy"
@@ -292,7 +355,7 @@
                     v-show="activeTab === 'share'"
                     id="file-share-panel"
                     tabindex="0"
-                    class="tab-panel"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                 >
                     <ShareBox
                         :item-id="file.id"
@@ -307,21 +370,29 @@
     </div>
     <div
         v-else
-        class="file-empty-state"
+        class="file-empty-state p-6 bg-surface border border-divider rounded-xl text-[#d5d5da]"
     >
-        <h1>Unable to load file</h1>
-        <p>The file could not be found or accessed.</p>
-        <div class="edit-actions">
+        <h1 class="m-0 text-white text-xl leading-[inherit]">Unable to load file</h1>
+        <p class="text-sm leading-normal">The file could not be found or accessed.</p>
+        <div class="edit-actions flex justify-end flex-wrap gap-2">
             <button
                 type="button"
-                class="action-button"
+                class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
+                text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
+                hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
                 @click="goBack"
             >
                 Back to {{ returnPage.name }}
             </button>
             <button
                 type="button"
-                class="action-button download-button"
+                class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
+                px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
+                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
+                hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
                 @click="refresh()"
             >
                 Try again
@@ -765,507 +836,3 @@ if (isText.value) {
     }
 }
 </script>
-
-<style scoped>
-.file-page {
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 27rem;
-    gap: 1rem;
-}
-
-.file-workspace,
-.file-panel {
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.preview-card {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 24px;
-    overflow: hidden;
-}
-
-.preview-content {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.25rem;
-    overflow: auto;
-    box-sizing: border-box;
-}
-
-.preview-content img,
-.preview-content video,
-.preview-content iframe {
-    display: block;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    object-fit: contain;
-    border-radius: 6px;
-    border: none;
-}
-
-.preview-content video {
-    background: #000;
-}
-
-.preview-content.text-preview {
-    display: block;
-    overscroll-behavior: contain;
-}
-
-.preview-content pre {
-    margin: 0;
-    color: #d5d5da;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    font-family: monospace;
-    font-size: 0.85rem;
-    line-height: 1.7;
-}
-
-.preview-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    max-width: 24rem;
-    color: #898991;
-    text-align: center;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-.preview-message :deep(.iconify) {
-    color: #8b7cff;
-}
-
-.preview-message p {
-    margin: 0;
-    color: #d5d5da;
-    font-size: 0.875rem;
-}
-
-.file-panel {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-}
-
-.file-information {
-    flex: 0 0 auto;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.875rem;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 12px;
-    box-sizing: border-box;
-}
-
-.file-heading {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-}
-
-.file-heading-text {
-    flex: 1;
-    min-width: 0;
-}
-
-.file-heading h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
-}
-
-.file-summary {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    margin: 0.375rem 0 0;
-    color: #898991;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-.close-details {
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    padding: 0;
-    color: #cfcfd5;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-}
-
-.close-details:hover {
-    background: #29292e;
-    color: #ffffff;
-}
-
-.file-actions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) repeat(3, 3.25rem);
-    gap: 0.75rem;
-}
-
-.action-button {
-    min-width: 0;
-    min-height: 2.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.875rem;
-    color: #cfcfd5;
-    background: #202024;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.5;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease;
-}
-
-.action-button:hover:not(:disabled) {
-    background: #29292e;
-    color: #ffffff;
-    border-color: #3a3a41;
-}
-
-.icon-action {
-    width: 3.25rem;
-    padding: 0;
-}
-
-.icon-action.is-favorite {
-    color: #8b7cff;
-}
-
-.download-button {
-    background: #3c47be;
-    color: #ffffff;
-    border-color: #3c47be;
-}
-
-.download-button:hover:not(:disabled) {
-    background: #4652d1;
-    border-color: #4652d1;
-}
-
-.delete-button {
-    background: #352024;
-    color: #ff6b6b;
-    border-color: #4a292d;
-}
-
-.delete-button:hover:not(:disabled) {
-    background: #3a2024;
-    color: #ff7d7d;
-    border-color: #4a292d;
-}
-
-.action-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.action-button.is-busy {
-    cursor: wait;
-}
-
-.detail-tabs {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.25rem;
-    padding: 0.25rem;
-    background: #151518;
-    border: 1px solid #29292e;
-    border-radius: 6px;
-}
-
-.detail-tabs button {
-    min-height: 2rem;
-    padding: 0.375rem 0.5rem;
-    color: #898991;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.5;
-    cursor: pointer;
-}
-
-.detail-tabs button:hover {
-    color: #ffffff;
-}
-
-.detail-tabs button.active {
-    background: #242429;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.detail-tabs button:disabled {
-    cursor: wait;
-}
-
-.tab-panel {
-    min-width: 0;
-}
-
-.file-metadata {
-    margin: 0;
-    border: 1px solid #29292e;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.metadata-row {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    align-items: start;
-    gap: 0.75rem;
-    padding: 0.5rem 0.875rem;
-    border-bottom: 1px solid #29292e;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-.metadata-row:last-child {
-    border-bottom: none;
-}
-
-.metadata-row dt {
-    color: #898991;
-}
-
-.metadata-row dd {
-    min-width: 0;
-    margin: 0;
-    color: #d5d5da;
-    overflow-wrap: anywhere;
-}
-
-.rename-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.rename-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.rename-field label {
-    color: #ffffff;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.rename-field p {
-    margin: 0;
-    color: #898991;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-.name-input {
-    width: 100%;
-    min-width: 0;
-    min-height: 2.75rem;
-    padding: 0.625rem 0.75rem;
-    color: #ffffff;
-    background: #202024;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    outline: none;
-}
-
-.name-input:focus {
-    border-color: #5965ed;
-}
-
-.name-input.invalid {
-    border-color: #ff6b6b;
-}
-
-.rename-field .rename-error {
-    color: #ff6b6b;
-}
-
-.edit-actions {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.copy-content {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #29292e;
-}
-
-.file-page button:focus-visible,
-.tab-panel:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 2px;
-}
-
-.file-empty-state {
-    padding: 1.5rem;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 12px;
-    color: #d5d5da;
-}
-
-.file-empty-state h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.25rem;
-}
-
-.file-empty-state p {
-    font-size: 0.875rem;
-    line-height: 1.5;
-}
-
-@media (max-width: 1100px) and (min-width: 901px) {
-    .file-page {
-        grid-template-columns: minmax(0, 1fr) 22rem;
-        gap: 0.75rem;
-    }
-
-    .file-actions {
-        gap: 0.5rem;
-    }
-}
-
-@media (max-width: 900px) {
-    .file-page {
-        height: auto;
-        min-height: 100%;
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .preview-card {
-        flex: none;
-        height: 36rem;
-    }
-
-    .file-panel {
-        overflow: visible;
-    }
-
-    .file-information {
-        flex: none;
-    }
-}
-
-@media (max-width: 500px) {
-    .preview-content {
-        padding: 0.75rem;
-    }
-
-    .preview-card {
-        height: 24rem;
-    }
-
-    .file-information {
-        padding: 0.75rem;
-    }
-
-    .file-actions {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.5rem;
-    }
-
-    .file-actions .download-button {
-        grid-column: 1 / -1;
-    }
-
-    .icon-action {
-        width: 100%;
-    }
-
-    .action-button {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-    }
-
-    .metadata-row {
-        gap: 0.5rem;
-        padding: 0.5rem 0.625rem;
-    }
-}
-
-.rename-input-group {
-    display: flex;
-    align-items: stretch;
-    min-width: 0;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.rename-input-group:focus-within {
-    border-color: #5965ed;
-}
-
-.rename-input-group .name-input {
-    flex: 1;
-    border: none;
-}
-
-.rename-extension {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    max-width: 35%;
-    overflow: hidden;
-    padding: 0 0.625rem;
-    background: #151518;
-    border-left: 1px solid #303036;
-    color: #898991;
-    font-size: 0.8125rem;
-    white-space: nowrap;
-}
-</style>

@@ -1,20 +1,28 @@
 <template>
-    <div class="file-page">
-        <section class="file-workspace">
-            <div class="preview-card">
+    <div class="file-page min-w-0 min-h-0 grid grid-cols-[minmax(0,_1fr)_27rem] gap-4
+        details-middle:grid-cols-[minmax(0,_1fr)_22rem] details-middle:gap-3 max-preview:h-auto
+        max-preview:min-h-full max-preview:grid-cols-1 size-full">
+        <section class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
+            <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-panel overflow-hidden
+                max-preview:flex-none max-preview:h-144 max-phone:h-96">
                 <slot />
             </div>
         </section>
-        <aside class="file-panel">
-            <section class="file-information">
-                <div class="file-heading">
-                    <div class="file-heading-text">
-                        <h1>{{ title }}</h1>
-                        <p class="file-summary">{{ summary }}</p>
+        <aside class="file-panel min-w-0 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain
+            max-preview:overflow-visible">
+            <section class="file-information flex-none min-w-0 flex flex-col gap-3 p-3.5 bg-surface border border-divider
+                rounded-panel max-preview:flex-none max-phone:p-3">
+                <div class="file-heading flex items-start gap-3">
+                    <div class="file-heading-text flex-1 min-w-0">
+                        <h1 class="m-0 text-white text-xl font-semibold leading-[1.35] wrap-anywhere">{{ title }}</h1>
+                        <p class="file-summary flex items-center flex-wrap gap-1.5 mt-1.5 mr-0 mb-0 ml-0 text-muted text-[0.8125rem]
+                            leading-normal">{{ summary }}</p>
                     </div>
                     <button
                         type="button"
-                        class="close-details"
+                        class="close-details shrink-0 grid place-items-center p-0 text-[#cfcfd5] bg-transparent border-0
+                        rounded-control cursor-pointer hover:bg-divider hover:text-white focus-visible:outline-2
+                        focus-visible:outline-accent focus-visible:outline-offset-2 size-7"
                         @click="$emit('back')"
                     >
                         <svg
@@ -32,10 +40,16 @@
                         </svg>
                     </button>
                 </div>
-                <div class="file-actions">
+                <div class="file-actions grid grid-cols-[minmax(0,_1fr)_repeat(3,_3.25rem)] gap-3 details-middle:gap-2
+                    max-phone:grid-cols-3 max-phone:gap-2">
                     <button
                         type="button"
-                        class="action-button download-button"
+                        class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
+                        px-3.5 text-white bg-primary border rounded-control text-control-size font-medium leading-normal
+                        cursor-pointer transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
+                        hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="busy"
                         @click="$emit('download')"
                     >
@@ -47,7 +61,12 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action"
+                        class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
+                        text-[#cfcfd5] bg-control border border-control-border rounded-control text-control-size font-medium
+                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13
+                        hover:enabled:bg-divider hover:enabled:text-white hover:enabled:border-[#3a3a41] favorite:text-accent
+                        disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :class="{ 'is-favorite': isFavorite }"
                         :disabled="busy"
                         @click="$emit('favorite')"
@@ -59,7 +78,12 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action"
+                        class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
+                        text-[#cfcfd5] bg-control border border-control-border rounded-control text-control-size font-medium
+                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13
+                        hover:enabled:bg-divider hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="busy"
                         @click="$emit('rename')"
                     >
@@ -70,7 +94,12 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action delete-button"
+                        class="action-button icon-action delete-button min-w-0 min-h-11 inline-flex items-center justify-center
+                        gap-2 p-0 text-[#ff6b6b] bg-[#352024] border rounded-control text-control-size font-medium
+                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-[#4a292d]
+                        hover:enabled:bg-[#3a2024] hover:enabled:text-[#ff7d7d] hover:enabled:border-[#4a292d]
+                        disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="busy"
                         @click="$emit('delete')"
                     >
@@ -81,10 +110,13 @@
                     </button>
                 </div>
                 <div
-                    class="detail-tabs"
+                    class="detail-tabs grid grid-cols-3 gap-1 p-[3px] bg-[#151518] border border-divider rounded-control"
                     @keydown="navigateTabs"
                 >
-                    <button
+                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-control-inner text-control-size
+                        font-medium leading-normal cursor-pointer hover:text-white is-active:bg-raised is-active:text-white
+                        is-active:font-semibold disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                         v-for="tab in tabs"
                         :id="itemType + '-' + tab + '-tab'"
                         :key="tab"
@@ -100,24 +132,26 @@
                 <div
                     v-show="activeTab === 'details'"
                     :id="itemType + '-details-panel'"
-                    class="tab-panel"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                     tabindex="0"
                 >
-                    <dl class="file-metadata">
+                    <dl class="file-metadata m-0 border border-divider rounded-md overflow-hidden">
                         <div
                             v-for="row in metadata"
                             :key="row.label"
-                            class="metadata-row"
+                            class="metadata-row grid grid-cols-[minmax(0,_3fr)_minmax(0,_2fr)] items-start gap-3 py-2 px-3.5 border-b
+                            border-b-divider text-[0.8125rem] leading-normal last:border-b-0 max-phone:gap-2 max-phone:py-2
+                            max-phone:px-2.5"
                         >
-                            <dt>{{ row.label }}</dt>
-                            <dd>{{ row.value ?? 'Unavailable' }}</dd>
+                            <dt class="text-muted">{{ row.label }}</dt>
+                            <dd class="min-w-0 m-0 text-[#d5d5da] wrap-anywhere">{{ row.value ?? 'Unavailable' }}</dd>
                         </div>
                     </dl>
                 </div>
                 <div
                     v-show="activeTab === 'edit'"
                     :id="itemType + '-edit-panel'"
-                    class="tab-panel"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                     tabindex="0"
                 >
                     <slot name="edit" />
@@ -125,7 +159,7 @@
                 <div
                     v-show="activeTab === 'share'"
                     :id="itemType + '-share-panel'"
-                    class="tab-panel"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                     tabindex="0"
                 >
                     <ShareBox
@@ -185,319 +219,3 @@ const navigateTabs = async (event: KeyboardEvent) => {
     document.getElementById(props.itemType + '-' + activeTab.value + '-tab')?.focus()
 }
 </script>
-
-<style scoped>
-.file-page {
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 27rem;
-    gap: 1rem;
-}
-
-.file-workspace,
-.file-panel {
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.preview-card {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: var(--ui-panel-radius, 24px);
-    overflow: hidden;
-}
-
-.file-panel {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-}
-
-.file-information {
-    flex: 0 0 auto;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.875rem;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: var(--ui-panel-radius, 24px);
-    box-sizing: border-box;
-}
-
-.file-heading {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-}
-
-.file-heading-text {
-    flex: 1;
-    min-width: 0;
-}
-
-.file-heading h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
-}
-
-.file-summary {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    margin: 0.375rem 0 0;
-    color: #898991;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-.close-details {
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    padding: 0;
-    color: #cfcfd5;
-    background: transparent;
-    border: none;
-    border-radius: var(--ui-control-radius, 8px);
-    cursor: pointer;
-}
-
-.close-details:hover {
-    background: #29292e;
-    color: #ffffff;
-}
-
-.file-actions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) repeat(3, 3.25rem);
-    gap: 0.75rem;
-}
-
-.action-button {
-    min-width: 0;
-    min-height: 2.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.875rem;
-    color: #cfcfd5;
-    background: #202024;
-    border: 1px solid #303036;
-    border-radius: var(--ui-control-radius, 8px);
-    box-sizing: border-box;
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-weight: 500;
-    line-height: 1.5;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease;
-}
-
-.action-button:hover:not(:disabled) {
-    background: #29292e;
-    color: #ffffff;
-    border-color: #3a3a41;
-}
-
-.icon-action {
-    width: 3.25rem;
-    padding: 0;
-}
-
-.icon-action.is-favorite {
-    color: #8b7cff;
-}
-
-.download-button {
-    background: #3c47be;
-    color: #ffffff;
-    border-color: #3c47be;
-}
-
-.download-button:hover:not(:disabled) {
-    background: #4652d1;
-    border-color: #4652d1;
-}
-
-.delete-button {
-    background: #352024;
-    color: #ff6b6b;
-    border-color: #4a292d;
-}
-
-.delete-button:hover:not(:disabled) {
-    background: #3a2024;
-    color: #ff7d7d;
-    border-color: #4a292d;
-}
-
-.action-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.detail-tabs {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.25rem;
-    padding: 3px;
-    background: #151518;
-    border: 1px solid #29292e;
-    border-radius: var(--ui-control-radius, 8px);
-}
-
-.detail-tabs button {
-    min-height: 2rem;
-    padding: 0.375rem 0.5rem;
-    color: #898991;
-    background: transparent;
-    border: none;
-    border-radius: var(--ui-control-inner-radius, 4px);
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-weight: 500;
-    line-height: 1.5;
-    cursor: pointer;
-}
-
-.detail-tabs button:hover {
-    color: #ffffff;
-}
-
-.detail-tabs button.active {
-    background: #242429;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.detail-tabs button:disabled {
-    cursor: wait;
-}
-
-.tab-panel {
-    min-width: 0;
-}
-
-.file-metadata {
-    margin: 0;
-    border: 1px solid #29292e;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.metadata-row {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    align-items: start;
-    gap: 0.75rem;
-    padding: 0.5rem 0.875rem;
-    border-bottom: 1px solid #29292e;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-.metadata-row:last-child {
-    border-bottom: none;
-}
-
-.metadata-row dt {
-    color: #898991;
-}
-
-.metadata-row dd {
-    min-width: 0;
-    margin: 0;
-    color: #d5d5da;
-    overflow-wrap: anywhere;
-}
-
-.file-page button:focus-visible,
-.tab-panel:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 2px;
-}
-
-@media (max-width: 1100px) and (min-width: 901px) {
-    .file-page {
-        grid-template-columns: minmax(0, 1fr) 22rem;
-        gap: 0.75rem;
-    }
-
-    .file-actions {
-        gap: 0.5rem;
-    }
-}
-
-@media (max-width: 900px) {
-    .file-page {
-        height: auto;
-        min-height: 100%;
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .preview-card {
-        flex: none;
-        height: 36rem;
-    }
-
-    .file-panel {
-        overflow: visible;
-    }
-
-    .file-information {
-        flex: none;
-    }
-}
-
-@media (max-width: 500px) {
-    .preview-card {
-        height: 24rem;
-    }
-
-    .file-information {
-        padding: 0.75rem;
-    }
-
-    .file-actions {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.5rem;
-    }
-
-    .file-actions .download-button {
-        grid-column: 1 / -1;
-    }
-
-    .icon-action {
-        width: 100%;
-    }
-
-    .action-button {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-    }
-
-    .metadata-row {
-        gap: 0.5rem;
-        padding: 0.5rem 0.625rem;
-    }
-}
-</style>

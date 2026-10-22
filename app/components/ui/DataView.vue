@@ -1,6 +1,7 @@
 <template>
     <div
-        class="data-view"
+        class="data-view relative flex flex-col flex-1 min-w-0 min-h-0 rounded-panel
+        with-list-pagination:rounded-bl-none with-list-pagination:rounded-br-none"
         :class="{ 'drag-active': isDragging }"
         @dragenter="dragenter"
         @dragover="handleDragover"
@@ -8,7 +9,12 @@
         @drop="drop"
     >
         <div
-            class="view-content"
+            class="view-content flex-1 min-h-0 min-w-0 is-list-view:flex is-list-view:flex-col is-list-view:bg-surface
+            is-list-view:border is-list-view:border-divider is-list-view:rounded-[inherit]
+            is-list-view:overflow-hidden is-grid-view:grid is-grid-view:grid-cols-[repeat(5,_1fr)]
+            is-grid-view:content-start is-grid-view:gap-3 is-grid-view:overflow-y-auto empty-view:flex
+            empty-view:items-center empty-view:justify-center loading-view:flex loading-view:items-center
+            loading-view:justify-center max-desktop:is-grid-view:grid-cols-[repeat(4,_1fr)]"
             :class="[
                 viewMode === 'list' ? 'list-view' : 'grid-view',
                 { 'empty-view': $slots.empty && !isLoading, 'loading-view': isLoading }
@@ -29,9 +35,11 @@
         </div>
         <div
             v-if="isDragging"
-            class="drop-overlay"
+            class="drop-overlay absolute inset-0 flex items-center justify-center border-2 border-dashed
+            border-highlight rounded-[inherit] pointer-events-none z-20"
         >
-            <span class="drop-message"><Icon name="solar:cloud-upload-bold" />{{ dropText }}</span>
+            <span class="drop-message flex items-center gap-2 max-w-[calc(100%_-_2rem)] py-3 px-4 text-[#d5d5da] bg-surface
+                border border-divider rounded-md text-sm leading-[inherit] font-medium text-center"><Icon class="text-accent shrink-0" name="solar:cloud-upload-bold" />{{ dropText }}</span>
         </div>
     </div>
 </template>
@@ -67,147 +75,3 @@ const handleDragleave = (event: DragEvent) => {
     if (!isDragging.value) emit('dragleave', event)
 }
 </script>
-
-<style scoped>
-.data-view {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    border-radius: var(--ui-panel-radius, 24px);
-}
-
-.data-view:has(+ .pagination:not(.grid-pagination)) {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.view-content {
-    flex: 1;
-    min-height: 0;
-    min-width: 0;
-}
-
-.data-view :deep(.loading-state) {
-    color: #a8a8b0;
-    font-size: 0.85rem;
-}
-
-.list-view {
-    display: flex;
-    flex-direction: column;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-radius: inherit;
-
-    overflow: hidden;
-}
-
-.grid-view {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    align-content: start;
-
-    gap: 0.75rem;
-
-    overflow-y: auto;
-}
-
-.empty-view,
-.loading-view {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.data-view :deep(.empty-state) {
-    width: 100%;
-    min-height: 12rem;
-
-    padding: 2rem 1rem;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    gap: 0.5rem;
-
-    text-align: center;
-
-    box-sizing: border-box;
-}
-
-.data-view :deep(.empty-state-icon) {
-    display: block;
-    flex-shrink: 0;
-
-    margin-bottom: 0.5rem;
-
-    color: #8b7cff;
-
-    font-size: 2.5rem;
-}
-
-.data-view :deep(.empty-state-folder-icon) {
-    color: #5da9ff;
-}
-
-.data-view :deep(.empty-state strong) {
-    color: #f5f5f5;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.5;
-}
-
-.data-view :deep(.empty-state-description) {
-    color: #898991;
-
-    font-size: 0.875rem;
-    font-weight: 400;
-    line-height: 1.5;
-}
-
-.drop-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed #5a5aff;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 20;
-}
-
-.drop-message {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    max-width: calc(100% - 2rem);
-    padding: 0.75rem 1rem;
-    color: #d5d5da;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-align: center;
-}
-
-.drop-message :deep(.iconify) {
-    color: #8b7cff;
-    flex-shrink: 0;
-}
-
-@media (max-width: 1500px) {
-    .grid-view {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-</style>

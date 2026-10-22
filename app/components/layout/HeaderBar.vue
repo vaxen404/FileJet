@@ -1,14 +1,16 @@
 <template>
-    <header class="header-bar">
-        <div class="title">
+    <header class="header-bar w-full h-16 flex items-center justify-between py-0 px-4 bg-surface border border-divider
+        rounded-xl">
+        <div class="title flex-1 min-w-0 mr-4">
             <ClientOnly>
                 <nav
                     v-if="fileHeader && isFileDetails"
-                    class="header-breadcrumb"
+                    class="header-breadcrumb flex items-center gap-3 min-w-0 text-sm leading-normal"
                 >
                     <NuxtLink
                         :to="fileHeader.returnPath"
-                        class="header-back"
+                        class="header-back inline-flex items-center gap-2 shrink-0 text-accent no-underline font-medium
+                        hover:text-[#b5acff]"
                     >
                         <Icon
                             name="solar:arrow-left-linear"
@@ -16,39 +18,44 @@
                         />
                         <span>Back to {{ fileHeader.returnName }}</span>
                     </NuxtLink>
-                    <span class="header-separator">/</span>
+                    <span class="header-separator text-[#6f6f78]">/</span>
                     <span
-                        class="header-filename"
+                        class="header-filename min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[#c5c5cb]"
                         :title="fileHeader.fileName"
                         >{{ fileHeader.fileName }}</span
                     >
                 </nav>
-                <h1 v-else>{{ title }}</h1>
+                <h1 class="m-0 text-white text-2xl font-semibold leading-tight" v-else>{{ title }}</h1>
                 <template #fallback>
-                    <h1>{{ title }}</h1>
+                    <h1 class="m-0 text-white text-2xl font-semibold leading-tight">{{ title }}</h1>
                 </template>
             </ClientOnly>
         </div>
 
-        <div class="header-actions">
+        <div class="header-actions shrink-0 flex items-center gap-2">
             <button
-                class="icon-button"
+                class="icon-button [&_svg]:text-[1.3rem] relative flex items-center justify-center text-white bg-control
+                border border-control-border rounded-md cursor-pointer transition-colors duration-200 ease-[ease]
+                hover:bg-[#2a2a2f] hover:border-[#3d3d44] size-10"
                 type="button"
             >
                 <Icon name="solar:bell-linear" />
-                <span class="notification-dot"></span>
+                <span class="notification-dot absolute top-[0.55rem] right-[0.55rem] bg-highlight rounded-full size-[0.4rem]"></span>
             </button>
 
             <button
-                class="profile-button"
+                class="profile-button h-10 flex items-center gap-2 py-0 px-2 text-white bg-control border
+                border-control-border rounded-md cursor-pointer transition-colors duration-200 ease-[ease]
+                hover:bg-[#2a2a2f] hover:border-[#3d3d44]"
                 type="button"
             >
-                <div class="avatar">
+                <div class="avatar flex items-center justify-center bg-primary rounded-full text-xs font-semibold leading-tight
+                    size-8">
                     {{ avatar }}
                 </div>
 
                 <Icon
-                    class="arrow-icon"
+                    class="arrow-icon text-secondary text-base leading-[inherit]"
                     name="solar:alt-arrow-down-linear"
                 />
             </button>
@@ -75,176 +82,3 @@ const isFileDetails = computed(
             (route.params.id ?? route.params.noteId ?? route.params.folderId)
 )
 </script>
-
-<style scoped>
-.title {
-    flex: 1;
-    min-width: 0;
-    margin-right: 1rem;
-}
-
-.header-breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
-}
-
-.header-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-shrink: 0;
-    color: #8b7cff;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.header-back:hover {
-    color: #b5acff;
-}
-
-.header-separator {
-    color: #6f6f78;
-}
-
-.header-filename {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #c5c5cb;
-}
-
-.header-actions {
-    flex-shrink: 0;
-}
-
-.header-bar {
-    width: 100%;
-    height: 4rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 1rem;
-
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 12px;
-
-    box-sizing: border-box;
-}
-
-.title h1 {
-    margin: 0;
-
-    color: #ffffff;
-
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.25;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.icon-button {
-    position: relative;
-
-    width: 2.5rem;
-    height: 2.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #ffffff;
-    background: #202024;
-
-    border: 1px solid #303036;
-    border-radius: 6px;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.icon-button:hover {
-    background: #2a2a2f;
-    border-color: #3d3d44;
-}
-
-.icon-button svg {
-    font-size: 1.3rem;
-}
-
-.notification-dot {
-    position: absolute;
-
-    top: 0.55rem;
-    right: 0.55rem;
-
-    width: 0.4rem;
-    height: 0.4rem;
-
-    background: #5a5aff;
-    border-radius: 50%;
-}
-
-.profile-button {
-    height: 2.5rem;
-
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    padding: 0 0.5rem;
-
-    color: #ffffff;
-    background: #202024;
-
-    border: 1px solid #303036;
-    border-radius: 6px;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.profile-button:hover {
-    background: #2a2a2f;
-    border-color: #3d3d44;
-}
-
-.avatar {
-    width: 2rem;
-    height: 2rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #3c47be;
-    border-radius: 50%;
-
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1.25;
-}
-
-.arrow-icon {
-    color: #b5b5bd;
-    font-size: 1rem;
-}
-</style>

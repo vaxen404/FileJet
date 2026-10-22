@@ -1,32 +1,35 @@
 <template>
-    <div class="shared-folder">
-        <div class="folder-heading">
-            <div class="folder-path">
+    <div class="shared-folder flex-1 min-h-0 min-w-0 flex flex-col">
+        <div class="folder-heading flex items-center gap-3 min-w-0 flex-wrap justify-between p-5">
+            <div class="folder-path flex items-center gap-3 min-w-0 flex-wrap">
                 <button
                     v-if="history.length"
                     type="button"
-                    class="folder-button"
+                    class="folder-button py-2.5 px-3 text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm
+                    cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
                     @click="goBack"
                 >
                     Back
                 </button>
-                <Icon name="solar:folder-bold" />
-                <h1>{{ contents?.name ?? rootName }}</h1>
+                <Icon class="text-accent" name="solar:folder-bold" />
+                <h1 class="m-0 text-[1.1rem] wrap-anywhere">{{ contents?.name ?? rootName }}</h1>
             </div>
             <a
-                class="folder-button primary"
+                class="folder-button primary py-2.5 px-3 text-white bg-primary border rounded-md text-sm cursor-pointer
+                no-underline border-primary hover:brightness-110 leading-[inherit]"
                 :href="resourceUrl('download', currentFolder)"
                 >Download Folder</a
             >
         </div>
         <div
             v-if="error"
-            class="folder-error"
+            class="folder-error p-5 text-muted"
         >
             Folder contents could not be loaded.
             <button
                 type="button"
-                class="folder-button"
+                class="folder-button py-2.5 px-3 text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm
+                cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
                 @click="refresh()"
             >
                 Try again
@@ -43,22 +46,25 @@
         />
         <div
             v-if="selected"
-            class="preview-overlay"
+            class="preview-overlay fixed inset-3 flex flex-col bg-canvas border border-divider rounded-xl z-1100
+            overflow-hidden"
             @keydown.esc="selected = null"
             @click.self="selected = null"
         >
-            <div class="preview-heading">
-                <h2>{{ selected.name }}</h2>
-                <div class="folder-path">
+            <div class="preview-heading flex items-center gap-3 min-w-0 flex-wrap justify-between p-5">
+                <h2 class="m-0 text-[1.1rem] wrap-anywhere">{{ selected.name }}</h2>
+                <div class="folder-path flex items-center gap-3 min-w-0 flex-wrap">
                     <a
-                        class="folder-button primary"
+                        class="folder-button primary py-2.5 px-3 text-white bg-primary border rounded-md text-sm cursor-pointer
+                        no-underline border-primary hover:brightness-110 leading-[inherit]"
                         :href="resourceUrl('download', selected)"
                         >Download</a
                     >
                     <button
                         ref="closeButton"
                         type="button"
-                        class="folder-button"
+                        class="folder-button py-2.5 px-3 text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm
+                        cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
                         @click="selected = null"
                     >
                         Close preview
@@ -67,17 +73,17 @@
             </div>
             <p
                 v-if="previewError"
-                class="folder-error"
+                class="folder-error p-5 text-muted"
             >
                 {{ previewError }}
             </p>
-            <img
+            <img class="flex-1 min-h-0 w-full object-contain border-0"
                 v-else-if="selected.mime_type?.startsWith('image/')"
                 :src="resourceUrl('preview', selected)"
                 :alt="selected.name"
                 @error="previewError = 'Preview could not be loaded.'"
             />
-            <video
+            <video class="flex-1 min-h-0 w-full object-contain border-0"
                 v-else-if="selected.mime_type?.startsWith('video/')"
                 :src="resourceUrl('preview', selected)"
                 controls
@@ -85,17 +91,17 @@
                 preload="metadata"
                 @error="previewError = 'Preview could not be loaded.'"
             />
-            <iframe
+            <iframe class="flex-1 min-h-0 w-full object-contain border-0"
                 v-else-if="selected.mime_type === 'application/pdf'"
                 :src="resourceUrl('preview', selected)"
                 :title="selected.name"
             />
-            <pre v-else-if="selected.type === 'note' || selected.mime_type?.startsWith('text/')">{{
+            <pre class="flex-1 min-h-0 w-full object-contain border-0 p-5 m-0 overflow-auto whitespace-pre-wrap wrap-anywhere" v-else-if="selected.type === 'note' || selected.mime_type?.startsWith('text/')">{{
                 loadingText ? 'Loading preview...' : textContent
             }}</pre>
             <p
                 v-else
-                class="folder-error"
+                class="folder-error p-5 text-muted"
             >
                 Preview is not available for this file type. Use Download to save it.
             </p>
@@ -185,99 +191,3 @@ const openItem = async (item: LibraryItem) => {
     }
 }
 </script>
-
-<style scoped>
-.shared-folder {
-    flex: 1;
-    min-height: 0;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.folder-heading,
-.preview-heading,
-.folder-path {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-    flex-wrap: wrap;
-}
-
-.folder-heading,
-.preview-heading {
-    justify-content: space-between;
-    padding: 1.25rem;
-}
-
-h1,
-h2 {
-    margin: 0;
-    font-size: 1.1rem;
-    overflow-wrap: anywhere;
-}
-
-.folder-path :deep(.iconify) {
-    color: #8b7cff;
-}
-
-.folder-button {
-    padding: 0.625rem 0.75rem;
-    color: #cfcfd5;
-    background: #202024;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    font: inherit;
-    font-size: 0.875rem;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.folder-button.primary {
-    background: #3c47be;
-    border-color: #3c47be;
-    color: #ffffff;
-}
-
-.folder-button:hover {
-    filter: brightness(1.1);
-}
-
-.folder-error {
-    padding: 1.25rem;
-    color: #898991;
-}
-
-.preview-overlay {
-    position: fixed;
-    inset: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    background: #121214;
-    border: 1px solid #29292e;
-    border-radius: 12px;
-    z-index: 1100;
-    overflow: hidden;
-}
-
-.preview-overlay img,
-.preview-overlay video,
-.preview-overlay iframe,
-.preview-overlay pre {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-    object-fit: contain;
-    border: 0;
-}
-
-.preview-overlay pre {
-    padding: 1.25rem;
-    margin: 0;
-    overflow: auto;
-    box-sizing: border-box;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-</style>

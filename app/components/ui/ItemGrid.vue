@@ -1,36 +1,4 @@
 <template>
-    <div class="items-grid"><slot /></div>
+    <div class="items-grid grid col-span-full grid-cols-6 gap-3 max-desktop:grid-cols-4 max-laptop:grid-cols-3
+        max-tablet:grid-cols-2 max-phone:grid-cols-1"><slot /></div>
 </template>
-
-<style scoped>
-.items-grid {
-    display: grid;
-    grid-column: 1 / -1;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 0.75rem;
-}
-
-@media (max-width: 1500px) {
-    .items-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 1100px) {
-    .items-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 800px) {
-    .items-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 500px) {
-    .items-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-</style>

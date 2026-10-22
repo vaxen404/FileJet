@@ -1,9 +1,13 @@
 <template>
-    <div class="details-panel">
-        <div class="details-actions">
+    <div class="details-panel w-full min-w-0 flex flex-col gap-3">
+        <div class="details-actions w-full grid grid-cols-2 gap-2 p-2 bg-surface border border-divider rounded-3xl">
             <button
                 v-if="actions.includes('download')"
-                class="actions-btn download"
+                class="actions-btn details-action-icons download w-full min-w-0 h-10 py-0 px-2 flex items-center
+                justify-center gap-2 bg-primary text-white border rounded-md text-sm font-medium whitespace-nowrap
+                cursor-pointer transition-colors duration-200 ease-[ease] leading-normal border-primary
+                hover:bg-[#4652d1] hover:text-white hover:border-[#4652d1] nth-2:row-start-2 nth-2:col-start-1
+                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
                 @click="emit('download')"
             >
                 <Icon name="solar:download-bold" />
@@ -12,7 +16,11 @@
 
             <button
                 v-if="actions.includes('rename')"
-                class="actions-btn"
+                class="actions-btn details-action-icons w-full min-w-0 h-10 py-0 px-2 flex items-center justify-center gap-2
+                bg-control text-[#cfcfd5] border border-control-border rounded-md text-sm font-medium
+                whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease] leading-normal
+                hover:bg-divider hover:text-white hover:border-[#3a3a41] nth-2:row-start-2 nth-2:col-start-1
+                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
                 @click="emit('rename')"
             >
                 <Icon name="solar:pen-bold" />
@@ -21,7 +29,11 @@
 
             <button
                 v-if="actions.includes('favorite')"
-                class="actions-btn"
+                class="actions-btn details-action-icons w-full min-w-0 h-10 py-0 px-2 flex items-center justify-center gap-2
+                bg-control text-[#cfcfd5] border border-control-border rounded-md text-sm font-medium
+                whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease] leading-normal
+                hover:bg-divider hover:text-white hover:border-[#3a3a41] nth-2:row-start-2 nth-2:col-start-1
+                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
                 @click="emit('favorite')"
             >
                 <Icon :name="isFavorite ? 'solar:star-bold' : 'solar:star-linear'" />
@@ -32,7 +44,11 @@
             <button
                 v-if="itemType === 'file' && canCopy && actions.includes('copy')"
                 type="button"
-                class="actions-btn copy"
+                class="actions-btn details-action-icons copy w-full min-w-0 h-10 py-0 px-2 flex items-center justify-center
+                gap-2 bg-control text-[#cfcfd5] border border-control-border rounded-md text-sm font-medium
+                whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease] leading-normal
+                hover:bg-divider hover:text-white hover:border-[#3a3a41] nth-2:row-start-2 nth-2:col-start-1
+                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
                 :disabled="isCopying"
                 @click="emit('copy')"
             >
@@ -42,7 +58,12 @@
 
             <button
                 v-if="actions.includes('delete')"
-                class="actions-btn delete"
+                class="actions-btn details-action-icons delete w-full min-w-0 h-10 py-0 px-2 flex items-center
+                justify-center gap-2 bg-control text-[#ff6b6b] border border-control-border rounded-md text-sm
+                font-medium whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease]
+                leading-normal hover:bg-[#352024] hover:text-[#ff7d7d] hover:border-[#4a292d] nth-2:row-start-2
+                nth-2:col-start-1 max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1
+                max-tiny:gap-1"
                 @click="emit('delete')"
             >
                 <Icon name="solar:trash-bin-trash-bold" />
@@ -52,9 +73,11 @@
 
         <div
             v-if="showInfo"
-            class="details-info"
+            class="details-info w-full bg-surface border border-divider rounded-3xl overflow-hidden"
         >
-            <div class="info-title">
+            <div class="info-title [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-accent [&_.icon]:size-4 [&_.icon]:shrink-0
+                [&_.icon]:text-accent h-12 py-0 px-[0.9rem] flex items-center gap-[0.45rem] text-white border-b
+                border-b-divider text-[0.85rem] font-semibold">
                 <Icon name="solar:info-circle-bold" />
                 Information
             </div>
@@ -99,166 +122,3 @@ const emit = defineEmits<{
     delete: []
 }>()
 </script>
-
-<style scoped>
-.details-panel {
-    width: 100%;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.details-actions,
-.details-info {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.details-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 24px;
-}
-
-.actions-btn {
-    width: 100%;
-    min-width: 0;
-    height: 2.5rem;
-    padding: 0 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: #202024;
-    color: #cfcfd5;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    white-space: nowrap;
-    box-sizing: border-box;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
-    line-height: 1.5;
-}
-
-.actions-btn:hover {
-    background: #29292e;
-    color: #ffffff;
-    border-color: #3a3a41;
-}
-
-.actions-btn.download {
-    background: #3c47be;
-    color: #ffffff;
-    border-color: #3c47be;
-}
-
-.actions-btn.download:hover {
-    background: #4652d1;
-    border-color: #4652d1;
-}
-
-.actions-btn.delete {
-    color: #ff6b6b;
-}
-
-.actions-btn.delete:hover {
-    background: #352024;
-    color: #ff7d7d;
-    border-color: #4a292d;
-}
-
-.actions-btn :deep(svg),
-.actions-btn :deep(.icon) {
-    width: 0.95rem;
-    height: 0.95rem;
-    flex-shrink: 0;
-}
-
-.details-info {
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 24px;
-    overflow: hidden;
-}
-
-.info-title {
-    height: 3rem;
-    padding: 0 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    color: #ffffff;
-    border-bottom: 1px solid #29292e;
-    font-size: 0.85rem;
-    font-weight: 600;
-    box-sizing: border-box;
-}
-
-.info-title :deep(svg),
-.info-title :deep(.icon) {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
-    color: #8b7cff;
-}
-
-.details-info :deep(.info-row) {
-    width: 100%;
-    height: 2.75rem;
-    padding: 0 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    border-bottom: 1px solid #29292e;
-    box-sizing: border-box;
-}
-
-.details-info :deep(.info-row:last-child) {
-    border-bottom: none;
-}
-
-.details-info :deep(.info-label) {
-    flex-shrink: 0;
-    color: #898991;
-    font-size: 0.75rem;
-    line-height: 1.5;
-}
-
-.details-info :deep(.info-value) {
-    min-width: 0;
-    max-width: 68%;
-    color: #d5d5da;
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-align: right;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.5;
-}
-
-.details-actions > .actions-btn:nth-child(2) {
-    grid-row: 2;
-    grid-column: 1;
-}
-
-@media (max-width: 360px) {
-    .actions-btn {
-        font-size: 0.75rem;
-        padding: 0 0.25rem;
-        gap: 0.25rem;
-    }
-}
-</style>

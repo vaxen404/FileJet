@@ -1,13 +1,13 @@
 <template>
-    <div class="folders-page">
-        <div class="folders-header">
-            <div class="folders-toolbar">
-                <SearchBox
+    <div class="folders-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
+        <div class="folders-header flex flex-col shrink-0 p-0 gap-3 mb-3">
+            <div class="folders-toolbar flex flex-row items-center justify-between gap-2 flex-wrap min-w-0">
+                <SearchBox class="max-tablet:w-full max-tablet:min-w-0 max-tablet:box-border"
                     v-model="searchQuery"
                     placeholder="Search folders..."
                 />
 
-                <div class="toolbar-actions">
+                <div class="toolbar-actions flex flex-row items-center gap-2 flex-wrap min-w-0">
                     <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
                     <UploadButton
@@ -18,13 +18,21 @@
 
                     <button
                         type="button"
-                        class="new-folder-button"
+                        class="new-folder-button inline-flex items-center justify-center shrink-0 gap-2 h-control py-0 px-3.5
+                        text-white bg-[#424dcc] border border-[#626de5] rounded-control
+                        shadow-[inset_0_1px_0_#ffffff12,_0_2px_6px_#0003] text-control-size font-medium leading-normal
+                        whitespace-nowrap cursor-pointer transition-[background,border-color,transform] duration-180
+                        ease-[ease] hover:enabled:bg-[#505ed8] hover:enabled:border-[#818bf3] hover:enabled:-translate-y-px
+                        active:enabled:bg-[#3944b8] active:enabled:translate-y-0
+                        active:enabled:shadow-[inset_0_1px_3px_#0003] focus-visible:outline-2 focus-visible:outline-[#d3d7ff]
+                        focus-visible:-outline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                        motion-reduce:transition-none motion-reduce:hover:enabled:translate-y-0"
                         :disabled="pending || folderActions.isLoading.value"
                         @click="createFolder"
                     >
                         <Icon
                             name="solar:add-folder-bold"
-                            class="new-folder-icon"
+                            class="new-folder-icon block shrink-0 text-white text-control-icon size-control-icon"
                         />
                         <span>New Folder</span>
                     </button>
@@ -42,8 +50,9 @@
             @drop="handleDrop"
         >
             <template #loading>
-                <div class="loading-state">
-                    <span class="loading-spinner" />
+                <div class="loading-state text-label text-[0.85rem] flex flex-col items-center gap-[0.8rem]">
+                    <span class="loading-spinner border-3 border-divider border-t-primary rounded-full animate-spin
+                        [animation-duration:0.8s] motion-reduce:animate-none size-8" />
                     <span>Loading folders...</span>
                 </div>
             </template>
@@ -52,14 +61,14 @@
                 v-if="!pending && filteredFolders.length === 0"
                 #empty
             >
-                <div class="empty-state">
+                <div class="empty-state w-full min-h-48 py-8 px-4 flex flex-col items-center justify-center gap-2 text-center">
                     <Icon
                         name="solar:folder-linear"
                         size="2.5rem"
-                        class="empty-state-icon empty-state-folder-icon"
+                        class="empty-state-icon empty-state-folder-icon block shrink-0 mb-2 text-[#5da9ff] text-[2.5rem]"
                     />
-                    <strong>{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
-                    <span class="empty-state-description">
+                    <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
+                    <span class="empty-state-description text-muted text-sm font-normal leading-normal">
                         {{
                             folders.length
                                 ? 'Try a different search.'
@@ -70,14 +79,15 @@
             </template>
 
             <template #list>
-                <div class="table-scroll">
-                    <table class="folders-table">
+                <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
+                    <table class="folders-table w-full border-separate border-spacing-0 bg-transparent border-0 rounded-none min-w-176
+                        table-fixed">
                         <thead>
                             <tr>
-                                <th>
+                                <th class="w-14 pl-4 pr-3 text-center file-table-heading">
                                     <input
                                         type="checkbox"
-                                        class="folder-checkbox"
+                                        class="folder-checkbox file-checkbox"
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
                                         :disabled="pending"
@@ -85,61 +95,62 @@
                                     />
                                 </th>
 
-                                <th>
-                                    <div class="name-header">
+                                <th class="w-[42%] file-table-heading">
+                                    <div class="name-header flex items-center gap-[0.3rem]">
                                         Name
                                         <Icon
                                             name="solar:sort-vertical-linear"
-                                            class="sort-icon"
+                                            class="sort-icon text-base leading-[inherit]"
                                         />
                                     </div>
                                 </th>
 
-                                <th>Type</th>
-                                <th>Created</th>
-                                <th>Modified</th>
-                                <th>Actions</th>
+                                <th class="file-table-heading">Type</th>
+                                <th class="file-table-heading">Created</th>
+                                <th class="file-table-heading">Modified</th>
+                                <th class="file-table-heading">Actions</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            <tr
+                            <tr class="hover:bg-surface-hover selected:bg-[#201d2d]"
                                 v-for="folder in paginatedFolders"
                                 :key="folder.id"
                                 :class="{ selected: selectedFolders.includes(folder.id) }"
                                 @click="openFolder(folder)"
                                 @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
                             >
-                                <td @click.stop>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedFolders"
                                         type="checkbox"
-                                        class="folder-checkbox"
+                                        class="folder-checkbox file-checkbox"
                                         :value="folder.id"
                                         :disabled="pending"
                                     />
                                 </td>
 
-                                <td>
-                                    <div class="folder-name">
-                                        <div class="folder-icon">
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
+                                    <div class="folder-name flex items-center gap-3">
+                                        <div class="folder-icon flex items-center justify-center shrink-0 text-white bg-primary border border-primary
+                                            rounded-md text-[1.2rem] size-10">
                                             <Icon name="solar:folder-bold" />
                                         </div>
 
-                                        <div class="folder-info">
-                                            <strong :title="folder.name">{{ folder.name }}</strong>
-                                            <span>
+                                        <div class="folder-info flex flex-col gap-1 min-w-0">
+                                            <strong class="text-white text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="folder.name">{{ folder.name }}</strong>
+                                            <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis">
                                                 Folder • {{ formatFileTime(folder.created_at) }}
                                             </span>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td>Folder</td>
-                                <td>{{ formatFileTime(folder.created_at) }}</td>
-                                <td>{{ formatFileTime(folder.updated_at) }}</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Folder</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(folder.created_at) }}</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(folder.updated_at) }}</td>
 
-                                <td @click.stop>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell" @click.stop>
                                     <ItemMenu
                                         :ref="menu => setFolderMenuRef(folder.id, menu)"
                                         type="folder"
@@ -176,11 +187,12 @@
                         @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
                     >
                         <template #actions>
-                            <label class="file-select">
+                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                                cursor-pointer size-8">
                                 <input
                                     v-model="selectedFolders"
                                     type="checkbox"
-                                    class="folder-checkbox"
+                                    class="folder-checkbox file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
                                     :value="folder.id"
                                     :disabled="pending"
                                 />
@@ -198,9 +210,9 @@
                             />
                         </template>
                         <template #metadata>
-                            <span>Folder</span>
+                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">Folder</span>
                             ·
-                            <span>{{ formatFileTime(folder.created_at) }}</span>
+                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileTime(folder.created_at) }}</span>
                         </template>
                     </ItemGridCard>
                 </ItemGrid>
@@ -424,384 +436,3 @@ watch([searchQuery, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 </script>
-
-<style scoped>
-.folders-page {
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    background: transparent;
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-}
-
-.folders-header {
-    display: flex;
-    flex-direction: column;
-
-    flex-shrink: 0;
-
-    padding: 0;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-
-.folders-toolbar {
-    display: flex;
-    flex-direction: row;
-
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    min-width: 0;
-}
-
-.toolbar-actions {
-    display: flex;
-    flex-direction: row;
-
-    align-items: center;
-
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    min-width: 0;
-}
-
-.new-folder-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    gap: 0.5rem;
-    height: var(--ui-control-height, 2.5rem);
-    padding: 0 0.875rem;
-    box-sizing: border-box;
-    color: #fff;
-    background: #424dcc;
-    border: 1px solid #626de5;
-    border-radius: var(--ui-control-radius, 8px);
-    box-shadow:
-        inset 0 1px 0 #ffffff12,
-        0 2px 6px #0003;
-    font-family: 'Inter', sans-serif;
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-weight: 500;
-    line-height: 1.5;
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-        background 0.18s ease,
-        border-color 0.18s ease,
-        transform 0.18s ease;
-}
-
-.new-folder-icon {
-    display: block;
-    width: var(--ui-control-icon-size, 1.125rem);
-    height: var(--ui-control-icon-size, 1.125rem);
-    flex-shrink: 0;
-    color: #ffffff;
-    font-size: var(--ui-control-icon-size, 1.125rem);
-}
-
-.new-folder-button:hover:not(:disabled) {
-    background: #505ed8;
-    border-color: #818bf3;
-    transform: translateY(-1px);
-}
-
-.new-folder-button:active:not(:disabled) {
-    background: #3944b8;
-    transform: translateY(0);
-    box-shadow: inset 0 1px 3px #0003;
-}
-
-.new-folder-button:focus-visible {
-    outline: 2px solid #d3d7ff;
-    outline-offset: -4px;
-}
-
-.new-folder-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.table-scroll {
-    flex: 1;
-    min-height: 0;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.folders-table {
-    width: 100%;
-
-    border-collapse: separate;
-    border-spacing: 0;
-
-    background: transparent;
-
-    border: none;
-    border-radius: 0;
-}
-
-.folders-table th,
-.folders-table td {
-    padding: 0 1rem;
-
-    text-align: left;
-    vertical-align: middle;
-
-    border-bottom: 1px solid #29292e;
-
-    box-sizing: border-box;
-}
-
-.folders-table thead th {
-    height: 3.8rem;
-
-    position: sticky;
-
-    top: 0;
-
-    z-index: 2;
-
-    background: #1a1a1d;
-
-    color: #a3a3ab;
-
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.folders-table tbody td {
-    height: 4.2rem;
-
-    color: #b5b5bd;
-
-    font-size: 0.85rem;
-}
-
-.folders-table tbody tr:hover {
-    background: #1f1f23;
-}
-
-.folders-table th:first-child,
-.folders-table td:first-child {
-    width: 3.5rem;
-
-    padding-left: 1rem;
-    padding-right: 0.75rem;
-
-    text-align: center;
-}
-
-.folder-checkbox {
-    position: relative;
-    appearance: none;
-    -webkit-appearance: none;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: 0;
-    box-sizing: border-box;
-    background: #202024;
-    border: 1px solid #505057;
-    border-radius: 4px;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.folder-checkbox:hover:not(:disabled) {
-    border-color: #8b7cff;
-}
-
-.folder-checkbox:checked,
-.folder-checkbox:indeterminate {
-    background: #3c47be;
-    border-color: #5965ed;
-}
-
-.folder-checkbox:checked::after {
-    content: '';
-    width: 0.3rem;
-    height: 0.55rem;
-    margin-top: -0.15rem;
-    border: solid #ffffff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.folder-checkbox:indeterminate::after {
-    content: '';
-    width: 0.55rem;
-    height: 2px;
-    margin: 0;
-    background: #ffffff;
-    border: 0;
-    transform: none;
-}
-
-.folder-checkbox:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 3px;
-}
-
-.folder-checkbox:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.folders-table th:nth-child(2),
-.folders-table td:nth-child(2) {
-    width: 42%;
-}
-
-.name-header {
-    display: flex;
-
-    align-items: center;
-
-    gap: 0.3rem;
-}
-
-.sort-icon {
-    font-size: 1rem;
-}
-
-.folder-name {
-    display: flex;
-
-    align-items: center;
-
-    gap: 0.75rem;
-}
-
-.folder-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    color: #ffffff;
-    background: #3c47be;
-
-    border: 1px solid #3c47be;
-    border-radius: 6px;
-
-    font-size: 1.2rem;
-}
-
-.folder-info {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 0.25rem;
-
-    min-width: 0;
-}
-
-.folder-info strong {
-    color: #ffffff;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-
-    white-space: nowrap;
-    line-height: 1.5;
-}
-
-.folder-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-
-    white-space: nowrap;
-    font-weight: 400;
-    line-height: 1.5;
-}
-
-.table-scroll {
-    overflow-x: auto;
-}
-
-.folders-table {
-    min-width: 44rem;
-    table-layout: fixed;
-}
-
-.folders-table tbody tr.selected {
-    background: #201d2d;
-}
-
-.folder-info strong,
-.folder-info span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.8rem;
-    color: #a8a8b0;
-    font-size: 0.85rem;
-}
-
-.loading-spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid #29292e;
-    border-top-color: #3c47be;
-    border-radius: 50%;
-    animation: loading-spin 0.8s linear infinite;
-}
-
-@keyframes loading-spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .new-folder-button {
-        transition: none;
-    }
-
-    .new-folder-button:hover:not(:disabled) {
-        transform: none;
-    }
-
-    .loading-spinner {
-        animation: none;
-    }
-}
-
-@media (max-width: 800px) {
-    .folders-toolbar :deep(.search-box) {
-        width: 100%;
-        min-width: 0;
-        box-sizing: border-box;
-    }
-}
-</style>

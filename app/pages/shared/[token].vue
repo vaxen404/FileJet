@@ -1,26 +1,31 @@
 <template>
-    <div class="shared-page">
+    <div class="shared-page w-full h-dvh min-h-0 p-3 flex flex-col bg-canvas text-white overflow-hidden
+        max-mobile:p-[0.6rem]">
         <div
             v-if="passwordRequired"
-            class="shared-error"
+            class="shared-error flex-1 basis-0 min-w-0 min-h-0 flex items-center justify-center p-4 short-screen:p-0
+            has-unlock:overflow-y-auto"
         >
             <form
-                class="shared-error-card share-unlock"
+                class="shared-error-card share-unlock w-full max-w-108 flex flex-col items-center gap-4
+                p-[clamp(1.25rem,_4vw,_2.5rem)] bg-surface border border-divider rounded-3xl text-center text-accent
+                my-auto shrink-0 short-screen:gap-[0.6rem] short-screen:p-4"
                 @submit.prevent="unlockShare"
             >
-                <Icon
+                <Icon class=""
                     name="solar:lock-keyhole-linear"
                     size="2.75rem"
                 />
-                <h1>Password Protected</h1>
+                <h1 class="m-0 text-white text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">Password Protected</h1>
                 <p
                     v-if="lockedFileName"
-                    class="locked-filename"
+                    class="locked-filename max-w-84 m-0 text-[#d5d5da] text-[0.85rem] leading-[1.7] w-full wrap-anywhere
+                    font-medium"
                     :title="lockedFileName"
                 >
                     {{ lockedFileName }}
                 </p>
-                <p>
+                <p class="max-w-84 m-0 text-muted text-[0.85rem] leading-[1.7]">
                     {{
                         passwordChallenge.itemType === 'folder'
                             ? 'This folder is protected by a password.'
@@ -29,9 +34,10 @@
                               : 'This file is protected by a password.'
                     }}
                 </p>
-                <label for="public-share-password">Password</label>
-                <div class="unlock-password-field">
-                    <input
+                <label class="w-full text-left text-[#d5d5da] text-sm leading-[inherit]" for="public-share-password">Password</label>
+                <div class="unlock-password-field relative w-full">
+                    <input class="w-full h-11 py-0 px-3 text-white bg-[#151518] border border-control-border rounded-md text-sm
+                        outline-none pr-11 focus:border-[#5965ed] leading-[inherit]"
                         id="public-share-password"
                         v-model="sharePassword"
                         :type="showPassword ? 'text' : 'password'"
@@ -44,12 +50,15 @@
                     />
                     <button
                         type="button"
-                        class="password-visibility"
+                        class="password-visibility absolute top-0 right-0 flex items-center justify-center p-0 border-0 rounded-md
+                        text-muted bg-transparent cursor-pointer hover:text-white focus-visible:outline-2
+                        focus-visible:outline-accent focus-visible:-outline-offset-2 disabled:opacity-65 disabled:cursor-wait
+                        size-11"
                         :title="showPassword ? 'Hide password' : 'Show password'"
                         :disabled="unlocking"
                         @click="showPassword = !showPassword"
                     >
-                        <Icon
+                        <Icon class=""
                             :name="showPassword ? 'solar:eye-closed-linear' : 'solar:eye-linear'"
                             size="1.2rem"
                         />
@@ -58,13 +67,18 @@
                 <p
                     v-if="unlockError"
                     id="unlock-error"
-                    class="unlock-error"
+                    class="unlock-error max-w-84 m-0 text-[#ff6b6b] text-[0.85rem] leading-[1.7]"
                 >
                     {{ unlockError }}
                 </p>
                 <button
                     type="submit"
-                    class="download-btn"
+                    class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
+                    px-[1.4rem] text-white bg-primary border border-[#4f5bdf] rounded-md [font-family:inherit]
+                    text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
+                    hover:bg-[#505cf0] hover:border-[#6b75ff] focus-visible:outline-2 focus-visible:outline-[#b5acff]
+                    focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
+                    short-screen:mt-0 short-screen:py-[0.65rem] short-screen:px-[1.1rem]"
                     :disabled="unlocking || !sharePassword"
                 >
                     {{
@@ -81,11 +95,14 @@
         </div>
         <div
             v-else-if="error"
-            class="shared-error"
+            class="shared-error flex-1 basis-0 min-w-0 min-h-0 flex items-center justify-center p-4 short-screen:p-0
+            has-unlock:overflow-y-auto"
         >
-            <div class="shared-error-card">
-                <div class="shared-error-icon">
-                    <Icon
+            <div class="shared-error-card w-full max-w-108 flex flex-col items-center gap-4 p-[clamp(1.25rem,_4vw,_2.5rem)]
+                bg-surface border border-divider rounded-3xl text-center short-screen:gap-[0.6rem] short-screen:p-4">
+                <div class="shared-error-icon flex items-center justify-center bg-[linear-gradient(145deg,_#30295f,_#211d3b)]
+                    border border-[#42386f] rounded-md text-[#a79aff] short-screen:w-16 short-screen:h-16 size-22">
+                    <Icon class=""
                         :name="
                             error.statusCode === 404
                                 ? 'solar:link-broken-linear'
@@ -95,9 +112,10 @@
                     />
                 </div>
 
-                <span class="shared-error-code">{{ error.statusCode || 'Error' }}</span>
+                <span class="shared-error-code py-[0.35rem] px-3 text-[#b5acff] bg-[#242039] border border-[#37304f] rounded-md
+                    text-xs leading-[inherit] font-semibold tracking-[0.08em]">{{ error.statusCode || 'Error' }}</span>
 
-                <h1>
+                <h1 class="m-0 text-white text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">
                     {{
                         error.statusCode === 410
                             ? 'Link Expired'
@@ -109,7 +127,7 @@
                     }}
                 </h1>
 
-                <p>
+                <p class="max-w-84 m-0 text-muted text-[0.85rem] leading-[1.7]">
                     {{
                         error.statusCode === 404 || error.statusCode === 410
                             ? 'This link may be invalid or no longer available. Ask the sender for a new link.'
@@ -122,7 +140,11 @@
         <template v-else-if="sharedItem">
             <div
                 v-if="sharedItem.type === 'file'"
-                class="shared-content"
+                class="shared-content basis-0 flex-1 min-w-0 min-h-0 flex bg-surface border border-divider rounded-3xl
+                overflow-hidden media-content:items-center media-content:justify-center media-content:bg-[#0d0d10]
+                image-content:bg-transparent image-content:border-0 text-content:block text-content:py-4
+                text-content:px-[1.2rem] text-content:overflow-auto text-content:overscroll-contain
+                text-content:wrap-anywhere"
                 :class="{
                     'media-content': isImage || isPdf || isVideo,
                     'image-content': isImage,
@@ -132,22 +154,28 @@
                 <div
                     v-if="isImage"
                     ref="imageStage"
-                    class="image-stage"
+                    class="image-stage relative flex items-center justify-center min-w-0 min-h-0 fullscreen:w-full
+                    fullscreen:h-dvh fullscreen:p-[clamp(0.5rem,_1.5vmin,_1rem)] fullscreen:bg-canvas
+                    fullscreen:overflow-hidden expanded:w-full expanded:h-dvh expanded:p-[clamp(0.5rem,_1.5vmin,_1rem)]
+                    expanded:bg-canvas expanded:overflow-hidden expanded:fixed expanded:inset-0 expanded:z-2000 size-full"
                     :class="{ 'is-expanded': isImageExpanded }"
                 >
                     <img
-                        class="image-preview"
+                        class="image-preview block min-w-0 min-h-0 object-contain object-center rounded-3xl size-full"
                         :src="`/api/shared/${token}/preview`"
                         :alt="sharedItem.item.name"
                     />
 
                     <button
                         type="button"
-                        class="image-fullscreen-btn"
+                        class="image-fullscreen-btn absolute right-4 bottom-4 flex items-center justify-center p-0 text-[#cfcfd5]
+                        bg-control border border-control-border rounded-md cursor-pointer transition-colors duration-200
+                        ease-[ease] hover:text-white hover:bg-divider focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2 size-[2.6rem]"
                         :title="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
                         @click="toggleImageFullscreen"
                     >
-                        <Icon
+                        <Icon class=""
                             :name="
                                 isImageFullscreen
                                     ? 'solar:quit-full-screen-linear'
@@ -161,27 +189,27 @@
                 <template v-else-if="isText">
                     <div
                         v-if="textPreviewError"
-                        class="error-message"
+                        class="error-message p-4 text-[#ef6666] text-[0.9rem] min-h-0 overflow-auto wrap-anywhere"
                     >
                         Text preview could not be loaded.
                     </div>
 
                     <pre
                         v-else
-                        class="text-preview"
+                        class="text-preview m-0 whitespace-pre-wrap break-words font-mono text-[0.9rem] leading-[1.7]"
                         >{{ textContent }}</pre>
                 </template>
 
                 <iframe
                     v-else-if="isPdf"
-                    class="pdf-preview"
+                    class="pdf-preview block min-w-0 min-h-0 border-0 size-full"
                     :src="`/api/shared/${token}/preview`"
                     :title="itemName"
                 />
 
                 <video
                     v-else-if="isVideo"
-                    class="video-preview"
+                    class="video-preview block min-w-0 min-h-0 object-contain object-center bg-black size-full"
                     :src="`/api/shared/${token}/preview`"
                     controls
                     autoplay
@@ -192,36 +220,53 @@
 
                 <div
                     v-else
-                    class="download-message"
+                    class="download-message w-full min-w-0 min-h-0 flex flex-col items-center justify-center gap-4 p-6
+                    text-center max-mobile:py-5 max-mobile:px-4 max-mobile:gap-[0.85rem] short-screen:grid
+                    short-screen:grid-cols-[3.5rem_minmax(0,_28rem)] short-screen:content-center
+                    short-screen:justify-items-start short-screen:gap-[0.4rem_1rem] short-screen:p-3
+                    short-screen:text-left"
                 >
-                    <div class="download-icon">
-                        <Icon
+                    <div class="download-icon flex-none flex items-center justify-center
+                        bg-[linear-gradient(145deg,_#30295f,_#211d3b)] border border-[#42386f] text-accent rounded-md
+                        max-mobile:w-22 max-mobile:h-22 short-screen:col-start-1 short-screen:row-start-1
+                        short-screen:row-span-4 short-screen:self-center short-screen:w-14 short-screen:h-14 size-26">
+                        <Icon class="short-screen:text-3xl! short-screen:leading-[inherit]!"
                             name="solar:file-bold"
                             size="3rem"
                         />
                     </div>
 
-                    <h2 :title="itemName">{{ itemName }}</h2>
+                    <h2 class="shrink-0 line-clamp-2 w-full max-w-136 mt-1 mr-0 mb-0 ml-0 text-white
+                        text-[clamp(1.1rem,_2.5vw,_1.5rem)] font-semibold leading-[1.4] wrap-anywhere overflow-hidden
+                        short-screen:col-start-2 short-screen:m-0 short-screen:text-[1.1rem]" :title="itemName">{{ itemName }}</h2>
 
-                    <div class="download-status">
-                        <span class="status-dot" />
+                    <div class="download-status flex-none inline-flex items-center gap-2 py-[0.45rem] px-3 text-[#b5acff]
+                        bg-[#242039] border border-[#37304f] rounded-md text-xs font-medium leading-[1.4]
+                        short-screen:col-start-2">
+                        <span class="status-dot flex-none bg-accent rounded-full shadow-[0_0_0_3px_#8b7cff1a] size-[0.4rem]" />
                         {{
                             downloadedToken === token ? 'Download started' : 'Starting download...'
                         }}
                     </div>
 
-                    <p>
-                        Your file will download automatically.<br />
+                    <p class="shrink-0 max-w-112 m-0 text-muted text-[0.85rem] leading-[1.6] short-screen:col-start-2
+                        short-screen:text-[0.8rem] short-screen:leading-normal">
+                        Your file will download automatically.<br class="" />
                         If it hasn't started, use the button below.
                     </p>
 
                     <button
                         type="button"
-                        class="download-btn"
+                        class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
+                        px-[1.4rem] text-white bg-primary border border-[#4f5bdf] rounded-md [font-family:inherit]
+                        text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
+                        hover:bg-[#505cf0] hover:border-[#6b75ff] focus-visible:outline-2 focus-visible:outline-[#b5acff]
+                        focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
+                        short-screen:mt-0 short-screen:py-[0.65rem] short-screen:px-[1.1rem]"
                         :disabled="isDownloading"
                         @click="manualDownload"
                     >
-                        <Icon
+                        <Icon class=""
                             name="solar:download-linear"
                             size="1.2rem"
                         />
@@ -233,24 +278,32 @@
 
             <div
                 v-else-if="sharedItem.type === 'note'"
-                class="shared-content text-content"
+                class="shared-content basis-0 text-content flex-1 min-w-0 min-h-0 block bg-surface border border-divider
+                rounded-3xl overflow-auto py-4 px-[1.2rem] overscroll-contain wrap-anywhere"
             >
-                <div class="shared-note-heading">
-                    <h1>{{ sharedItem.item.title }}</h1>
+                <div class="shared-note-heading flex items-center justify-between flex-wrap gap-3 mb-4">
+                    <h1 class="m-0 text-[1.1rem] wrap-anywhere">{{ sharedItem.item.title }}</h1>
                     <a
-                        class="download-btn"
+                        class="download-btn m-0 no-underline flex-none inline-flex items-center justify-center gap-[0.65rem]
+                        py-[0.8rem] px-[1.4rem] text-white bg-primary border border-[#4f5bdf] rounded-md
+                        [font-family:inherit] text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200
+                        ease-[ease] hover:bg-[#505cf0] hover:border-[#6b75ff] focus-visible:outline-2
+                        focus-visible:outline-[#b5acff] focus-visible:outline-offset-4 disabled:opacity-65
+                        disabled:cursor-wait short-screen:col-start-2 short-screen:mt-0 short-screen:py-[0.65rem]
+                        short-screen:px-[1.1rem]"
                         :href="downloadUrl"
                         >Download Note</a
                     >
                 </div>
-                <pre class="text-preview">{{ sharedItem.item.content }}</pre>
+                <pre class="text-preview m-0 whitespace-pre-wrap break-words font-mono text-[0.9rem] leading-[1.7]">{{ sharedItem.item.content }}</pre>
             </div>
 
             <div
                 v-else-if="sharedItem.type === 'folder'"
-                class="shared-content shared-folder-content"
+                class="shared-content basis-0 shared-folder-content flex-1 min-w-0 min-h-0 flex bg-surface border
+                border-divider rounded-3xl overflow-hidden"
             >
-                <SharedFolderContents
+                <SharedFolderContents class=""
                     :key="token"
                     :token="token"
                     :root-id="sharedItem.item.id"
@@ -497,516 +550,3 @@ watch(
     }
 )
 </script>
-
-<style scoped>
-.shared-page {
-    width: 100%;
-    height: 100dvh;
-    min-height: 0;
-    padding: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    background: #121214;
-    color: #ffffff;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-
-.shared-page *,
-.shared-page *::before,
-.shared-page *::after {
-    box-sizing: border-box;
-}
-
-.shared-content {
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 24px;
-    overflow: hidden;
-}
-
-.media-content {
-    align-items: center;
-    justify-content: center;
-    background: #0d0d10;
-}
-
-.image-content {
-    background: transparent;
-    border: 0;
-}
-
-.image-stage {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-}
-
-.image-stage:fullscreen,
-.image-stage.is-expanded {
-    width: 100%;
-    height: 100dvh;
-    padding: clamp(0.5rem, 1.5vmin, 1rem);
-    background: #121214;
-    overflow: hidden;
-}
-
-.image-stage.is-expanded {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-}
-
-.image-fullscreen-btn {
-    position: absolute;
-    right: 1rem;
-    bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.6rem;
-    height: 2.6rem;
-    padding: 0;
-    color: #cfcfd5;
-    background: #202024;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease;
-}
-
-.image-fullscreen-btn:hover {
-    color: #ffffff;
-    background: #29292e;
-}
-
-.image-fullscreen-btn:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 2px;
-}
-
-.image-preview,
-.pdf-preview,
-.video-preview {
-    display: block;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-}
-
-.image-preview,
-.video-preview {
-    object-fit: contain;
-    object-position: center;
-}
-
-.image-preview {
-    border-radius: 24px;
-}
-
-.pdf-preview {
-    border: 0;
-}
-
-.text-content {
-    display: block;
-    padding: 1rem 1.2rem;
-    overflow: auto;
-    overscroll-behavior: contain;
-    overflow-wrap: anywhere;
-}
-
-.shared-note-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.shared-note-heading h1 {
-    margin: 0;
-    font-size: 1.1rem;
-    overflow-wrap: anywhere;
-}
-
-.shared-note-heading .download-btn {
-    margin: 0;
-    text-decoration: none;
-}
-
-.text-preview {
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: monospace;
-    font-size: 0.9rem;
-    line-height: 1.7;
-}
-
-.video-preview {
-    background: #000;
-}
-
-.download-message {
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    text-align: center;
-}
-
-.download-icon {
-    flex: 0 0 auto;
-    width: 6.5rem;
-    height: 6.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(145deg, #30295f, #211d3b);
-    border: 1px solid #42386f;
-    color: #8b7cff;
-    border-radius: 6px;
-}
-
-.download-message h2 {
-    flex-shrink: 0;
-    display: -webkit-box;
-    width: 100%;
-    max-width: 34rem;
-    margin: 0.25rem 0 0;
-    color: #ffffff;
-    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-    font-weight: 600;
-    line-height: 1.4;
-    overflow-wrap: anywhere;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-}
-
-.download-status {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0.75rem;
-    color: #b5acff;
-    background: #242039;
-    border: 1px solid #37304f;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1.4;
-}
-
-.status-dot {
-    flex: 0 0 auto;
-    width: 0.4rem;
-    height: 0.4rem;
-    background: #8b7cff;
-    border-radius: 50%;
-    box-shadow: 0 0 0 3px #8b7cff1a;
-}
-
-.download-message p {
-    flex-shrink: 0;
-    max-width: 28rem;
-    margin: 0;
-    color: #898991;
-    font-size: 0.85rem;
-    line-height: 1.6;
-}
-
-.download-btn {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.65rem;
-    margin-top: 0.25rem;
-    padding: 0.8rem 1.4rem;
-    color: #ffffff;
-    background: #3c47be;
-    border: 1px solid #4f5bdf;
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.download-btn:hover:not(:disabled) {
-    background: #505cf0;
-    border-color: #6b75ff;
-}
-
-.download-btn:focus-visible {
-    outline: 2px solid #b5acff;
-    outline-offset: 4px;
-}
-
-.download-btn:disabled {
-    opacity: 0.65;
-    cursor: wait;
-}
-
-.shared-error {
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-}
-
-.shared-error-card {
-    width: 100%;
-    max-width: 27rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: clamp(1.25rem, 4vw, 2.5rem);
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 24px;
-    text-align: center;
-}
-
-.shared-error-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 5.5rem;
-    height: 5.5rem;
-    background: linear-gradient(145deg, #30295f, #211d3b);
-    border: 1px solid #42386f;
-    border-radius: 6px;
-    color: #a79aff;
-}
-
-.shared-error-code {
-    padding: 0.35rem 0.75rem;
-    color: #b5acff;
-    background: #242039;
-    border: 1px solid #37304f;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-}
-
-.shared-error-card h1 {
-    margin: 0;
-    color: #ffffff;
-    font-size: clamp(1.2rem, 3vw, 1.5rem);
-    font-weight: 600;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
-}
-
-.shared-error-card p {
-    max-width: 21rem;
-    margin: 0;
-    color: #898991;
-    font-size: 0.85rem;
-    line-height: 1.7;
-}
-
-.error-message {
-    padding: 1rem;
-    color: #ef6666;
-    font-size: 0.9rem;
-    min-height: 0;
-    overflow: auto;
-    overflow-wrap: anywhere;
-}
-
-@media (max-width: 600px) {
-    .shared-page {
-        padding: 0.6rem;
-    }
-
-    .download-message {
-        padding: 1.25rem 1rem;
-        gap: 0.85rem;
-    }
-
-    .download-icon {
-        width: 5.5rem;
-        height: 5.5rem;
-    }
-}
-
-@media (max-height: 500px) {
-    .shared-error {
-        padding: 0;
-    }
-
-    .shared-error-card {
-        gap: 0.6rem;
-        padding: 1rem;
-    }
-
-    .shared-error-icon {
-        width: 4rem;
-        height: 4rem;
-    }
-
-    .download-message {
-        display: grid;
-        grid-template-columns: 3.5rem minmax(0, 28rem);
-        align-content: center;
-        justify-items: start;
-        gap: 0.4rem 1rem;
-        padding: 0.75rem;
-        text-align: left;
-    }
-
-    .download-icon {
-        grid-column: 1;
-        grid-row: 1 / span 4;
-        align-self: center;
-        width: 3.5rem;
-        height: 3.5rem;
-    }
-
-    .download-icon :deep(.iconify) {
-        font-size: 2rem !important;
-    }
-
-    .download-message h2,
-    .download-status,
-    .download-message p,
-    .download-btn {
-        grid-column: 2;
-    }
-
-    .download-message h2 {
-        margin: 0;
-        font-size: 1.1rem;
-    }
-
-    .download-message p {
-        font-size: 0.8rem;
-        line-height: 1.5;
-    }
-
-    .download-btn {
-        margin-top: 0;
-        padding: 0.65rem 1.1rem;
-    }
-}
-
-.share-unlock {
-    color: #8b7cff;
-}
-
-.share-unlock label {
-    width: 100%;
-    text-align: left;
-    color: #d5d5da;
-    font-size: 0.875rem;
-}
-
-.share-unlock input {
-    width: 100%;
-    height: 2.75rem;
-    padding: 0 0.75rem;
-    color: #ffffff;
-    background: #151518;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    font: inherit;
-    font-size: 0.875rem;
-    outline: none;
-}
-
-.share-unlock input:focus {
-    border-color: #5965ed;
-}
-
-.share-unlock .unlock-error {
-    color: #ff6b6b;
-}
-
-.shared-error:has(.share-unlock) {
-    overflow-y: auto;
-}
-
-.share-unlock {
-    margin-block: auto;
-    flex-shrink: 0;
-}
-
-.share-unlock .locked-filename {
-    width: 100%;
-    color: #d5d5da;
-    overflow-wrap: anywhere;
-    font-weight: 500;
-}
-
-.unlock-password-field {
-    position: relative;
-    width: 100%;
-}
-
-.unlock-password-field input {
-    padding-right: 2.75rem;
-}
-
-.password-visibility {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    padding: 0;
-    border: 0;
-    border-radius: 6px;
-    color: #898991;
-    background: transparent;
-    cursor: pointer;
-}
-
-.password-visibility:hover:not(:disabled) {
-    color: #ffffff;
-}
-
-.password-visibility:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: -2px;
-}
-
-.password-visibility:disabled {
-    opacity: 0.65;
-    cursor: wait;
-}
-</style>

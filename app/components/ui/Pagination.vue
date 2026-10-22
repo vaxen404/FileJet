@@ -1,16 +1,20 @@
 <template>
     <div
         v-if="totalPages > 0"
-        class="pagination"
+        class="pagination h-14 shrink-0 flex items-center justify-center gap-1 bg-surface border border-divider
+        border-t-0 rounded-bl-panel rounded-br-panel grid-pagination:bg-transparent grid-pagination:border-0
+        grid-pagination:rounded-none grid-pagination:mt-3"
         :class="{ 'grid-pagination': viewMode === 'grid' }"
     >
         <button
             type="button"
-            class="page-button"
+            class="page-button flex items-center justify-center bg-transparent text-label border border-divider
+            rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
+            hover:enabled:text-white disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
             :disabled="modelValue === 1"
             @click="previousPage"
         >
-            <Icon name="solar:alt-arrow-left-linear" />
+            <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:alt-arrow-left-linear" />
         </button>
 
         <template
@@ -19,7 +23,7 @@
         >
             <span
                 v-if="page === '...'"
-                class="page-dots"
+                class="page-dots text-muted py-0 px-[0.3rem]"
             >
                 ...
             </span>
@@ -27,7 +31,10 @@
             <button
                 v-else
                 type="button"
-                class="page-button"
+                class="page-button flex items-center justify-center bg-transparent text-label border border-divider
+                rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
+                hover:enabled:text-white is-active:bg-primary is-active:text-white is-active:border-primary
+                disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
                 :class="{ active: modelValue === page }"
                 @click="goToPage(Number(page))"
             >
@@ -37,11 +44,13 @@
 
         <button
             type="button"
-            class="page-button"
+            class="page-button flex items-center justify-center bg-transparent text-label border border-divider
+            rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
+            hover:enabled:text-white disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
             :disabled="modelValue === totalPages"
             @click="nextPage"
         >
-            <Icon name="solar:alt-arrow-right-linear" />
+            <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:alt-arrow-right-linear" />
         </button>
     </div>
 </template>
@@ -97,78 +106,3 @@ const goToPage = (page: number) => {
     emit('update:modelValue', page)
 }
 </script>
-
-<style scoped>
-.pagination {
-    height: 3.5rem;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-top: none;
-
-    border-bottom-left-radius: var(--ui-panel-radius, 24px);
-    border-bottom-right-radius: var(--ui-panel-radius, 24px);
-}
-
-.grid-pagination {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    margin-top: 0.75rem;
-}
-
-.page-button {
-    width: 2.2rem;
-    height: 2.2rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: transparent;
-    color: #a8a8b0;
-
-    border: 1px solid #29292e;
-    border-radius: var(--ui-control-radius, 8px);
-
-    cursor: pointer;
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    line-height: 1.5;
-}
-
-.page-button :deep(.iconify) {
-    display: block;
-    width: var(--ui-control-icon-size, 1.125rem);
-    height: var(--ui-control-icon-size, 1.125rem);
-    font-size: var(--ui-control-icon-size, 1.125rem);
-    flex-shrink: 0;
-}
-
-.page-button:hover:not(:disabled) {
-    background: #242429;
-    color: #ffffff;
-}
-
-.page-button.active {
-    background: #3c47be;
-    color: #ffffff;
-    border-color: #3c47be;
-}
-
-.page-button:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
-.page-dots {
-    color: #898991;
-    padding: 0 0.3rem;
-}
-</style>

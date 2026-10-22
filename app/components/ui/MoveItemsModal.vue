@@ -2,29 +2,38 @@
     <Teleport to="body">
         <dialog
             ref="dialog"
-            class="move-modal"
+            class="move-modal w-[min(34rem,_calc(100vw_-_2rem))] max-h-[calc(100dvh_-_2rem)] p-0 overflow-y-auto
+            text-foreground bg-surface border border-[#35353c] rounded-[20px] shadow-[0_24px_80px_#0008]
+            backdrop:bg-[#0009]"
             @cancel.prevent="close"
             @click.self="close"
         >
-            <div class="modal-content">
-                <div class="modal-heading">
+            <div class="modal-content p-5">
+                <div class="modal-heading flex items-start justify-between gap-4">
                     <div>
-                        <h2 :id="`${id}-title`">
+                        <h2 class="m-0 text-[1.1rem]" :id="`${id}-title`">
                             Move {{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}
                         </h2>
-                        <p>Choose the folder you want to move your selection to.</p>
+                        <p class="text-heading-muted text-[0.8125rem] leading-normal">Choose the folder you want to move your selection to.</p>
                     </div>
                     <button
                         type="button"
-                        class="close-button"
+                        class="close-button inline-flex items-center justify-center gap-2 min-h-8 p-0 text-[#d5d5da] bg-transparent
+                        border-0 rounded-control text-control-size cursor-pointer w-8 shrink-0
+                        hover:enabled:bg-control-border disabled:opacity-40 disabled:cursor-not-allowed
+                        focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-2"
                         :disabled="isMoving"
                         @click="close"
                     >
                         <Icon name="solar:close-circle-linear" />
                     </button>
                 </div>
-                <nav class="breadcrumbs">
-                    <button
+                <nav class="breadcrumbs flex items-center gap-1 overflow-x-auto mt-2 mr-0 mb-3 ml-0">
+                    <button class="inline-flex items-center justify-center gap-2 min-h-8 py-0 px-2 text-[#b1a5ff] bg-transparent
+                        border-0 rounded-control text-control-size cursor-pointer shrink-0 max-w-56 overflow-hidden
+                        text-ellipsis whitespace-nowrap hover:enabled:bg-control-border disabled:opacity-40
+                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:-outline-offset-2"
                         type="button"
                         :disabled="isMoving"
                         @click="navigate(null)"
@@ -35,8 +44,12 @@
                         v-for="folder in breadcrumbs"
                         :key="folder.id"
                     >
-                        <Icon name="solar:alt-arrow-right-linear" />
-                        <button
+                        <Icon class="shrink-0 text-muted" name="solar:alt-arrow-right-linear" />
+                        <button class="inline-flex items-center justify-center gap-2 min-h-8 py-0 px-2 text-[#b1a5ff] bg-transparent
+                            border-0 rounded-control text-control-size cursor-pointer shrink-0 max-w-56 overflow-hidden
+                            text-ellipsis whitespace-nowrap hover:enabled:bg-control-border disabled:opacity-40
+                            disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:-outline-offset-2"
                             type="button"
                             :disabled="isMoving"
                             @click="navigate(folder.id)"
@@ -45,9 +58,11 @@
                         </button>
                     </template>
                 </nav>
-                <label class="search-field">
+                <label class="search-field flex items-center gap-2 py-0 px-3 min-h-10 text-muted bg-canvas border border-[#35353c]
+                    rounded-control focus-within:border-accent">
                     <Icon name="solar:magnifier-linear" />
-                    <input
+                    <input class="flex-1 min-w-0 py-[0.6rem] px-0 text-foreground bg-transparent border-0 outline-none text-sm
+                        leading-[inherit]"
                         ref="searchInput"
                         v-model="search"
                         type="search"
@@ -55,19 +70,23 @@
                         :disabled="isMoving"
                     />
                 </label>
-                <div class="folder-list">
+                <div class="folder-list min-h-40 max-h-72 overflow-y-auto mt-3">
                     <p
                         v-if="loading"
-                        class="list-message"
+                        class="list-message text-heading-muted text-[0.8125rem] leading-normal flex flex-col items-center
+                        justify-center min-h-36 py-0 px-4 text-center"
                     >
                         Loading folders...
                     </p>
                     <div
                         v-else-if="loadError"
-                        class="list-message"
+                        class="list-message flex flex-col items-center justify-center min-h-36 py-0 px-4 text-center"
                     >
-                        <p>{{ loadError }}</p>
-                        <button
+                        <p class="text-heading-muted text-[0.8125rem] leading-normal">{{ loadError }}</p>
+                        <button class="inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-[#d5d5da] bg-raised border
+                            border-[#35353c] rounded-control text-control-size cursor-pointer hover:enabled:bg-control-border
+                            disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:-outline-offset-2"
                             type="button"
                             @click="loadFolders"
                         >
@@ -79,7 +98,10 @@
                             v-for="folder in childFolders"
                             :key="folder.id"
                             type="button"
-                            class="folder-row"
+                            class="folder-row flex items-center justify-center gap-3 min-h-10 p-3 text-[#d5d5da] bg-transparent border-0
+                            rounded-control text-control-size cursor-pointer w-full text-left hover:enabled:bg-control-border
+                            disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:-outline-offset-2"
                             :disabled="isMoving || excludedFolders.has(folder.id)"
                             :title="
                                 excludedFolders.has(folder.id)
@@ -90,14 +112,15 @@
                         >
                             <Icon
                                 name="solar:folder-bold"
-                                class="folder-icon"
+                                class="folder-icon text-[#b1a5ff] text-lg leading-[inherit] shrink-0 size-4.5"
                             />
-                            <span class="folder-name">{{ folder.name }}</span>
-                            <Icon name="solar:alt-arrow-right-linear" />
+                            <span class="folder-name flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{{ folder.name }}</span>
+                            <Icon class="text-lg leading-[inherit] shrink-0 size-4.5" name="solar:alt-arrow-right-linear" />
                         </button>
                         <p
                             v-if="!childFolders.length"
-                            class="list-message"
+                            class="list-message text-heading-muted text-[0.8125rem] leading-normal flex flex-col items-center
+                            justify-center min-h-36 py-0 px-4 text-center"
                         >
                             {{
                                 search
@@ -109,14 +132,19 @@
                 </div>
                 <p
                     v-if="saveError"
-                    class="form-error"
+                    class="form-error text-[#ff8181] text-[0.8125rem] leading-normal wrap-anywhere"
                 >
                     {{ saveError }}
                 </p>
-                <div class="modal-footer">
-                    <span class="destination-label">To: {{ destinationLabel }}</span>
-                    <div class="footer-actions">
-                        <button
+                <div class="modal-footer flex items-center justify-between flex-wrap gap-3 border-t border-t-control-border pt-4
+                    mt-3">
+                    <span class="destination-label max-w-56 overflow-hidden text-ellipsis whitespace-nowrap text-muted
+                        text-[0.8125rem]">To: {{ destinationLabel }}</span>
+                    <div class="footer-actions flex gap-2 ml-auto">
+                        <button class="inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-[#d5d5da] bg-raised border
+                            border-[#35353c] rounded-control text-control-size cursor-pointer hover:enabled:bg-control-border
+                            disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:-outline-offset-2"
                             type="button"
                             :disabled="isMoving"
                             @click="close"
@@ -125,7 +153,10 @@
                         </button>
                         <button
                             type="button"
-                            class="primary"
+                            class="primary inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-white bg-primary border
+                            rounded-control text-control-size cursor-pointer border-primary hover:enabled:bg-[#4a56d4]
+                            disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:-outline-offset-2"
                             :disabled="!canMove"
                             @click="move"
                         >
@@ -369,224 +400,3 @@ const move = async () => {
     }
 }
 </script>
-
-<style scoped>
-.move-modal {
-    width: min(34rem, calc(100vw - 2rem));
-    max-height: calc(100dvh - 2rem);
-    padding: 0;
-    overflow-y: auto;
-    color: #f3f3f5;
-    background: #1a1a1d;
-    border: 1px solid #35353c;
-    border-radius: 20px;
-    box-shadow: 0 24px 80px #0008;
-}
-
-.move-modal::backdrop {
-    background: #0009;
-}
-
-.modal-content {
-    padding: 1.25rem;
-}
-
-.modal-heading {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-h2 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-p {
-    color: #a3a3ab;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-}
-
-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-height: 2.5rem;
-    padding: 0 0.75rem;
-    color: #d5d5da;
-    background: #242429;
-    border: 1px solid #35353c;
-    border-radius: var(--ui-control-radius, 8px);
-    font: inherit;
-    font-size: var(--ui-control-font-size, 0.875rem);
-    cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-    background: #303036;
-}
-
-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-button:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: -2px;
-}
-
-.close-button {
-    min-height: 2rem;
-    width: 2rem;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    flex-shrink: 0;
-}
-
-.breadcrumbs {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    overflow-x: auto;
-    margin: 0.5rem 0 0.75rem;
-}
-
-.breadcrumbs button {
-    flex-shrink: 0;
-    min-height: 2rem;
-    max-width: 14rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: 0 0.5rem;
-    border: 0;
-    background: transparent;
-    color: #b1a5ff;
-}
-
-.breadcrumbs > .iconify {
-    flex-shrink: 0;
-    color: #898991;
-}
-
-.search-field {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 0.75rem;
-    min-height: 2.5rem;
-    color: #898991;
-    background: #121214;
-    border: 1px solid #35353c;
-    border-radius: var(--ui-control-radius, 8px);
-}
-
-.search-field:focus-within {
-    border-color: #8b7cff;
-}
-
-.search-field input {
-    flex: 1;
-    min-width: 0;
-    padding: 0.6rem 0;
-    color: #f3f3f5;
-    background: transparent;
-    border: 0;
-    outline: none;
-    font: inherit;
-    font-size: 0.875rem;
-}
-
-.folder-list {
-    min-height: 10rem;
-    max-height: 18rem;
-    overflow-y: auto;
-    margin-top: 0.75rem;
-}
-
-.folder-row {
-    display: flex;
-    width: 100%;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    border: 0;
-    background: transparent;
-    text-align: left;
-}
-
-.folder-row .folder-name {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.folder-row .folder-icon {
-    color: #b1a5ff;
-    font-size: 1.25rem;
-}
-
-.folder-row .iconify {
-    width: 1.125rem;
-    height: 1.125rem;
-    font-size: 1.125rem;
-    flex-shrink: 0;
-}
-
-.list-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 9rem;
-    padding: 0 1rem;
-    text-align: center;
-}
-
-.form-error {
-    color: #ff8181;
-    overflow-wrap: anywhere;
-}
-
-.modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    border-top: 1px solid #303036;
-    padding-top: 1rem;
-    margin-top: 0.75rem;
-}
-
-.destination-label {
-    max-width: 14rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #898991;
-    font-size: 0.8125rem;
-}
-
-.footer-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-left: auto;
-}
-
-.primary {
-    background: #3c47be;
-    border-color: #3c47be;
-    color: #fff;
-}
-
-.primary:hover:not(:disabled) {
-    background: #4a56d4;
-}
-</style>

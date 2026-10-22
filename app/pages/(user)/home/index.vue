@@ -1,103 +1,113 @@
 <template>
-    <div class="dashboard-page">
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon purple-bg">
+    <div class="dashboard-page flex flex-col gap-3 size-full">
+        <section class="stats-grid grid grid-cols-[repeat(3,_1fr)] gap-3 shrink-0">
+            <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
+                <div class="stat-icon purple-bg flex items-center justify-center text-[#7777ff] bg-[#29215c] rounded-[0.675rem]
+                    text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:document-linear"
-                        class="purple"
+                        class="purple text-accent"
                     />
                 </div>
 
-                <div class="stat-info">
-                    <strong>{{ files.length }}</strong>
-                    <span>Files</span>
+                <div class="stat-info flex flex-col gap-[0.2rem]">
+                    <strong class="text-white text-[1.7rem] font-bold">{{ files.length }}</strong>
+                    <span class="text-[#92929a] text-[0.9rem]">Files</span>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon blue-bg">
+            <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
+                <div class="stat-icon blue-bg flex items-center justify-center text-[#7777ff] bg-[#152c49] rounded-[0.675rem]
+                    text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:folder-linear"
-                        class="blue"
+                        class="blue text-[#5da9ff]"
                     />
                 </div>
 
-                <div class="stat-info">
-                    <strong>{{ folders.length }}</strong>
-                    <span>Folders</span>
+                <div class="stat-info flex flex-col gap-[0.2rem]">
+                    <strong class="text-white text-[1.7rem] font-bold">{{ folders.length }}</strong>
+                    <span class="text-[#92929a] text-[0.9rem]">Folders</span>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon green-bg">
+            <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
+                <div class="stat-icon green-bg flex items-center justify-center text-[#7777ff] bg-[#153a29] rounded-[0.675rem]
+                    text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:notebook-linear"
-                        class="green"
+                        class="green text-[#55db8c]"
                     />
                 </div>
 
-                <div class="stat-info">
-                    <strong>{{ notes.length }}</strong>
-                    <span>Notes</span>
+                <div class="stat-info flex flex-col gap-[0.2rem]">
+                    <strong class="text-white text-[1.7rem] font-bold">{{ notes.length }}</strong>
+                    <span class="text-[#92929a] text-[0.9rem]">Notes</span>
                 </div>
             </div>
         </section>
 
-        <section class="dashboard-grid">
-            <div class="dashboard-left">
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h2>Recent Files</h2>
+        <section class="dashboard-grid grid grid-cols-[minmax(0,_1.85fr)_minmax(0,_1.15fr)] gap-3 flex-1 min-h-0">
+            <div class="dashboard-left flex flex-col min-w-0 h-full min-h-0">
+                <div class="dashboard-card h-full flex flex-col min-h-0 bg-surface border border-divider rounded-3xl
+                    overflow-hidden">
+                    <div class="card-header flex items-center justify-between p-4 shrink-0">
+                        <h2 class="m-0 text-white text-lg font-semibold leading-tight">Recent Files</h2>
 
-                        <NuxtLink to="/files">
+                        <NuxtLink class="flex items-center gap-[0.3rem] text-[#7777ff] no-underline text-sm font-medium leading-normal
+                            hover:text-[#9999ff]" to="/files">
                             View all
                             <Icon name="solar:arrow-right-linear" />
                         </NuxtLink>
                     </div>
 
                     <div
-                        class="files-list"
+                        class="files-list flex-1 min-h-0 pt-0 pr-[1.4rem] pb-2 pl-[1.4rem] overflow-y-auto overflow-x-hidden
+                        [scrollbar-width:thin] [scrollbar-color:#39393f_transparent] files-empty:flex files-empty:flex-col"
                         :class="{ 'files-list-empty': files.length === 0 }"
                     >
                         <div
                             v-if="files.length === 0"
-                            class="empty-files"
+                            class="empty-files flex-1 min-h-48 flex flex-col justify-center items-center gap-[0.45rem] text-muted
+                            text-center"
                         >
-                            <div class="empty-files-icon">
-                                <Icon
+                            <div class="empty-files-icon mb-2 flex items-center justify-center text-3xl leading-[inherit] text-[#6f74ff]
+                                size-[3.2rem]">
+                                <Icon class="text-[0.825rem] text-muted"
                                     name="solar:file-bold"
                                     size="3rem"
                                 />
                             </div>
 
-                            <strong>No files yet</strong>
+                            <strong class="text-[0.95rem] font-semibold text-[#f5f5f5]">No files yet</strong>
 
-                            <span> Your recent files will appear here. </span>
+                            <span class="text-[0.825rem] text-muted"> Your recent files will appear here. </span>
 
                             <NuxtLink
                                 to="/files"
-                                class="empty-files-link"
+                                class="empty-files-link mt-[0.35rem] flex items-center gap-1 text-[#767cff] text-[0.825rem] font-medium
+                                no-underline hover:text-[#9297ff]"
                             >
                                 Open Files
-                                <Icon name="solar:arrow-right-linear" />
+                                <Icon class="text-[0.825rem] text-muted" name="solar:arrow-right-linear" />
                             </NuxtLink>
                         </div>
                         <template v-else>
                             <div
                                 v-for="file in recentFiles"
                                 :key="file.id"
-                                class="file-main"
+                                class="file-main w-full min-h-[4.6rem] flex items-center justify-between border-t border-t-divider"
                                 @click="openFile(file)"
                             >
-                                <div class="file-left">
-                                    <div class="file-icon">
+                                <div class="file-left flex-1 min-w-0 flex items-center gap-[0.85rem]">
+                                    <div class="file-icon shrink-0 flex items-center justify-center text-accent bg-[#29215c] rounded-md text-xl
+                                        leading-[inherit] size-10">
                                         <Icon
                                             :name="getFileIcon(file.mime_type, file.original_name)"
                                         />
                                     </div>
 
-                                    <div class="file-info">
+                                    <div class="file-info min-w-0 flex flex-col gap-1">
                                         <input
                                             v-if="editingFileId === file.id"
                                             :ref="
@@ -107,23 +117,24 @@
                                             "
                                             v-model="editingFileName"
                                             type="text"
-                                            class="file-name-input"
+                                            class="file-name-input w-full min-w-0 py-1 px-2 text-white bg-control border border-primary rounded-md
+                                            text-sm font-semibold outline-none leading-normal focus-visible:border-[#5965ed]"
                                             :readonly="isSavingRename"
                                             @keydown.enter.prevent="saveRename(file)"
                                             @keydown.esc.prevent="cancelRename"
                                             @blur="saveRename(file)"
                                             @click.stop
                                         />
-                                        <strong v-else>{{ file.name }}</strong>
-                                        <span
+                                        <strong class="text-white text-sm font-semibold overflow-hidden text-ellipsis whitespace-nowrap leading-normal" v-else>{{ file.name }}</strong>
+                                        <span class="text-muted text-xs font-normal leading-normal"
                                             >{{ getFileType(file.original_name) }} •
                                             {{ formatFileTime(file.created_at) }}</span
                                         >
                                     </div>
                                 </div>
 
-                                <div class="file-right">
-                                    <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                                <div class="file-right shrink-0 flex items-center gap-[0.675rem]">
+                                    <span class="file-size min-w-18 text-[#b0b0b8] text-[0.85rem] text-right">{{ formatFileSize(file.size) }}</span>
 
                                     <ItemMenu
                                         type="file"
@@ -144,24 +155,25 @@
                 </div>
             </div>
 
-            <div class="dashboard-right">
-                <div class="dashboard-card storage-card">
-                    <div class="card-header">
-                        <h2>Storage Usage</h2>
+            <div class="dashboard-right flex flex-col min-w-0 h-full min-h-0 gap-4">
+                <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1
+                    min-h-0">
+                    <div class="card-header flex items-center justify-between p-4 shrink-0">
+                        <h2 class="m-0 text-white text-lg font-semibold leading-tight">Storage Usage</h2>
                     </div>
 
-                    <div class="storage-content">
-                        <div class="storage-top">
-                            <strong>{{ storagePercent }}%</strong>
+                    <div class="storage-content w-full pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]">
+                        <div class="storage-top flex items-center justify-between pt-0 pr-[0.8rem] pb-0 pl-[0.2rem] mb-[0.4rem]">
+                            <strong class="text-white text-[1.275rem]">{{ storagePercent }}%</strong>
 
-                            <span>
-                                <b>{{ formatFileSize(user?.storageUsed ?? 0) }}</b> /
+                            <span class="text-[#8d8d95] text-[0.85rem]">
+                                <b class="text-white font-semibold">{{ formatFileSize(user?.storageUsed ?? 0) }}</b> /
                                 {{ formatFileSize(user?.storageLimit ?? 0) }}
                             </span>
                         </div>
 
                         <meter
-                            class="storage-meter"
+                            class="storage-meter w-full max-w-full h-4 block appearance-none border-0 rounded-sm bg-[#2c2c31]"
                             min="0"
                             max="100"
                             :value="storagePercent"
@@ -169,37 +181,37 @@
                             {{ storagePercent }}%
                         </meter>
 
-                        <div class="storage-types">
-                            <div class="storage-item">
-                                <div class="storage-name">
-                                    <span class="storage-dot blue-dot"></span>
+                        <div class="storage-types flex flex-col gap-[1.1rem] mt-12">
+                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                                <div class="storage-name flex items-center gap-[0.55rem]">
+                                    <span class="storage-dot blue-dot rounded-full shrink-0 bg-[#5da9ff] size-[0.55rem]"></span>
                                     Images
                                 </div>
 
                                 <span>{{ imagesSize }} GB</span>
                             </div>
 
-                            <div class="storage-item">
-                                <div class="storage-name">
-                                    <span class="storage-dot purple-dot"></span>
+                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                                <div class="storage-name flex items-center gap-[0.55rem]">
+                                    <span class="storage-dot purple-dot rounded-full shrink-0 bg-accent size-[0.55rem]"></span>
                                     Documents
                                 </div>
 
                                 <span>{{ documentsSize }} GB</span>
                             </div>
 
-                            <div class="storage-item">
-                                <div class="storage-name">
-                                    <span class="storage-dot cyan-dot"></span>
+                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                                <div class="storage-name flex items-center gap-[0.55rem]">
+                                    <span class="storage-dot cyan-dot rounded-full shrink-0 bg-[#55c2d4] size-[0.55rem]"></span>
                                     Videos
                                 </div>
 
                                 <span>{{ videosSize }} GB</span>
                             </div>
 
-                            <div class="storage-item">
-                                <div class="storage-name">
-                                    <span class="storage-dot gray-dot"></span>
+                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                                <div class="storage-name flex items-center gap-[0.55rem]">
+                                    <span class="storage-dot gray-dot rounded-full shrink-0 bg-[#6b6b75] size-[0.55rem]"></span>
                                     Others
                                 </div>
 
@@ -208,59 +220,72 @@
                         </div>
                     </div>
                 </div>
-                <div class="dashboard-card quick-card">
-                    <div class="card-header">
-                        <h2>Quick Actions</h2>
+                <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 min-h-0
+                    pb-4">
+                    <div class="card-header flex items-center justify-between p-4 shrink-0">
+                        <h2 class="m-0 text-white text-lg font-semibold leading-tight">Quick Actions</h2>
                     </div>
 
-                    <div class="quick-actions-grid">
+                    <div class="quick-actions-grid grid grid-cols-2 gap-3 py-0 px-4">
                         <button
                             @click="navigateTo('/files')"
                             type="button"
-                            class="quick-action-card"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
+                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
-                            <div class="quick-action-icon upload-icon">
+                            <div class="quick-action-icon upload-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
+                                text-white bg-[#356de8] size-[3.4rem]">
                                 <Icon name="solar:upload-linear" />
                             </div>
 
-                            <span class="quick-action-title">Upload File</span>
+                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">Upload File</span>
                         </button>
 
                         <button
                             @click="navigateTo('/folders')"
                             type="button"
-                            class="quick-action-card"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
+                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
-                            <div class="quick-action-icon folder-icon">
+                            <div class="quick-action-icon folder-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
+                                text-[#5da9ff] bg-[#173655] border border-[#234c70] size-[3.4rem]">
                                 <Icon name="solar:add-linear" />
                             </div>
 
-                            <span class="quick-action-title">New Folder</span>
+                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">New Folder</span>
                         </button>
 
                         <button
                             type="button"
-                            class="quick-action-card"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
+                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
-                            <div class="quick-action-icon note-icon">
+                            <div class="quick-action-icon note-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
+                                text-[#55db8c] bg-[#16452d] border border-[#1d5d3a] size-[3.4rem]">
                                 <Icon name="solar:notebook-linear" />
                             </div>
 
-                            <span class="quick-action-title">New Note</span>
+                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">New Note</span>
                         </button>
 
                         <button
                             type="button"
-                            class="quick-action-card"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
+                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
-                            <div class="quick-action-icon inbox-icon">
+                            <div class="quick-action-icon inbox-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
+                                text-white bg-[#5c2ca7] border border-[#7138c2] size-[3.4rem]">
                                 <Icon
                                     name="solar:users-group-rounded-linear"
                                     class=""
                                 />
                             </div>
 
-                            <span class="quick-action-title">Shared Inbox</span>
+                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">Shared Inbox</span>
                         </button>
                     </div>
                 </div>
@@ -426,188 +451,6 @@ const othersSize = ref(0)
 </script>
 
 <style scoped>
-.dashboard-page {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-    box-sizing: border-box;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-
-    flex-shrink: 0;
-}
-
-.stat-card {
-    min-height: 8rem;
-
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-
-    padding: 1rem;
-
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 24px;
-
-    box-sizing: border-box;
-}
-
-.stat-icon {
-    width: 3.4rem;
-    height: 3.4rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #7777ff;
-    background: #24244d;
-
-    border-radius: 0.675rem;
-
-    font-size: 1.6rem;
-}
-
-.stat-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
-.stat-info strong {
-    color: #ffffff;
-
-    font-size: 1.7rem;
-    font-weight: 700;
-}
-
-.stat-info span {
-    color: #92929a;
-    font-size: 0.9rem;
-}
-
-.purple {
-    color: #8b7cff;
-}
-
-.blue {
-    color: #5da9ff;
-}
-
-.green {
-    color: #55db8c;
-}
-
-.purple-bg {
-    background: #29215c;
-}
-
-.blue-bg {
-    background: #152c49;
-}
-
-.green-bg {
-    background: #153a29;
-}
-
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.85fr) minmax(0, 1.15fr);
-    gap: 0.75rem;
-
-    flex: 1;
-    min-height: 0;
-}
-
-.dashboard-left,
-.dashboard-right {
-    display: flex;
-    flex-direction: column;
-
-    min-width: 0;
-}
-
-.dashboard-left {
-    height: 100%;
-    min-height: 0;
-}
-
-.dashboard-left .dashboard-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.dashboard-card {
-    background: #1a1a1d;
-    border: 1px solid #29292e;
-    border-radius: 24px;
-
-    box-sizing: border-box;
-    overflow: hidden;
-}
-
-.card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 1rem;
-
-    flex-shrink: 0;
-}
-
-.card-header h2 {
-    margin: 0;
-
-    color: #ffffff;
-
-    font-size: 1.125rem;
-    font-weight: 600;
-    line-height: 1.25;
-}
-
-.card-header a {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-
-    color: #7777ff;
-
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    line-height: 1.5;
-}
-
-.card-header a:hover {
-    color: #9999ff;
-}
-
-.files-list {
-    flex: 1;
-    min-height: 0;
-
-    padding: 0 1.4rem 0.5rem;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    scrollbar-width: thin;
-    scrollbar-color: #39393f transparent;
-}
-
 .files-list::-webkit-scrollbar-track {
     background: transparent;
 }
@@ -619,158 +462,6 @@ const othersSize = ref(0)
 
 .files-list::-webkit-scrollbar-thumb:hover {
     background: #4a4a52;
-}
-
-.file-main {
-    width: 100%;
-    min-height: 4.6rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    border-top: 1px solid #29292e;
-}
-
-.file-left {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-}
-
-.file-icon {
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #8b7cff;
-    background: #29215c;
-
-    border-radius: 6px;
-
-    font-size: 1.25rem;
-}
-
-.file-info {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.file-info strong {
-    color: #ffffff;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    line-height: 1.5;
-}
-
-.file-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-    font-weight: 400;
-    line-height: 1.5;
-}
-
-.file-name-input {
-    width: 100%;
-    min-width: 0;
-    padding: 0.25rem 0.5rem;
-    box-sizing: border-box;
-    color: #ffffff;
-    background: #202024;
-    border: 1px solid #3c47be;
-    border-radius: 6px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 600;
-    outline: none;
-    line-height: 1.5;
-}
-
-.file-name-input:focus-visible {
-    border-color: #5965ed;
-}
-
-.file-right {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.675rem;
-}
-
-.file-size {
-    min-width: 4.5rem;
-    color: #b0b0b8;
-    font-size: 0.85rem;
-    text-align: right;
-}
-
-.dashboard-right {
-    height: 100%;
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.storage-content {
-    width: 100%;
-    padding: 0 1.4rem 1.4rem;
-    box-sizing: border-box;
-}
-
-.storage-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 0.8rem 0 0.2rem;
-
-    margin-bottom: 0.4rem;
-}
-
-.storage-top strong {
-    color: #ffffff;
-    font-size: 1.275rem;
-}
-
-.storage-top span {
-    color: #8d8d95;
-    font-size: 0.85rem;
-}
-
-.storage-top b {
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.storage-meter {
-    width: 100%;
-    max-width: 100%;
-    height: 1rem;
-
-    display: block;
-    box-sizing: border-box;
-
-    appearance: none;
-    -webkit-appearance: none;
-
-    border: none;
-    border-radius: 4px;
-    background: #2c2c31;
 }
 
 .storage-meter::-webkit-meter-bar {
@@ -789,206 +480,5 @@ const othersSize = ref(0)
 .storage-meter::-moz-meter-bar {
     background: #4242fc;
     border-radius: 4px;
-}
-
-.storage-types {
-    display: flex;
-    flex-direction: column;
-    gap: 1.1rem;
-
-    margin-top: 3rem;
-}
-
-.storage-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    width: 100%;
-
-    color: #92929a;
-    font-size: 0.85rem;
-}
-
-.storage-name {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-}
-
-.storage-dot {
-    width: 0.55rem;
-    height: 0.55rem;
-
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.blue-dot {
-    background: #5da9ff;
-}
-
-.purple-dot {
-    background: #8b7cff;
-}
-
-.cyan-dot {
-    background: #55c2d4;
-}
-
-.gray-dot {
-    background: #6b6b75;
-}
-
-.storage-card,
-.quick-card {
-    flex: 1;
-    min-height: 0;
-}
-
-.quick-card {
-    padding-bottom: 1rem;
-}
-
-.quick-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-
-    padding: 0 1rem;
-}
-
-.quick-action-card {
-    min-height: 7rem;
-
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-
-    padding: 1rem;
-
-    color: #ffffff;
-    background: #1d1d21;
-
-    border: 1px solid #2d2d33;
-    border-radius: 24px;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease;
-}
-
-.quick-action-card:hover {
-    background: #232328;
-    border-color: #383840;
-
-    transform: translateY(-1px);
-}
-
-.quick-action-icon {
-    width: 3.4rem;
-    height: 3.4rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 6px;
-
-    font-size: 1.65rem;
-}
-
-.quick-action-title {
-    color: #ffffff;
-
-    font-size: 0.95rem;
-    font-weight: 600;
-
-    text-align: left;
-}
-
-.upload-icon {
-    color: #ffffff;
-    background: #356de8;
-}
-
-.folder-icon {
-    color: #5da9ff;
-    background: #173655;
-
-    border: 1px solid #234c70;
-}
-
-.note-icon {
-    color: #55db8c;
-    background: #16452d;
-
-    border: 1px solid #1d5d3a;
-}
-
-.inbox-icon {
-    color: #ffffff;
-    background: #5c2ca7;
-
-    border: 1px solid #7138c2;
-}
-
-.files-list-empty {
-    display: flex;
-    flex-direction: column;
-}
-
-.empty-files {
-    flex: 1;
-    min-height: 12rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 0.45rem;
-    color: #898991;
-    text-align: center;
-}
-
-.empty-files-icon {
-    width: 3.2rem;
-    height: 3.2rem;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: #6f74ff;
-}
-
-.empty-files strong {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #f5f5f5;
-}
-
-.empty-files span {
-    font-size: 0.825rem;
-    color: #898991;
-}
-
-.empty-files-link {
-    margin-top: 0.35rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #767cff;
-    font-size: 0.825rem;
-    font-weight: 500;
-    text-decoration: none;
-}
-
-.empty-files-link:hover {
-    color: #9297ff;
 }
 </style>

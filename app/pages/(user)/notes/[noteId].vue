@@ -19,13 +19,14 @@
     >
         <article
             v-if="!isEditing"
-            class="note-reader"
+            class="note-reader flex-1 min-w-0 min-h-0 flex flex-col justify-start gap-4 p-5 overflow-auto
+            overscroll-contain text-left max-phone:p-3"
         >
-            <div class="reader-heading">
-                <h2>{{ note.title }}</h2>
+            <div class="reader-heading w-full min-w-0 m-0 flex items-baseline justify-between flex-wrap gap-2">
+                <h2 class="m-0 text-white text-xl font-semibold leading-[1.4] wrap-anywhere">{{ note.title }}</h2>
                 <span
                     v-if="dirty"
-                    class="unsaved-state"
+                    class="unsaved-state text-muted text-[0.8125rem]"
                 >
                     Unsaved changes kept in Edit
                 </span>
@@ -33,38 +34,40 @@
 
             <div
                 v-if="note.content"
-                class="note-reading-content"
+                class="note-reading-content w-full min-w-0 m-0 text-[#d5d5da] text-sm leading-normal whitespace-pre-wrap
+                wrap-anywhere"
                 v-text="note.content"
             />
 
             <div
                 v-else
-                class="note-empty"
+                class="note-empty flex flex-col items-start gap-2.5 text-muted text-left"
             >
-                <Icon
+                <Icon class="text-accent"
                     name="solar:notebook-linear"
                     size="2rem"
                 />
-                <strong>This note is empty</strong>
-                <p>Choose Edit to add content.</p>
+                <strong class="text-[#d5d5da] text-sm leading-[inherit]">This note is empty</strong>
+                <p class="m-0 text-[0.8125rem] leading-[1.6]">Choose Edit to add content.</p>
             </div>
         </article>
 
         <form
             v-else
-            class="note-editor"
+            class="note-editor flex-1 min-w-0 min-h-0 flex flex-col gap-3 p-5 max-phone:p-3"
             @submit.prevent="save"
         >
-            <div class="editor-heading">
-                <label for="note-title">Note title</label>
+            <div class="editor-heading flex items-center justify-between gap-3 flex-wrap">
+                <label class="text-white text-sm leading-[inherit] font-medium" for="note-title">Note title</label>
                 <span
                     v-if="dirty"
-                    class="unsaved-state"
+                    class="unsaved-state text-muted text-[0.8125rem]"
                 >
                     Unsaved changes
                 </span>
             </div>
-            <input
+            <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
+                focus:outline-none focus:border-[#5965ed]"
                 id="note-title"
                 ref="titleInput"
                 v-model="draftTitle"
@@ -72,8 +75,9 @@
                 required
                 :disabled="busy"
             />
-            <label for="note-content">Content</label>
-            <textarea
+            <label class="text-white text-sm leading-[inherit] font-medium" for="note-content">Content</label>
+            <textarea class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 flex-1 min-h-24
+                resize-none leading-[1.7] focus:outline-none focus:border-[#5965ed]"
                 id="note-content"
                 v-model="draftContent"
                 required
@@ -82,12 +86,13 @@
             />
             <p
                 v-if="saveError"
-                class="editor-error"
+                class="editor-error text-[#ff6b6b] m-0"
             >
                 {{ saveError }}
             </p>
-            <div class="editor-actions">
-                <button
+            <div class="editor-actions flex items-center justify-end gap-3 flex-wrap">
+                <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                    hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                     type="button"
                     :disabled="busy || !dirty"
                     @click="cancel"
@@ -96,7 +101,8 @@
                 </button>
                 <button
                     type="submit"
-                    class="primary"
+                    class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
+                    hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="busy || !dirty"
                 >
                     {{ isSaving ? 'Saving...' : 'Save' }}
@@ -106,26 +112,28 @@
         <template #edit>
             <form
                 v-if="isEditing"
-                class="note-edit-title"
+                class="note-edit-title flex flex-col gap-3"
                 @submit.prevent="save"
             >
-                <label for="note-edit-title">Note title</label>
-                <input
+                <label class="text-white text-sm leading-[inherit] font-medium" for="note-edit-title">Note title</label>
+                <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
+                    focus:outline-none focus:border-[#5965ed]"
                     id="note-edit-title"
                     v-model="draftTitle"
                     maxlength="32"
                     required
                     :disabled="busy"
                 />
-                <p>Content can be edited in the editor. Save applies both title and content.</p>
+                <p class="text-muted text-[0.8125rem]">Content can be edited in the editor. Save applies both title and content.</p>
                 <p
                     v-if="saveError"
-                    class="editor-error"
+                    class="editor-error text-[#ff6b6b] text-[0.8125rem] m-0"
                 >
                     {{ saveError }}
                 </p>
-                <div class="editor-actions">
-                    <button
+                <div class="editor-actions flex items-center justify-end gap-3 flex-wrap">
+                    <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                        hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                         type="button"
                         :disabled="busy"
                         @click="cancel"
@@ -134,7 +142,8 @@
                     </button>
                     <button
                         type="submit"
-                        class="primary"
+                        class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
+                        hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
                         {{ isSaving ? 'Saving...' : 'Save' }}
@@ -145,17 +154,18 @@
     </DetailsWorkspace>
     <div
         v-else
-        class="detail-error"
+        class="detail-error p-5 text-[#d5d5da]"
     >
         <h1>Unable to load note</h1>
         <p>The note could not be found or accessed.</p>
-        <button
+        <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+            hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
             type="button"
             @click="refresh()"
         >
             Try again
         </button>
-        <NuxtLink :to="returnPage.path">Back to {{ returnPage.name }}</NuxtLink>
+        <NuxtLink class="text-accent ml-3" :to="returnPage.path">Back to {{ returnPage.name }}</NuxtLink>
     </div>
 </template>
 
@@ -337,190 +347,3 @@ const metadataRows = computed(() => {
     ]
 })
 </script>
-
-<style scoped>
-.note-reader {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 1rem;
-    padding: 1.25rem;
-    overflow: auto;
-    overscroll-behavior: contain;
-    box-sizing: border-box;
-    text-align: left;
-}
-
-.reader-heading,
-.note-reading-content {
-    width: 100%;
-    min-width: 0;
-    margin: 0;
-}
-
-.reader-heading {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.reader-heading h2 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.4;
-    overflow-wrap: anywhere;
-}
-
-.note-reading-content {
-    color: #d5d5da;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-}
-
-.note-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.625rem;
-    color: #898991;
-    text-align: left;
-}
-
-.note-empty :deep(.iconify) {
-    color: #8b7cff;
-}
-
-.note-empty strong {
-    color: #d5d5da;
-    font-size: 0.875rem;
-}
-
-.note-empty p {
-    margin: 0;
-    font-size: 0.8125rem;
-    line-height: 1.6;
-}
-
-.note-editor {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1.25rem;
-    box-sizing: border-box;
-}
-
-.editor-heading,
-.editor-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.editor-actions {
-    justify-content: flex-end;
-}
-
-label {
-    color: #ffffff;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-input,
-textarea,
-button {
-    color: #cfcfd5;
-    background: #202024;
-    border: 1px solid #303036;
-    border-radius: 6px;
-    padding: 0.625rem 0.75rem;
-    font: inherit;
-    box-sizing: border-box;
-    min-width: 0;
-}
-
-textarea {
-    flex: 1;
-    min-height: 6rem;
-    resize: none;
-    line-height: 1.7;
-}
-
-input:focus,
-textarea:focus {
-    outline: none;
-    border-color: #5965ed;
-}
-
-button {
-    cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-    background: #29292e;
-}
-
-button.primary {
-    background: #3c47be;
-    border-color: #3c47be;
-    color: #ffffff;
-}
-
-button.primary:hover:not(:disabled) {
-    background: #4652d1;
-}
-
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.unsaved-state,
-.note-edit-title p {
-    color: #898991;
-    font-size: 0.8125rem;
-}
-
-.editor-error,
-.note-edit-title .editor-error {
-    color: #ff6b6b;
-    margin: 0;
-}
-
-.note-edit-title {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.detail-error {
-    padding: 1.25rem;
-    color: #d5d5da;
-}
-
-.detail-error a {
-    color: #8b7cff;
-    margin-left: 0.75rem;
-}
-
-@media (max-width: 500px) {
-    .note-reader,
-    .note-editor {
-        padding: 0.75rem;
-    }
-}
-</style>

@@ -1,13 +1,13 @@
 <template>
-    <div class="notes-page">
-        <div class="notes-header">
-            <div class="notes-toolbar">
-                <SearchBox
+    <div class="notes-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
+        <div class="notes-header flex flex-col shrink-0 p-0 gap-3 mb-3">
+            <div class="notes-toolbar flex items-center justify-between flex-wrap gap-2 min-w-0">
+                <SearchBox class="[flex:1_1_18rem] min-w-0 max-w-128 max-tablet:basis-full max-tablet:max-w-none"
                     v-model="searchQuery"
                     placeholder="Search notes..."
                 />
 
-                <div class="toolbar-actions">
+                <div class="toolbar-actions flex items-center flex-wrap gap-2 min-w-0">
                     <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
                     <UploadButton
@@ -19,12 +19,15 @@
 
                     <button
                         type="button"
-                        class="new-note-button"
+                        class="new-note-button h-control shrink-0 whitespace-nowrap flex items-center justify-center gap-2 py-0 px-3
+                        bg-primary text-white border-0 rounded-control text-control-size font-medium cursor-pointer
+                        transition-[background,transform] duration-200 ease-[ease] leading-normal hover:bg-[#4a56d4]
+                        hover:-translate-y-px active:translate-y-0"
                         @click="createNote"
                     >
                         <Icon
                             name="solar:add-circle-bold"
-                            class="new-note-icon"
+                            class="new-note-icon block text-control-icon shrink-0 size-control-icon"
                         />
                         New Note
                     </button>
@@ -39,26 +42,26 @@
             @drop="handleDrop"
         >
             <template #loading>
-                <div class="loading-state">Loading notes...</div>
+                <div class="loading-state text-label text-[0.85rem]">Loading notes...</div>
             </template>
             <template
                 v-if="!isInitialLoading && filteredNotes.length === 0"
                 #empty
             >
-                <div class="empty-state">
+                <div class="empty-state w-full min-h-48 py-8 px-4 flex flex-col items-center justify-center gap-2 text-center">
                     <Icon
                         name="solar:notebook-bold"
                         size="2.5rem"
-                        class="empty-state-icon"
+                        class="empty-state-icon block shrink-0 mb-2 text-accent text-[2.5rem]"
                     />
-                    <strong>{{
+                    <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{
                         error
                             ? 'Unable to load notes'
                             : notes.length
                               ? 'No matching notes'
                               : 'No notes yet'
                     }}</strong>
-                    <span class="empty-state-description">{{
+                    <span class="empty-state-description text-muted text-sm font-normal leading-normal">{{
                         error ||
                         (notes.length
                             ? 'Try a different search.'
@@ -68,14 +71,14 @@
             </template>
 
             <template #list>
-                <div class="table-scroll">
-                    <table class="notes-table">
+                <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
+                    <table class="notes-table w-full border-separate border-spacing-0 bg-transparent border-0 min-w-176 table-fixed">
                         <thead>
                             <tr>
-                                <th>
+                                <th class="w-14 pl-4 pr-3 text-center file-table-heading">
                                     <input
                                         type="checkbox"
-                                        class="note-checkbox"
+                                        class="note-checkbox file-checkbox"
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
                                         :disabled="busy"
@@ -83,50 +86,51 @@
                                     />
                                 </th>
 
-                                <th>
-                                    <div class="name-header">
+                                <th class="w-[42%] file-table-heading">
+                                    <div class="name-header flex items-center gap-[0.3rem]">
                                         Name
                                         <Icon
                                             name="solar:sort-vertical-linear"
-                                            class="sort-icon"
+                                            class="sort-icon text-base leading-[inherit]"
                                         />
                                     </div>
                                 </th>
 
-                                <th>Type</th>
-                                <th>Size</th>
-                                <th>Modified</th>
-                                <th>Actions</th>
+                                <th class="file-table-heading">Type</th>
+                                <th class="file-table-heading">Size</th>
+                                <th class="file-table-heading">Modified</th>
+                                <th class="file-table-heading">Actions</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            <tr
+                            <tr class="hover:bg-surface-hover selected:bg-[#201d2d]"
                                 v-for="note in paginatedNotes"
                                 :key="note.id"
                                 :class="{ selected: selectedNotes.includes(note.id) }"
                                 @click="openNote(note)"
                                 @contextmenu.prevent.stop="openContextMenu($event, note.id)"
                             >
-                                <td @click.stop>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedNotes"
                                         type="checkbox"
-                                        class="note-checkbox"
+                                        class="note-checkbox file-checkbox"
                                         :value="note.id"
                                         :disabled="busy"
                                     />
                                 </td>
 
-                                <td>
-                                    <div class="note-name">
-                                        <div class="note-icon">
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
+                                    <div class="note-name flex items-center gap-3">
+                                        <div class="note-icon flex items-center justify-center shrink-0 text-[#9c8cff] bg-[#29215c] border
+                                            border-[#443b82] rounded-md text-[1.2rem] size-10">
                                             <Icon name="solar:notebook-bold" />
                                         </div>
 
-                                        <div class="note-info">
-                                            <strong :title="note.title">{{ note.title }}</strong>
-                                            <span>
+                                        <div class="note-info min-w-0 flex flex-col gap-1">
+                                            <strong class="text-white text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="note.title">{{ note.title }}</strong>
+                                            <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis">
                                                 {{ formatFileSize(note.size) }} •
                                                 {{ formatFileTime(note.created_at) }}
                                             </span>
@@ -134,11 +138,11 @@
                                     </div>
                                 </td>
 
-                                <td>Note</td>
-                                <td>{{ formatFileSize(note.size) }}</td>
-                                <td>{{ formatFileTime(note.updated_at) }}</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Note</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileSize(note.size) }}</td>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(note.updated_at) }}</td>
 
-                                <td @click.stop>
+                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell" @click.stop>
                                     <ItemMenu
                                         :ref="menu => setNoteMenuRef(note.id, menu)"
                                         type="note"
@@ -177,11 +181,12 @@
                         @contextmenu.prevent.stop="openContextMenu($event, note.id)"
                     >
                         <template #actions>
-                            <label class="file-select">
+                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                                cursor-pointer size-8">
                                 <input
                                     v-model="selectedNotes"
                                     type="checkbox"
-                                    class="note-checkbox"
+                                    class="note-checkbox file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
                                     :value="note.id"
                                     :disabled="busy"
                                 />
@@ -207,9 +212,9 @@
                             />
                         </template>
                         <template #metadata>
-                            <span>{{ formatFileSize(note.size) }}</span>
+                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileSize(note.size) }}</span>
                             ·
-                            <span>{{ formatFileTime(note.created_at) }}</span>
+                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileTime(note.created_at) }}</span>
                         </template>
                     </ItemGridCard>
                 </ItemGrid>
@@ -479,331 +484,3 @@ watch([searchQuery, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 </script>
-
-<style scoped>
-.notes-page {
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    background: transparent;
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-}
-
-.notes-header {
-    display: flex;
-    flex-direction: column;
-
-    flex-shrink: 0;
-
-    padding: 0;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-
-.notes-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    min-width: 0;
-}
-
-.notes-toolbar :deep(.search-box) {
-    flex: 1 1 18rem;
-    min-width: 0;
-    max-width: 32rem;
-    box-sizing: border-box;
-}
-
-.toolbar-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    min-width: 0;
-}
-
-.new-note-button {
-    height: var(--ui-control-height, 2.5rem);
-    flex-shrink: 0;
-    white-space: nowrap;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 0.5rem;
-
-    padding: 0 0.75rem;
-
-    background: #3c47be;
-    color: #ffffff;
-
-    border: none;
-    border-radius: var(--ui-control-radius, 8px);
-
-    font-size: var(--ui-control-font-size, 0.875rem);
-    font-weight: 500;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease;
-    font-family: 'Inter', sans-serif;
-    line-height: 1.5;
-    box-sizing: border-box;
-}
-
-.new-note-icon {
-    display: block;
-    width: var(--ui-control-icon-size, 1.125rem);
-    height: var(--ui-control-icon-size, 1.125rem);
-    font-size: var(--ui-control-icon-size, 1.125rem);
-    flex-shrink: 0;
-}
-
-.new-note-button:hover {
-    background: #4a56d4;
-    transform: translateY(-1px);
-}
-
-.new-note-button:active {
-    transform: translateY(0);
-}
-
-.table-scroll {
-    flex: 1;
-    min-height: 0;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.notes-table {
-    width: 100%;
-
-    border-collapse: separate;
-    border-spacing: 0;
-
-    background: transparent;
-
-    border: none;
-}
-
-.notes-table th,
-.notes-table td {
-    padding: 0 1rem;
-
-    text-align: left;
-    vertical-align: middle;
-
-    border-bottom: 1px solid #29292e;
-
-    box-sizing: border-box;
-}
-
-.notes-table thead th {
-    height: 3.8rem;
-
-    position: sticky;
-    top: 0;
-
-    z-index: 2;
-
-    background: #1a1a1d;
-
-    color: #a3a3ab;
-
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.notes-table tbody td {
-    height: 4.2rem;
-
-    color: #b5b5bd;
-
-    font-size: 0.85rem;
-}
-
-.notes-table tbody tr:hover {
-    background: #1f1f23;
-}
-
-.notes-table th:first-child,
-.notes-table td:first-child {
-    width: 3.5rem;
-
-    padding-left: 1rem;
-    padding-right: 0.75rem;
-
-    text-align: center;
-}
-
-.notes-table th:nth-child(2),
-.notes-table td:nth-child(2) {
-    width: 42%;
-}
-
-.note-checkbox {
-    position: relative;
-    appearance: none;
-    -webkit-appearance: none;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: 0;
-    box-sizing: border-box;
-    background: #202024;
-    border: 1px solid #505057;
-    border-radius: 4px;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.note-checkbox:hover:not(:disabled) {
-    border-color: #8b7cff;
-}
-
-.note-checkbox:checked,
-.note-checkbox:indeterminate {
-    background: #3c47be;
-    border-color: #5965ed;
-}
-
-.note-checkbox:checked::after {
-    content: '';
-    width: 0.3rem;
-    height: 0.55rem;
-    margin-top: -0.15rem;
-    border: solid #ffffff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.note-checkbox:indeterminate::after {
-    content: '';
-    width: 0.55rem;
-    height: 2px;
-    margin: 0;
-    background: #ffffff;
-    border: 0;
-    transform: none;
-}
-
-.note-checkbox:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 3px;
-}
-
-.note-checkbox:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.name-header {
-    display: flex;
-    align-items: center;
-
-    gap: 0.3rem;
-}
-
-.sort-icon {
-    font-size: 1rem;
-}
-
-.note-name {
-    display: flex;
-    align-items: center;
-
-    gap: 0.75rem;
-}
-
-.note-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    color: #9c8cff;
-    background: #29215c;
-
-    border: 1px solid #443b82;
-    border-radius: 6px;
-
-    font-size: 1.2rem;
-}
-
-.note-info {
-    min-width: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 0.25rem;
-}
-
-.note-info strong {
-    color: #ffffff;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-
-    white-space: nowrap;
-    line-height: 1.5;
-}
-
-.note-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-
-    white-space: nowrap;
-    font-weight: 400;
-    line-height: 1.5;
-}
-
-.table-scroll {
-    overflow-x: auto;
-}
-
-.notes-table {
-    min-width: 44rem;
-    table-layout: fixed;
-}
-
-.notes-table tbody tr.selected {
-    background: #201d2d;
-}
-
-.note-info strong,
-.note-info span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-@media (max-width: 800px) {
-    .notes-toolbar :deep(.search-box) {
-        flex-basis: 100%;
-        max-width: none;
-    }
-}
-</style>

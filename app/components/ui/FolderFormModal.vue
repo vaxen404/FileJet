@@ -2,18 +2,21 @@
     <Teleport to="body">
         <dialog
             ref="dialog"
-            class="folder-modal"
+            class="folder-modal w-[min(28rem,_calc(100vw_-_2rem))] max-h-[calc(100dvh_-_2rem)] p-0 overflow-y-auto
+            text-foreground bg-surface border border-[#35353c] rounded-2xl shadow-[0_24px_80px_#0006]
+            backdrop:bg-[#0009]"
             @cancel.prevent="close"
             @click.self="close"
         >
-            <form @submit.prevent="save">
-                <div class="modal-header">
-                    <div class="modal-icon"><Icon name="solar:folder-bold" /></div>
-                    <div class="modal-heading">
-                        <h2 :id="`${id}-title`">
+            <form class="p-6" @submit.prevent="save">
+                <div class="modal-header flex items-center gap-3">
+                    <div class="modal-icon grid place-items-center shrink-0 text-[#6ea8ff] bg-[#1f2d4a] rounded-[10px] text-2xl
+                        leading-[inherit] size-11"><Icon name="solar:folder-bold" /></div>
+                    <div class="modal-heading flex-1 min-w-0">
+                        <h2 class="m-0 text-[1.1rem]" :id="`${id}-title`">
                             {{ isEditing ? 'Rename folder' : 'New folder' }}
                         </h2>
-                        <p :id="`${id}-description`">
+                        <p class="mt-[0.35rem] mr-0 mb-0 ml-0 text-heading-muted text-[0.8rem] leading-normal" :id="`${id}-description`">
                             {{
                                 isEditing
                                     ? 'Choose a new name for your folder.'
@@ -23,16 +26,20 @@
                     </div>
                     <button
                         type="button"
-                        class="close-button"
+                        class="close-button inline-flex items-center justify-center gap-2 min-h-8 p-0 border-0 rounded-md
+                        text-[1.35rem] cursor-pointer w-8 shrink-0 text-heading-muted bg-transparent disabled:opacity-50
+                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-3"
                         :disabled="isLoading"
                         @click="close"
                     >
                         <Icon name="solar:close-circle-linear" />
                     </button>
                 </div>
-                <div class="form-field">
-                    <label :for="`${id}-name`">Folder name</label>
-                    <input
+                <div class="form-field flex flex-col gap-2 my-6 mx-0">
+                    <label class="text-sm leading-[inherit] font-medium" :for="`${id}-name`">Folder name</label>
+                    <input class="w-full min-h-11 py-[0.6rem] px-3 text-foreground bg-canvas border border-[#35353c] rounded-md text-sm
+                        focus:outline-none focus:valid-field:border-accent is-invalid:border-[#ff6b6b] leading-[inherit]"
                         :id="`${id}-name`"
                         ref="nameInput"
                         v-model="name"
@@ -48,15 +55,18 @@
                     <p
                         v-if="message"
                         :id="`${id}-error`"
-                        class="form-error"
+                        class="form-error m-0 text-[#ff8181] text-[0.8rem] leading-normal wrap-anywhere"
                     >
                         {{ message }}
                     </p>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer flex justify-end flex-wrap gap-2">
                     <button
                         type="button"
-                        class="cancel-button"
+                        class="cancel-button inline-flex items-center justify-center gap-2 min-h-10 py-0 px-[0.9rem] border
+                        border-[#35353c] rounded-md text-sm cursor-pointer text-[#d5d5da] bg-raised
+                        hover:enabled:bg-control-border disabled:opacity-50 disabled:cursor-not-allowed
+                        focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-3 leading-[inherit]"
                         :disabled="isLoading"
                         @click="close"
                     >
@@ -64,7 +74,10 @@
                     </button>
                     <button
                         type="submit"
-                        class="save-button"
+                        class="save-button inline-flex items-center justify-center gap-2 min-h-10 py-0 px-[0.9rem] border rounded-md
+                        text-sm cursor-pointer text-white bg-primary border-primary hover:enabled:bg-[#4a56d4]
+                        disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-3 leading-[inherit]"
                         :disabled="!canSubmit"
                     >
                         <Icon :name="isEditing ? 'solar:pen-bold' : 'solar:add-circle-bold'" />
@@ -159,165 +172,3 @@ const save = async () => {
     }
 }
 </script>
-
-<style scoped>
-.folder-modal {
-    width: min(28rem, calc(100vw - 2rem));
-    max-height: calc(100dvh - 2rem);
-    padding: 0;
-    overflow-y: auto;
-    color: #f3f3f5;
-    background: #1a1a1d;
-    border: 1px solid #35353c;
-    border-radius: 16px;
-    font-family: 'Inter', sans-serif;
-    box-shadow: 0 24px 80px #0006;
-}
-
-.folder-modal::backdrop {
-    background: #0009;
-}
-
-.folder-modal form {
-    padding: 1.5rem;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.modal-heading {
-    flex: 1;
-    min-width: 0;
-}
-
-.modal-icon {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    flex-shrink: 0;
-    color: #6ea8ff;
-    background: #1f2d4a;
-    border-radius: 10px;
-    font-size: 1.5rem;
-}
-
-h2 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-p {
-    margin: 0.35rem 0 0;
-    color: #a3a3ab;
-    font-size: 0.8rem;
-    line-height: 1.5;
-}
-
-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-height: 2.5rem;
-    padding: 0 0.9rem;
-    border: 1px solid #35353c;
-    border-radius: 6px;
-    font: inherit;
-    font-size: 0.875rem;
-    cursor: pointer;
-}
-
-.close-button {
-    padding: 0;
-    width: 2rem;
-    min-height: 2rem;
-    flex-shrink: 0;
-    border: 0;
-    color: #a3a3ab;
-    background: transparent;
-    font-size: 1.35rem;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin: 1.5rem 0;
-}
-
-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-input {
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 2.75rem;
-    padding: 0.6rem 0.75rem;
-    color: #f3f3f5;
-    background: #121214;
-    border: 1px solid #35353c;
-    border-radius: 6px;
-    font: inherit;
-    font-size: 0.875rem;
-}
-
-input:focus {
-    outline: none;
-}
-
-input:focus:not(.invalid) {
-    border-color: #8b7cff;
-}
-
-input.invalid {
-    border-color: #ff6b6b;
-}
-
-.form-error {
-    margin: 0;
-    color: #ff8181;
-    overflow-wrap: anywhere;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.cancel-button {
-    color: #d5d5da;
-    background: #242429;
-}
-
-.cancel-button:hover:not(:disabled) {
-    background: #303036;
-}
-
-.save-button {
-    color: white;
-    background: #3c47be;
-    border-color: #3c47be;
-}
-
-.save-button:hover:not(:disabled) {
-    background: #4a56d4;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-button:focus-visible {
-    outline: 2px solid #8b7cff;
-    outline-offset: 3px;
-}
-</style>
