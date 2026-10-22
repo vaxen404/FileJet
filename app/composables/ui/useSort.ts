@@ -1,5 +1,4 @@
-type SortMode =
-    | 'newest' | 'oldest' | 'name-asc' | 'name-desc'
+type SortMode = 'newest' | 'oldest' | 'name-asc' | 'name-desc'
 
 export const useSort = <T>(
     items: Ref<T[]>,

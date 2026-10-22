@@ -5,14 +5,16 @@
             class="sort-trigger"
             @click="isOpen = !isOpen"
         >
-            <Icon name="solar:sort-vertical-linear" class="sort-icon" aria-hidden="true" />
+            <Icon
+                name="solar:sort-vertical-linear"
+                class="sort-icon"
+            />
 
             <span>{{ currentLabel }}</span>
 
             <Icon
                 name="solar:alt-arrow-down-linear"
                 class="arrow-icon"
-                aria-hidden="true"
             />
         </button>
 

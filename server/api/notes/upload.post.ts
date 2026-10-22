@@ -1,11 +1,11 @@
 import { reserveStorage } from '~~/server/utils/storage'
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { noteSchema } from "~~/shared/schemas/note"
-import { getFileParts } from "~~/server/utils/files";
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { noteSchema } from '~~/shared/schemas/note'
+import { getFileParts } from '~~/server/utils/files'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -15,7 +15,7 @@ export default defineEventHandler(async ( event) => {
 
         enforceRateLimit(event, `notes-upload:${session.userId}`, 10, 60 * 1000)
 
-        const formData = await readMultipartFormData(event) ?? []
+        const formData = (await readMultipartFormData(event)) ?? []
         const fileParts = getFileParts(formData)
 
         if (!fileParts?.length) {
@@ -28,6 +28,7 @@ export default defineEventHandler(async ( event) => {
 
         const maxSize = 5 * 1024 * 1024
         const titles = new Set<string>()
+
         const notes: {
             user_id: string
             folder_id: string | null
@@ -114,12 +115,13 @@ export default defineEventHandler(async ( event) => {
             })
         }
 
-        const uploadedNotes = await prisma.$transaction(async ( tx) => {
+        const uploadedNotes = await prisma.$transaction(async tx => {
             await reserveStorage(
                 tx,
                 session.userId,
                 notes.reduce((total, note) => total + note.size, 0n)
             )
+
             for (const note of notes) {
                 if (
                     await tx.notes.findFirst({

@@ -20,6 +20,7 @@ export default defineEventHandler(async event => {
             'Cache-Control': 'no-store',
             'X-Content-Type-Options': 'nosniff'
         })
+
         return archive.data
     }
 
@@ -30,6 +31,7 @@ export default defineEventHandler(async event => {
             'Cache-Control': 'no-store',
             'X-Content-Type-Options': 'nosniff'
         })
+
         return target.item.content
     }
 
@@ -70,6 +72,7 @@ export default defineEventHandler(async event => {
         fileStat = await stat(filePath)
     } catch (error: any) {
         if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error
+
         throw createError({
             statusCode: 404,
             statusMessage: 'File not found on disk'

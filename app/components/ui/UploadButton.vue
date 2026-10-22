@@ -9,7 +9,7 @@
             :webkitdirectory="mode === 'folder' ? '' : undefined"
             :disabled="disabled"
             @change="handleFileChange"
-        >
+        />
 
         <button
             type="button"
@@ -18,14 +18,16 @@
             @click="openPicker"
         >
             <span class="upload-left">
-                <Icon name="solar:cloud-upload-bold" class="upload-icon" aria-hidden="true" />
+                <Icon
+                    name="solar:cloud-upload-bold"
+                    class="upload-icon"
+                />
                 <span>{{ text }}</span>
             </span>
 
             <Icon
                 name="solar:alt-arrow-down-linear"
                 class="small-arrow"
-                aria-hidden="true"
             />
         </button>
     </div>
@@ -54,6 +56,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 
 const openPicker = () => {
     if (props.disabled) return
+
     fileInput.value?.click()
 }
 

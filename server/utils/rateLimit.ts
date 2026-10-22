@@ -28,6 +28,7 @@ export function enforceRateLimit(event: H3Event, key: string, limit: number, win
                 message: 'Too many requests. Please try again later.'
             })
         }
+
         buckets.set(bucketKey, {
             count: 1,
             resetAt: now + windowMs

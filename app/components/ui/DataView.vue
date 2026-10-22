@@ -1,7 +1,6 @@
 <template>
     <div
         class="data-view"
-        :aria-busy="isLoading"
         :class="{ 'drag-active': isDragging }"
         @dragenter="dragenter"
         @dragover="handleDragover"
@@ -31,7 +30,6 @@
         <div
             v-if="isDragging"
             class="drop-overlay"
-            role="status"
         >
             <span class="drop-message"><Icon name="solar:cloud-upload-bold" />{{ dropText }}</span>
         </div>
@@ -45,6 +43,7 @@ const props = defineProps<{
     isLoading?: boolean
     dropText?: string
 }>()
+
 const emit = defineEmits<{
     dragover: [event: DragEvent]
     dragleave: [event: DragEvent]
@@ -57,12 +56,14 @@ const { isDragging, dragenter, dragover, dragleave, drop } = useFileDrop(
 )
 
 const handleDragover = (event: DragEvent) => {
-    dragover(event);
+    dragover(event)
+
     if (isDragging.value) emit('dragover', event)
 }
 
 const handleDragleave = (event: DragEvent) => {
-    dragleave(event);
+    dragleave(event)
+
     if (!isDragging.value) emit('dragleave', event)
 }
 </script>

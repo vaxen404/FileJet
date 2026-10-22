@@ -1,10 +1,10 @@
 import { lockStorageUser } from '~~/server/utils/storage'
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { isUuid } from "~~/server/utils/validation"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -47,6 +47,7 @@ export default defineEventHandler(async ( event) => {
 
         return await prisma.$transaction(async tx => {
             await lockStorageUser(tx, session.userId)
+
             const file = await tx.files.findFirst({
                 where: {
                     id: fileId,
@@ -103,7 +104,8 @@ export default defineEventHandler(async ( event) => {
             }
         })
     } catch (err: any) {
-        console.log(err.message);
+        console.log(err.message)
+
         if (err.statusCode) throw err
 
         throwError(500, 'An error occurred while renaming the file.')

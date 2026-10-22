@@ -1,13 +1,12 @@
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
+import { readFile, stat } from 'node:fs/promises'
+import { resolve, sep } from 'node:path'
+import { createReadStream } from 'node:fs'
 
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { isUuid } from "~~/server/utils/validation"
-import { readFile, stat } from "node:fs/promises"
-import { resolve, sep } from "node:path"
-import { createReadStream } from "node:fs"
-
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -95,6 +94,7 @@ export default defineEventHandler(async ( event) => {
                 if (!match || (!match[1] && !match[2])) {
                     setResponseStatus(event, 416)
                     setHeader(event, 'Content-Range', `bytes */${size}`)
+
                     return ''
                 }
 
@@ -105,8 +105,8 @@ export default defineEventHandler(async ( event) => {
                 const end = isSuffix
                     ? size - 1
                     : match[2]
-                        ? Math.min(Number(match[2]), size - 1)
-                        : size - 1
+                      ? Math.min(Number(match[2]), size - 1)
+                      : size - 1
 
                 if (
                     !Number.isSafeInteger(start) ||
@@ -116,6 +116,7 @@ export default defineEventHandler(async ( event) => {
                 ) {
                     setResponseStatus(event, 416)
                     setHeader(event, 'Content-Range', `bytes */${size}`)
+
                     return ''
                 }
 

@@ -86,6 +86,7 @@ export function getAuthSession(event: H3Event): SessionPayload | null {
 
         if (payload.expiresAt <= Date.now()) {
             clearAuthSession(event)
+
             return null
         }
 

@@ -5,7 +5,6 @@
                 <nav
                     v-if="fileHeader && isFileDetails"
                     class="header-breadcrumb"
-                    aria-label="Breadcrumb"
                 >
                     <NuxtLink
                         :to="fileHeader.returnPath"
@@ -17,15 +16,10 @@
                         />
                         <span>Back to {{ fileHeader.returnName }}</span>
                     </NuxtLink>
-                    <span
-                        class="header-separator"
-                        aria-hidden="true"
-                        >/</span
-                    >
+                    <span class="header-separator">/</span>
                     <span
                         class="header-filename"
                         :title="fileHeader.fileName"
-                        aria-current="page"
                         >{{ fileHeader.fileName }}</span
                     >
                 </nav>

@@ -1,4 +1,3 @@
-
 import type { Prisma } from '~~/src/generated/prisma/client'
 import { throwError } from './error'
 

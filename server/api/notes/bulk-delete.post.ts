@@ -82,6 +82,7 @@ export default defineEventHandler(async event => {
             if (deleted.count !== noteIds.length) {
                 throwError(409, 'Notes changed during deletion.')
             }
+
             const trashed = await tx.trash.findMany({
                 where: {
                     user_id: session.userId,

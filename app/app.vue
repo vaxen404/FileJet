@@ -71,12 +71,8 @@ onMounted(resumeToasts)
     border-radius: 4px;
 }
 
-:where(dialog, [role='dialog'], [role='alertdialog']) {
+:where(dialog, .note-modal-conteiner, .preview-overlay) {
     border-radius: 12px;
-}
-
-:where([role='tooltip']) {
-    border-radius: 6px;
 }
 
 * {

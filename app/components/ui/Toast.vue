@@ -4,8 +4,6 @@
             v-if="show"
             class="toast"
             :class="[type, { 'toast--trash-inline': actionVariant === 'trash-undo' }]"
-            :role="type === 'error' ? 'alert' : 'status'"
-            aria-atomic="true"
         >
             <template v-if="actionVariant === 'trash-undo'">
                 <span class="trash-toast-message">{{ message }}</span>
@@ -16,7 +14,6 @@
                         type="button"
                         class="trash-toast-undo"
                         :disabled="pending"
-                        :aria-busy="pending"
                         @click="$emit('action')"
                     >
                         {{ pending ? 'Restoring...' : actionLabel }}
@@ -25,7 +22,6 @@
                     <button
                         type="button"
                         class="trash-toast-close"
-                        aria-label="Dismiss notification"
                         @click="$emit('close')"
                     >
                         <svg
@@ -33,7 +29,6 @@
                             height="14"
                             viewBox="0 0 16 16"
                             fill="none"
-                            aria-hidden="true"
                         >
                             <path
                                 d="M3 3L13 13M13 3L3 13"
@@ -49,9 +44,10 @@
             <template v-else>
                 <Icon
                     class="toast-icon"
-                    :name="type === 'error' ? 'solar:close-circle-linear' : 'solar:check-circle-linear'"
+                    :name="
+                        type === 'error' ? 'solar:close-circle-linear' : 'solar:check-circle-linear'
+                    "
                     size="1rem"
-                    aria-hidden="true"
                 />
 
                 <span class="toast-message">{{ message }}</span>
@@ -61,7 +57,6 @@
                     type="button"
                     class="toast-action"
                     :disabled="pending"
-                    :aria-busy="pending"
                     @click="$emit('action')"
                 >
                     {{ pending ? 'Restoring...' : actionLabel }}

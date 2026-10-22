@@ -47,6 +47,9 @@ interface FavoriteData {
     folder_id: string | null
     note_id: string | null
     created_at: string | null
+    files: Omit<FileData, 'storage_key'> | null
+    folders: FolderData | null
+    notes: NoteData | null
 }
 
 interface TrashData {
@@ -111,6 +114,7 @@ export const useUser = () => {
 
         try {
             const data = await requestFetch<FilesResponse>('/api/files')
+
             if (requestIds.value.files === requestId) {
                 files.value = data.files
             }
@@ -127,6 +131,7 @@ export const useUser = () => {
 
         try {
             const data = await requestFetch<FoldersResponse>('/api/folders')
+
             if (requestIds.value.folders === requestId) {
                 folders.value = data.folders
             }
@@ -143,6 +148,7 @@ export const useUser = () => {
 
         try {
             const data = await requestFetch<NotesResponse>('/api/notes')
+
             if (requestIds.value.notes === requestId) {
                 notes.value = data.notes
             }
@@ -159,6 +165,7 @@ export const useUser = () => {
 
         try {
             const data = await requestFetch<FavoritesResponse>('/api/favorites')
+
             if (requestIds.value.favorites === requestId) {
                 favorites.value = data.favorites
             }
@@ -175,6 +182,7 @@ export const useUser = () => {
 
         try {
             const data = await requestFetch<{ items: TrashData[] }>('/api/trash')
+
             if (requestIds.value.trash === requestId) {
                 trash.value = data.items
             }

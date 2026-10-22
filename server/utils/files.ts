@@ -6,10 +6,12 @@ import type { MultiPartData } from 'h3'
 export type FilePart = MultiPartData & { name: 'files'; filename: string }
 
 export function isFilePart(part: MultiPartData): part is FilePart {
-    return part.name === 'files' &&
+    return (
+        part.name === 'files' &&
         typeof part.filename === 'string' &&
         part.filename.length > 0 &&
         Buffer.isBuffer(part.data)
+    )
 }
 
 export const getFileParts = (formData: MultiPartData[]): FilePart[] => formData.filter(isFilePart)
@@ -41,9 +43,11 @@ export async function saveFileToStorage(userId: string, file: FilePart, key?: st
     }
 
     const filePath = storagePath(storageKey)
+
     if (!filePath.startsWith(storagePath(userId) + sep)) {
         throw new Error('Invalid storage owner.')
     }
+
     await mkdir(dirname(filePath), { recursive: true })
 
     const handle = await open(filePath, 'wx', 0o600)
@@ -62,7 +66,9 @@ export async function saveFileToStorage(userId: string, file: FilePart, key?: st
                 console.error('Failed upload cleanup:', cleanupError)
             }
         }
+
         throw error
     }
+
     return { safeName, storageKey }
 }

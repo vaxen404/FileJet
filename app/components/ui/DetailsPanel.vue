@@ -34,7 +34,6 @@
                 type="button"
                 class="actions-btn copy"
                 :disabled="isCopying"
-                :aria-busy="isCopying"
                 @click="emit('copy')"
             >
                 <Icon name="solar:copy-bold" />
@@ -71,8 +70,7 @@
 </template>
 
 <script setup lang="ts">
-type Action =
-    | 'download' | 'rename' | 'copy' | 'favorite' | 'delete'
+type Action = 'download' | 'rename' | 'copy' | 'favorite' | 'delete'
 
 withDefaults(
     defineProps<{

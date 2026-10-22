@@ -6,8 +6,6 @@
         <button
             type="button"
             class="menu-trigger"
-            aria-label="Actions"
-            :aria-expanded="isOpen"
             @click="toggleMenu"
         >
             <Icon name="solar:menu-dots-bold" />
@@ -34,8 +32,8 @@
                             type === 'folder'
                                 ? 'solar:folder-open-bold'
                                 : type === 'note'
-                                    ? 'solar:notebook-bold'
-                                    : 'solar:document-bold'
+                                  ? 'solar:notebook-bold'
+                                  : 'solar:document-bold'
                         "
                     />
 
@@ -128,8 +126,7 @@
 <script setup lang="ts">
 import { onClickOutside } from '@vueuse/core'
 
-type Action =
-    | 'open' | 'rename' | 'copy' | 'edit' | 'download' | 'favorite' | 'delete'
+type Action = 'open' | 'rename' | 'copy' | 'edit' | 'download' | 'favorite' | 'delete'
 
 const props = withDefaults(
     defineProps<{
@@ -166,6 +163,7 @@ const isOpen = computed({
         else if (activeMenuId.value === menuId) activeMenuId.value = null
     }
 })
+
 const contextPosition = ref<{ x: number; y: number } | null>(null)
 const menuRef = ref<HTMLElement | null>(null)
 const dropdownRef = ref<HTMLElement | null>(null)
@@ -192,6 +190,7 @@ const updatePosition = () => {
             trigger.left >= viewportRight)
     ) {
         isOpen.value = false
+
         return
     }
 
@@ -200,11 +199,13 @@ const updatePosition = () => {
     const style = getComputedStyle(dropdown)
     const verticalBorder = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
     const verticalPadding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+
     const horizontalSpace =
         parseFloat(style.paddingLeft) +
         parseFloat(style.paddingRight) +
         parseFloat(style.borderLeftWidth) +
         parseFloat(style.borderRightWidth)
+
     const maxWidth = `${Math.max(0, viewportWidth - edge * 2 - horizontalSpace)}px`
     const minWidth = `${Math.min(rootFontSize * 11, parseFloat(maxWidth))}px`
 
@@ -213,9 +214,11 @@ const updatePosition = () => {
 
     const width = dropdown.getBoundingClientRect().width
     const height = dropdown.scrollHeight + verticalBorder
+
     const anchorBottom = contextPosition.value
         ? Math.min(Math.max(contextPosition.value.y, viewportTop + edge), viewportBottom - edge)
         : trigger.bottom - edge
+
     const anchorTop = contextPosition.value ? anchorBottom : trigger.top + edge
     const below = Math.max(0, viewportBottom - edge - anchorBottom)
     const above = Math.max(0, anchorTop - viewportTop - edge)
@@ -223,6 +226,7 @@ const updatePosition = () => {
     const availableHeight = opensUp ? above : below
     const visibleHeight = Math.min(height, availableHeight)
     const top = opensUp ? anchorTop - visibleHeight : anchorBottom
+
     const left = Math.min(
         Math.max(
             viewportLeft + edge,
@@ -250,6 +254,7 @@ watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
     let observer: ResizeObserver | null = null
     let visibilityObserver: IntersectionObserver | null = null
     const viewport = window.visualViewport
+
     const handleScroll = (event: Event) => {
         // Keep scrolling inside a tall menu available; close a pointer-anchored
         // menu when its file moves instead of leaving it over another file.
@@ -258,10 +263,13 @@ watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
             !(event.target instanceof Node && dropdownRef.value?.contains(event.target))
         ) {
             isOpen.value = false
+
             return
         }
+
         schedulePosition()
     }
+
     const schedulePosition = () => {
         if (frame !== null) return
 
@@ -270,6 +278,7 @@ watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
             updatePosition()
         })
     }
+
     const handleKeydown = (event: KeyboardEvent) => {
         if (event.key === 'Escape') isOpen.value = false
     }
@@ -282,7 +291,9 @@ watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
 
     onCleanup(() => {
         cancelled = true
+
         if (frame !== null) window.cancelAnimationFrame(frame)
+
         observer?.disconnect()
         visibilityObserver?.disconnect()
         window.removeEventListener('scroll', handleScroll, true)
@@ -293,6 +304,7 @@ watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
     })
 
     await nextTick()
+
     if (cancelled || !isOpen.value) return
 
     updatePosition()
@@ -300,6 +312,7 @@ watch([isOpen, contextPosition], async ([open], _, onCleanup) => {
     if (typeof ResizeObserver !== 'undefined' && dropdownRef.value) {
         observer = new ResizeObserver(schedulePosition)
         observer.observe(dropdownRef.value)
+
         if (menuRef.value) observer.observe(menuRef.value)
     }
 

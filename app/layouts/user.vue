@@ -103,5 +103,4 @@ body {
 .user-header {
     flex-shrink: 0;
 }
-
 </style>

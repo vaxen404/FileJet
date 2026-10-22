@@ -3,31 +3,17 @@
         <section
             v-if="active"
             class="upload-status"
-            aria-label="Upload status"
         >
-            <div
-                class="upload-status-heading"
-                role="status"
-                aria-live="polite"
-            >
+            <div class="upload-status-heading">
                 <Icon name="solar:cloud-upload-bold" />
                 <span>{{ processing ? 'Processing...' : label }}</span>
                 <span
                     v-if="value !== null"
                     class="upload-percentage"
-                >{{ value }}%</span>
+                    >{{ value }}%</span
+                >
             </div>
-            <div
-                class="upload-progress"
-                role="progressbar"
-                :aria-label="label"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                :aria-valuenow="value ?? undefined"
-                :aria-valuetext="
-                    processing ? 'Processing...' : value === null ? 'Uploading...' : `${value}%`
-                "
-            >
+            <div class="upload-progress">
                 <div
                     class="upload-progress-bar"
                     :class="{ indeterminate: value === null }"
@@ -41,9 +27,9 @@
 <script setup lang="ts">
 const props = withDefaults(
     defineProps<{
-        active: boolean,
-        progress: number | null,
-        processing?: boolean,
+        active: boolean
+        progress: number | null
+        processing?: boolean
         label?: string
     }>(),
     { processing: false, label: 'Uploading files...' }

@@ -15,6 +15,7 @@ export default defineEventHandler(async event => {
         if (target.type === 'note' && 'content' in target.item) {
             setHeader(event, 'Content-Type', 'text/plain; charset=utf-8')
             setHeader(event, 'X-Content-Type-Options', 'nosniff')
+
             return target.item.content
         }
 
@@ -51,6 +52,7 @@ export default defineEventHandler(async event => {
         } catch (error: any) {
             if (error.code === 'ENOENT' || error.code === 'ENOTDIR')
                 throwError(404, 'Stored file not found.')
+
             throw error
         }
 
@@ -96,6 +98,7 @@ export default defineEventHandler(async event => {
                 if (!match || (!match[1] && !match[2])) {
                     setResponseStatus(event, 416)
                     setHeader(event, 'Content-Range', `bytes */${size}`)
+
                     return ''
                 }
 
@@ -117,6 +120,7 @@ export default defineEventHandler(async event => {
                 ) {
                     setResponseStatus(event, 416)
                     setHeader(event, 'Content-Range', `bytes */${size}`)
+
                     return ''
                 }
 
@@ -133,6 +137,7 @@ export default defineEventHandler(async event => {
         return await sendStream(event, createReadStream(filePath))
     } catch (err: any) {
         if (err.statusCode) throw err
+
         if (err.code === 'ENOENT' || err.code === 'ENOTDIR')
             throwError(404, 'Stored file not found.')
 

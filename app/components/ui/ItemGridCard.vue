@@ -5,7 +5,8 @@
     >
         <div class="file-preview">
             <slot name="preview"
-            ><div class="file-preview-placeholder"><Icon :name="icon" /></div></slot>
+                ><div class="file-preview-placeholder"><Icon :name="icon" /></div
+            ></slot>
             <div
                 class="file-overlay"
                 @click.stop
@@ -15,17 +16,19 @@
         </div>
         <div class="file-details">
             <slot name="title"
-            ><strong
+                ><strong
                     class="file-name-input"
                     :title="title"
-                >{{ title }}</strong></slot>
+                    >{{ title }}</strong
+                ></slot
+            >
             <div class="file-metadata"><slot name="metadata" /></div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-withDefaults(defineProps<{ selected?: boolean, title?: string, icon?: string }>(), {
+withDefaults(defineProps<{ selected?: boolean; title?: string; icon?: string }>(), {
     selected: false,
     title: '',
     icon: 'solar:file-bold'
@@ -202,6 +205,7 @@ withDefaults(defineProps<{ selected?: boolean, title?: string, icon?: string }>(
 .file-metadata :deep(span:first-child) {
     flex-shrink: 0;
 }
+
 @media (hover: none) {
     .file-overlay {
         opacity: 1;

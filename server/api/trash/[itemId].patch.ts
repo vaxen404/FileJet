@@ -1,9 +1,9 @@
-import { prisma } from "~~/server/utils/prisma";
-import { getAuthSession } from "~~/server/utils/auth";
-import { throwError } from "~~/server/utils/error";
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -20,7 +20,7 @@ export default defineEventHandler(async ( event) => {
         }
 
         await prisma.$transaction(
-            async ( tx) => {
+            async tx => {
                 const item = await tx.trash.findFirst({
                     where: {
                         id: itemId,

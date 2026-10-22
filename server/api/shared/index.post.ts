@@ -1,13 +1,13 @@
 import { readShareBody } from '../../utils/shareBody'
 import { parseShareSettings } from '../../utils/shareSettings'
 import { assertShareOrigin, shareState } from '../../utils/shares'
-import { randomUUID } from "node:crypto";
-import { prisma } from "~~/server/utils/prisma"
+import { randomUUID } from 'node:crypto'
+import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         assertShareOrigin(event)
         setHeader(event, 'Cache-Control', 'no-store')
@@ -93,9 +93,9 @@ export default defineEventHandler(async ( event) => {
                 event,
                 Object.keys(settings).length
                     ? await prisma.shared_items.update({
-                            where: { id: existing.id },
-                            data: settings
-                        })
+                          where: { id: existing.id },
+                          data: settings
+                      })
                     : existing
             )
         }
@@ -105,7 +105,7 @@ export default defineEventHandler(async ( event) => {
         while (retries > 0) {
             try {
                 const result = await prisma.$transaction(
-                    async ( tx) => {
+                    async tx => {
                         const existing = await tx.shared_items.findFirst({
                             where: {
                                 user_id: session.userId,
@@ -117,9 +117,9 @@ export default defineEventHandler(async ( event) => {
                         if (existing) {
                             return Object.keys(settings).length
                                 ? await tx.shared_items.update({
-                                        where: { id: existing.id },
-                                        data: settings
-                                    })
+                                      where: { id: existing.id },
+                                      data: settings
+                                  })
                                 : existing
                         }
 
@@ -169,9 +169,9 @@ export default defineEventHandler(async ( event) => {
                             event,
                             Object.keys(settings).length
                                 ? await prisma.shared_items.update({
-                                        where: { id: existing.id },
-                                        data: settings
-                                    })
+                                      where: { id: existing.id },
+                                      data: settings
+                                  })
                                 : existing
                         )
                     }

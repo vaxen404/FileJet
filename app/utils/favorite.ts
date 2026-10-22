@@ -10,11 +10,11 @@ export const getItemName = (item: any) => {
     return item.file_id ? item.files.name : item.folder_id ? item.folders.name : item.notes.title
 }
 
-export const getItemType = (item: any) => {
+export const getItemType = (item: any): 'file' | 'folder' | 'note' => {
     return item.file_id ? 'file' : item.folder_id ? 'folder' : 'note'
 }
 
-export const getItemId = (item: any) => {
+export const getItemId = (item: any): string => {
     return item.file_id ? item.file_id : item.folder_id ? item.folder_id : item.note_id
 }
 
@@ -26,10 +26,10 @@ export const getItemActions = (item: any) => {
     }
 
     if (type === 'folder') {
-        return ['open', 'rename', 'favorite', 'delete'] as const
+        return ['open', 'rename', 'download', 'favorite', 'delete'] as const
     }
 
-    return ['open', 'edit', 'favorite', 'delete'] as const
+    return ['open', 'edit', 'rename', 'download', 'favorite', 'delete'] as const
 }
 
 export const formatTime = (date: string | null) => {

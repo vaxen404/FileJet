@@ -75,6 +75,7 @@ export default defineEventHandler(async event => {
                     folder_id: note.folder_id
                 }
             })
+
             return trashed.id
         })
 

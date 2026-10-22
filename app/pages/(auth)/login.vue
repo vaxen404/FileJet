@@ -8,7 +8,7 @@
                 <input
                     type="text"
                     v-model="username"
-                >
+                />
             </div>
 
             <div class="form-group">
@@ -18,7 +18,7 @@
                         :type="isView ? 'text' : 'password'"
                         @keyup.enter="handleLogin"
                         v-model="password"
-                    >
+                    />
                     <button
                         v-if="password.length > 0"
                         @click="isView = !isView"

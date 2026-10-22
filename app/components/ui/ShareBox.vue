@@ -2,18 +2,19 @@
     <section
         class="share-box-card"
         :class="{ embedded }"
-        aria-label="Share"
     >
         <div
             v-if="!embedded"
             class="share-title"
         >
-            <Icon name="solar:link-bold" /> Share</div>
+            <Icon name="solar:link-bold" /> Share
+        </div>
         <p
             v-if="isLoading"
             class="share-description"
-            role="status"
-        >Loading share settings...</p>
+        >
+            Loading share settings...
+        </p>
         <div v-else>
             <div
                 v-if="state.url"
@@ -23,12 +24,10 @@
                     :value="state.url"
                     type="text"
                     readonly
-                    aria-label="Share link"
-                >
+                />
                 <button
                     type="button"
                     class="copy-btn"
-                    aria-label="Copy link"
                     title="Copy link"
                     @click="copyShareLink"
                 >
@@ -38,16 +37,15 @@
             <p class="share-description">
                 {{
                     state.url
-                        ? ( state.isExpired
+                        ? state.isExpired
                             ? 'This link has expired.'
-                            : 'Share this link to give access to this item.')
+                            : 'Share this link to give access to this item.'
                         : 'Create a share link for this item.'
                 }}
             </p>
 
             <form
                 class="share-settings"
-                :aria-busy="isSaving"
                 @submit.prevent="saveSettings"
             >
                 <label class="password-toggle">
@@ -55,7 +53,7 @@
                         v-model="passwordEnabled"
                         type="checkbox"
                         :disabled="busy"
-                    >
+                    />
                     <span>Password protection</span>
                 </label>
                 <div
@@ -79,9 +77,10 @@
                                 ? 'Leave blank to keep the current password'
                                 : 'At least 4 characters'
                         "
-                    >
+                    />
                     <span class="setting-help"
-                    >The password is verified when opening the link.</span>
+                        >The password is verified when opening the link.</span
+                    >
                 </div>
                 <div class="setting-field">
                     <label :for="`share-expiration-${itemId}`">Link expiration</label>
@@ -102,20 +101,17 @@
                         type="datetime-local"
                         required
                         :disabled="busy"
-                        aria-label="Link expiration date"
-                    >
+                    />
                 </div>
                 <p
                     v-if="errorMessage"
                     class="share-error"
-                    role="alert"
                 >
                     {{ errorMessage }}
                 </p>
                 <p
                     v-if="savedMessage"
                     class="share-description"
-                    role="status"
                 >
                     {{ savedMessage }}
                 </p>
@@ -124,7 +120,6 @@
                         type="submit"
                         class="create-share-btn"
                         :disabled="busy"
-                        :aria-busy="isSaving"
                     >
                         <Icon name="solar:link-circle-bold" />
                         {{ isSaving ? 'Saving...' : state.url ? 'Save settings' : 'Create Link' }}
@@ -146,7 +141,9 @@
             type="button"
             class="create-share-btn"
             @click="loadShareLink"
-        >Try again</button>
+        >
+            Try again
+        </button>
     </section>
 </template>
 
@@ -162,6 +159,7 @@ const props = withDefaults(
     }>(),
     { embedded: false }
 )
+
 const emit = defineEmits<{ changed: [state: ShareState] }>()
 const { openToast } = useToast()
 const state = ref<ShareState>(emptyShareState())
@@ -183,6 +181,7 @@ let copyTimer: ReturnType<typeof setTimeout> | undefined
 
 const localDate = (iso: string) => {
     const date = new Date(iso)
+
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
 }
 
@@ -201,10 +200,12 @@ const loadShareLink = async () => {
     isLoading.value = true
     loadFailed.value = false
     errorMessage.value = ''
+
     try {
         const value = await $fetch<ShareState>('/api/shared', {
             query: { itemId: props.itemId, itemType: props.itemType }
         })
+
         if (id === requestId) applyState(value)
     } catch (err: any) {
         if (id === requestId) {
@@ -217,30 +218,37 @@ const loadShareLink = async () => {
 }
 
 const settingsPayload = () => {
-    const passwordAction = passwordEnabled.value ? password.value ? 'set' : 'keep' : 'remove'
+    const passwordAction = passwordEnabled.value ? (password.value ? 'set' : 'keep') : 'remove'
+
     if (passwordEnabled.value && !state.value.hasPassword && !password.value)
         throw new Error('Enter a password with at least 4 characters.')
+
     if (
         passwordEnabled.value &&
         password.value &&
         (password.value.length < 4 || password.value.length > 128)
     )
         throw new Error('Password must contain 4–128 characters.')
+
     let expiresAt: string | null = null
+
     if (expiration.value === 'custom') {
         if (!customExpiration.value) throw new Error('Select an expiration date.')
+
         expiresAt =
             state.value.expiresAt && localDate(state.value.expiresAt) === customExpiration.value
                 ? state.value.expiresAt
                 : new Date(customExpiration.value).toISOString()
     } else if (expiration.value !== 'never')
         expiresAt = new Date(Date.now() + Number(expiration.value) * 86400000).toISOString()
+
     if (
         expiresAt &&
         expiresAt !== state.value.expiresAt &&
         new Date(expiresAt).getTime() <= Date.now()
     )
         throw new Error('Expiration must be in the future.')
+
     return {
         passwordAction,
         ...(passwordAction === 'set' ? { password: password.value } : {}),
@@ -250,28 +258,35 @@ const settingsPayload = () => {
 
 const saveSettings = async () => {
     if (busy.value) return
+
     errorMessage.value = ''
     savedMessage.value = ''
     let settings
+
     try {
         settings = settingsPayload()
     } catch (err: any) {
-        errorMessage.value = err.message;
+        errorMessage.value = err.message
+
         return
     }
+
     const id = ++requestId
     isSaving.value = true
+
     try {
         const value = state.value.url
             ? await $fetch<ShareState>(
-                    `/api/shared/items/${props.itemType}/${encodeURIComponent(props.itemId)}`,
-                    { method: 'PATCH', body: settings }
-                )
+                  `/api/shared/items/${props.itemType}/${encodeURIComponent(props.itemId)}`,
+                  { method: 'PATCH', body: settings }
+              )
             : await $fetch<ShareState>('/api/shared', {
-                    method: 'POST',
-                    body: { itemId: props.itemId, itemType: props.itemType, ...settings }
-                })
+                  method: 'POST',
+                  body: { itemId: props.itemId, itemType: props.itemType, ...settings }
+              })
+
         if (id !== requestId) return
+
         applyState(value)
         savedMessage.value = 'Share settings saved.'
         openToast(savedMessage.value, 'success')
@@ -286,15 +301,19 @@ const saveSettings = async () => {
 
 const removeShareLink = async () => {
     if (busy.value) return
+
     const id = ++requestId
     isSaving.value = true
     errorMessage.value = ''
     savedMessage.value = ''
+
     try {
         await $fetch(`/api/shared/items/${props.itemType}/${encodeURIComponent(props.itemId)}`, {
             method: 'DELETE'
         })
+
         if (id !== requestId) return
+
         applyState(emptyShareState())
         openToast('Share link removed successfully.', 'success')
     } catch (err: any) {
@@ -307,6 +326,7 @@ const removeShareLink = async () => {
 
 const copyShareLink = async () => {
     if (!state.value.url) return
+
     try {
         await navigator.clipboard.writeText(state.value.url)
         copied.value = true
@@ -327,6 +347,7 @@ watch(
         isSaving.value = false
         errorMessage.value = ''
         savedMessage.value = ''
+
         if (props.initialState !== undefined) applyState(props.initialState)
         else loadShareLink()
     },
@@ -334,7 +355,7 @@ watch(
 )
 
 onBeforeUnmount(() => {
-    requestId++;
+    requestId++
     clearTimeout(copyTimer)
 })
 </script>

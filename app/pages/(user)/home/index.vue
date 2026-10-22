@@ -108,7 +108,6 @@
                                             v-model="editingFileName"
                                             type="text"
                                             class="file-name-input"
-                                            :aria-label="`Rename ${file.name}`"
                                             :readonly="isSavingRename"
                                             @keydown.enter.prevent="saveRename(file)"
                                             @keydown.esc.prevent="cancelRename"
@@ -316,6 +315,7 @@ const startRename = async (file: FileItem) => {
 
 const cancelRename = () => {
     if (isSavingRename.value) return
+
     editingFileId.value = null
 }
 
@@ -326,6 +326,7 @@ const saveRename = async (file: FileItem) => {
 
     if (!newName || newName === file.name) {
         cancelRename()
+
         return
     }
 

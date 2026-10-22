@@ -3,10 +3,7 @@
         v-if="file"
         class="file-page"
     >
-        <section
-            class="file-workspace"
-            aria-label="File preview"
-        >
+        <section class="file-workspace">
             <div class="preview-card">
                 <div
                     class="preview-content"
@@ -15,7 +12,6 @@
                     <div
                         v-if="previewError"
                         class="preview-message"
-                        role="status"
                     >
                         <Icon
                             name="solar:document-linear"
@@ -64,21 +60,15 @@
             </div>
         </section>
 
-        <aside
-            class="file-panel"
-            aria-label="File details"
-        >
-            <section
-                class="file-information"
-                aria-labelledby="file-detail-title"
-            >
+        <aside class="file-panel">
+            <section class="file-information">
                 <div class="file-heading">
                     <div class="file-heading-text">
                         <h1 id="file-detail-title">{{ displayFileName }}</h1>
                         <p class="file-summary">
                             <span>{{ formatFileSize(file.size) }}</span>
                             <template v-if="file.created_at">
-                                <span aria-hidden="true">·</span>
+                                <span>·</span>
                                 <span>{{ formatDateTime(file.created_at) }}</span>
                             </template>
                         </p>
@@ -86,7 +76,6 @@
                     <button
                         type="button"
                         class="close-details"
-                        :aria-label="`Back to ${returnPage.name}`"
                         :title="`Back to ${returnPage.name}`"
                         @click="goBack"
                     >
@@ -95,7 +84,6 @@
                             width="20"
                             height="20"
                             fill="none"
-                            aria-hidden="true"
                         >
                             <path
                                 d="m6 6 12 12M18 6 6 18"
@@ -107,16 +95,12 @@
                     </button>
                 </div>
 
-                <div
-                    class="file-actions"
-                    role="group"
-                    aria-label="File actions"
-                >
+                <div class="file-actions">
                     <button
                         type="button"
                         class="action-button download-button"
+                        :class="{ 'is-busy': isDownloading }"
                         :disabled="isDownloading || isDeleting || isSavingRename"
-                        :aria-busy="isDownloading"
                         @click="handleDownload(file.id)"
                     >
                         <Icon
@@ -128,15 +112,14 @@
                     <button
                         type="button"
                         class="action-button icon-action"
+                        :class="{
+                            'is-favorite': isFileFavorite(file.id),
+                            'is-busy': isUpdatingFavorite
+                        }"
                         :disabled="isUpdatingFavorite || isDeleting || isSavingRename"
-                        :aria-label="
-                            isFileFavorite(file.id) ? 'Remove from favorites' : 'Add to favorites'
-                        "
                         :title="
                             isFileFavorite(file.id) ? 'Remove from favorites' : 'Add to favorites'
                         "
-                        :aria-pressed="isFileFavorite(file.id)"
-                        :aria-busy="isUpdatingFavorite"
                         @click="handleFavorite(file)"
                     >
                         <Icon
@@ -150,7 +133,6 @@
                         type="button"
                         class="action-button icon-action"
                         :disabled="isDeleting || isSavingRename"
-                        aria-label="Rename"
                         title="Rename"
                         @click="startRename"
                     >
@@ -162,9 +144,8 @@
                     <button
                         type="button"
                         class="action-button icon-action delete-button"
+                        :class="{ 'is-busy': isDeleting }"
                         :disabled="isDeleting || isSavingRename"
-                        :aria-busy="isDeleting"
-                        aria-label="Delete file"
                         title="Delete file"
                         @click="handleDelete(file.id)"
                     >
@@ -177,16 +158,11 @@
 
                 <div
                     class="detail-tabs"
-                    role="tablist"
-                    aria-label="File information"
                     @keydown="handleTabKeydown"
                 >
                     <button
                         id="file-details-tab"
                         type="button"
-                        role="tab"
-                        :aria-selected="activeTab === 'details'"
-                        aria-controls="file-details-panel"
                         :tabindex="activeTab === 'details' ? 0 : -1"
                         :disabled="isSavingRename"
                         :class="{ active: activeTab === 'details' }"
@@ -197,9 +173,6 @@
                     <button
                         id="file-edit-tab"
                         type="button"
-                        role="tab"
-                        :aria-selected="activeTab === 'edit'"
-                        aria-controls="file-edit-panel"
                         :tabindex="activeTab === 'edit' ? 0 : -1"
                         :disabled="isSavingRename"
                         :class="{ active: activeTab === 'edit' }"
@@ -210,9 +183,6 @@
                     <button
                         id="file-share-tab"
                         type="button"
-                        role="tab"
-                        aria-controls="file-share-panel"
-                        :aria-selected="activeTab === 'share'"
                         :tabindex="activeTab === 'share' ? 0 : -1"
                         :disabled="isSavingRename"
                         :class="{ active: activeTab === 'share' }"
@@ -225,8 +195,6 @@
                 <div
                     v-show="activeTab === 'details'"
                     id="file-details-panel"
-                    role="tabpanel"
-                    aria-labelledby="file-details-tab"
                     tabindex="0"
                     class="tab-panel"
                 >
@@ -245,14 +213,11 @@
                 <div
                     v-show="activeTab === 'edit'"
                     id="file-edit-panel"
-                    role="tabpanel"
-                    aria-labelledby="file-edit-tab"
                     tabindex="0"
                     class="tab-panel edit-panel"
                 >
                     <form
                         class="rename-form"
-                        :aria-busy="isSavingRename"
                         @submit.prevent="saveRename"
                     >
                         <div class="rename-field">
@@ -268,28 +233,22 @@
                                     v-model="editingFileName"
                                     type="text"
                                     class="name-input"
+                                    :class="{ invalid: Boolean(renameError) }"
                                     maxlength="255"
                                     required
                                     autocomplete="off"
                                     :disabled="isSavingRename || isDeleting"
-                                    :aria-invalid="Boolean(renameError)"
-                                    :aria-describedby="
-                                        renameError ? 'file-rename-error' : undefined
-                                    "
                                     @input="renameError = ''"
                                     @keydown.esc.prevent="cancelRename"
                                 />
-                                <span
-                                    class="rename-extension"
-                                    aria-label="Current file extension"
-                                    >{{ originalExtension || 'No extension' }}</span
-                                >
+                                <span class="rename-extension">{{
+                                    originalExtension || 'No extension'
+                                }}</span>
                             </div>
                             <p
                                 v-if="renameError"
                                 id="file-rename-error"
                                 class="rename-error"
-                                role="alert"
                             >
                                 {{ renameError }}
                             </p>
@@ -306,8 +265,8 @@
                             <button
                                 type="submit"
                                 class="action-button download-button"
+                                :class="{ 'is-busy': isSavingRename }"
                                 :disabled="!canSaveRename || isDeleting"
-                                :aria-busy="isSavingRename"
                             >
                                 {{ isSavingRename ? 'Saving...' : 'Save' }}
                             </button>
@@ -320,8 +279,8 @@
                         <button
                             type="button"
                             class="action-button"
+                            :class="{ 'is-busy': isCopying }"
                             :disabled="isCopying || isDeleting || isSavingRename"
-                            :aria-busy="isCopying"
                             @click="handleCopy"
                         >
                             <Icon name="solar:copy-linear" />
@@ -332,8 +291,6 @@
                 <div
                     v-show="activeTab === 'share'"
                     id="file-share-panel"
-                    role="tabpanel"
-                    aria-labelledby="file-share-tab"
                     tabindex="0"
                     class="tab-panel"
                 >
@@ -351,7 +308,6 @@
     <div
         v-else
         class="file-empty-state"
-        role="alert"
     >
         <h1>Unable to load file</h1>
         <p>The file could not be found or accessed.</p>
@@ -422,6 +378,7 @@ const shareStatus = ref<ShareState>(file.value?.share ?? emptyShareState())
 
 const handleShareChanged = (state: ShareState) => {
     shareStatus.value = state
+
     if (file.value) file.value.share = state
 }
 
@@ -444,11 +401,13 @@ onBeforeUnmount(() => {
 
 const originalExtension = computed(() => {
     const name = file.value?.original_name ?? ''
+
     return name.includes('.') ? `.${name.split('.').pop()}` : ''
 })
 
 const editableFileName = computed(() => {
     const name = displayFileName.value
+
     return originalExtension.value && name.length > originalExtension.value.length
         ? name.slice(0, -originalExtension.value.length)
         : name
@@ -488,11 +447,13 @@ const goBack = () => router.push(returnPage.value.path)
 
 const startRename = async () => {
     if (!file.value || isSavingRename.value || isDeleting.value) return
+
     if (!isRenaming.value) {
         editingFileName.value = editableFileName.value
         renameError.value = ''
         isRenaming.value = true
     }
+
     activeTab.value = 'edit'
     await nextTick()
     nameInput.value?.focus()
@@ -501,6 +462,7 @@ const startRename = async () => {
 
 const selectTab = async (tab: DetailTab) => {
     if (isSavingRename.value) return
+
     if (tab === 'edit') await startRename()
     else activeTab.value = tab
 }
@@ -508,15 +470,18 @@ const selectTab = async (tab: DetailTab) => {
 const handleTabKeydown = async (event: KeyboardEvent) => {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key) || isSavingRename.value)
         return
+
     event.preventDefault()
     const tabs: DetailTab[] = ['details', 'edit', 'share']
     const current = tabs.indexOf(activeTab.value)
+
     const index =
         event.key === 'Home'
             ? 0
             : event.key === 'End'
               ? 2
               : (current + (event.key === 'ArrowRight' ? 1 : 2)) % 3
+
     const tab = tabs[index]!
     await selectTab(tab)
     await nextTick()
@@ -533,6 +498,7 @@ const handleTabKeydown = async (event: KeyboardEvent) => {
 
 const cancelRename = () => {
     if (isSavingRename.value) return
+
     editingFileName.value = editableFileName.value
     renameError.value = ''
     isRenaming.value = false
@@ -541,22 +507,31 @@ const cancelRename = () => {
 
 const saveRename = async () => {
     if (!file.value || !isRenaming.value || isSavingRename.value || isDeleting.value) return
+
     const newName = renameTargetName.value
+
     if (!newName) {
         renameError.value = 'Filename is required.'
+
         return
     }
+
     if (newName === editableFileName.value) {
         cancelRename()
+
         return
     }
+
     isSavingRename.value = true
     renameError.value = ''
+
     try {
         const response = await renameFile(file.value.id, newName)
         file.value = { ...file.value, ...response.file }
         const listedFile = files.value.find(item => item.id === response.file.id)
+
         if (listedFile) Object.assign(listedFile, response.file)
+
         editingFileName.value = editableFileName.value
         isRenaming.value = false
         activeTab.value = 'details'
@@ -575,7 +550,9 @@ watch(editableFileName, name => {
 
 const handleDownload = async (id: string) => {
     if (isDownloading.value) return
+
     isDownloading.value = true
+
     try {
         await downloadFile(id)
         openToast('Download started.', 'success')
@@ -588,7 +565,9 @@ const handleDownload = async (id: string) => {
 
 const handleCopy = async () => {
     if (!file.value || !canCopy.value || isCopying.value) return
+
     isCopying.value = true
+
     try {
         await copyFile(file.value)
         openToast('Copied to clipboard.', 'success')
@@ -604,6 +583,7 @@ const handleCopy = async () => {
 
 const handleDelete = async (id: string) => {
     if (isDeleting.value || isSavingRename.value) return
+
     try {
         await deleteFile(id)
         await goBack()
@@ -616,7 +596,9 @@ const isFileFavorite = (id: string) => favorites.value.some(favorite => favorite
 
 const handleFavorite = async (item: FileData) => {
     if (isUpdatingFavorite.value) return
+
     isUpdatingFavorite.value = true
+
     try {
         if (isFileFavorite(item.id)) {
             await removeFavorite(item.id, 'file')
@@ -625,6 +607,7 @@ const handleFavorite = async (item: FileData) => {
             await addFavorite(item.id, 'file')
             openToast('File favorited successfully.', 'success')
         }
+
         await fetchAll()
     } catch (err: any) {
         openToast(err?.data?.message || err?.message || 'File could not be favorited.', 'error')
@@ -646,6 +629,7 @@ const isPdf = computed(() => file.value?.mime_type === 'application/pdf')
 const fileExtension = computed(() => {
     const name = file.value?.original_name ?? ''
     const dot = name.lastIndexOf('.')
+
     return dot > 0 && dot < name.length - 1 ? getFileType(name) : ''
 })
 
@@ -664,6 +648,7 @@ const handlePreviewError = () => {
 
 const captureImageMetadata = (event?: Event) => {
     const image = (event?.target as HTMLImageElement | null) ?? imagePreview.value
+
     if (image && image.naturalWidth > 0 && image.naturalHeight > 0) {
         mediaDimensions.value = { width: image.naturalWidth, height: image.naturalHeight }
     }
@@ -671,35 +656,44 @@ const captureImageMetadata = (event?: Event) => {
 
 const captureVideoMetadata = (event?: Event) => {
     const video = (event?.target as HTMLVideoElement | null) ?? videoPreview.value
+
     if (!video) return
+
     if (video.videoWidth > 0 && video.videoHeight > 0) {
         mediaDimensions.value = { width: video.videoWidth, height: video.videoHeight }
     }
+
     mediaDuration.value =
         Number.isFinite(video.duration) && video.duration >= 0 ? video.duration : null
 }
 
 onMounted(() => {
     captureImageMetadata()
+
     if ((videoPreview.value?.readyState ?? 0) >= 1) captureVideoMetadata()
 })
 
 const formatDateTime = (date: string) => {
     if (!Number.isFinite(new Date(date).getTime())) return ''
+
     return `${formatFileTime(date)} ${new Date(date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
 }
 
 const metadataRows = computed(() => {
     if (!file.value) return []
+
     const item = file.value
     const technical = item.technical_metadata ?? {}
+
     const dimensions =
         mediaDimensions.value ??
         (technical.width && technical.height
             ? { width: technical.width, height: technical.height }
             : null)
+
     const duration = mediaDuration.value ?? technical.duration
     const rows: { label: string; value: string }[] = []
+
     const add = (label: string, value: string | number | null | undefined) =>
         rows.push({
             label,
@@ -708,6 +702,7 @@ const metadataRows = computed(() => {
                     ? 'Unavailable'
                     : String(value)
         })
+
     add('Full filename', displayFileName.value)
     add('Extension', fileExtension.value || 'None')
     add('MIME type', item.mime_type)
@@ -732,6 +727,7 @@ const metadataRows = computed(() => {
         'Link expiration',
         shareStatus.value.expiresAt ? formatDateTime(shareStatus.value.expiresAt) : 'Never'
     )
+
     if (isVideo.value) {
         add('Resolution', dimensions ? `${dimensions.width} × ${dimensions.height}` : null)
         add(
@@ -742,11 +738,13 @@ const metadataRows = computed(() => {
         )
         add('FPS', technical.fps ? `${Number(technical.fps.toFixed(3))} fps` : null)
     }
+
     if (isImage.value) {
         add('Width', dimensions?.width)
         add('Height', dimensions?.height)
         add('Image format', technical.format || fileExtension.value)
     }
+
     if (item.mime_type?.startsWith('audio/')) {
         add(
             'Duration',
@@ -755,6 +753,7 @@ const metadataRows = computed(() => {
                 : null
         )
     }
+
     return rows
 })
 
@@ -969,7 +968,7 @@ if (isText.value) {
     padding: 0;
 }
 
-.icon-action[aria-pressed='true'] {
+.icon-action.is-favorite {
     color: #8b7cff;
 }
 
@@ -1001,7 +1000,7 @@ if (isText.value) {
     cursor: not-allowed;
 }
 
-.action-button[aria-busy='true'] {
+.action-button.is-busy {
     cursor: wait;
 }
 
@@ -1123,7 +1122,7 @@ if (isText.value) {
     border-color: #5965ed;
 }
 
-.name-input[aria-invalid='true'] {
+.name-input.invalid {
     border-color: #ff6b6b;
 }
 

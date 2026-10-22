@@ -21,28 +21,20 @@
                 <ItemFilters
                     v-model="activeCategory"
                     :options="filterOptions"
-                    label="Filter files"
                 />
 
                 <SortDropdown v-model="sortMode" />
             </div>
-
         </div>
 
         <DataView
             :view-mode="viewMode"
             :is-loading="isInitialLoading"
-            :aria-busy="isLoading || pending || isBulkDeleting"
             drop-text="Drop files to upload"
             @drop="handleDrop"
         >
             <template #loading>
-                <div
-                    class="loading-state"
-                    role="status"
-                >
-                    Loading files...
-                </div>
+                <div class="loading-state">Loading files...</div>
             </template>
             <template
                 v-if="!isInitialLoading && filteredFiles.length === 0"
@@ -82,7 +74,6 @@
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
                                         :disabled="isLoading || isBulkDeleting"
-                                        aria-label="Select all files on this page"
                                         @change="toggleSelectAll"
                                     />
                                 </th>
@@ -119,7 +110,6 @@
                                         class="file-checkbox"
                                         :value="file.id"
                                         :disabled="isLoading || isBulkDeleting"
-                                        :aria-label="`Select ${file.name}`"
                                     />
                                 </td>
 
@@ -236,7 +226,6 @@
                                     type="checkbox"
                                     :value="file.id"
                                     :disabled="isLoading || isBulkDeleting"
-                                    :aria-label="`Select ${file.name}`"
                                 />
                             </label>
                             <ItemMenu
@@ -376,6 +365,7 @@ const startRename = async (file: any) => {
 
 const handleDrop = (event: DragEvent) => {
     const droppedFiles = event.dataTransfer?.files
+
     if (droppedFiles?.length) return handleFiles(droppedFiles)
 }
 
@@ -403,12 +393,14 @@ const { sortedItems: sortedFiles } = useSort(
 const handleFiles = async (files: FileList) => {
     if (!files.length) {
         openToast('Please select a file', 'error')
+
         return
     }
 
     try {
         await uploadFiles(files, async () => {
             await fetchAll()
+
             if (error.value) throw new Error(error.value)
         })
 
@@ -427,6 +419,7 @@ const saveRename = async (file: any) => {
 
     if (!newName || newName === file.name) {
         editingFileId.value = null
+
         return
     }
 
@@ -489,6 +482,7 @@ const handleFavorite = async (file: any) => {
             await fetchAll()
 
             openToast('File removed from favorites.', 'success')
+
             return
         }
 
@@ -513,12 +507,17 @@ const {
 
 const { selectedItems: selectedFiles, allSelected, toggleSelectAll } = useSelection(paginatedFiles)
 
-const selectionItems = computed(() => selectedFiles.value.map(id => ({ id, type: 'file' as const })))
+const selectionItems = computed(() =>
+    selectedFiles.value.map(id => ({ id, type: 'file' as const }))
+)
+
 const handleSelectionMoved = async () => {
     selectedFiles.value = []
     await fetchAll()
+
     if (error.value) openToast(error.value, 'error')
 }
+
 const isBulkDeleting = ref(false)
 
 const partiallySelected = computed(

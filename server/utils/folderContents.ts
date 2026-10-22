@@ -11,6 +11,7 @@ export async function requireFolderWithin(userId: string, rootId: string, folder
 
     while (current && !visited.has(current)) {
         visited.add(current)
+
         const folder: { id: string; parent_folder_id: string | null } | null =
             await prisma.folders.findFirst({
                 where: { id: current, user_id: userId },
@@ -18,7 +19,9 @@ export async function requireFolderWithin(userId: string, rootId: string, folder
             })
 
         if (!folder) break
+
         if (folder.id === rootId) return
+
         current = folder.parent_folder_id
     }
 
@@ -39,6 +42,7 @@ export async function getFolderTree(userId: string, rootId: string) {
 
         for (const child of children) {
             if (ids.has(child.id)) continue
+
             ids.add(child.id)
             pending.push(child.id)
         }

@@ -66,6 +66,7 @@ export default defineEventHandler(async event => {
                     user_id: session.userId
                 }
             })
+
             return trashed.id
         })
 
@@ -78,11 +79,7 @@ export default defineEventHandler(async event => {
     } catch (err: unknown) {
         console.error('[FILE DELETE ERROR]', err)
 
-        if (
-            err &&
-            typeof err === 'object' &&
-            'statusCode' in err
-        ) {
+        if (err && typeof err === 'object' && 'statusCode' in err) {
             throw err
         }
 

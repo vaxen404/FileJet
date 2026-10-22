@@ -25,14 +25,11 @@
                         <Icon
                             name="solar:add-folder-bold"
                             class="new-folder-icon"
-                            aria-hidden="true"
                         />
                         <span>New Folder</span>
                     </button>
                 </div>
             </div>
-
-
         </div>
 
         <DataView
@@ -45,15 +42,8 @@
             @drop="handleDrop"
         >
             <template #loading>
-                <div
-                    class="loading-state"
-                    role="status"
-                    aria-live="polite"
-                >
-                    <span
-                        class="loading-spinner"
-                        aria-hidden="true"
-                    />
+                <div class="loading-state">
+                    <span class="loading-spinner" />
                     <span>Loading folders...</span>
                 </div>
             </template>
@@ -91,7 +81,6 @@
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
                                         :disabled="pending"
-                                        aria-label="Select all folders on this page"
                                         @change="toggleSelectAll"
                                     />
                                 </th>
@@ -128,7 +117,6 @@
                                         class="folder-checkbox"
                                         :value="folder.id"
                                         :disabled="pending"
-                                        :aria-label="`Select ${folder.name}`"
                                     />
                                 </td>
 
@@ -195,7 +183,6 @@
                                     class="folder-checkbox"
                                     :value="folder.id"
                                     :disabled="pending"
-                                    :aria-label="`Select ${folder.name}`"
                                 />
                             </label>
                             <ItemMenu
@@ -263,6 +250,7 @@ const folderModalOpen = ref(false)
 
 const createFolder = (): void => {
     if (pending.value || folderActions.isLoading.value) return
+
     folderModalOpen.value = true
 }
 
@@ -338,8 +326,11 @@ const favoriteFolder = async (folder: FolderItem) => {
     try {
         if (isFolderFavorite(folder.id)) await removeFavorite(folder.id, 'folder')
         else await addFavorite(folder.id, 'folder')
+
         await fetchAll()
+
         if (error.value) throw new Error(error.value)
+
         openToast('Favorite updated.', 'success')
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'Could not update favorite.', 'error')
@@ -348,6 +339,7 @@ const favoriteFolder = async (folder: FolderItem) => {
 
 const deleteFolder = async (folder: FolderItem) => {
     if (folderActions.isDeleting.value) return
+
     try {
         await folderActions.deleteFolder(folder.id)
     } catch (err: any) {
@@ -370,6 +362,7 @@ const handleFolderSaved = async (): Promise<void> => {
     sortMode.value = 'newest'
     currentPage.value = 1
     await fetchAll()
+
     if (error.value) openToast(error.value, 'error')
 }
 
@@ -379,10 +372,14 @@ const {
     toggleSelectAll
 } = useSelection(paginatedFolders)
 
-const selectionItems = computed(() => selectedFolders.value.map(id => ({ id, type: 'folder' as const })))
+const selectionItems = computed(() =>
+    selectedFolders.value.map(id => ({ id, type: 'folder' as const }))
+)
+
 const handleSelectionMoved = async () => {
     selectedFolders.value = []
     await fetchAll()
+
     if (error.value) openToast(error.value, 'error')
 }
 
@@ -490,7 +487,9 @@ watch([searchQuery, sortMode, viewMode], () => {
     background: #424dcc;
     border: 1px solid #626de5;
     border-radius: var(--ui-control-radius, 8px);
-    box-shadow: inset 0 1px 0 #ffffff12, 0 2px 6px #0003;
+    box-shadow:
+        inset 0 1px 0 #ffffff12,
+        0 2px 6px #0003;
     font-family: 'Inter', sans-serif;
     font-size: var(--ui-control-font-size, 0.875rem);
     font-weight: 500;

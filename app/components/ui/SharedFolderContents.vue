@@ -22,7 +22,6 @@
         <div
             v-if="error"
             class="folder-error"
-            role="alert"
         >
             Folder contents could not be loaded.
             <button
@@ -45,9 +44,6 @@
         <div
             v-if="selected"
             class="preview-overlay"
-            role="dialog"
-            aria-modal="true"
-            :aria-label="selected.name"
             @keydown.esc="selected = null"
             @click.self="selected = null"
         >
@@ -72,7 +68,6 @@
             <p
                 v-if="previewError"
                 class="folder-error"
-                role="alert"
             >
                 {{ previewError }}
             </p>
@@ -115,6 +110,7 @@ const props = defineProps<{ token: string; rootId: string; rootName: string }>()
 const emit = defineEmits<{ accessError: [] }>()
 const currentId = ref(props.rootId)
 const history = ref<string[]>([])
+
 const currentFolder = computed<LibraryItem>(() => ({
     id: currentId.value,
     type: 'folder',
@@ -131,12 +127,14 @@ const resourceUrl = (
     `/api/shared/${encodeURIComponent(props.token)}/${action}?itemId=${encodeURIComponent(item.id)}&itemType=${item.type}`
 
 const contentsUrl = computed(() => resourceUrl('contents', { id: currentId.value, type: 'folder' }))
+
 const {
     data: contents,
     pending,
     error,
     refresh
 } = await useFetch<{ id: string; name: string; items: LibraryItem[] }>(contentsUrl)
+
 const selected = ref<LibraryItem | null>(null)
 const closeButton = ref<HTMLButtonElement | null>(null)
 const previewError = ref('')
@@ -149,6 +147,7 @@ watch(error, value => {
 
 const goBack = () => {
     const previous = history.value.pop()
+
     if (previous) currentId.value = previous
 }
 
@@ -156,6 +155,7 @@ const openItem = async (item: LibraryItem) => {
     if (item.type === 'folder') {
         history.value.push(currentId.value)
         currentId.value = item.id
+
         return
     }
 
@@ -168,13 +168,16 @@ const openItem = async (item: LibraryItem) => {
 
     if (item.type === 'note' || item.mime_type?.startsWith('text/')) {
         loadingText.value = true
+
         try {
             const text = await $fetch<string>(resourceUrl('preview', item), {
                 responseType: 'text'
             })
+
             if (selected.value?.id === item.id) textContent.value = text
         } catch (failure: any) {
             if (selected.value?.id === item.id) previewError.value = 'Preview could not be loaded.'
+
             if ([401, 403, 410].includes(failure.statusCode)) emit('accessError')
         } finally {
             if (selected.value?.id === item.id) loadingText.value = false

@@ -1,8 +1,8 @@
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -42,24 +42,25 @@ export default defineEventHandler(async ( event) => {
         })
 
         return {
-            favorites: favorites.map((item) => ({
+            favorites: favorites.map(item => ({
                 ...item,
                 files: item.files
                     ? {
-                            ...item.files,
-                            size: item.files.size.toString()
-                        }
+                          ...item.files,
+                          size: item.files.size.toString()
+                      }
                     : null,
                 notes: item.notes
                     ? {
-                            ...item.notes,
-                            size: item.notes.size.toString()
-                        }
+                          ...item.notes,
+                          size: item.notes.size.toString()
+                      }
                     : null
             }))
         }
     } catch (err: any) {
-        console.log(err.message);
+        console.log(err.message)
+
         if (err.statusCode) throw err
 
         throwError(500, 'An unknown error occurred while fetching favorites.')

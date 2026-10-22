@@ -18,13 +18,22 @@ export default defineEventHandler(async event => {
             throwError(401, 'You need to be logged in.')
         }
 
-        const isCreate = getHeader(event, 'content-type')?.split(';')[0]?.trim() === 'application/json'
-        enforceRateLimit(event, `folders-${isCreate ? 'create' : 'upload'}:${session.userId}`, 10, 60 * 1000)
+        const isCreate =
+            getHeader(event, 'content-type')?.split(';')[0]?.trim() === 'application/json'
+
+        enforceRateLimit(
+            event,
+            `folders-${isCreate ? 'create' : 'upload'}:${session.userId}`,
+            10,
+            60 * 1000
+        )
         const targetFolderId = await getUploadFolder(event, session.userId)
 
         if (isCreate) {
             const parsed = folderSchema.safeParse(await readBody(event))
-            if (!parsed.success) throwError(400, parsed.error.issues[0]?.message || 'Invalid folder name.')
+
+            if (!parsed.success)
+                throwError(400, parsed.error.issues[0]?.message || 'Invalid folder name.')
 
             const folder = await prisma.$transaction(async tx => {
                 const duplicate = await tx.folders.findFirst({
@@ -35,6 +44,7 @@ export default defineEventHandler(async event => {
                     },
                     select: { id: true }
                 })
+
                 if (duplicate) throwError(409, 'A folder with this name already exists.')
 
                 return tx.folders.create({
@@ -47,6 +57,7 @@ export default defineEventHandler(async event => {
             })
 
             setResponseStatus(event, 201)
+
             return { success: true, folder }
         }
 

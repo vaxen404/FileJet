@@ -14,6 +14,7 @@ export const getFileReturnPage = (value: unknown) => {
     if (typeof value !== 'string') return null
 
     const pathname = value.split(/[?#]/, 1)[0]?.replace(/\/$/, '') ?? ''
+
     const name =
         fileReturnPages[pathname] ||
         (/^\/folders\/[0-9a-f-]{36}$/i.test(pathname) ? 'Folder' : undefined)

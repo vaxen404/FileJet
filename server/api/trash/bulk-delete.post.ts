@@ -1,17 +1,16 @@
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
+import { unlink } from 'node:fs/promises'
+import path from 'node:path'
 
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { isUuid } from "~~/server/utils/validation"
-import { unlink } from "node:fs/promises"
-import path from "node:path"
-
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
         if (!session) {
-            throwError(401, "You need to be logged in.")
+            throwError(401, 'You need to be logged in.')
         }
 
         enforceRateLimit(event, `trash-bulk-delete:${session.userId}`, 10, 60 * 1000)
@@ -23,15 +22,15 @@ export default defineEventHandler(async ( event) => {
             !Array.isArray(body.itemIds) ||
             body.itemIds.length === 0 ||
             body.itemIds.length > 50 ||
-            !body.itemIds.every((id: unknown) => typeof id === "string" && isUuid(id))
+            !body.itemIds.every((id: unknown) => typeof id === 'string' && isUuid(id))
         ) {
-            throwError(400, "Invalid item IDs.")
+            throwError(400, 'Invalid item IDs.')
         }
 
         const itemIds = [...new Set<string>(body.itemIds)]
 
         const result = await prisma.$transaction(
-            async ( tx) => {
+            async tx => {
                 const items = await tx.trash.findMany({
                     where: {
                         id: { in: itemIds },
@@ -40,12 +39,12 @@ export default defineEventHandler(async ( event) => {
                 })
 
                 if (items.length !== itemIds.length) {
-                    throwError(404, "Some items were not found.")
+                    throwError(404, 'Some items were not found.')
                 }
 
                 for (const item of items) {
-                    if (!["file", "note", "folder"].includes(item.item_type)) {
-                        throwError(409, "Invalid trash item type.")
+                    if (!['file', 'note', 'folder'].includes(item.item_type)) {
+                        throwError(409, 'Invalid trash item type.')
                     }
                 }
 
@@ -56,7 +55,7 @@ export default defineEventHandler(async ( event) => {
                 })
 
                 const selectedFolderIds = new Set(
-                    items.filter(item => item.item_type === "folder").map(item => item.item_id)
+                    items.filter(item => item.item_type === 'folder').map(item => item.item_id)
                 )
 
                 let changed = true
@@ -66,7 +65,7 @@ export default defineEventHandler(async ( event) => {
 
                     for (const folder of allTrashItems) {
                         if (
-                            folder.item_type === "folder" &&
+                            folder.item_type === 'folder' &&
                             folder.parent_folder_id &&
                             selectedFolderIds.has(folder.parent_folder_id) &&
                             !selectedFolderIds.has(folder.item_id)
@@ -81,8 +80,8 @@ export default defineEventHandler(async ( event) => {
 
                 for (const item of allTrashItems) {
                     if (
-                        (item.item_type === "folder" && selectedFolderIds.has(item.item_id)) ||
-                        ((item.item_type === "file" || item.item_type === "note") &&
+                        (item.item_type === 'folder' && selectedFolderIds.has(item.item_id)) ||
+                        ((item.item_type === 'file' || item.item_type === 'note') &&
                             item.folder_id !== null &&
                             selectedFolderIds.has(item.folder_id))
                     ) {
@@ -96,31 +95,31 @@ export default defineEventHandler(async ( event) => {
                 const storageKeys = new Set<string>()
 
                 for (const item of selectedItems) {
-                    if (!["file", "note", "folder"].includes(item.item_type)) {
-                        throwError(409, "Invalid trash item type.")
+                    if (!['file', 'note', 'folder'].includes(item.item_type)) {
+                        throwError(409, 'Invalid trash item type.')
                     }
 
-                    if (item.item_type === "folder") continue
+                    if (item.item_type === 'folder') continue
 
                     if (item.size === null || item.size < 0n) {
-                        throwError(409, "Item size is invalid.")
+                        throwError(409, 'Item size is invalid.')
                     }
 
                     totalSize += item.size
 
-                    if (item.item_type === "file") {
+                    if (item.item_type === 'file') {
                         const key = item.storage_key
 
                         if (
                             !key ||
-                            key === "." ||
-                            key === ".." ||
+                            key === '.' ||
+                            key === '..' ||
                             path.basename(key) !== key ||
-                            key.includes("/") ||
-                            key.includes("\\") ||
-                            key.includes("\0")
+                            key.includes('/') ||
+                            key.includes('\\') ||
+                            key.includes('\0')
                         ) {
-                            throwError(409, "Invalid storage key.")
+                            throwError(409, 'Invalid storage key.')
                         }
 
                         storageKeys.add(key)
@@ -137,11 +136,11 @@ export default defineEventHandler(async ( event) => {
                 })
 
                 if (!user) {
-                    throwError(404, "User not found.")
+                    throwError(404, 'User not found.')
                 }
 
                 if (user.storage_used === null || user.storage_used < totalSize) {
-                    throwError(409, "Invalid storage usage.")
+                    throwError(409, 'Invalid storage usage.')
                 }
 
                 if (totalSize > 0n) {
@@ -160,7 +159,7 @@ export default defineEventHandler(async ( event) => {
                     })
 
                     if (updated.count !== 1) {
-                        throwError(409, "Storage usage has changed.")
+                        throwError(409, 'Storage usage has changed.')
                     }
                 }
 
@@ -174,7 +173,7 @@ export default defineEventHandler(async ( event) => {
                 })
 
                 if (deleted.count !== selectedItems.length) {
-                    throwError(409, "Trash contents have changed.")
+                    throwError(409, 'Trash contents have changed.')
                 }
 
                 return {
@@ -183,7 +182,7 @@ export default defineEventHandler(async ( event) => {
                 }
             },
             {
-                isolationLevel: "Serializable",
+                isolationLevel: 'Serializable',
                 maxWait: 5000,
                 timeout: 50000
             }
@@ -192,16 +191,14 @@ export default defineEventHandler(async ( event) => {
         let diskDeleted = true
 
         for (const storageKey of result.storageKeys) {
-            const filePath = path.join(process.cwd(),
-                "storage", session.userId, storageKey)
+            const filePath = path.join(process.cwd(), 'storage', session.userId, storageKey)
 
             try {
                 await unlink(filePath)
             } catch (err: any) {
-                if (err.code !== "ENOENT") {
+                if (err.code !== 'ENOENT') {
                     diskDeleted = false
-                    console.error(
-                        "Failed to delete file from disk:", filePath, err)
+                    console.error('Failed to delete file from disk:', filePath, err)
                 }
             }
         }
@@ -214,10 +211,8 @@ export default defineEventHandler(async ( event) => {
     } catch (err: any) {
         if (err.statusCode) throw err
 
-        console.error("Bulk trash deletion failed:", err)
+        console.error('Bulk trash deletion failed:', err)
 
-        throwError(500,
-            "An unexpected error occurred while permanently deleting items."
-        )
+        throwError(500, 'An unexpected error occurred while permanently deleting items.')
     }
 })

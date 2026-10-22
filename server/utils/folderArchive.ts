@@ -32,6 +32,7 @@ export async function createFolderArchive(userId: string, folderId: string) {
         }
 
         used.add(name)
+
         return name
     }
 

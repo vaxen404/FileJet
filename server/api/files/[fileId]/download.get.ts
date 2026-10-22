@@ -1,12 +1,12 @@
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
-import { resolve, sep } from "node:path";
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth";
-import { throwError } from "~~/server/utils/error";
-import { isUuid } from "~~/server/utils/validation";
+import { createReadStream } from 'node:fs'
+import { stat } from 'node:fs/promises'
+import { resolve, sep } from 'node:path'
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 

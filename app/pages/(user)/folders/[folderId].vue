@@ -6,7 +6,6 @@
         :summary="formatFileSize(folder.totalSize)"
         :item-id="folder.id"
         item-type="folder"
-        :return-name="returnPage.name"
         :metadata="metadataRows"
         :share="folder.share"
         :is-favorite="isFavorite"
@@ -20,7 +19,6 @@
     >
         <div
             class="folder-workspace"
-            :aria-busy="busy"
             @dragenter="dragenter"
             @dragover="dragover"
             @dragleave="dragleave"
@@ -65,10 +63,9 @@
             <div
                 v-if="isDragging && !busy && !pending"
                 class="folder-drop-overlay"
-                role="status"
             >
                 <div class="folder-drop-message">
-                    <Icon name="solar:cloud-upload-bold" aria-hidden="true" />
+                    <Icon name="solar:cloud-upload-bold" />
                     <strong>Drop files or folders to upload</strong>
                     <span>Upload to {{ folder.name }}</span>
                 </div>
@@ -83,7 +80,6 @@
         <template #edit>
             <form
                 class="folder-edit"
-                :aria-busy="isSaving"
                 @submit.prevent="saveRename"
             >
                 <label for="folder-name">Folder name</label>
@@ -98,14 +94,12 @@
                 <span
                     v-if="dirty"
                     class="muted"
-                    role="status"
                 >
                     Unsaved changes
                 </span>
                 <p
                     v-if="saveError"
                     class="error"
-                    role="alert"
                 >
                     {{ saveError }}
                 </p>
@@ -131,7 +125,6 @@
     <div
         v-else
         class="detail-error"
-        role="alert"
     >
         <h1>Unable to load folder</h1>
         <p>The folder could not be found or accessed.</p>
@@ -223,6 +216,7 @@ const previewUrl = (item: LibraryItem) => `/api/files/${encodeURIComponent(item.
 
 const refreshContents = async () => {
     await refresh()
+
     if (fetchError.value)
         throw new Error(
             'The folder was updated, but its contents could not be refreshed. Try again.'
@@ -284,6 +278,7 @@ const removeFolder = async () => {
     if (busy.value) return
 
     working.value = true
+
     try {
         await deleteFolder(id)
 
@@ -349,6 +344,7 @@ const itemAction = async (action: string, item: LibraryItem) => {
             await deleteItem(item)
 
             await refreshContents()
+
             return
         } else if (action === 'rename') {
             const extension =
@@ -371,6 +367,7 @@ const itemAction = async (action: string, item: LibraryItem) => {
 
             await refreshContents()
         }
+
         openToast(
             action === 'copy' ? 'Copied to clipboard.' : 'Action completed successfully.',
             'success'
@@ -394,14 +391,17 @@ const deleteSelected = async (items: LibraryItem[]) => {
         const fileIds = items.filter(item => item.type === 'file').map(item => item.id)
         const folderIds = items.filter(item => item.type === 'folder').map(item => item.id)
         const noteIds = items.filter(item => item.type === 'note').map(item => item.id)
+
         const results = await Promise.allSettled([
             fileActions.deleteFiles(fileIds, { notify: false }),
             folderActions.deleteFolders(folderIds, { notify: false }),
             deleteNotes(noteIds, { notify: false })
         ])
+
         const successful = results.flatMap(result =>
             result.status === 'fulfilled' ? [result.value] : []
         )
+
         const deletedIds = successful.flatMap(result => result.deletedIds)
         const trashIds = successful.flatMap(result => result.trashIds)
 
@@ -426,10 +426,13 @@ const handleDrop = async (event: DragEvent) => {
     if (busy.value || pending.value || !folder.value || !event.dataTransfer) return
 
     working.value = true
+
     try {
         const { files, folderFiles } = await getDroppedUploadItems(event.dataTransfer)
+
         if (!files.length && !folderFiles.length) {
             openToast('The dropped folders contain no files to upload.', 'error')
+
             return
         }
 
@@ -439,12 +442,14 @@ const handleDrop = async (event: DragEvent) => {
             const batch = files.slice(index, index + 6)
             uploads.push(() => fileActions.uploadFiles(batch))
         }
+
         if (folderFiles.length) {
             uploads.push(() => folderActions.uploadFolders(folderFiles, undefined, id))
         }
 
         let completed = 0
         const failures: string[] = []
+
         for (const upload of uploads) {
             try {
                 await upload()
@@ -456,21 +461,30 @@ const handleDrop = async (event: DragEvent) => {
 
         if (completed) {
             openToast(
-                failures.length ? 'Some items were uploaded successfully.' : 'Files and folders uploaded successfully.',
+                failures.length
+                    ? 'Some items were uploaded successfully.'
+                    : 'Files and folders uploaded successfully.',
                 'success'
             )
         }
+
         for (const message of new Set(failures)) openToast(message, 'error')
+
         if (completed) await refreshContents()
     } catch (error: any) {
-        openToast(error.data?.message || error.message || 'Could not read the dropped items.', 'error')
+        openToast(
+            error.data?.message || error.message || 'Could not read the dropped items.',
+            'error'
+        )
     } finally {
         working.value = false
     }
 }
 
 const { isDragging, dragenter, dragover, dragleave, drop } = useFileDrop(
-    event => { void handleDrop(event) },
+    event => {
+        void handleDrop(event)
+    },
     () => Boolean(folder.value)
 )
 
@@ -568,8 +582,16 @@ const metadataRows = computed(() => {
     font-size: 2.5rem;
 }
 
-.folder-drop-message strong { font-size: 0.9375rem; }
-.folder-drop-message span { max-width: 100%; color: #a3a3ab; font-size: 0.8125rem; overflow-wrap: anywhere; }
+.folder-drop-message strong {
+    font-size: 0.9375rem;
+}
+
+.folder-drop-message span {
+    max-width: 100%;
+    color: #a3a3ab;
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+}
 
 .parent-link {
     display: flex;

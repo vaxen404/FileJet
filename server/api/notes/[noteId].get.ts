@@ -5,12 +5,15 @@ import { shareState } from '../../utils/shares'
 
 export default defineEventHandler(async event => {
     const session = getAuthSession(event)
+
     if (!session) throw createError({ statusCode: 401, message: 'You need to be logged in.' })
 
     const id = getRouterParam(event, 'noteId')
+
     if (!id || !isUuid(id)) throw createError({ statusCode: 400, message: 'Invalid note ID.' })
 
     const note = await prisma.notes.findFirst({ where: { id, user_id: session.userId } })
+
     if (!note) throw createError({ statusCode: 404, message: 'Note not found.' })
 
     const [folder, share] = await Promise.all([
@@ -26,5 +29,6 @@ export default defineEventHandler(async event => {
     ])
 
     setHeader(event, 'Cache-Control', 'no-store')
+
     return { ...note, size: note.size.toString(), folder, share: shareState(event, share) }
 })

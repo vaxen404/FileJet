@@ -6,9 +6,14 @@ export const useItemActions = () => {
 
     const moveItems = async (items: SelectionItem[], destinationId: string | null) => {
         if (isMoving.value) return
+
         isMoving.value = true
+
         try {
-            return await $fetch('/api/items/move', { method: 'POST', body: { items, destinationId } })
+            return await $fetch('/api/items/move', {
+                method: 'POST',
+                body: { items, destinationId }
+            })
         } finally {
             isMoving.value = false
         }
@@ -16,10 +21,18 @@ export const useItemActions = () => {
 
     const downloadItems = async (items: SelectionItem[]) => {
         if (isDownloading.value || !items.length) return
+
         isDownloading.value = true
+
         try {
-            const data = await $fetch<Blob>('/api/items/download', { method: 'POST', body: { items }, responseType: 'blob' })
+            const data = await $fetch<Blob>('/api/items/download', {
+                method: 'POST',
+                body: { items },
+                responseType: 'blob'
+            })
+
             const url = URL.createObjectURL(data)
+
             try {
                 const link = document.createElement('a')
                 link.href = url
@@ -33,12 +46,18 @@ export const useItemActions = () => {
         } catch (error: any) {
             if (error.data instanceof Blob) {
                 let message = 'Could not download the selected items.'
+
                 try {
                     const body = JSON.parse(await error.data.text())
+
                     if (typeof body.message === 'string') message = body.message
-                } catch { /* Keep the download error readable when the response is not JSON. */ }
+                } catch {
+                    /* Keep the download error readable when the response is not JSON. */
+                }
+
                 throw new Error(message)
             }
+
             throw error
         } finally {
             isDownloading.value = false

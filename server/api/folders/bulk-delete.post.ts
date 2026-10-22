@@ -206,6 +206,7 @@ export default defineEventHandler(async event => {
             if (deleted.count !== rootIds.length) {
                 throwError(409, 'folders changed during deletion.')
             }
+
             const trashed = await tx.trash.findMany({
                 where: {
                     user_id: session.userId,

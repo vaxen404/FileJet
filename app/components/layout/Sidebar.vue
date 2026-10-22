@@ -4,7 +4,7 @@
             <img
                 src="/images/filejetlogo.png"
                 alt="FileJet"
-            >
+            />
         </div>
 
         <div class="menu-section">
@@ -155,7 +155,7 @@
 
     <ConfirmModal
         :show="showLogoutModal"
-        title='Log out?'
+        title="Log out?"
         message="Are you sure you want to log out of your account?"
         confirm-text="Logout"
         cancel-text="Cancel"

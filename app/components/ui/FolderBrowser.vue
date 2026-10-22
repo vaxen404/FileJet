@@ -17,15 +17,9 @@
         <DataView
             :view-mode="view"
             :is-loading="pending"
-            :aria-busy="busy"
         >
             <template #loading>
-                <div
-                    class="contents-empty"
-                    role="status"
-                >
-                    Loading folder contents...
-                </div>
+                <div class="contents-empty">Loading folder contents...</div>
             </template>
             <template
                 v-if="!pending && !filtered.length"
@@ -51,7 +45,6 @@
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
                                         :disabled="busy"
-                                        aria-label="Select all items on this page"
                                         @change="toggleSelectAll"
                                     />
                                 </th>
@@ -80,7 +73,6 @@
                                         class="item-checkbox"
                                         :value="item.id"
                                         :disabled="busy"
-                                        :aria-label="'Select ' + item.name"
                                     />
                                 </td>
                                 <td>
@@ -168,7 +160,6 @@
                                     class="item-checkbox"
                                     :value="item.id"
                                     :disabled="busy"
-                                    :aria-label="'Select ' + item.name"
                                 />
                             </label>
                             <ItemMenu
@@ -210,7 +201,12 @@
             :busy="busy || pending"
             :current-folder-id="currentFolderId"
             @clear="selected = []"
-            @delete="$emit('deleteSelected', items.filter(item => selected.includes(item.id)))"
+            @delete="
+                $emit(
+                    'deleteSelected',
+                    items.filter(item => selected.includes(item.id))
+                )
+            "
             @moved="handleSelectionMoved"
         />
     </div>
@@ -245,26 +241,37 @@ const emit = defineEmits<{
 const search = ref('')
 const view = ref<'grid' | 'list'>('grid')
 const sort = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
+
 const filtered = computed(() =>
     props.items.filter(item => item.name.toLowerCase().includes(search.value.trim().toLowerCase()))
 )
+
 const { sortedItems } = useSort(
     filtered,
     sort,
     item => item.name,
     item => item.created_at
 )
+
 const perPage = computed(() => (view.value === 'list' ? 12 : 24))
 const { currentPage, totalPages, paginatedItems } = usePagination(sortedItems, perPage)
 const { selectedItems: selected, allSelected, toggleSelectAll } = useSelection(paginatedItems)
-const selectionItems = computed(() => props.items.filter(item => selected.value.includes(item.id)).map(item => ({ id: item.id, type: item.type })))
+
+const selectionItems = computed(() =>
+    props.items
+        .filter(item => selected.value.includes(item.id))
+        .map(item => ({ id: item.id, type: item.type }))
+)
+
 const handleSelectionMoved = () => {
     selected.value = []
     emit('moved')
 }
+
 const partiallySelected = computed(
     () => !allSelected.value && paginatedItems.value.some(item => selected.value.includes(item.id))
 )
+
 const menus = new Map<string, InstanceType<typeof ItemMenu>>()
 
 const setMenu = (id: string, menu: Element | ComponentPublicInstance | null) => {

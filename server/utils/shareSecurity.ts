@@ -15,8 +15,10 @@ const cookieName = (token: string) =>
 
 const secret = () => {
     const value = process.env.AUTH_SECRET
+
     if (!value || value.length < 32)
         throw createError({ statusCode: 500, message: 'Share authentication is not configured.' })
+
     return value
 }
 
@@ -29,27 +31,37 @@ export function shareExpired(share: Pick<ShareAccess, 'expires_at'>, now = Date.
 
 export function createShareGrant(share: ShareAccess, now = Date.now()) {
     const expiresAt = Math.min(now + GRANT_TTL, share.expires_at?.getTime() ?? Infinity)
+
     const payload = Buffer.from(
         JSON.stringify({ token: share.token, version: share.access_version, expiresAt })
     ).toString('base64url')
+
     return `${payload}.${sign(payload)}`
 }
 
 export function validShareGrant(grant: string | undefined, share: ShareAccess, now = Date.now()) {
     if (!grant || grant.length > 2048 || shareExpired(share, now)) return false
+
     const parts = grant.split('.')
+
     if (parts.length !== 2) return false
+
     const [payload, signature] = parts as [string, string]
     const expected = Buffer.from(sign(payload))
     const actual = Buffer.from(signature)
+
     if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return false
+
     try {
         const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'))
-        return data.token === share.token &&
+
+        return (
+            data.token === share.token &&
             data.version === share.access_version &&
             Number.isFinite(data.expiresAt) &&
             data.expiresAt > now &&
             data.expiresAt <= now + GRANT_TTL
+        )
     } catch {
         return false
     }
@@ -57,12 +69,14 @@ export function validShareGrant(grant: string | undefined, share: ShareAccess, n
 
 export function assertShareNotExpired(event: H3Event, share: ShareAccess) {
     setHeader(event, 'Cache-Control', 'no-store')
+
     if (shareExpired(share))
         throw createError({ statusCode: 410, message: 'This share link has expired.' })
 }
 
 export function assertShareAccess(event: H3Event, share: ShareAccess) {
     assertShareNotExpired(event, share)
+
     if (share.password_hash && !validShareGrant(getCookie(event, cookieName(share.token)), share)) {
         throw createError({
             statusCode: 401,

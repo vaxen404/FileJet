@@ -6,13 +6,11 @@
         >
             <form
                 class="shared-error-card share-unlock"
-                :aria-busy="unlocking"
                 @submit.prevent="unlockShare"
             >
                 <Icon
                     name="solar:lock-keyhole-linear"
                     size="2.75rem"
-                    aria-hidden="true"
                 />
                 <h1>Password Protected</h1>
                 <p
@@ -42,17 +40,12 @@
                         required
                         maxlength="128"
                         :disabled="unlocking"
-                        :aria-invalid="Boolean(unlockError)"
-                        :aria-describedby="unlockError ? 'unlock-error' : undefined"
                         @input="unlockError = ''"
                     />
                     <button
                         type="button"
                         class="password-visibility"
-                        :aria-label="showPassword ? 'Hide password' : 'Show password'"
                         :title="showPassword ? 'Hide password' : 'Show password'"
-                        :aria-pressed="showPassword"
-                        aria-controls="public-share-password"
                         :disabled="unlocking"
                         @click="showPassword = !showPassword"
                     >
@@ -66,7 +59,6 @@
                     v-if="unlockError"
                     id="unlock-error"
                     class="unlock-error"
-                    role="alert"
                 >
                     {{ unlockError }}
                 </p>
@@ -74,7 +66,6 @@
                     type="submit"
                     class="download-btn"
                     :disabled="unlocking || !sharePassword"
-                    :aria-busy="unlocking"
                 >
                     {{
                         unlocking
@@ -91,13 +82,9 @@
         <div
             v-else-if="error"
             class="shared-error"
-            role="alert"
         >
             <div class="shared-error-card">
-                <div
-                    class="shared-error-icon"
-                    aria-hidden="true"
-                >
+                <div class="shared-error-icon">
                     <Icon
                         :name="
                             error.statusCode === 404
@@ -157,9 +144,7 @@
                     <button
                         type="button"
                         class="image-fullscreen-btn"
-                        :aria-label="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
                         :title="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
-                        :aria-pressed="isImageFullscreen"
                         @click="toggleImageFullscreen"
                     >
                         <Icon
@@ -209,10 +194,7 @@
                     v-else
                     class="download-message"
                 >
-                    <div
-                        class="download-icon"
-                        aria-hidden="true"
-                    >
+                    <div class="download-icon">
                         <Icon
                             name="solar:file-bold"
                             size="3rem"
@@ -221,15 +203,8 @@
 
                     <h2 :title="itemName">{{ itemName }}</h2>
 
-                    <div
-                        class="download-status"
-                        role="status"
-                        aria-live="polite"
-                    >
-                        <span
-                            class="status-dot"
-                            aria-hidden="true"
-                        />
+                    <div class="download-status">
+                        <span class="status-dot" />
                         {{
                             downloadedToken === token ? 'Download started' : 'Starting download...'
                         }}
@@ -244,7 +219,6 @@
                         type="button"
                         class="download-btn"
                         :disabled="isDownloading"
-                        :aria-busy="isDownloading"
                         @click="manualDownload"
                     >
                         <Icon
@@ -332,8 +306,10 @@ const unlockError = ref('')
 
 const unlockShare = async () => {
     if (unlocking.value || !sharePassword.value) return
+
     unlocking.value = true
     unlockError.value = ''
+
     try {
         await $fetch(`/api/shared/${encodeURIComponent(token.value)}/unlock`, {
             method: 'POST',
@@ -342,6 +318,7 @@ const unlockShare = async () => {
         sharePassword.value = ''
         showPassword.value = false
         await refresh()
+
         if (error.value?.statusCode === 401)
             unlockError.value = 'Access could not be verified. Please try again.'
     } catch (err: any) {
@@ -352,6 +329,7 @@ const unlockShare = async () => {
                 : status === 429
                   ? 'Too many attempts. Please try again later.'
                   : err?.data?.message || 'Unable to unlock this file. Please try again.'
+
         if (status === 410 || status === 404 || status === 409) await refresh()
     } finally {
         unlocking.value = false
@@ -372,6 +350,7 @@ const isImage = computed(() => {
 
 const imageStage = ref<HTMLElement | null>(null)
 const isImageExpanded = ref(false)
+
 const {
     isSupported: supportsFullscreen,
     isFullscreen,
@@ -383,11 +362,13 @@ const isImageFullscreen = computed(() => isFullscreen.value || isImageExpanded.v
 const toggleImageFullscreen = async () => {
     if (isImageExpanded.value) {
         isImageExpanded.value = false
+
         return
     }
 
     if (!supportsFullscreen.value) {
         isImageExpanded.value = true
+
         return
     }
 
@@ -452,8 +433,11 @@ const downloadedToken = ref<string | null>(null)
 
 const autoDownload = () => {
     if (!import.meta.client) return
+
     if (!isDownloadOnly.value) return
+
     if (isDownloading.value) return
+
     if (downloadedToken.value === token.value) return
 
     isDownloading.value = true

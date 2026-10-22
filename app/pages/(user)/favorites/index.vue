@@ -13,58 +13,25 @@
             </div>
 
             <div class="favorites-subtoolbar">
-                <div
-                    class="favorites-filters"
-                    aria-label="Favorite categories"
-                >
-                    <button
-                        type="button"
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'All' }"
-                        :aria-pressed="activeCategory === 'All'"
-                        @click="activeCategory = 'All'"
-                    >
-                        All
-                    </button>
-
-                    <button
-                        type="button"
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Files' }"
-                        :aria-pressed="activeCategory === 'Files'"
-                        @click="activeCategory = 'Files'"
-                    >
-                        Files
-                    </button>
-
-                    <button
-                        type="button"
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Folders' }"
-                        :aria-pressed="activeCategory === 'Folders'"
-                        @click="activeCategory = 'Folders'"
-                    >
-                        Folders
-                    </button>
-
-                    <button
-                        type="button"
-                        class="filter-btn"
-                        :class="{ active: activeCategory === 'Notes' }"
-                        :aria-pressed="activeCategory === 'Notes'"
-                        @click="activeCategory = 'Notes'"
-                    >
-                        Notes
-                    </button>
-                </div>
+                <ItemFilters
+                    v-model="activeCategory"
+                    :options="filterOptions"
+                />
 
                 <SortDropdown v-model="sortMode" />
             </div>
         </div>
 
-        <DataView :view-mode="viewMode">
+        <DataView
+            :view-mode="viewMode"
+            :is-loading="isInitialLoading"
+        >
+            <template #loading>
+                <div class="loading-state">Loading favorites...</div>
+            </template>
+
             <template
-                v-if="filteredFavorites.length === 0"
+                v-if="!isInitialLoading && filteredFavorites.length === 0"
                 #empty
             >
                 <div class="empty-state">
@@ -72,12 +39,8 @@
                         name="solar:star-bold"
                         class="empty-state-icon"
                     />
-
-                    <strong>No favorites yet</strong>
-
-                    <span class="empty-state-description">
-                        Your favorite files, folders and notes will appear here.
-                    </span>
+                    <strong>{{ emptyTitle }}</strong>
+                    <span class="empty-state-description">{{ emptyDescription }}</span>
                 </div>
             </template>
 
@@ -90,12 +53,12 @@
                                     <input
                                         type="checkbox"
                                         class="favorite-checkbox"
-                                        aria-label="Select all favorites on this page"
                                         :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="busy"
                                         @change="toggleSelectAll"
                                     />
                                 </th>
-
                                 <th scope="col">
                                     <div class="name-header">
                                         Name
@@ -105,7 +68,6 @@
                                         />
                                     </div>
                                 </th>
-
                                 <th scope="col">Type</th>
                                 <th scope="col">Size</th>
                                 <th scope="col">Added</th>
@@ -119,52 +81,51 @@
                                 :key="item.id"
                                 :class="{ selected: selectedFavorites.includes(item.id) }"
                                 @dblclick="openItem(item)"
+                                @contextmenu.prevent.stop="openContextMenu($event, item.id)"
                             >
-                                <td>
+                                <td @dblclick.stop>
                                     <input
                                         v-model="selectedFavorites"
                                         type="checkbox"
                                         class="favorite-checkbox"
                                         :value="item.id"
-                                        :aria-label="'Select ' + getItemName(item)"
+                                        :disabled="busy"
                                     />
                                 </td>
-
                                 <td>
-                                    <input
-                                        type="text"
-                                        class="name-input"
-                                        :data-file-id="item.id"
-                                        :class="{ active: editingItemId === item.id }"
-                                        :value="
-                                            editingItemId === item.id
-                                                ? editingItemName
-                                                : getItemName(item)
-                                        "
-                                        :disabled="editingItemId !== item.id"
-                                        @input="
-                                            editingItemName = ($event.target as HTMLInputElement)
-                                                .value
-                                        "
-                                        @keyup.enter="saveRename(item)"
-                                        @blur="editingItemId === item.id && saveRename(item)"
-                                    />
+                                    <div class="favorite-name">
+                                        <div
+                                            class="favorite-icon"
+                                            :class="getItemType(item)"
+                                        >
+                                            <Icon :name="itemIcon(item)" />
+                                        </div>
+                                        <div class="favorite-info">
+                                            <strong :title="getItemName(item)">{{
+                                                getItemName(item)
+                                            }}</strong>
+                                            <span
+                                                >{{ getItemSize(item) }} ·
+                                                {{ formatFileTime(item.created_at) }}</span
+                                            >
+                                        </div>
+                                    </div>
                                 </td>
-
                                 <td class="favorite-type">{{ getItemType(item) }}</td>
                                 <td>{{ getItemSize(item) }}</td>
-                                <td>{{ formatTime(item.created_at) }}</td>
-
-                                <td>
+                                <td>{{ formatFileTime(item.created_at) }}</td>
+                                <td
+                                    @click.stop
+                                    @dblclick.stop
+                                >
                                     <ItemMenu
+                                        :ref="menu => setMenuRef(item.id, menu)"
                                         :type="getItemType(item)"
                                         :actions="[...getItemActions(item)]"
                                         :is-favorite="true"
-                                        @click.stop
-                                        @dblclick.stop
                                         @open="openItem(item)"
                                         @edit="openItem(item)"
-                                        @rename="startRename(item)"
+                                        @rename="renameItem(item)"
                                         @favorite="handleRemove(item)"
                                         @delete="handleDelete(item)"
                                         @download="handleDownload(item)"
@@ -177,52 +138,72 @@
             </template>
 
             <template #grid>
-                <div
-                    v-for="item in paginatedItems"
-                    :key="item.id"
-                    class="favorite-card"
-                    @click="openItem(item)"
-                >
-                    <div class="favorite-card-top">
-                        <div class="favorite-card-icon">
-                            <Icon :name="getItemIcon(item)" />
-                        </div>
+                <ItemGrid>
+                    <ItemGridCard
+                        v-for="item in paginatedItems"
+                        :key="item.id"
+                        :title="getItemName(item)"
+                        :icon="itemIcon(item)"
+                        :selected="selectedFavorites.includes(item.id)"
+                        @click="openItem(item)"
+                        @contextmenu.prevent.stop="openContextMenu($event, item.id)"
+                    >
+                        <template
+                            v-if="hasMediaPreview(item)"
+                            #preview
+                        >
+                            <img
+                                v-if="item.files?.mime_type?.startsWith('image/')"
+                                :src="`/api/files/${item.file_id}/preview`"
+                                :alt="getItemName(item)"
+                                loading="lazy"
+                                class="file-preview-image"
+                            />
+                            <template v-else>
+                                <div class="video-play-icon"><Icon name="solar:play-bold" /></div>
+                                <video
+                                    :src="`/api/files/${item.file_id}/preview`"
+                                    class="file-preview-image"
+                                    preload="metadata"
+                                    muted
+                                    playsinline
+                                />
+                            </template>
+                        </template>
 
-                        <ItemMenu
-                            :type="getItemType(item)"
-                            :actions="[...getItemActions(item)]"
-                            :is-favorite="true"
-                            @click.stop
-                            @dblclick.stop
-                            @open="openItem(item)"
-                            @edit="openItem(item)"
-                            @rename="startRename(item)"
-                            @favorite="handleRemove(item)"
-                            @delete="handleDelete(item)"
-                            @download="handleDownload(item)"
-                        />
-                    </div>
+                        <template #actions>
+                            <label class="file-select">
+                                <input
+                                    v-model="selectedFavorites"
+                                    type="checkbox"
+                                    class="favorite-checkbox"
+                                    :value="item.id"
+                                    :disabled="busy"
+                                />
+                            </label>
+                            <ItemMenu
+                                :ref="menu => setMenuRef(item.id, menu)"
+                                :type="getItemType(item)"
+                                :actions="[...getItemActions(item)]"
+                                :is-favorite="true"
+                                @open="openItem(item)"
+                                @edit="openItem(item)"
+                                @rename="renameItem(item)"
+                                @favorite="handleRemove(item)"
+                                @delete="handleDelete(item)"
+                                @download="handleDownload(item)"
+                            />
+                        </template>
 
-                    <div class="favorite-card-info">
-                        <input
-                            type="text"
-                            class="name-input"
-                            :data-file-id="item.id"
-                            :class="{ active: editingItemId === item.id }"
-                            :value="editingItemId === item.id ? editingItemName : getItemName(item)"
-                            :disabled="editingItemId !== item.id"
-                            @input="editingItemName = ($event.target as HTMLInputElement).value"
-                            @keyup.enter="saveRename(item)"
-                            @blur="editingItemId === item.id && saveRename(item)"
-                        />
-                        <span class="favorite-type">{{ getItemType(item) }}</span>
-                    </div>
-
-                    <div class="favorite-card-bottom">
-                        <span>{{ getItemSize(item) }}</span>
-                        <span>{{ formatTime(item.created_at) }}</span>
-                    </div>
-                </div>
+                        <template #metadata>
+                            <span class="favorite-type">{{ getItemType(item) }}</span>
+                            ·
+                            <span>{{ getItemSize(item) }}</span>
+                            ·
+                            <span>{{ formatFileTime(item.created_at) }}</span>
+                        </template>
+                    </ItemGridCard>
+                </ItemGrid>
             </template>
         </DataView>
 
@@ -231,37 +212,38 @@
             :total-pages="totalPages"
             :view-mode="viewMode"
         />
+
+        <SelectionToolbar
+            :items="selectionItems"
+            :busy="busy"
+            @clear="selectedFavorites = []"
+            @delete="handleDeleteSelected"
+            @moved="handleSelectionMoved"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
+import type ItemMenu from '~/components/ui/ItemMenu.vue'
+import type { TrashMoveResult } from '~~/shared/types/trash'
+import { getItemIcon, getItemName, getItemType, getItemId, getItemActions } from '~/utils/favorite'
+import { getFileIcon, formatFileSize, formatFileTime } from '~/utils/file'
+
 definePageMeta({
     middleware: 'auth',
     layout: 'user'
 })
 
-import {
-    getItemIcon,
-    getItemName,
-    getItemType,
-    getItemId,
-    getItemActions,
-    formatTime
-} from '~/utils/favorite'
+const { openToast } = useToast()
+const { removeFavorite } = useFavoriteActions()
+const { notifyTrashed } = useTrashActions()
+const fileActions = useFileActions()
+const folderActions = useFolderActions()
+const noteActions = useNoteActions()
+const { favorites, pending, error, fetchAll } = useUser()
 
-const { toastMessage, toastType, showToast, openToast } = useToast()
-
-const { addFavorite, removeFavorite } = useFavoriteActions()
-
-const { renameFile, downloadFile, deleteFile, isDeleting: isDeletingFile } = useFileActions()
-const { deleteFolder, isDeleting: isDeletingFolder } = useFolderActions()
-const { deleteNote, isDeleting: isDeletingNote } = useNoteActions()
-
-const isDeleting = computed(
-    () => isDeletingFile.value || isDeletingFolder.value || isDeletingNote.value
-)
-
-const { favorites, error, fetchAll } = useUser()
+type FavoriteItem = (typeof favorites.value)[number]
 
 await fetchAll()
 
@@ -270,25 +252,52 @@ if (error.value) {
 }
 
 const searchQuery = ref('')
-const viewMode = ref<'list' | 'grid'>('list')
+const viewMode = ref<'list' | 'grid'>('grid')
 const activeCategory = ref('All')
+const filterOptions = ['All', 'Files', 'Folders', 'Notes'] as const
+const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
+const isRemoving = ref(false)
+const isBulkDeleting = ref(false)
+
+const busy = computed(() => {
+    return (
+        pending.value ||
+        isRemoving.value ||
+        isBulkDeleting.value ||
+        fileActions.isLoading.value ||
+        folderActions.isLoading.value ||
+        noteActions.isLoading.value
+    )
+})
+
+const isInitialLoading = computed(() => pending.value && favorites.value.length === 0)
 
 const filteredFavorites = computed(() => {
-    return favorites.value.filter(item => {
-        const itemType = getItemType(item)
-        const matchesCategory =
-            activeCategory.value === 'All' ||
-            activeCategory.value === `${itemType.charAt(0).toUpperCase()}${itemType.slice(1)}s`
+    const query = searchQuery.value.trim().toLowerCase()
+    const categories = { file: 'Files', folder: 'Folders', note: 'Notes' }
 
-        const matchesSearch = getItemName(item)
-            .toLowerCase()
-            .includes(searchQuery.value.toLowerCase())
+    return favorites.value.filter(item => {
+        const category = categories[getItemType(item)]
+        const matchesCategory = activeCategory.value === 'All' || activeCategory.value === category
+        const matchesSearch = getItemName(item).toLowerCase().includes(query)
 
         return matchesCategory && matchesSearch
     })
 })
 
-const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
+const emptyTitle = computed(() => {
+    if (error.value) return 'Unable to load favorites'
+    if (favorites.value.length) return 'No matching favorites'
+
+    return 'No favorites yet'
+})
+
+const emptyDescription = computed(() => {
+    if (error.value) return error.value
+    if (favorites.value.length) return 'Try a different search or filter.'
+
+    return 'Your favorite files, folders and notes will appear here.'
+})
 
 const { sortedItems: sortedFavorites } = useSort(
     filteredFavorites,
@@ -297,149 +306,193 @@ const { sortedItems: sortedFavorites } = useSort(
     item => item.created_at
 )
 
-const handleDelete = async (item: any) => {
-    if (isDeleting.value) return
-
-    try {
-        const type = getItemType(item)
-        const itemId = getItemId(item)
-
-        if (type === 'file') await deleteFile(itemId)
-        else if (type === 'folder') await deleteFolder(itemId)
-        else await deleteNote(itemId)
-    } catch (err: any) {
-        openToast(err.data?.message || err.message || 'Could not move item to Trash.', 'error')
-    }
-}
-
-const handleRemove = async (item: any) => {
-    try {
-        const type = getItemType(item)
-        const itemId = getItemId(item)
-
-        await removeFavorite(itemId, type)
-        await fetchAll()
-
-        openToast('Removed from favorites.', 'success')
-    } catch (err: any) {
-        openToast(err.data?.message || err.message || 'Could not remove from favorites.', 'error')
-    }
-}
-
-const openItem = (item: any) => {
-    const type = getItemType(item)
-    return navigateTo({
-        path:
-            '/' +
-            (type === 'file' ? 'files' : type === 'folder' ? 'folders' : 'notes') +
-            '/' +
-            getItemId(item),
-        query: { from: '/favorites' }
-    })
-}
-
-const editingItemId = ref<string | null>(null)
-const editingItemName = ref('')
-
-const startRename = async (item: any) => {
-    editingItemId.value = item.id
-    editingItemName.value = getItemName(item)
-
-    await nextTick()
-
-    const input = document.querySelector(`[data-file-id="${item.id}"]`) as HTMLInputElement | null
-
-    input?.focus()
-    input?.select()
-}
-
-const renameItem = async (
-    itemId: string,
-    itemType: 'file' | 'folder' | 'note',
-    newName: string
-) => {
-    if (itemType === 'file') {
-        await renameFile(itemId, newName)
-        return
-    }
-
-    // if (itemType === 'folder') {
-    //     await renameFolder(itemId, newName)
-    //     return
-    // }
-
-    // await renameNote(itemId, newName)
-}
-
-const saveRename = async (item: any) => {
-    const newName = editingItemName.value.trim()
-
-    if (!newName || newName === getItemName(item)) {
-        editingItemId.value = null
-        return
-    }
-
-    try {
-        const type = getItemType(item)
-        const itemId = getItemId(item)
-
-        await renameItem(itemId, type, newName)
-        await fetchAll()
-
-        editingItemId.value = null
-
-        openToast('Item renamed successfully', 'success')
-    } catch (err: any) {
-        openToast(err.data?.message || err.message || 'Item could not be renamed.', 'error')
-    }
-}
-
-const handleDownload = async (item: any) => {
-    const type = getItemType(item)
-    const itemId = getItemId(item)
-
-    if (type === 'file') {
-        try {
-            await downloadFile(itemId)
-        } catch (err: any) {
-            openToast(err.data?.message || err.message || 'File could not be downloaded.', 'error')
-        }
-        return
-    }
-
-    // if (type === 'note') {
-    //     downloadNote(itemId)
-    //     return
-    // }
-
-    // if (type === 'folder') {
-    //     downloadFolder(itemId)
-    //     return
-    // }
-}
-
-const itemsPerPage = computed(() => {
-    return viewMode.value === 'list' ? 12 : 20
-})
-
+const itemsPerPage = computed(() => (viewMode.value === 'list' ? 12 : 24))
 const { currentPage, totalPages, paginatedItems } = usePagination(sortedFavorites, itemsPerPage)
-
 const {
     selectedItems: selectedFavorites,
     allSelected,
     toggleSelectAll
 } = useSelection(paginatedItems)
 
-type FavoriteResource = (typeof favorites.value)[number] & {
-    files?: { size?: number | string | null } | null
-    notes?: { size?: number | string | null } | null
+const partiallySelected = computed(() => {
+    return (
+        !allSelected.value &&
+        paginatedItems.value.some(item => selectedFavorites.value.includes(item.id))
+    )
+})
+
+const selectionItems = computed(() => {
+    return favorites.value
+        .filter(item => selectedFavorites.value.includes(item.id))
+        .map(item => ({ id: getItemId(item), type: getItemType(item) }))
+})
+
+const menus = new Map<string, InstanceType<typeof ItemMenu>>()
+
+const setMenuRef = (id: string, menu: Element | ComponentPublicInstance | null) => {
+    if (menu) {
+        menus.set(id, menu as InstanceType<typeof ItemMenu>)
+    } else {
+        menus.delete(id)
+    }
 }
 
-const getItemSize = (item: FavoriteResource) => {
-    const size = item.file_id ? item.files?.size : item.note_id ? item.notes?.size : null
+const openContextMenu = (event: MouseEvent, id: string) => {
+    if (busy.value) return
+
+    menus.get(id)?.openAt(event.clientX, event.clientY)
+}
+
+const itemIcon = (item: FavoriteItem) => {
+    if (item.files) {
+        return getFileIcon(item.files.mime_type, item.files.original_name)
+    }
+
+    return getItemIcon(item)
+}
+
+const hasMediaPreview = (item: FavoriteItem) => {
+    const mimeType = item.files?.mime_type
+
+    return Boolean(mimeType?.startsWith('image/') || mimeType?.startsWith('video/'))
+}
+
+const getItemSize = (item: FavoriteItem) => {
+    const size = item.files?.size ?? item.notes?.size
 
     return size == null ? '-' : formatFileSize(size)
 }
+
+const itemPath = (item: FavoriteItem) => {
+    const routes = { file: 'files', folder: 'folders', note: 'notes' }
+
+    return `/${routes[getItemType(item)]}/${getItemId(item)}`
+}
+
+const openItem = (item: FavoriteItem) => {
+    return navigateTo({ path: itemPath(item), query: { from: '/favorites' } })
+}
+
+const renameItem = (item: FavoriteItem) => {
+    return navigateTo({ path: itemPath(item), query: { from: '/favorites', tab: 'edit' } })
+}
+
+const handleRemove = async (item: FavoriteItem) => {
+    if (busy.value) return
+
+    isRemoving.value = true
+
+    try {
+        await removeFavorite(getItemId(item), getItemType(item))
+        await fetchAll()
+
+        if (error.value) throw new Error(error.value)
+
+        openToast('Removed from favorites.', 'success')
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not remove from favorites.', 'error')
+    } finally {
+        isRemoving.value = false
+    }
+}
+
+const handleDownload = async (item: FavoriteItem) => {
+    try {
+        const type = getItemType(item)
+        const id = getItemId(item)
+
+        if (type === 'file') {
+            await fileActions.downloadFile(id)
+        } else if (type === 'folder') {
+            folderActions.downloadFolder(id)
+        } else {
+            const link = document.createElement('a')
+            link.href = `/api/notes/${encodeURIComponent(id)}/download`
+            link.download = ''
+
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+        }
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Item could not be downloaded.', 'error')
+    }
+}
+
+const handleDelete = async (item: FavoriteItem) => {
+    if (busy.value) return
+
+    try {
+        const type = getItemType(item)
+        const id = getItemId(item)
+
+        if (type === 'file') {
+            await fileActions.deleteFile(id)
+        } else if (type === 'folder') {
+            await folderActions.deleteFolder(id)
+        } else {
+            await noteActions.deleteNote(id)
+        }
+    } catch (err: any) {
+        openToast(err.data?.message || err.message || 'Could not move item to Trash.', 'error')
+    }
+}
+
+const handleDeleteSelected = async () => {
+    if (busy.value || !selectionItems.value.length) return
+
+    isBulkDeleting.value = true
+
+    const selected = [...selectionItems.value]
+    const combined: TrashMoveResult = { success: true, deletedIds: [], failedIds: [], trashIds: [] }
+    const deleteActions = {
+        file: fileActions.deleteFiles,
+        note: noteActions.deleteNotes,
+        folder: folderActions.deleteFolders
+    }
+
+    try {
+        // Delete selected children before folders so overlapping selections remain valid.
+        for (const type of ['file', 'note', 'folder'] as const) {
+            const ids = selected.filter(item => item.type === type).map(item => item.id)
+
+            if (!ids.length) continue
+
+            try {
+                const result = await deleteActions[type](ids, { notify: false })
+                combined.deletedIds.push(...result.deletedIds)
+                combined.failedIds.push(...result.failedIds)
+                combined.trashIds.push(...result.trashIds)
+            } catch {
+                combined.failedIds.push(...ids)
+            }
+        }
+
+        notifyTrashed(combined, undefined, true)
+
+        if (combined.failedIds.length) {
+            openToast(`${combined.failedIds.length} items could not be moved to Trash.`, 'error')
+        }
+    } finally {
+        isBulkDeleting.value = false
+    }
+}
+
+const handleSelectionMoved = async () => {
+    selectedFavorites.value = []
+    await fetchAll()
+
+    if (error.value) openToast(error.value, 'error')
+}
+
+watch(favorites, items => {
+    const availableIds = new Set(items.map(item => item.id))
+    selectedFavorites.value = selectedFavorites.value.filter(id => availableIds.has(id))
+})
+
+watch(totalPages, total => {
+    currentPage.value = Math.min(currentPage.value, Math.max(1, total))
+})
 
 watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     currentPage.value = 1
@@ -449,7 +502,7 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 <style scoped>
 .favorites-page {
     width: 100%;
-    height: 100%;
+    flex: 1;
     min-height: 0;
 
     display: flex;
@@ -475,84 +528,26 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
 
 .favorites-toolbar {
     display: flex;
-    flex-direction: row;
-
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
     flex-wrap: wrap;
+    gap: 0.5rem;
     min-width: 0;
+}
+
+.favorites-toolbar :deep(.search-box) {
+    flex: 1 1 18rem;
+    min-width: 0;
+    max-width: 32rem;
+    box-sizing: border-box;
 }
 
 .toolbar-actions {
     display: flex;
-    flex-direction: row;
-
     align-items: center;
-
-    gap: 0.5rem;
     flex-wrap: wrap;
+    gap: 0.5rem;
     min-width: 0;
-}
-
-.favorites-subtoolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.favorites-filters {
-    display: flex;
-    flex-direction: row;
-
-    align-items: center;
-
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.filter-btn {
-    height: 2.5rem;
-
-    padding: 0 0.75rem;
-
-    color: #a8a8b0;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-radius: 6px;
-
-    font-size: 0.875rem;
-    font-weight: 500;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
-    font-family: 'Inter', sans-serif;
-    line-height: 1.5;
-    box-sizing: border-box;
-}
-
-.filter-btn:hover {
-    color: #ffffff;
-
-    background: #242429;
-
-    border-color: #35353c;
-}
-
-.filter-btn.active {
-    color: #ffffff;
-
-    background: #3c47be;
-
-    border-color: #3c47be;
 }
 
 .table-scroll {
@@ -572,7 +567,6 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     background: transparent;
 
     border: none;
-    border-radius: 0;
 }
 
 .favorites-table th,
@@ -591,7 +585,6 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     height: 3.8rem;
 
     position: sticky;
-
     top: 0;
 
     z-index: 2;
@@ -612,29 +605,6 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     font-size: 0.85rem;
 }
 
-.favorites-table tbody tr {
-    transition:
-        background 0.2s ease,
-        color 0.2s ease;
-}
-
-.favorites-table tbody tr.selected {
-    background: #242642;
-}
-
-.favorites-table tbody tr.selected:hover {
-    background: #292c4d;
-}
-
-.favorites-table tbody tr.selected .favorite-icon {
-    background: #343c8f;
-    color: #ffffff;
-}
-
-.favorites-table tbody tr.selected td {
-    color: #d1d2e5;
-}
-
 .favorites-table tbody tr:hover {
     background: #1f1f23;
 }
@@ -649,56 +619,73 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     text-align: center;
 }
 
-.favorite-checkbox {
-    appearance: none;
-
-    -webkit-appearance: none;
-
-    width: 1rem;
-    height: 1rem;
-
-    margin: 0;
-
-    background: #1a1a1d;
-
-    border: 1px solid #6b6b75;
-
-    border-radius: 4px;
-
-    cursor: pointer;
-}
-
-.favorite-checkbox:checked {
-    background: #3c47be;
-
-    border-color: #3c47be;
-}
-
-.favorite-checkbox:checked::after {
-    content: '\2713';
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    height: 100%;
-
-    color: #ffffff;
-
-    font-size: 0.7rem;
-    font-weight: 700;
-}
-
 .favorites-table th:nth-child(2),
 .favorites-table td:nth-child(2) {
     width: 42%;
 }
 
+.favorite-checkbox {
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    box-sizing: border-box;
+    background: #202024;
+    border: 1px solid #505057;
+    border-radius: 4px;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.favorite-checkbox:hover:not(:disabled) {
+    border-color: #8b7cff;
+}
+
+.favorite-checkbox:checked,
+.favorite-checkbox:indeterminate {
+    background: #3c47be;
+    border-color: #5965ed;
+}
+
+.favorite-checkbox:checked::after {
+    content: '';
+    width: 0.3rem;
+    height: 0.55rem;
+    margin-top: -0.15rem;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.favorite-checkbox:indeterminate::after {
+    content: '';
+    width: 0.55rem;
+    height: 2px;
+    margin: 0;
+    background: #ffffff;
+    border: 0;
+    transform: none;
+}
+
+.favorite-checkbox:focus-visible {
+    outline: 2px solid #8b7cff;
+    outline-offset: 3px;
+}
+
+.favorite-checkbox:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .name-header {
     display: flex;
-
     align-items: center;
 
     gap: 0.3rem;
@@ -708,63 +695,39 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     font-size: 1rem;
 }
 
-.name-input {
-    width: 32rem;
-    color: #ffffff;
+.favorite-name {
+    display: flex;
+    align-items: center;
 
-    background: transparent;
-
-    border: 1px solid transparent;
-    border-radius: 6px;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-
-    white-space: nowrap;
-
-    outline: none;
-    line-height: 1.5;
-    font-family: 'Inter', sans-serif;
-    min-width: 0;
-    max-width: 100%;
-    box-sizing: border-box;
-    text-overflow: ellipsis;
-}
-
-.name-input.active {
-    background: #1f1f23;
-    border-color: #3c47be;
-    padding: 0.45rem 0.6rem;
+    gap: 0.75rem;
 }
 
 .favorite-icon {
-    width: 2.4rem;
-    height: 2.4rem;
+    width: 2.5rem;
+    height: 2.5rem;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
     flex-shrink: 0;
 
-    color: #8b7cff;
-
+    color: #9c8cff;
     background: #29215c;
 
+    border: 1px solid #443b82;
     border-radius: 6px;
 
-    font-size: 1.15rem;
+    font-size: 1.2rem;
 }
 
 .favorite-info {
-    display: flex;
+    min-width: 0;
 
+    display: flex;
     flex-direction: column;
 
     gap: 0.25rem;
-
-    min-width: 0;
 }
 
 .favorite-info strong {
@@ -787,98 +750,24 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     line-height: 1.5;
 }
 
-.favorite-card {
-    min-height: 10rem;
-
-    padding: 0.75rem;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    background: #1a1a1d;
-
-    border: 1px solid #29292e;
-    border-radius: 24px;
-
-    box-sizing: border-box;
-
-    cursor: pointer;
-    gap: 0.75rem;
+.table-scroll {
+    overflow-x: auto;
 }
 
-.favorite-card:hover {
-    background: #1f1f23;
-
-    border-color: #35353c;
+.favorites-table {
+    min-width: 44rem;
+    table-layout: fixed;
 }
 
-.favorite-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.favorites-table tbody tr.selected {
+    background: #201d2d;
 }
 
-.favorite-card-icon {
-    width: 2.7rem;
-    height: 2.7rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #8b7cff;
-
-    background: #29215c;
-
-    border-radius: 6px;
-
-    font-size: 1.25rem;
-}
-
-.favorite-card-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.favorite-card-info strong {
-    color: #ffffff;
-
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.5;
-}
-
-.favorite-card-info span {
-    color: #898991;
-
-    font-size: 0.75rem;
-    font-weight: 400;
-    line-height: 1.5;
-}
-
-.favorite-card-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    color: #898991;
-
-    font-size: 0.75rem;
-    font-weight: 400;
-    line-height: 1.5;
-    gap: 0.5rem;
-}
-
-.favorite-type {
-    text-transform: capitalize;
-}
-
-.favorites-toolbar :deep(.search-box) {
-    flex: 1 1 18rem;
-    min-width: 0;
-    max-width: 32rem;
+.favorite-info strong,
+.favorite-info span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 @media (max-width: 800px) {
@@ -886,5 +775,44 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
         flex-basis: 100%;
         max-width: none;
     }
+}
+
+.favorites-subtoolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.favorite-type {
+    text-transform: capitalize;
+}
+
+.favorite-name {
+    min-width: 0;
+}
+
+.favorite-icon.file {
+    color: #8b7cff;
+    background: #252543;
+    border-color: #3a3a64;
+}
+
+.favorite-icon.folder {
+    color: #63a8ff;
+    background: #1c2d49;
+    border-color: #345580;
+}
+
+.video-play-icon {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 2.5rem;
+    pointer-events: none;
 }
 </style>

@@ -1,7 +1,7 @@
-import { prisma } from "~~/server/utils/prisma";
-import { getAuthSession } from "~~/server/utils/auth"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 

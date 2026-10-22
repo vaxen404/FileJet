@@ -1,10 +1,9 @@
-﻿
-import { prisma } from '~~/server/utils/prisma'
+﻿import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -44,8 +43,8 @@ export default defineEventHandler(async ( event) => {
             itemType === 'file'
                 ? await prisma.files.findFirst(query)
                 : itemType === 'folder'
-                    ? await prisma.folders.findFirst(query)
-                    : await prisma.notes.findFirst(query)
+                  ? await prisma.folders.findFirst(query)
+                  : await prisma.notes.findFirst(query)
 
         if (!item) {
             throwError(404, 'Item not found.')

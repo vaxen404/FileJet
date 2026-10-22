@@ -1,9 +1,9 @@
 import argon2 from 'argon2'
 import { prisma } from '~~/server/utils/prisma'
-import { enforceRateLimit } from "~~/server/utils/rateLimit"
+import { enforceRateLimit } from '~~/server/utils/rateLimit'
 import { setAuthSession } from '~~/server/utils/auth'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         enforceRateLimit(event, 'auth-login', 10, 10 * 60 * 1000)
 

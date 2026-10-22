@@ -1,17 +1,11 @@
 <template>
     <div class="file-page">
-        <section
-            class="file-workspace"
-            :aria-label="itemType === 'note' ? 'Note editor' : 'Folder contents'"
-        >
+        <section class="file-workspace">
             <div class="preview-card">
                 <slot />
             </div>
         </section>
-        <aside
-            class="file-panel"
-            :aria-label="itemType + ' details'"
-        >
+        <aside class="file-panel">
             <section class="file-information">
                 <div class="file-heading">
                     <div class="file-heading-text">
@@ -21,7 +15,6 @@
                     <button
                         type="button"
                         class="close-details"
-                        :aria-label="'Back to ' + returnName"
                         @click="$emit('back')"
                     >
                         <svg
@@ -29,7 +22,6 @@
                             width="20"
                             height="20"
                             fill="none"
-                            aria-hidden="true"
                         >
                             <path
                                 d="m6 6 12 12M18 6 6 18"
@@ -40,11 +32,7 @@
                         </svg>
                     </button>
                 </div>
-                <div
-                    class="file-actions"
-                    role="group"
-                    :aria-label="itemType + ' actions'"
-                >
+                <div class="file-actions">
                     <button
                         type="button"
                         class="action-button download-button"
@@ -60,9 +48,8 @@
                     <button
                         type="button"
                         class="action-button icon-action"
+                        :class="{ 'is-favorite': isFavorite }"
                         :disabled="busy"
-                        :aria-pressed="isFavorite"
-                        :aria-label="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
                         @click="$emit('favorite')"
                     >
                         <Icon
@@ -74,7 +61,6 @@
                         type="button"
                         class="action-button icon-action"
                         :disabled="busy"
-                        aria-label="Rename"
                         @click="$emit('rename')"
                     >
                         <Icon
@@ -86,7 +72,6 @@
                         type="button"
                         class="action-button icon-action delete-button"
                         :disabled="busy"
-                        aria-label="Delete"
                         @click="$emit('delete')"
                     >
                         <Icon
@@ -97,8 +82,6 @@
                 </div>
                 <div
                     class="detail-tabs"
-                    role="tablist"
-                    :aria-label="itemType + ' information'"
                     @keydown="navigateTabs"
                 >
                     <button
@@ -106,9 +89,6 @@
                         :id="itemType + '-' + tab + '-tab'"
                         :key="tab"
                         type="button"
-                        role="tab"
-                        :aria-selected="activeTab === tab"
-                        :aria-controls="itemType + '-' + tab + '-panel'"
                         :tabindex="activeTab === tab ? 0 : -1"
                         :class="{ active: activeTab === tab }"
                         :disabled="busy"
@@ -120,8 +100,6 @@
                 <div
                     v-show="activeTab === 'details'"
                     :id="itemType + '-details-panel'"
-                    role="tabpanel"
-                    :aria-labelledby="itemType + '-details-tab'"
                     class="tab-panel"
                     tabindex="0"
                 >
@@ -139,8 +117,6 @@
                 <div
                     v-show="activeTab === 'edit'"
                     :id="itemType + '-edit-panel'"
-                    role="tabpanel"
-                    :aria-labelledby="itemType + '-edit-tab'"
                     class="tab-panel"
                     tabindex="0"
                 >
@@ -149,8 +125,6 @@
                 <div
                     v-show="activeTab === 'share'"
                     :id="itemType + '-share-panel'"
-                    role="tabpanel"
-                    :aria-labelledby="itemType + '-share-tab'"
                     class="tab-panel"
                     tabindex="0"
                 >
@@ -175,7 +149,6 @@ const props = defineProps<{
     summary: string
     itemId: string
     itemType: 'note' | 'folder'
-    returnName: string
     metadata: { label: string; value: string | number | null }[]
     share: ShareState
     isFavorite: boolean
@@ -196,14 +169,17 @@ defineEmits<{
 
 const navigateTabs = async (event: KeyboardEvent) => {
     if (props.busy || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+
     event.preventDefault()
     const index = tabs.indexOf(activeTab.value)
+
     const next =
         event.key === 'Home'
             ? 0
             : event.key === 'End'
               ? 2
               : (index + (event.key === 'ArrowRight' ? 1 : 2)) % 3
+
     activeTab.value = tabs[next]!
     await nextTick()
     document.getElementById(props.itemType + '-' + activeTab.value + '-tab')?.focus()
@@ -348,7 +324,7 @@ const navigateTabs = async (event: KeyboardEvent) => {
     padding: 0;
 }
 
-.icon-action[aria-pressed='true'] {
+.icon-action.is-favorite {
     color: #8b7cff;
 }
 
@@ -378,10 +354,6 @@ const navigateTabs = async (event: KeyboardEvent) => {
 .action-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-.action-button[aria-busy='true'] {
-    cursor: wait;
 }
 
 .detail-tabs {

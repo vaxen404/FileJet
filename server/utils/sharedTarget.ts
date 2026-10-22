@@ -11,6 +11,7 @@ export async function getSharedTarget(event: H3Event) {
 
     if (type === 'folder') {
         const query = getQuery(event)
+
         if (query.itemId !== undefined) {
             if (
                 typeof query.itemId !== 'string' ||
@@ -19,12 +20,14 @@ export async function getSharedTarget(event: H3Event) {
             ) {
                 throw createError({ statusCode: 400, message: 'Invalid shared item.' })
             }
+
             id = query.itemId
             type = String(query.itemType)
         }
     }
 
     const where = { id, user_id: share.user_id }
+
     const item =
         type === 'file'
             ? await prisma.files.findFirst({ where })
@@ -38,8 +41,10 @@ export async function getSharedTarget(event: H3Event) {
 
     if (share.item_type === 'folder') {
         const folderId = type === 'folder' ? item.id : 'folder_id' in item ? item.folder_id : null
+
         if (!folderId)
             throw createError({ statusCode: 404, message: 'Item not found in this shared folder.' })
+
         await requireFolderWithin(share.user_id, share.item_id, folderId)
     }
 

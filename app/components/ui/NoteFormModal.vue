@@ -9,9 +9,6 @@
                 <div
                     ref="dialog"
                     class="note-modal-conteiner"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="note-modal-title"
                     @keydown.esc="closeModal"
                     @keydown.tab="trapFocus"
                 >
@@ -39,7 +36,6 @@
                         <button
                             type="button"
                             class="clouse-button"
-                            aria-label="Close"
                             :disabled="isLoading"
                             @click="closeModal"
                         >
@@ -47,16 +43,11 @@
                         </button>
                     </div>
 
-                    <form
-                        :aria-busy="isLoading"
-                        @submit.prevent="saveNote"
-                    >
+                    <form @submit.prevent="saveNote">
                         <div class="note-modal-body">
                             <div class="form-field">
                                 <div class="fielad-header">
-                                    <label for="note-form-title">
-                                        Title
-                                    </label>
+                                    <label for="note-form-title"> Title </label>
 
                                     <span>{{ title.length }} / 32</span>
                                 </div>
@@ -76,9 +67,7 @@
 
                             <div class="form-field">
                                 <div class="field-header">
-                                    <label for="note-form-content">
-                                        Content
-                                    </label>
+                                    <label for="note-form-content"> Content </label>
 
                                     <span>{{ content.length }} characters</span>
                                 </div>
@@ -120,16 +109,16 @@
                                             isLoading
                                                 ? 'solar:refresh-linear'
                                                 : isEditing
-                                                    ? 'solar:diskette-linear'
-                                                    : 'solar:add-circle-linear'
+                                                  ? 'solar:diskette-linear'
+                                                  : 'solar:add-circle-linear'
                                         "
                                     />
                                     {{
                                         isLoading
                                             ? 'Saving...'
                                             : isEditing
-                                                ? 'Save changes'
-                                                : 'Create note'
+                                              ? 'Save changes'
+                                              : 'Create note'
                                     }}
                                 </button>
                             </div>
@@ -145,8 +134,8 @@
 import { noteSchema } from '~~/shared/schemas/note'
 
 interface NoteData {
-    id: string,
-    title: string,
+    id: string
+    title: string
     content: string
 }
 
@@ -178,10 +167,12 @@ const dialog = ref<HTMLElement | null>(null)
 const isEditing = computed(() => props.mode === 'edit')
 
 const canSubmit = computed(() => {
-    return noteSchema.safeParse({
+    return (
+        noteSchema.safeParse({
             title: title.value,
             content: content.value
         }).success && !isLoading.value
+    )
 })
 
 watch(
@@ -189,8 +180,8 @@ watch(
     async () => {
         if (!props.open) return
 
-        title.value = isEditing.value ? props.note?.title ?? '' : ''
-        content.value = isEditing.value ? props.note?.content ?? '' : ''
+        title.value = isEditing.value ? (props.note?.title ?? '') : ''
+        content.value = isEditing.value ? (props.note?.content ?? '') : ''
         await nextTick()
         titleInput.value?.focus()
     },
@@ -201,17 +192,21 @@ const trapFocus = (event: KeyboardEvent) => {
     const fields = dialog.value?.querySelectorAll<HTMLElement>(
         'button:not(:disabled), input:not(:disabled), textarea:not(:disabled)'
     )
+
     if (!fields?.length) {
-        event.preventDefault();
+        event.preventDefault()
+
         return
     }
+
     const first = fields[0]!
     const last = fields[fields.length - 1]!
+
     if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
+        event.preventDefault()
         last.focus()
     } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
+        event.preventDefault()
         first.focus()
     }
 }
@@ -232,11 +227,13 @@ const saveNote = async () => {
 
     if (!result.success) {
         openToast(result.error.issues[0]?.message ?? 'Invalid note.', 'error')
+
         return
     }
 
     if (isEditing.value && !props.note?.id) {
         openToast('No note selected.', 'error')
+
         return
     }
 
@@ -446,6 +443,7 @@ button:focus-visible {
     outline: 2px solid #8b7cff;
     outline-offset: 2px;
 }
+
 @media (max-width: 500px) {
     .note-modal-conteiner {
         padding: 1rem;

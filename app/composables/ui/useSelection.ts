@@ -2,10 +2,12 @@ export const useSelection = <T extends { id: string }>(items: Ref<T[]>) => {
     const selectedItems = ref<string[]>([])
 
     const allSelected = computed(() => {
-        return items.value.length > 0 &&
+        return (
+            items.value.length > 0 &&
             items.value.every(item => {
                 return selectedItems.value.includes(item.id)
             })
+        )
     })
 
     const toggleSelectAll = (event: Event) => {

@@ -2,9 +2,9 @@ import { requireOwnedShareItem, shareState } from '../../utils/shares'
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
-import { isUuid } from "~~/server/utils/validation"
+import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -28,6 +28,7 @@ export default defineEventHandler(async ( event) => {
 
         setHeader(event, 'Cache-Control', 'no-store')
         await requireOwnedShareItem(session.userId, itemId, itemType)
+
         const sharedItem = await prisma.shared_items.findFirst({
             where: {
                 user_id: session.userId,

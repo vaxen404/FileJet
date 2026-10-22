@@ -8,10 +8,12 @@ export const useFileActions = (folderId?: string) => {
     const activeDeletes = ref(0)
 
     const isLoading = computed(() => activeRequests.value > 0 || isUploading.value)
+
     const { isUploading, isProcessing, uploadProgress, upload } = useUpload(
         folderId ? `/api/files?folderId=${encodeURIComponent(folderId)}` : '/api/files',
         'File'
     )
+
     const isDeleting = computed(() => activeDeletes.value > 0)
 
     const startLoading = () => {
@@ -141,10 +143,12 @@ export const useFileActions = (folderId?: string) => {
             ) {
                 const content = await $fetch<string>(previewUrl, { responseType: 'text' })
                 await navigator.clipboard.writeText(content)
+
                 return
             }
 
             const clipboardType = mimeType.startsWith('text/') ? 'text/plain' : 'image/png'
+
             const content = $fetch<Blob>(previewUrl, { responseType: 'blob' }).then(async blob => {
                 if (clipboardType === 'text/plain') {
                     return new Blob([await blob.text()], { type: 'text/plain' })
@@ -196,14 +200,17 @@ export const useFileActions = (folderId?: string) => {
 
     const downloadFile = async (fileId: string) => {
         const url = `/api/files/${encodeURIComponent(fileId)}/download`
+
         try {
             await $fetch(url, { method: 'HEAD', retry: 0 })
         } catch (error: any) {
             if ((error?.statusCode ?? error?.status) === 404) {
                 throw new Error('File not found in storage. Please upload it again.')
             }
+
             throw error
         }
+
         const link = document.createElement('a')
 
         link.href = url

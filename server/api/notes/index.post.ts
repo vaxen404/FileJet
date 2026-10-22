@@ -1,10 +1,10 @@
 import { reserveStorage } from '~~/server/utils/storage'
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { noteSchema } from "~~/shared/schemas/note"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { noteSchema } from '~~/shared/schemas/note'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -25,7 +25,7 @@ export default defineEventHandler(async ( event) => {
 
         const size = BigInt(Buffer.byteLength(content, 'utf-8'))
 
-        const addNote = await prisma.$transaction(async ( tx) => {
+        const addNote = await prisma.$transaction(async tx => {
             await reserveStorage(tx, session.userId, size)
 
             const existing = await tx.notes.findFirst({
@@ -33,7 +33,7 @@ export default defineEventHandler(async ( event) => {
                     user_id: session.userId,
                     folder_id: null,
                     title: {
-                        equals: title,
+                        equals: title
                     }
                 }
             })

@@ -1,8 +1,8 @@
 export type AuthUser = {
-    id: string,
-    username: string,
-    email: string | null,
-    storageLimit: string,
+    id: string
+    username: string
+    email: string | null
+    storageLimit: string
     storageUsed: string
 }
 

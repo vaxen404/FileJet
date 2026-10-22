@@ -1,16 +1,11 @@
 <template>
-    <div
-        class="item-filters"
-        role="group"
-        :aria-label="label"
-    >
+    <div class="item-filters">
         <button
             v-for="option in options"
             :key="option"
             type="button"
             class="filter-btn"
             :class="{ active: model === option }"
-            :aria-pressed="model === option"
             @click="model = option"
         >
             {{ option }}
@@ -19,13 +14,9 @@
 </template>
 
 <script setup lang="ts">
-withDefaults(
-    defineProps<{
-        options: readonly string[]
-        label?: string
-    }>(),
-    { label: 'Filter items' }
-)
+defineProps<{
+    options: readonly string[]
+}>()
 
 const model = defineModel<string>({ required: true })
 </script>

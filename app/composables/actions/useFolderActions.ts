@@ -79,7 +79,8 @@ export const useFolderActions = () => {
                 ? await getFolderFiles(input)
                 : Array.from(input as FileList | File[])
 
-        if (files.length === 0) throw new Error('This folder is empty. Use New Folder to create an empty folder.')
+        if (files.length === 0)
+            throw new Error('This folder is empty. Use New Folder to create an empty folder.')
 
         const uploadId = Symbol()
 
@@ -117,6 +118,7 @@ export const useFolderActions = () => {
                 xhr.onload = () => {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         resolve()
+
                         return
                     }
 
@@ -162,6 +164,7 @@ export const useFolderActions = () => {
 
     const createFolder = async (name: string, parentFolderId?: string) => {
         startLoading()
+
         try {
             return await $fetch('/api/folders', {
                 method: 'POST',

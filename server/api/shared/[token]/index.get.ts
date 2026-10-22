@@ -8,10 +8,12 @@ export default defineEventHandler(async event => {
     try {
         const sharedItem = await getPublicShare(event, false)
         enforceRateLimit(event, `shared-public:${sharedItem.token}`, 60, 60 * 1000)
+
         try {
             assertShareAccess(event, sharedItem)
         } catch (err: any) {
             if (err.statusCode !== 401) throw err
+
             const file =
                 sharedItem.item_type === 'file'
                     ? await prisma.files.findFirst({
@@ -19,7 +21,9 @@ export default defineEventHandler(async event => {
                           select: { name: true, original_name: true }
                       })
                     : null
+
             if (sharedItem.item_type === 'file' && !file) throwError(404, 'File not found.')
+
             throw createError({
                 statusCode: 401,
                 message: 'A password is required for this share link.',

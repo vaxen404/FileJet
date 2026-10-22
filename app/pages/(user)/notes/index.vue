@@ -22,28 +22,24 @@
                         class="new-note-button"
                         @click="createNote"
                     >
-                        <Icon name="solar:add-circle-bold" class="new-note-icon" aria-hidden="true" />
+                        <Icon
+                            name="solar:add-circle-bold"
+                            class="new-note-icon"
+                        />
                         New Note
                     </button>
                 </div>
             </div>
-
         </div>
 
         <DataView
             :view-mode="viewMode"
             :is-loading="isInitialLoading"
-            :aria-busy="pending || isLoading || isBulkDeleting"
             drop-text="Drop notes to upload"
             @drop="handleDrop"
         >
             <template #loading>
-                <div
-                    class="loading-state"
-                    role="status"
-                >
-                    Loading notes...
-                </div>
+                <div class="loading-state">Loading notes...</div>
             </template>
             <template
                 v-if="!isInitialLoading && filteredNotes.length === 0"
@@ -83,7 +79,6 @@
                                         :checked="allSelected"
                                         :indeterminate="partiallySelected"
                                         :disabled="busy"
-                                        aria-label="Select all notes on this page"
                                         @change="toggleSelectAll"
                                     />
                                 </th>
@@ -120,7 +115,6 @@
                                         class="note-checkbox"
                                         :value="note.id"
                                         :disabled="busy"
-                                        :aria-label="`Select ${note.title}`"
                                     />
                                 </td>
 
@@ -190,7 +184,6 @@
                                     class="note-checkbox"
                                     :value="note.id"
                                     :disabled="busy"
-                                    :aria-label="`Select ${note.title}`"
                                 />
                             </label>
                             <ItemMenu
@@ -288,6 +281,7 @@ const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
 
 const filteredNotes = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
+
     return notes.value.filter(note => {
         return note.title.toLowerCase().includes(query)
     })
@@ -310,10 +304,14 @@ const {
 
 const { selectedItems: selectedNotes, allSelected, toggleSelectAll } = useSelection(paginatedNotes)
 
-const selectionItems = computed(() => selectedNotes.value.map(id => ({ id, type: 'note' as const })))
+const selectionItems = computed(() =>
+    selectedNotes.value.map(id => ({ id, type: 'note' as const }))
+)
+
 const handleSelectionMoved = async () => {
     selectedNotes.value = []
     await fetchAll()
+
     if (error.value) openToast(error.value, 'error')
 }
 
@@ -330,7 +328,9 @@ const isNoteFavorite = (noteId: string) => {
 
 const handleDrop = async (event: DragEvent) => {
     const droppedNotes = event.dataTransfer?.files
+
     if (!droppedNotes?.length) return
+
     await handleNoteUpload(droppedNotes)
 }
 
@@ -340,6 +340,7 @@ const handleNoteUpload = async (files: FileList) => {
     try {
         await uploadNote(files, async () => {
             await fetchAll()
+
             if (error.value) throw new Error(error.value)
         })
         openToast('Notes uploaded successfully.', 'success')
@@ -390,11 +391,13 @@ const renameNote = (note: NoteItem) =>
 
 const handleNoteSaved = async () => {
     await fetchAll()
+
     if (error.value) openToast(error.value, 'error')
 }
 
 const downloadNote = (note: NoteItem) => {
     const url = URL.createObjectURL(new Blob([note.content], { type: 'text/plain;charset=utf-8' }))
+
     try {
         const link = document.createElement('a')
         link.href = url
@@ -409,13 +412,19 @@ const downloadNote = (note: NoteItem) => {
 
 const favoriteNote = async (note: NoteItem) => {
     if (isFavoriting.value) return
+
     isFavoriting.value = true
+
     try {
         const favorite = isNoteFavorite(note.id)
+
         if (favorite) await removeFavorite(note.id, 'note')
         else await addFavorite(note.id, 'note')
+
         await fetchAll()
+
         if (error.value) throw new Error(error.value)
+
         openToast(favorite ? 'Note removed from favorites.' : 'Note added to favorites.', 'success')
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'Could not update favorite.', 'error')
@@ -426,6 +435,7 @@ const favoriteNote = async (note: NoteItem) => {
 
 const deleteNote = async (note: NoteItem) => {
     if (isDeleting.value) return
+
     try {
         await removeNote(note.id)
         notes.value = notes.value.filter(item => item.id !== note.id)

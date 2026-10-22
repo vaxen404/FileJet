@@ -1,17 +1,14 @@
 <template>
-    <div class="view-switcher" role="group" aria-label="View mode">
+    <div class="view-switcher">
         <button
             type="button"
             class="view-button"
             :class="{ active: modelValue === 'grid' }"
-            :aria-pressed="modelValue === 'grid'"
-            aria-label="Grid view"
             @click="emit('update:modelValue', 'grid')"
         >
             <Icon
                 name="solar:widget-4-linear"
                 class="view-icon"
-                aria-hidden="true"
             />
         </button>
 
@@ -19,14 +16,11 @@
             type="button"
             class="view-button"
             :class="{ active: modelValue === 'list' }"
-            :aria-pressed="modelValue === 'list'"
-            aria-label="List view"
             @click="emit('update:modelValue', 'list')"
         >
             <Icon
                 name="solar:list-linear"
                 class="view-icon"
-                aria-hidden="true"
             />
         </button>
     </div>

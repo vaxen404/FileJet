@@ -13,10 +13,12 @@ export const useNoteActions = () => {
     const activeDeletes = ref(0)
 
     const isLoading = computed(() => activeRequests.value > 0 || isUploading.value)
+
     const { isUploading, isProcessing, uploadProgress, upload } = useUpload(
         '/api/notes/upload',
         'Note'
     )
+
     const isDeleting = computed(() => activeDeletes.value > 0)
 
     const startLoading = () => {
@@ -67,6 +69,7 @@ export const useNoteActions = () => {
             })
 
             await onSuccess?.()
+
             return response
         } finally {
             stopLoading()

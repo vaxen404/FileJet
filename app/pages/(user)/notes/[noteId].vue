@@ -6,7 +6,6 @@
         :summary="formatFileSize(note.size)"
         :item-id="note.id"
         item-type="note"
-        :return-name="returnPage.name"
         :metadata="metadataRows"
         :share="note.share"
         :is-favorite="isFavorite"
@@ -21,14 +20,12 @@
         <article
             v-if="!isEditing"
             class="note-reader"
-            aria-label="Note content"
         >
             <div class="reader-heading">
                 <h2>{{ note.title }}</h2>
                 <span
                     v-if="dirty"
                     class="unsaved-state"
-                    role="status"
                 >
                     Unsaved changes kept in Edit
                 </span>
@@ -47,7 +44,6 @@
                 <Icon
                     name="solar:notebook-linear"
                     size="2rem"
-                    aria-hidden="true"
                 />
                 <strong>This note is empty</strong>
                 <p>Choose Edit to add content.</p>
@@ -57,7 +53,6 @@
         <form
             v-else
             class="note-editor"
-            :aria-busy="isSaving"
             @submit.prevent="save"
         >
             <div class="editor-heading">
@@ -65,7 +60,6 @@
                 <span
                     v-if="dirty"
                     class="unsaved-state"
-                    role="status"
                 >
                     Unsaved changes
                 </span>
@@ -89,7 +83,6 @@
             <p
                 v-if="saveError"
                 class="editor-error"
-                role="alert"
             >
                 {{ saveError }}
             </p>
@@ -128,7 +121,6 @@
                 <p
                     v-if="saveError"
                     class="editor-error"
-                    role="alert"
                 >
                     {{ saveError }}
                 </p>
@@ -154,7 +146,6 @@
     <div
         v-else
         class="detail-error"
-        role="alert"
     >
         <h1>Unable to load note</h1>
         <p>The note could not be found or accessed.</p>
@@ -179,9 +170,11 @@ definePageMeta({ middleware: 'auth', layout: 'user', key: route => route.path })
 const route = useRoute()
 const router = useRouter()
 const id = route.params.noteId as string
+
 const returnPage = computed(
     () => getFileReturnPage(route.query.from) ?? { path: '/notes', name: 'Notes' }
 )
+
 const { data: note, refresh } = await useFetch<NoteDetails>(`/api/notes/${encodeURIComponent(id)}`)
 const { updateNote, deleteNote, isDeleting } = useNoteActions()
 const { addFavorite, removeFavorite } = useFavoriteActions()
@@ -198,11 +191,13 @@ const isSaving = ref(false)
 const isFavoriting = ref(false)
 const saveError = ref('')
 const busy = computed(() => isSaving.value || isDeleting.value || isFavoriting.value)
+
 const dirty = computed(
     () =>
         !!note.value &&
         (draftTitle.value !== note.value.title || draftContent.value !== note.value.content)
 )
+
 const isFavorite = computed(() => favorites.value.some(item => item.note_id === id))
 
 useDetailsHeader(
@@ -238,9 +233,12 @@ const focusTitle = async () => {
 
 const save = async () => {
     if (!note.value || !isEditing.value || busy.value || !dirty.value) return
+
     const parsed = noteSchema.safeParse({ title: draftTitle.value, content: draftContent.value })
+
     if (!parsed.success) {
         saveError.value = parsed.error.issues[0]?.message ?? 'Invalid note.'
+
         return
     }
 
@@ -252,11 +250,14 @@ const save = async () => {
             ...parsed.data,
             expectedUpdatedAt: note.value.updated_at
         })
+
         note.value = { ...note.value, ...response.note }
         draftTitle.value = response.note.title
         draftContent.value = response.note.content
         const listed = notes.value.find(item => item.id === id)
+
         if (listed) Object.assign(listed, response.note)
+
         activeTab.value = 'details'
         openToast('Note saved successfully.', 'success')
     } catch (error: any) {
@@ -276,10 +277,13 @@ const download = () => {
 
 const toggleFavorite = async () => {
     if (busy.value) return
+
     isFavoriting.value = true
+
     try {
         if (isFavorite.value) await removeFavorite(id, 'note')
         else await addFavorite(id, 'note')
+
         await fetchFavorites()
         openToast('Favorite updated.', 'success')
     } catch (error: any) {
@@ -291,6 +295,7 @@ const toggleFavorite = async () => {
 
 const remove = async () => {
     if (busy.value) return
+
     try {
         await deleteNote(id)
         notes.value = notes.value.filter(item => item.id !== id)
@@ -303,8 +308,11 @@ const remove = async () => {
 
 const metadataRows = computed(() => {
     const item = note.value
+
     if (!item) return []
+
     const sharing = item.share
+
     return [
         { label: 'Note title', value: item.title },
         { label: 'Size', value: formatFileSize(item.size) },

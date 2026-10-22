@@ -1,11 +1,11 @@
 import { getFileMetadata } from '../../../utils/fileMetadata'
 import { shareState } from '../../../utils/shares'
-import { prisma } from "~~/server/utils/prisma"
-import { getAuthSession } from "~~/server/utils/auth"
-import { throwError } from "~~/server/utils/error"
-import { isUuid } from "~~/server/utils/validation"
+import { prisma } from '~~/server/utils/prisma'
+import { getAuthSession } from '~~/server/utils/auth'
+import { throwError } from '~~/server/utils/error'
+import { isUuid } from '~~/server/utils/validation'
 
-export default defineEventHandler(async ( event) => {
+export default defineEventHandler(async event => {
     try {
         const session = getAuthSession(event)
 
@@ -32,6 +32,7 @@ export default defineEventHandler(async ( event) => {
         }
 
         setHeader(event, 'Cache-Control', 'no-store')
+
         const [technicalMetadata, sharedItem] = await Promise.all([
             getFileMetadata(file),
             prisma.shared_items.findFirst({

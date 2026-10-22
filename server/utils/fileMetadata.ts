@@ -12,6 +12,7 @@ const pending = new Map<string, Promise<FileTechnicalMetadata>>()
 
 const positive = (value: unknown) => {
     const number = typeof value === 'string' || typeof value === 'number' ? Number(value) : NaN
+
     return Number.isFinite(number) && number > 0 ? number : undefined
 }
 
@@ -20,18 +21,23 @@ const text = (value: unknown) =>
 
 export function parseProbeMetadata(raw: unknown): FileTechnicalMetadata {
     if (!raw || typeof raw !== 'object') return {}
-    const probe = raw as { streams?: Record<string, unknown>[], format?: Record<string, unknown> }
+
+    const probe = raw as { streams?: Record<string, unknown>[]; format?: Record<string, unknown> }
+
     const streams = Array.isArray(probe.streams)
         ? probe.streams.filter(s => s && typeof s === 'object')
         : []
+
     const video = streams.find(
         s =>
             s.codec_type === 'video' &&
             (s.disposition as { attached_pic?: number } | undefined)?.attached_pic !== 1
     )
+
     const audio = streams.find(s => s.codec_type === 'audio')
     const rate = text(video?.avg_frame_rate)?.split('/')
     const fps = rate?.length === 2 ? positive(Number(rate[0]) / Number(rate[1])) : undefined
+
     return Object.fromEntries(
         Object.entries({
             width: positive(video?.width),
@@ -47,47 +53,60 @@ export function parseProbeMetadata(raw: unknown): FileTechnicalMetadata {
 }
 
 type StoredFile = {
-    id: string,
-    user_id: string,
-    storage_key: string,
-    mime_type: string | null,
-    technical_metadata: unknown,
-    metadata_signature: string | null,
+    id: string
+    user_id: string
+    storage_key: string
+    mime_type: string | null
+    technical_metadata: unknown
+    metadata_signature: string | null
     metadata_checked_at: Date | null
 }
 
 export async function getFileMetadata(file: StoredFile): Promise<FileTechnicalMetadata> {
     if (!/^(image|audio|video)\//.test(file.mime_type ?? '')) return {}
+
     if (pending.has(file.id)) return pending.get(file.id)!
+
     if (pending.size >= 2) return {}
+
     const work = extract(file).finally(() => pending.delete(file.id))
     pending.set(file.id, work)
+
     return work
 }
 
 async function extract(file: StoredFile): Promise<FileTechnicalMetadata> {
     try {
         if (!file.storage_key.startsWith(`${file.user_id}/`)) return {}
+
         const [path, ownerRoot] = await Promise.all([
             realpath(storagePath(file.storage_key)),
             realpath(storagePath(file.user_id))
         ])
+
         if (!path.startsWith(ownerRoot + sep)) return {}
+
         const fileStat = await stat(path)
+
         if (!fileStat.isFile()) return {}
+
         const provider = createHash('sha256')
             .update(process.env.FFPROBE_PATH || 'ffprobe')
             .digest('hex')
             .slice(0, 16)
+
         const signature = `v4:${fileStat.size}:${fileStat.mtimeMs}:${provider}`
         const cached = (file.technical_metadata as FileTechnicalMetadata | null) ?? {}
+
         if (
             file.metadata_signature === signature &&
             (Object.keys(cached).length ||
                 Date.now() - (file.metadata_checked_at?.getTime() ?? 0) < 3600000)
         )
             return cached
+
         let metadata: FileTechnicalMetadata = {}
+
         try {
             const { stdout } = await exec(
                 process.env.FFPROBE_PATH || 'ffprobe',
@@ -115,8 +134,10 @@ async function extract(file: StoredFile): Promise<FileTechnicalMetadata> {
                 ],
                 { timeout: 8000, maxBuffer: 256 * 1024, windowsHide: true, encoding: 'utf8' }
             )
+
             metadata = parseProbeMetadata(JSON.parse(stdout))
         } catch {}
+
         await prisma.files.updateMany({
             where: { id: file.id, user_id: file.user_id, storage_key: file.storage_key },
             data: {
@@ -125,6 +146,7 @@ async function extract(file: StoredFile): Promise<FileTechnicalMetadata> {
                 metadata_signature: signature
             }
         })
+
         return metadata
     } catch {
         return {}

@@ -79,6 +79,7 @@ export const useToast = () => {
 
         if (Date.now() >= toast.expiresAt) {
             closeToast(id)
+
             return
         }
 
