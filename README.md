@@ -1,205 +1,228 @@
- <div align="center">
+<div align="center">
 
-# 🚀 FileJet
+# FileJet
 
 **Your files. Your storage. Your control.**
 
-A modern file management application built for simplicity, organization, and a smooth user experience.
+A self-hosted file manager with folders, notes, public share links, and per-user storage limits.
 
-[Features](#-features) · [Technology](#-technology) · [Installation](#-installation) · [Roadmap](#-roadmap)
+[Features](#features) · [Technology](#technology) · [Installation](#installation) · [Deployment](#deployment)
 
 ![Development](https://img.shields.io/badge/Status-In%20Development-F59E0B?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 
 </div>
 
----
+## Features
 
-## 📖 Overview
+### Files, folders, and notes
 
-FileJet is a full-stack file management application that provides a centralized workspace for organizing files, managing folders, and monitoring storage usage.
+- File uploads with progress tracking and storage quota checks.
+- Duplicate filename checks scoped to the same user and folder.
+- Nested folders, folder uploads in supported browsers, renaming, and moving items.
+- File downloads, folder ZIP downloads, and ZIP downloads of selected items.
+- Image, audio, video, PDF, and text previews for supported formats.
+- Notes with editing, TXT/Markdown import, and download.
+- Favorites, search, filtering, sorting, pagination, and grid/list views.
 
-The project is built with a focus on maintainable code, straightforward navigation, and a responsive interface.
+### Sharing
 
-FileJet is actively being developed, with additional file sharing and collaboration features planned for future releases.
+- Public links for files, folders, and notes at `/shared/<token>`.
+- Optional link passwords and expiration dates.
+- Browsing and downloading shared folder contents.
+- A Shared page with search, type/status filters, sorting, and pagination.
+- Copying links, changing share settings, and removing individual or selected links.
+- Removing a share link leaves the original item intact.
 
-## ✨ Features
+### Trash
 
-### File Management
+- Move files, folders, and notes to Trash, then restore or permanently delete them.
+- Bulk restore and deletion, plus an 8-second Undo action after moving items to Trash.
+- Existing share links are unavailable while their items are in Trash. Restoring an item preserves its link, password, and expiration settings.
+- Permanent deletion also removes the item's share records. A link explicitly removed from Shared is not recreated by Undo.
 
-- Upload and manage files through a web interface.
-- Monitor upload progress in real time.
-- Organize content using folders.
-- Delete files and manage folder contents.
-- Track file operations with loading states.
+### Accounts and preferences
 
-### Accounts & Storage
+- Username/password login with signed, HttpOnly session cookies.
+- Username and optional email editing.
+- Password changes with current-password verification and new-password confirmation.
+- Six accent colors applied throughout the interface.
+- Default grid/list view, sort order, and custom items per page, with an Auto option.
+- Collapsible Profile and Password sections; Profile starts open.
+- A themed confirmation dialog for unsaved changes during in-app navigation.
 
-- User authentication and session handling.
-- Account-based file management.
-- Storage usage and limit tracking.
-- PostgreSQL-backed user and file metadata.
+Profile and password changes are stored in PostgreSQL. Appearance and browsing preferences are stored per account in the current browser's `localStorage`; they do not sync across devices.
 
-### User Experience
+## Technology
 
-- Dashboard-based navigation.
-- Clean and minimal interface.
-- File and folder management views.
-- Interactive upload progress indicators.
-- Reusable UI components.
+| Layer | Technology |
+|---|---|
+| Frontend | Nuxt 4, Vue 3, TypeScript |
+| Styling | Tailwind CSS 4 through `@tailwindcss/vite`, shared theme variables |
+| Server | Node.js, Nitro, H3 |
+| Database | PostgreSQL, Prisma 7, `@prisma/adapter-pg` |
+| Validation and passwords | Zod, Argon2id |
+| ZIP archives | fflate |
+| Media metadata | Optional `ffprobe` |
 
-## 🧰 Technology
+Nuxt serves both the interface and API. PostgreSQL holds users, item metadata, notes, favorites, share settings, and Trash records. Uploaded file contents are saved on the local filesystem under `storage/`.
 
-FileJet combines a Vue-powered interface with a server-side application layer and a relational database.
-
-**Frontend**
-
-![Nuxt](https://img.shields.io/badge/Nuxt-18181B?style=for-the-badge&logo=nuxt&logoColor=00DC82)
-![Vue.js](https://img.shields.io/badge/Vue.js-18181B?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D)
-![TypeScript](https://img.shields.io/badge/TypeScript-18181B?style=for-the-badge&logo=typescript&logoColor=3178C6)
-![CSS](https://img.shields.io/badge/CSS-18181B?style=for-the-badge&logo=css&logoColor=663399)
-
-**Backend & Database**
-
-![Node.js](https://img.shields.io/badge/Node.js-18181B?style=for-the-badge&logo=nodedotjs&logoColor=5FA04E)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18181B?style=for-the-badge&logo=postgresql&logoColor=4169E1)
-![Prisma](https://img.shields.io/badge/Prisma-18181B?style=for-the-badge&logo=prisma&logoColor=white)
-
-## 🏗️ Architecture
-
-FileJet uses Nuxt to handle both the user interface and server-side API endpoints.
-
-```text
-           FileJet Web Interface
-                    |
-              Nuxt / Vue
-                    |
-              Nitro API
-                    |
-          Application Services
-                    |
-             Prisma ORM
-                    |
-              PostgreSQL
-```
-
-The application is organized around reusable components, composables for shared frontend logic, and server-side endpoints responsible for processing requests.
-
-## 🚀 Installation
+## Installation
 
 ### Requirements
 
-Before running FileJet, make sure you have the following installed:
+- Node.js 24.11+ within the 24.x release line, or 22.19+ within 22.x, with npm.
+- A PostgreSQL database and Git.
+- A writable, persistent local filesystem for uploaded files.
+- Optional: `ffprobe` on `PATH` for media dimensions, duration, and other technical metadata. Set `FFPROBE_PATH` to use a specific executable.
 
-- Node.js and npm
-- PostgreSQL
-- Git
-
-### Setup
-
-**1. Clone the project**
+### Clone and install
 
 ```bash
-git clone https://github.com/vaxen404/FileJetV2.git
-cd FileJetV2
+git clone https://github.com/vaxen404/FileJet.git
+cd FileJet
+npm ci
 ```
 
-**2. Install dependencies**
+Run the following commands from the project root.
 
-```bash
-npm install
-```
+### Environment
 
-**3. Configure environment variables**
-
-Create a `.env` file in the root directory:
+Create `.env`:
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/filejet"
-AUTH_SECRET="replace-with-a-secure-random-secret"
+AUTH_SECRET="replace-with-your-generated-secret"
 ```
 
-Replace the example values with your own configuration. Keep this file private and never commit credentials to Git.
-
-**4. Generate the database client**
+`AUTH_SECRET` must contain at least 32 characters. Generate a random value with:
 
 ```bash
-npx prisma generate
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-Ensure that your PostgreSQL database and required tables are configured before starting the application.
+Keep `.env` private. The Prisma configuration is named `prisma7.config.ts`, so pass it explicitly to Prisma commands:
 
-**5. Run the development server**
+```bash
+npx prisma generate --config prisma7.config.ts
+```
+
+### Database setup
+
+The checked-in migrations extend an existing schema; there is no initial migration that creates all base tables. `prisma migrate deploy` alone cannot initialize an empty database.
+
+For a **new, empty database**, create the current schema:
+
+```bash
+npx prisma db push --config prisma7.config.ts
+```
+
+Then run this SQL in that database using your PostgreSQL client. These folder indexes and the favorites check constraint are maintained in migration SQL rather than the Prisma schema; the favorites unique indexes are already created by `db push`.
+
+```sql
+BEGIN;
+
+CREATE UNIQUE INDEX folders_root_owner_name_key
+    ON folders (user_id, name) WHERE parent_folder_id IS NULL;
+CREATE UNIQUE INDEX folders_child_owner_name_key
+    ON folders (user_id, parent_folder_id, name) WHERE parent_folder_id IS NOT NULL;
+
+ALTER TABLE favorites ADD CONSTRAINT favorites_exactly_one_item
+    CHECK (num_nonnulls(file_id, folder_id, note_id) = 1) NOT VALID;
+
+COMMIT;
+```
+
+After both steps succeed, record the three migrations as applied, since their tables, columns, indexes, and constraints now exist:
+
+```bash
+npx prisma migrate resolve --applied 202610160001_integrity --config prisma7.config.ts
+npx prisma migrate resolve --applied 202610170001_share_security_metadata --config prisma7.config.ts
+npx prisma migrate resolve --applied 202610180001_trash --config prisma7.config.ts
+```
+
+For an **existing database with its base schema and migration history already configured**, apply pending migrations instead:
+
+```bash
+npx prisma migrate deploy --config prisma7.config.ts
+```
+
+The new-database procedure above is not an upgrade procedure for an existing installation.
+
+### First account
+
+There is currently no public sign-up flow or checked-in user seed script. Before logging in, an administrator must provision a row in `users` with a unique `username` and an Argon2id hash in `password_hash`. Do not store a plaintext password in that field. The email is optional; IDs and storage fields have database defaults.
+
+The schema's default storage quota is **10 MiB** (`10485760` bytes). An administrator can set a different per-user quota through `users.storage_limit`.
+
+### Development
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` in your browser.
+Open [localhost:3000](http://localhost:3000).
 
-## 📁 Project Organization
+## Deployment
 
-The application separates user-facing features from backend operations to make development and maintenance easier.
+Build and start the Node.js server from the project root, with `NODE_ENV=production` set in the deployment environment:
 
-| Directory | Purpose |
+```bash
+npm run build
+node --env-file=.env .output/server/index.mjs
+```
+
+Use HTTPS in production; authentication cookies use the `Secure` flag in production mode. You can supply `DATABASE_URL` and `AUTH_SECRET` through the process environment instead of a `.env` file, in which case omit `--env-file=.env`.
+
+File paths resolve relative to the process working directory as `storage/<userId>/...`. The application creates storage directories as needed. Keep this directory persistent across restarts and deployments, and back it up together with PostgreSQL. A static-only deployment or an ephemeral filesystem cannot provide the complete application.
+
+## Limits and storage behavior
+
+- Regular file uploads accept **1–6 files per request**.
+- TXT/Markdown note imports accept up to **10 notes per request**, with a **5 MiB limit per note**.
+- Storage quotas are enforced per user. Items in Trash continue to count toward usage until permanently deleted.
+- Each user can have up to **20 share records**. Expired links and links retained for trashed items still count until their records are removed.
+- Login, upload, account changes, and sharing endpoints have rate limits.
+- Sessions expire after seven days.
+
+## Project structure
+
+| Path | Purpose |
 |---|---|
-| `components/` | Reusable interface components |
-| `composables/` | Shared reactive logic and API interactions |
-| `pages/` | Application routes and views |
-| `server/api/` | Server-side API endpoints |
-| `server/utils/` | Backend utility functions |
-| `prisma/` | Database schema and Prisma configuration |
-| `assets/` | Application styles and assets |
-| `public/` | Publicly accessible static resources |
+| `app/pages/` | Application and public share routes |
+| `app/components/` | Layout, forms, dialogs, and reusable UI |
+| `app/composables/` | Frontend state, preferences, and item actions |
+| `app/plugins/` | Client initialization and authentication |
+| `app/assets/css/` | Tailwind CSS entry point and theme styles |
+| `server/api/` | Authenticated and public API endpoints |
+| `server/utils/` | Sessions, storage, sharing, and backend helpers |
+| `shared/` | Shared validation schemas and types |
+| `prisma/` | Database schema and SQL migrations |
+| `prisma7.config.ts` | Prisma CLI configuration |
+| `src/generated/prisma/` | Generated Prisma client |
+| `maintenance/` | Upload recovery tooling |
+| `public/` | Public static assets |
+| `storage/` | Uploaded file contents, excluded from Git |
 
-## 🗺️ Roadmap
+## Development commands
 
-FileJet is evolving into a more complete personal storage and file-sharing platform.
+```bash
+npm run typecheck
+npm run build
+npm run preview
+```
 
-**Core functionality**
+The `npm test` and `npm run test:db` scripts reference `tests/`, which is currently excluded from Git and is not included in a fresh clone.
 
-- [x] User authentication foundation
-- [x] File uploading
-- [x] Upload progress tracking
-- [x] Folder management
-- [x] File deletion operations
+To recover journaled files left by interrupted uploads, first stop **all** FileJet instances and workers, then run from the project root:
 
-**Planned improvements**
+```bash
+npm run storage:recover -- --offline
+```
 
-- [ ] Shareable file links
-- [ ] Password-protected sharing
-- [ ] File previews
-- [ ] Advanced file searching
-- [ ] File and folder organization improvements
-- [ ] Additional account and storage controls
-- [ ] Performance and reliability improvements
+Recovery removes uncommitted files referenced by upload journals while retaining files referenced in the database, including Trash. It requires the same database and storage directory as the stopped application.
 
-## 🔐 Security
+## Maintainer
 
-FileJet's backend is designed to keep file operations separate from client-side application logic.
-
-Authentication, request validation, and file access controls are important parts of the project's ongoing development.
-
-Before deploying FileJet publicly, review its authentication, authorization, upload validation, storage permissions, and production configuration.
-
-## 📌 Development Status
-
-FileJet is an independent project currently under active development.
-
-The application is being improved incrementally, and some planned features may not yet be available. APIs, configuration, and implementation details may change during development.
-
-## 👨‍💻 Maintainer
-
-Created and maintained by **[Vaxen](https://github.com/vaxen404)**.
-
-For bug reports, suggestions, or feedback, use the repository's GitHub Issues section.
-
----
-
-<div align="center">
-
-**FileJet — A simpler way to manage your files.**
-
-Built with Nuxt, TypeScript, Prisma, and PostgreSQL.
-
-</div>
+Created and maintained by [Vaxen](https://github.com/vaxen404). Report bugs and suggestions through [GitHub Issues](https://github.com/vaxen404/FileJet/issues).
