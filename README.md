@@ -1,20 +1,27 @@
 <div align="center">
 
-# FileJet
+# 🚀 FileJet
 
 **Your files. Your storage. Your control.**
 
 A self-hosted file manager with folders, notes, public share links, and per-user storage limits.
 
-[Features](#features) · [Technology](#technology) · [Installation](#installation) · [Deployment](#deployment)
+[Features](#-features) · [Technology](#-technology) · [Installation](#-installation) · [Roadmap](#-roadmap)
 
 ![Development](https://img.shields.io/badge/Status-In%20Development-F59E0B?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 
 </div>
 
-## Features
+---
+
+## 📖 Overview
+
+FileJet provides a workspace for organizing files, folders, and notes, monitoring storage usage, and sharing content through public links.
+
+The application is self-hosted. PostgreSQL stores users and item metadata, while uploaded files stay on your local filesystem.
+
+## ✨ Features
 
 ### Files, folders, and notes
 
@@ -54,21 +61,44 @@ A self-hosted file manager with folders, notes, public share links, and per-user
 
 Profile and password changes are stored in PostgreSQL. Appearance and browsing preferences are stored per account in the current browser's `localStorage`; they do not sync across devices.
 
-## Technology
+## 🧰 Technology
 
-| Layer | Technology |
-|---|---|
-| Frontend | Nuxt 4, Vue 3, TypeScript |
-| Styling | Tailwind CSS 4 through `@tailwindcss/vite`, shared theme variables |
-| Server | Node.js, Nitro, H3 |
-| Database | PostgreSQL, Prisma 7, `@prisma/adapter-pg` |
-| Validation and passwords | Zod, Argon2id |
-| ZIP archives | fflate |
-| Media metadata | Optional `ffprobe` |
+**Frontend**
+
+![Nuxt](https://img.shields.io/badge/Nuxt_4-18181B?style=for-the-badge&logo=nuxt&logoColor=00DC82)
+![Vue.js](https://img.shields.io/badge/Vue_3-18181B?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D)
+![TypeScript](https://img.shields.io/badge/TypeScript-18181B?style=for-the-badge&logo=typescript&logoColor=3178C6)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-18181B?style=for-the-badge&logo=tailwindcss&logoColor=06B6D4)
+
+**Backend & Database**
+
+![Node.js](https://img.shields.io/badge/Node.js-18181B?style=for-the-badge&logo=nodedotjs&logoColor=5FA04E)
+![Nitro](https://img.shields.io/badge/Nitro-18181B?style=for-the-badge&logo=nitro&logoColor=FF4088)
+![H3](https://img.shields.io/badge/H3-18181B?style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18181B?style=for-the-badge&logo=postgresql&logoColor=4169E1)
+![Prisma](https://img.shields.io/badge/Prisma_7-18181B?style=for-the-badge&logo=prisma&logoColor=white)
+
+Tailwind CSS runs through `@tailwindcss/vite` with shared theme variables. The backend uses `@prisma/adapter-pg`, Zod for validation, Argon2id for passwords, and fflate for ZIP archives. Optional `ffprobe` support provides technical media metadata.
+
+## 🏗️ Architecture
+
+```text
+             FileJet Web Interface
+                       |
+                  Nuxt / Vue
+                       |
+                Nitro / H3 API
+                       |
+              Application Services
+                 /           \
+           Prisma ORM     Local Filesystem
+                |              |
+           PostgreSQL       storage/
+```
 
 Nuxt serves both the interface and API. PostgreSQL holds users, item metadata, notes, favorites, share settings, and Trash records. Uploaded file contents are saved on the local filesystem under `storage/`.
 
-## Installation
+## 🚀 Installation
 
 ### Requirements
 
@@ -164,7 +194,7 @@ npm run dev
 
 Open [localhost:3000](http://localhost:3000).
 
-## Deployment
+## 🌐 Deployment
 
 Build and start the Node.js server from the project root, with `NODE_ENV=production` set in the deployment environment:
 
@@ -177,7 +207,7 @@ Use HTTPS in production; authentication cookies use the `Secure` flag in product
 
 File paths resolve relative to the process working directory as `storage/<userId>/...`. The application creates storage directories as needed. Keep this directory persistent across restarts and deployments, and back it up together with PostgreSQL. A static-only deployment or an ephemeral filesystem cannot provide the complete application.
 
-## Limits and storage behavior
+## 💾 Limits and storage behavior
 
 - Regular file uploads accept **1–6 files per request**.
 - TXT/Markdown note imports accept up to **10 notes per request**, with a **5 MiB limit per note**.
@@ -186,7 +216,7 @@ File paths resolve relative to the process working directory as `storage/<userId
 - Login, upload, account changes, and sharing endpoints have rate limits.
 - Sessions expire after seven days.
 
-## Project structure
+## 📁 Project Organization
 
 | Path | Purpose |
 |---|---|
@@ -205,7 +235,28 @@ File paths resolve relative to the process working directory as `storage/<userId
 | `public/` | Public static assets |
 | `storage/` | Uploaded file contents, excluded from Git |
 
-## Development commands
+## 🗺️ Roadmap
+
+**Completed**
+
+- [x] User authentication and session handling
+- [x] File uploads with progress, duplicate checks, and storage limits
+- [x] Nested folders, folder uploads, and moving items
+- [x] Individual downloads and ZIP archives
+- [x] File previews and technical media metadata
+- [x] Notes with editing, import, and download
+- [x] Favorites, search, filtering, sorting, and pagination
+- [x] Public links for files, folders, and notes
+- [x] Password-protected links and expiration settings
+- [x] Shared page with checkboxes and bulk link removal
+- [x] Trash with bulk restore, permanent deletion, and Undo
+- [x] Preserving share links when trashed items are restored
+- [x] Username, email, and password settings
+- [x] Accent colors and default grid/list preferences
+- [x] Custom items per page
+- [x] Collapsible account sections and unsaved-change confirmation
+
+## 🛠️ Development commands
 
 ```bash
 npm run typecheck
@@ -223,6 +274,20 @@ npm run storage:recover -- --offline
 
 Recovery removes uncommitted files referenced by upload journals while retaining files referenced in the database, including Trash. It requires the same database and storage directory as the stopped application.
 
-## Maintainer
+## 📌 Development Status
+
+FileJet is under active development. APIs, configuration, and implementation details may change.
+
+## 👨‍💻 Maintainer
 
 Created and maintained by [Vaxen](https://github.com/vaxen404). Report bugs and suggestions through [GitHub Issues](https://github.com/vaxen404/FileJet/issues).
+
+---
+
+<div align="center">
+
+**FileJet — A simpler way to manage your files.**
+
+Built with Nuxt, TypeScript, Tailwind CSS, Prisma, and PostgreSQL.
+
+</div>
