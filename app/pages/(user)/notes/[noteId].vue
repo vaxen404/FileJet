@@ -67,7 +67,7 @@
                 </span>
             </div>
             <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
-                focus:outline-none focus:border-[#5965ed]"
+                focus:outline-none focus:border-accent"
                 id="note-title"
                 ref="titleInput"
                 v-model="draftTitle"
@@ -77,7 +77,7 @@
             />
             <label class="text-white text-sm leading-[inherit] font-medium" for="note-content">Content</label>
             <textarea class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 flex-1 min-h-24
-                resize-none leading-[1.7] focus:outline-none focus:border-[#5965ed]"
+                resize-none leading-[1.7] focus:outline-none focus:border-accent"
                 id="note-content"
                 v-model="draftContent"
                 required
@@ -102,7 +102,7 @@
                 <button
                     type="submit"
                     class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
-                    hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed"
+                    hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="busy || !dirty"
                 >
                     {{ isSaving ? 'Saving...' : 'Save' }}
@@ -117,7 +117,7 @@
             >
                 <label class="text-white text-sm leading-[inherit] font-medium" for="note-edit-title">Note title</label>
                 <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
-                    focus:outline-none focus:border-[#5965ed]"
+                    focus:outline-none focus:border-accent"
                     id="note-edit-title"
                     v-model="draftTitle"
                     maxlength="32"
@@ -143,7 +143,7 @@
                     <button
                         type="submit"
                         class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
-                        hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed"
+                        hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
                         {{ isSaving ? 'Saving...' : 'Save' }}

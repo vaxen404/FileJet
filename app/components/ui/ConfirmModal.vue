@@ -2,25 +2,28 @@
     <Teleport to="body">
         <div
             v-if="show"
-            class="modal-overlay fixed inset-0 flex items-center justify-center bg-black/65 backdrop-blur-xs z-9999"
+            class="modal-overlay fixed inset-0 z-10000 flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs"
             @click.self="emit('cancel')"
         >
-            <div class="confirm-modal w-96 p-6 flex flex-col items-center bg-surface border border-divider rounded-xl
-                shadow-[0_1rem_3rem_rgba(0,_0,_0,_0.45)]">
-                <div class="modal-icon flex items-center justify-center mb-4 bg-[#3a2024] text-[#ff6b6b] rounded-md text-2xl
-                    leading-[inherit] size-[3.2rem]">
-                    <Icon name="solar:danger-triangle-bold" />
-                </div>
+            <div
+                ref="dialog"
+                role="alertdialog"
+                aria-modal="true"
+                :aria-labelledby="titleId"
+                :aria-describedby="messageId"
+                class="confirm-modal w-full max-w-100 rounded-xl border border-divider bg-surface p-6 shadow-2xl"
+                @keydown.esc.prevent.stop="emit('cancel')"
+                @keydown.tab="trapFocus"
+            >
+                <h3 :id="titleId" class="mb-2 text-base font-semibold text-foreground">{{ title }}</h3>
 
-                <h3 class="mt-0 mr-0 mb-2 ml-0 text-white text-[1.1rem] font-semibold">{{ title }}</h3>
+                <p :id="messageId" class="text-sm leading-6 text-label">{{ message }}</p>
 
-                <p class="m-0 text-label text-[0.9rem] text-center leading-normal">{{ message }}</p>
-
-                <div class="modal-actions w-full flex gap-3 mt-6">
+                <div class="modal-actions mt-6 flex justify-end gap-3">
                     <button
+                        ref="cancelButton"
                         type="button"
-                        class="cancel-button flex-1 h-10 rounded-md text-sm font-medium cursor-pointer leading-normal bg-raised
-                        text-white border border-control-border hover:bg-[#2d2d33]"
+                        class="cancel-button h-10 cursor-pointer rounded-control border border-control-border bg-control px-4 text-xs font-medium text-secondary hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         @click="emit('cancel')"
                     >
                         {{ cancelText || 'Cancel' }}
@@ -28,8 +31,8 @@
 
                     <button
                         type="button"
-                        class="confirm-button flex-1 h-10 rounded-md text-sm font-medium cursor-pointer leading-normal bg-[#b91c1c]
-                        text-white border-0 hover:bg-[#dc2626]"
+                        class="confirm-button h-10 cursor-pointer rounded-control border px-4 text-xs font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        :class="variant === 'danger' ? 'border-red-700 bg-red-700 hover:bg-red-600' : 'border-primary bg-primary hover:brightness-110'"
                         @click="emit('confirm')"
                     >
                         {{ confirmText || 'Confirm' }}
@@ -41,16 +44,53 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = withDefaults(defineProps<{
     show: boolean
     title: string
     message: string
     confirmText?: string
     cancelText?: string
-}>()
+    variant?: 'danger' | 'neutral'
+}>(), { variant: 'danger' })
 
 const emit = defineEmits<{
     confirm: []
     cancel: []
 }>()
+
+const dialog = ref<HTMLElement | null>(null)
+const cancelButton = ref<HTMLButtonElement | null>(null)
+const id = useId()
+const titleId = `${id}-title`
+const messageId = `${id}-message`
+let previousFocus: HTMLElement | null = null
+
+watch(() => props.show, async show => {
+    if (!import.meta.client) return
+
+    if (show) {
+        previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        await nextTick()
+        if (props.show) cancelButton.value?.focus()
+    } else {
+        if (previousFocus?.isConnected) previousFocus.focus()
+        previousFocus = null
+    }
+}, { immediate: true, flush: 'post' })
+
+const trapFocus = (event: KeyboardEvent) => {
+    const buttons = dialog.value?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')
+    if (!buttons?.length) return
+
+    const first = buttons[0]
+    const last = buttons[buttons.length - 1]
+
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last?.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first?.focus()
+    }
+}
 </script>

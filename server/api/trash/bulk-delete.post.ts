@@ -3,7 +3,7 @@ import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
 import { unlink } from 'node:fs/promises'
-import path from 'node:path'
+import { resolveTrashStoragePath } from '~~/server/utils/trashStorage'
 
 export default defineEventHandler(async event => {
     try {
@@ -110,17 +110,9 @@ export default defineEventHandler(async event => {
                     if (item.item_type === 'file') {
                         const key = item.storage_key
 
-                        if (
-                            !key ||
-                            key === '.' ||
-                            key === '..' ||
-                            path.basename(key) !== key ||
-                            key.includes('/') ||
-                            key.includes('\\') ||
-                            key.includes('\0')
-                        ) {
-                            throwError(409, 'Invalid storage key.')
-                        }
+                        if (!key) throwError(409, 'File storage key is missing.')
+
+                        resolveTrashStoragePath(session.userId, key)
 
                         storageKeys.add(key)
                     }
@@ -163,6 +155,16 @@ export default defineEventHandler(async event => {
                     }
                 }
 
+                await tx.shared_items.deleteMany({
+                    where: {
+                        user_id: session.userId,
+                        OR: ['file', 'folder', 'note'].map(type => ({
+                            item_type: type,
+                            item_id: { in: selectedItems.filter(item => item.item_type === type).map(item => item.item_id) }
+                        }))
+                    }
+                })
+
                 const deleted = await tx.trash.deleteMany({
                     where: {
                         user_id: session.userId,
@@ -191,7 +193,7 @@ export default defineEventHandler(async event => {
         let diskDeleted = true
 
         for (const storageKey of result.storageKeys) {
-            const filePath = path.join(process.cwd(), 'storage', session.userId, storageKey)
+            const filePath = resolveTrashStoragePath(session.userId, storageKey)
 
             try {
                 await unlink(filePath)

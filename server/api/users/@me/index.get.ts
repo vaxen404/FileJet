@@ -1,3 +1,4 @@
+import { throwError } from '~~/server/utils/error'
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 
@@ -6,10 +7,7 @@ export default defineEventHandler(async event => {
         const session = getAuthSession(event)
 
         if (!session) {
-            throw createError({
-                statusCode: 401,
-                message: 'Oturum açmanız gerekiyor.'
-            })
+            throwError(401, 'You need to be logged in.')
         }
 
         const user = await prisma.users.findUnique({
@@ -27,10 +25,7 @@ export default defineEventHandler(async event => {
         })
 
         if (!user) {
-            throw createError({
-                statusCode: 401,
-                message: 'Geçersiz oturum.'
-            })
+            throwError(401, 'Invalid session.')
         }
 
         return {
@@ -44,9 +39,6 @@ export default defineEventHandler(async event => {
     } catch (err: any) {
         if (err.statusCode) throw err
 
-        throw createError({
-            statusCode: 500,
-            message: 'Kullanıcı bilgileri alınırken bir hata oluştu.'
-        })
+        throwError(500, 'Failed to fetch user information.')
     }
 })

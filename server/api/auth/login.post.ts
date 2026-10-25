@@ -1,3 +1,4 @@
+import { throwError } from '~~/server/utils/error'
 import argon2 from 'argon2'
 import { prisma } from '~~/server/utils/prisma'
 import { enforceRateLimit } from '~~/server/utils/rateLimit'
@@ -15,10 +16,7 @@ export default defineEventHandler(async event => {
             !username.trim() ||
             !password
         ) {
-            throw createError({
-                statusCode: 401,
-                message: 'Kullanıcı adı veya şifre hatalı.'
-            })
+            throwError(401, 'Invalid username or password.')
         }
 
         const user = await prisma.users.findUnique({
@@ -28,19 +26,13 @@ export default defineEventHandler(async event => {
         })
 
         if (!user) {
-            throw createError({
-                statusCode: 401,
-                message: 'Kullanıcı adı veya şifre hatalı.'
-            })
+            throwError(401, 'Invalid username or password.')
         }
 
         const isPasswordCorrect = await argon2.verify(user.password_hash, password)
 
         if (!isPasswordCorrect) {
-            throw createError({
-                statusCode: 401,
-                message: 'Kullanıcı adı veya şifre hatalı.'
-            })
+            throwError(401, 'Invalid username or password.')
         }
 
         setAuthSession(event, user.id)
@@ -60,9 +52,6 @@ export default defineEventHandler(async event => {
 
         if (err.statusCode) throw err
 
-        throw createError({
-            statusCode: 500,
-            message: 'Giriş aşamasında bilinmeyen bir hata oluştu!'
-        })
+        throwError(500, 'An unexpected error occurred while logging in.')
     }
 })

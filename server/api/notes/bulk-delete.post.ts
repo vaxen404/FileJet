@@ -60,16 +60,6 @@ export default defineEventHandler(async event => {
                 }
             })
 
-            await tx.shared_items.deleteMany({
-                where: {
-                    user_id: session.userId,
-                    item_id: {
-                        in: noteIds
-                    },
-                    item_type: 'note'
-                }
-            })
-
             const deleted = await tx.notes.deleteMany({
                 where: {
                     user_id: session.userId,

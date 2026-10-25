@@ -10,7 +10,7 @@
                     <NuxtLink
                         :to="fileHeader.returnPath"
                         class="header-back inline-flex items-center gap-2 shrink-0 text-accent no-underline font-medium
-                        hover:text-[#b5acff]"
+                        hover:text-accent"
                     >
                         <Icon
                             name="solar:arrow-left-linear"
@@ -71,7 +71,8 @@ defineProps({
     }
 })
 
-const avatar = ref('VX')
+const currentUser = useAuthUser()
+const avatar = computed(() => currentUser.value?.username.slice(0, 2).toUpperCase() || 'FJ')
 const fileHeader = useFileHeader()
 const route = useRoute()
 

@@ -29,7 +29,7 @@
                     </button>
                 </div>
                 <nav class="breadcrumbs flex items-center gap-1 overflow-x-auto mt-2 mr-0 mb-3 ml-0">
-                    <button class="inline-flex items-center justify-center gap-2 min-h-8 py-0 px-2 text-[#b1a5ff] bg-transparent
+                    <button class="inline-flex items-center justify-center gap-2 min-h-8 py-0 px-2 text-accent bg-transparent
                         border-0 rounded-control text-control-size cursor-pointer shrink-0 max-w-56 overflow-hidden
                         text-ellipsis whitespace-nowrap hover:enabled:bg-control-border disabled:opacity-40
                         disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
@@ -45,7 +45,7 @@
                         :key="folder.id"
                     >
                         <Icon class="shrink-0 text-muted" name="solar:alt-arrow-right-linear" />
-                        <button class="inline-flex items-center justify-center gap-2 min-h-8 py-0 px-2 text-[#b1a5ff] bg-transparent
+                        <button class="inline-flex items-center justify-center gap-2 min-h-8 py-0 px-2 text-accent bg-transparent
                             border-0 rounded-control text-control-size cursor-pointer shrink-0 max-w-56 overflow-hidden
                             text-ellipsis whitespace-nowrap hover:enabled:bg-control-border disabled:opacity-40
                             disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
@@ -112,7 +112,7 @@
                         >
                             <Icon
                                 name="solar:folder-bold"
-                                class="folder-icon text-[#b1a5ff] text-lg leading-[inherit] shrink-0 size-4.5"
+                                class="folder-icon text-accent text-lg leading-[inherit] shrink-0 size-4.5"
                             />
                             <span class="folder-name flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{{ folder.name }}</span>
                             <Icon class="text-lg leading-[inherit] shrink-0 size-4.5" name="solar:alt-arrow-right-linear" />
@@ -154,7 +154,7 @@
                         <button
                             type="button"
                             class="primary inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-white bg-primary border
-                            rounded-control text-control-size cursor-pointer border-primary hover:enabled:bg-[#4a56d4]
+                            rounded-control text-control-size cursor-pointer border-primary hover:enabled:bg-primary/85
                             disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                             focus-visible:-outline-offset-2"
                             :disabled="!canMove"

@@ -1,10 +1,10 @@
-import { createError } from 'h3'
+import { throwError } from './error'
 import { prisma } from './prisma'
 import { isUuid } from './validation'
 import type { LibraryItem } from '../../shared/types/library'
 
 export async function requireFolderWithin(userId: string, rootId: string, folderId: string) {
-    if (!isUuid(folderId)) throw createError({ statusCode: 400, message: 'Invalid folder ID.' })
+    if (!isUuid(folderId)) throwError(400, 'Invalid folder ID.')
 
     const visited = new Set<string>()
     let current: string | null = folderId
@@ -25,7 +25,7 @@ export async function requireFolderWithin(userId: string, rootId: string, folder
         current = folder.parent_folder_id
     }
 
-    throw createError({ statusCode: 404, message: 'Item not found in this shared folder.' })
+    throwError(404, 'Item not found in this shared folder.')
 }
 
 export async function getFolderTree(userId: string, rootId: string) {

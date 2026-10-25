@@ -1,3 +1,4 @@
+import { throwError } from './error'
 import crypto from 'node:crypto'
 import type { H3Event } from 'h3'
 
@@ -13,10 +14,7 @@ function getSessionSecret() {
     const secret = process.env.AUTH_SECRET
 
     if (!secret || secret.length < 32) {
-        throw createError({
-            statusCode: 500,
-            message: 'AUTH_SECRET eksik veya çok kısa.'
-        })
+        throwError(500, 'AUTH_SECRET is missing or too short.')
     }
 
     return secret

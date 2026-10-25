@@ -97,7 +97,7 @@
 @utility file-checkbox {
     @apply relative m-0 grid size-[1.1rem] shrink-0 cursor-pointer appearance-none place-items-center rounded-sm border border-[#505057] bg-control;
     @apply transition-colors duration-200 ease-[ease] enabled:hover:border-accent;
-    @apply checked:border-[#5965ed] checked:bg-primary indeterminate:border-[#5965ed] indeterminate:bg-primary;
+    @apply checked:border-primary checked:bg-primary indeterminate:border-primary indeterminate:bg-primary;
     @apply checked:after:-mt-[0.15rem] checked:after:h-[0.55rem] checked:after:w-[0.3rem] checked:after:rotate-45;
     @apply checked:after:border-r-2 checked:after:border-b-2 checked:after:border-white checked:after:content-[''];
     @apply indeterminate:after:m-0 indeterminate:after:h-[2px] indeterminate:after:w-[0.55rem] indeterminate:after:rotate-0;
@@ -119,7 +119,7 @@
     @apply block w-full min-w-0 min-h-6 overflow-hidden text-ellipsis whitespace-nowrap;
     @apply rounded-md border border-transparent bg-transparent p-0 text-sm leading-normal font-semibold text-foreground outline-none;
     @apply disabled:opacity-100 disabled:[-webkit-text-fill-color:#f3f3f5] disabled:cursor-pointer;
-    @apply is-active:border-[#7063d8] is-active:px-1 is-active:py-0;
+    @apply is-active:border-accent is-active:px-1 is-active:py-0;
 }
 
 /* Preserve DetailsPanel's public slot classes and optional SVG icon mode. */

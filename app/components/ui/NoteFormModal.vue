@@ -15,7 +15,7 @@
                 >
                     <div class="note-modal-header flex items-center gap-3 justify-between">
                         <div class="header-left flex items-center gap-3">
-                            <div class="note-icon flex items-center justify-center shrink-0 text-accent bg-[#29215c] rounded-md size-10">
+                            <div class="note-icon flex items-center justify-center shrink-0 text-accent bg-accent/12 rounded-md size-10">
                                 <Icon name="solar:notes-bold-duotone" />
                             </div>
 
@@ -57,7 +57,7 @@
                                 </div>
 
                                 <input class="w-full min-w-0 p-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md text-sm
-                                    leading-normal outline-none focus:border-[#5965ed] disabled:opacity-60 disabled:cursor-wait"
+                                    leading-normal outline-none focus:border-accent disabled:opacity-60 disabled:cursor-wait"
                                     id="note-form-title"
                                     ref="titleInput"
                                     v-model="title"
@@ -78,7 +78,7 @@
                                 </div>
 
                                 <textarea class="w-full min-w-0 p-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md text-sm
-                                    leading-normal outline-none resize-y min-h-32 focus:border-[#5965ed] disabled:opacity-60
+                                    leading-normal outline-none resize-y min-h-32 focus:border-accent disabled:opacity-60
                                     disabled:cursor-wait"
                                     id="note-form-content"
                                     v-model="content"
@@ -113,7 +113,7 @@
                                     type="submit"
                                     class="save-btn inline-flex items-center justify-center gap-2 min-h-10 py-2 px-3 border rounded-md
                                     text-white bg-primary [font-family:inherit] text-sm font-medium leading-normal cursor-pointer
-                                    border-primary hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-wait
+                                    border-primary hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-wait
                                     focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                                     :disabled="!canSubmit"
                                 >

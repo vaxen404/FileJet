@@ -21,7 +21,7 @@
                         type="button"
                         class="new-note-button h-control shrink-0 whitespace-nowrap flex items-center justify-center gap-2 py-0 px-3
                         bg-primary text-white border-0 rounded-control text-control-size font-medium cursor-pointer
-                        transition-[background,transform] duration-200 ease-[ease] leading-normal hover:bg-[#4a56d4]
+                        transition-[background,transform] duration-200 ease-[ease] leading-normal hover:bg-primary/85
                         hover:-translate-y-px active:translate-y-0"
                         @click="createNote"
                     >
@@ -104,7 +104,7 @@
                         </thead>
 
                         <tbody>
-                            <tr class="hover:bg-surface-hover selected:bg-[#201d2d]"
+                            <tr class="hover:bg-surface-hover selected:bg-accent/8"
                                 v-for="note in paginatedNotes"
                                 :key="note.id"
                                 :class="{ selected: selectedNotes.includes(note.id) }"
@@ -123,8 +123,8 @@
 
                                 <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
                                     <div class="note-name flex items-center gap-3">
-                                        <div class="note-icon flex items-center justify-center shrink-0 text-[#9c8cff] bg-[#29215c] border
-                                            border-[#443b82] rounded-md text-[1.2rem] size-10">
+                                        <div class="note-icon flex items-center justify-center shrink-0 text-accent bg-accent/12 border
+                                            border-accent/25 rounded-md text-[1.2rem] size-10">
                                             <Icon name="solar:notebook-bold" />
                                         </div>
 
@@ -283,6 +283,7 @@ if (error.value) {
 const searchQuery = ref('')
 const viewMode = ref<'list' | 'grid'>('grid')
 const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
+const { itemsPerPage } = useBrowsePreferences(viewMode, sortMode)
 
 const filteredNotes = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
@@ -298,8 +299,6 @@ const { sortedItems: sortedNotes } = useSort(
     note => note.title,
     note => note.created_at
 )
-
-const itemsPerPage = computed(() => (viewMode.value === 'list' ? 12 : 24))
 
 const {
     currentPage,

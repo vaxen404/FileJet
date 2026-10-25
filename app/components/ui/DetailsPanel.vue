@@ -6,7 +6,7 @@
                 class="actions-btn details-action-icons download w-full min-w-0 h-10 py-0 px-2 flex items-center
                 justify-center gap-2 bg-primary text-white border rounded-md text-sm font-medium whitespace-nowrap
                 cursor-pointer transition-colors duration-200 ease-[ease] leading-normal border-primary
-                hover:bg-[#4652d1] hover:text-white hover:border-[#4652d1] nth-2:row-start-2 nth-2:col-start-1
+                hover:bg-primary/85 hover:text-white hover:border-primary nth-2:row-start-2 nth-2:col-start-1
                 max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
                 @click="emit('download')"
             >

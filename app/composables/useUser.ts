@@ -1,7 +1,7 @@
 interface UserData {
     id: string
     username: string
-    email: string
+    email: string | null
     storageLimit: number | string
     storageUsed: number | string
     createdAt: string | null

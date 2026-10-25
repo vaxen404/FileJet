@@ -10,7 +10,7 @@
         >
             <form class="p-6" @submit.prevent="save">
                 <div class="modal-header flex items-center gap-3">
-                    <div class="modal-icon grid place-items-center shrink-0 text-[#6ea8ff] bg-[#1f2d4a] rounded-[10px] text-2xl
+                    <div class="modal-icon grid place-items-center shrink-0 text-accent bg-accent/12 rounded-[10px] text-2xl
                         leading-[inherit] size-11"><Icon name="solar:folder-bold" /></div>
                     <div class="modal-heading flex-1 min-w-0">
                         <h2 class="m-0 text-[1.1rem]" :id="`${id}-title`">
@@ -75,7 +75,7 @@
                     <button
                         type="submit"
                         class="save-button inline-flex items-center justify-center gap-2 min-h-10 py-0 px-[0.9rem] border rounded-md
-                        text-sm cursor-pointer text-white bg-primary border-primary hover:enabled:bg-[#4a56d4]
+                        text-sm cursor-pointer text-white bg-primary border-primary hover:enabled:bg-primary/85
                         disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-3 leading-[inherit]"
                         :disabled="!canSubmit"

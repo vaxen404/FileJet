@@ -1,3 +1,4 @@
+import { throwError } from '~~/server/utils/error'
 import { getAuthSession } from '../../../utils/auth'
 import { isUuid } from '../../../utils/validation'
 import { createFolderArchive } from '../../../utils/folderArchive'
@@ -5,12 +6,12 @@ import { createFolderArchive } from '../../../utils/folderArchive'
 export default defineEventHandler(async event => {
     const session = getAuthSession(event)
 
-    if (!session) throw createError({ statusCode: 401, message: 'You need to be logged in.' })
+    if (!session) throwError(401, 'You need to be logged in.')
 
     const folderId = getRouterParam(event, 'folderId')
 
     if (!folderId || !isUuid(folderId))
-        throw createError({ statusCode: 400, message: 'Invalid folder ID.' })
+        throwError(400, 'Invalid folder ID.')
 
     enforceRateLimit(event, 'folders-download:' + session.userId, 10, 60000)
 
@@ -29,9 +30,9 @@ export default defineEventHandler(async event => {
         if (error.statusCode) throw error
 
         if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
-            throw createError({ statusCode: 404, message: 'A stored file is missing.' })
+            throwError(404, 'A stored file is missing.')
         }
 
-        throw createError({ statusCode: 500, message: 'Could not download folder.' })
+        throwError(500, 'Could not download folder.')
     }
 })

@@ -77,7 +77,7 @@
                                 </td>
                                 <td class="p-3 border-b border-b-divider">
                                     <div class="item-name flex items-center gap-3 min-w-0">
-                                        <span class="item-icon grid place-items-center shrink-0 rounded-[10px] bg-[#282354] text-accent text-control-icon
+                                        <span class="item-icon grid place-items-center shrink-0 rounded-[10px] bg-accent/12 text-accent text-control-icon
                                             size-[2.7rem]"><Icon :name="icon(item)" /></span>
                                         <strong class="max-w-72 overflow-hidden text-ellipsis whitespace-nowrap" :title="item.name">{{ item.name }}</strong>
                                     </div>

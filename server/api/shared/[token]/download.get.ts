@@ -1,3 +1,4 @@
+import { throwError } from '~~/server/utils/error'
 import { getSharedTarget } from '../../../utils/sharedTarget'
 import { createFolderArchive } from '../../../utils/folderArchive'
 import { enforceRateLimit } from '../../../utils/rateLimit'
@@ -36,8 +37,7 @@ export default defineEventHandler(async event => {
     }
 
     if (target.type !== 'file') {
-        throw createError({
-            statusCode: 404,
+        throwError(404, 'Shared file not found', {
             statusMessage: 'Shared file not found'
         })
     }
@@ -50,8 +50,7 @@ export default defineEventHandler(async event => {
     })
 
     if (!file) {
-        throw createError({
-            statusCode: 404,
+        throwError(404, 'File not found', {
             statusMessage: 'File not found'
         })
     }
@@ -60,8 +59,7 @@ export default defineEventHandler(async event => {
     const filePath = resolve(storageDirectory, file.storage_key)
 
     if (!filePath.startsWith(storageDirectory + sep)) {
-        throw createError({
-            statusCode: 403,
+        throwError(403, 'Invalid file path', {
             statusMessage: 'Invalid file path'
         })
     }
@@ -73,15 +71,13 @@ export default defineEventHandler(async event => {
     } catch (error: any) {
         if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error
 
-        throw createError({
-            statusCode: 404,
+        throwError(404, 'File not found on disk', {
             statusMessage: 'File not found on disk'
         })
     }
 
     if (!fileStat.isFile()) {
-        throw createError({
-            statusCode: 404,
+        throwError(404, 'Invalid file', {
             statusMessage: 'Invalid file'
         })
     }

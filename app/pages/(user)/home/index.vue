@@ -2,7 +2,7 @@
     <div class="dashboard-page flex flex-col gap-3 size-full">
         <section class="stats-grid grid grid-cols-[repeat(3,_1fr)] gap-3 shrink-0">
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
-                <div class="stat-icon purple-bg flex items-center justify-center text-[#7777ff] bg-[#29215c] rounded-[0.675rem]
+                <div class="stat-icon purple-bg flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem]
                     text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:document-linear"
@@ -17,11 +17,11 @@
             </div>
 
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
-                <div class="stat-icon blue-bg flex items-center justify-center text-[#7777ff] bg-[#152c49] rounded-[0.675rem]
+                <div class="stat-icon blue-bg flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem]
                     text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:folder-linear"
-                        class="blue text-[#5da9ff]"
+                        class="blue text-accent"
                     />
                 </div>
 
@@ -32,11 +32,11 @@
             </div>
 
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
-                <div class="stat-icon green-bg flex items-center justify-center text-[#7777ff] bg-[#153a29] rounded-[0.675rem]
+                <div class="stat-icon flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem]
                     text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:notebook-linear"
-                        class="green text-[#55db8c]"
+                        class="text-accent"
                     />
                 </div>
 
@@ -54,8 +54,8 @@
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
                         <h2 class="m-0 text-white text-lg font-semibold leading-tight">Recent Files</h2>
 
-                        <NuxtLink class="flex items-center gap-[0.3rem] text-[#7777ff] no-underline text-sm font-medium leading-normal
-                            hover:text-[#9999ff]" to="/files">
+                        <NuxtLink class="flex items-center gap-[0.3rem] text-accent no-underline text-sm font-medium leading-normal
+                            hover:text-accent" to="/files">
                             View all
                             <Icon name="solar:arrow-right-linear" />
                         </NuxtLink>
@@ -71,7 +71,7 @@
                             class="empty-files flex-1 min-h-48 flex flex-col justify-center items-center gap-[0.45rem] text-muted
                             text-center"
                         >
-                            <div class="empty-files-icon mb-2 flex items-center justify-center text-3xl leading-[inherit] text-[#6f74ff]
+                            <div class="empty-files-icon mb-2 flex items-center justify-center text-3xl leading-[inherit] text-accent
                                 size-[3.2rem]">
                                 <Icon class="text-[0.825rem] text-muted"
                                     name="solar:file-bold"
@@ -85,8 +85,8 @@
 
                             <NuxtLink
                                 to="/files"
-                                class="empty-files-link mt-[0.35rem] flex items-center gap-1 text-[#767cff] text-[0.825rem] font-medium
-                                no-underline hover:text-[#9297ff]"
+                                class="empty-files-link mt-[0.35rem] flex items-center gap-1 text-accent text-[0.825rem] font-medium
+                                no-underline hover:text-accent"
                             >
                                 Open Files
                                 <Icon class="text-[0.825rem] text-muted" name="solar:arrow-right-linear" />
@@ -100,7 +100,7 @@
                                 @click="openFile(file)"
                             >
                                 <div class="file-left flex-1 min-w-0 flex items-center gap-[0.85rem]">
-                                    <div class="file-icon shrink-0 flex items-center justify-center text-accent bg-[#29215c] rounded-md text-xl
+                                    <div class="file-icon shrink-0 flex items-center justify-center text-accent bg-accent/12 rounded-md text-xl
                                         leading-[inherit] size-10">
                                         <Icon
                                             :name="getFileIcon(file.mime_type, file.original_name)"
@@ -118,7 +118,7 @@
                                             v-model="editingFileName"
                                             type="text"
                                             class="file-name-input w-full min-w-0 py-1 px-2 text-white bg-control border border-primary rounded-md
-                                            text-sm font-semibold outline-none leading-normal focus-visible:border-[#5965ed]"
+                                            text-sm font-semibold outline-none leading-normal focus-visible:border-accent"
                                             :readonly="isSavingRename"
                                             @keydown.enter.prevent="saveRename(file)"
                                             @keydown.esc.prevent="cancelRename"
@@ -235,7 +235,7 @@
                             duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
                             <div class="quick-action-icon upload-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
-                                text-white bg-[#356de8] size-[3.4rem]">
+                                text-white bg-primary size-[3.4rem]">
                                 <Icon name="solar:upload-linear" />
                             </div>
 
@@ -250,7 +250,7 @@
                             duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
                             <div class="quick-action-icon folder-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
-                                text-[#5da9ff] bg-[#173655] border border-[#234c70] size-[3.4rem]">
+                                text-accent bg-accent/12 border border-accent/25 size-[3.4rem]">
                                 <Icon name="solar:add-linear" />
                             </div>
 
@@ -264,7 +264,7 @@
                             duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
                             <div class="quick-action-icon note-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
-                                text-[#55db8c] bg-[#16452d] border border-[#1d5d3a] size-[3.4rem]">
+                                text-accent bg-accent/12 border border-accent/25 size-[3.4rem]">
                                 <Icon name="solar:notebook-linear" />
                             </div>
 
@@ -278,7 +278,7 @@
                             duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
                         >
                             <div class="quick-action-icon inbox-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
-                                text-white bg-[#5c2ca7] border border-[#7138c2] size-[3.4rem]">
+                                text-white bg-primary border border-primary size-[3.4rem]">
                                 <Icon
                                     name="solar:users-group-rounded-linear"
                                     class=""
@@ -472,13 +472,15 @@ const othersSize = ref(0)
     box-shadow: none;
 }
 
-.storage-meter::-webkit-meter-optimum-value {
-    background: #4242fc;
+.storage-meter::-webkit-meter-optimum-value,
+.storage-meter::-webkit-meter-suboptimum-value,
+.storage-meter::-webkit-meter-even-less-good-value {
+    background: var(--color-accent);
     border-radius: 4px;
 }
 
 .storage-meter::-moz-meter-bar {
-    background: #4242fc;
+    background: var(--color-accent);
     border-radius: 4px;
 }
 </style>

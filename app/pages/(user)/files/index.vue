@@ -103,7 +103,7 @@
                                 v-for="file in paginatedFiles"
                                 :key="file.id"
                                 :class="selectedFiles.includes(file.id)
-                                    ? 'bg-[#242642] text-[#d1d2e5] hover:bg-[#292c4d]'
+                                    ? 'bg-accent/12 text-[#d1d2e5] hover:bg-accent/18'
                                     : 'hover:bg-[#1f1f23]'"
                                 @click="openFile(file)"
                                 @contextmenu.prevent.stop="openContextMenu($event, file.id)"
@@ -123,7 +123,7 @@
                                         <div
                                             class="file-icon flex shrink-0 items-center justify-center rounded-md text-white text-[1.15rem]
                                             size-[2.4rem]"
-                                            :class="selectedFiles.includes(file.id) ? 'bg-[#343c8f]' : 'bg-[#3c47be]'"
+                                            :class="selectedFiles.includes(file.id) ? 'bg-primary/80' : 'bg-primary'"
                                         >
                                             <Icon
                                                 :name="
@@ -400,6 +400,7 @@ const filteredFiles = computed(() => {
 })
 
 const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
+const { itemsPerPage } = useBrowsePreferences(viewMode, sortMode)
 
 const { sortedItems: sortedFiles } = useSort(
     filteredFiles,
@@ -512,10 +513,6 @@ const handleFavorite = async (file: any) => {
         openToast(err.data?.message || err.message || 'File could not be favorited', 'error')
     }
 }
-
-const itemsPerPage = computed(() => {
-    return viewMode.value === 'list' ? 12 : 24
-})
 
 const {
     currentPage,

@@ -86,7 +86,7 @@
             >
                 <label class="text-white text-sm leading-[inherit]" for="folder-name">Folder name</label>
                 <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
-                    focus:outline-none focus:border-[#5965ed]"
+                    focus:outline-none focus:border-accent"
                     id="folder-name"
                     ref="nameInput"
                     v-model="draftName"
@@ -118,7 +118,7 @@
                     <button
                         type="submit"
                         class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
-                        hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed"
+                        hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
                         {{ isSaving ? 'Saving...' : 'Save' }}

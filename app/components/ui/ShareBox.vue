@@ -22,7 +22,7 @@
                 class="share-link flex gap-2 mb-2"
             >
                 <input class="flex-1 min-w-0 w-full h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border
-                    rounded-md text-sm outline-none focus:border-[#5965ed] disabled:opacity-60
+                    rounded-md text-sm outline-none focus:border-accent disabled:opacity-60
                     disabled:cursor-not-allowed leading-[inherit]"
                     :value="state.url"
                     type="text"
@@ -70,7 +70,7 @@
                         state.hasPassword ? 'Change password' : 'Link password'
                     }}</label>
                     <input class="w-full min-w-0 h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md
-                        text-sm outline-none focus:border-[#5965ed] disabled:opacity-60 disabled:cursor-not-allowed
+                        text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
                         leading-[inherit]"
                         :id="`share-password-${itemId}`"
                         v-model="password"
@@ -93,7 +93,7 @@
                 <div class="setting-field flex flex-col gap-2">
                     <label class="text-[#d5d5da] text-sm leading-normal" :for="`share-expiration-${itemId}`">Link expiration</label>
                     <select class="w-full min-w-0 h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md
-                        text-sm outline-none focus:border-[#5965ed] disabled:opacity-60 disabled:cursor-not-allowed
+                        text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
                         leading-[inherit]"
                         :id="`share-expiration-${itemId}`"
                         v-model="expiration"
@@ -106,7 +106,7 @@
                         <option value="custom">Custom expiration date</option>
                     </select>
                     <input class="w-full min-w-0 h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md
-                        text-sm outline-none focus:border-[#5965ed] disabled:opacity-60 disabled:cursor-not-allowed
+                        text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
                         leading-[inherit]"
                         v-if="expiration === 'custom'"
                         v-model="customExpiration"
@@ -132,7 +132,7 @@
                         type="submit"
                         class="create-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
                         font-medium leading-normal cursor-pointer bg-primary text-white border border-primary
-                        hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
+                        hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:outline-offset-2"
                         :disabled="busy"
                     >
@@ -140,7 +140,7 @@
                         {{ isSaving ? 'Saving...' : state.url ? 'Save settings' : 'Create Link' }}
                     </button>
                     <button
-                        v-if="state.url"
+                        v-if="state.url && allowRemove"
                         type="button"
                         class="remove-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
                         font-medium leading-normal cursor-pointer bg-transparent text-[#ff6b6b] border border-[#4a292d]
@@ -159,7 +159,7 @@
             type="button"
             class="create-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
             font-medium leading-normal cursor-pointer bg-primary text-white border border-primary
-            hover:enabled:bg-[#4652d1] disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
+            hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
             focus-visible:outline-accent focus-visible:outline-offset-2"
             @click="loadShareLink"
         >
@@ -177,11 +177,12 @@ const props = withDefaults(
         itemType: 'file' | 'folder' | 'note'
         initialState?: ShareState
         embedded?: boolean
+        allowRemove?: boolean
     }>(),
-    { embedded: false }
+    { embedded: false, allowRemove: true }
 )
 
-const emit = defineEmits<{ changed: [state: ShareState] }>()
+const emit = defineEmits<{ changed: [state: ShareState]; 'saving-change': [saving: boolean] }>()
 const { openToast } = useToast()
 const state = ref<ShareState>(emptyShareState())
 const passwordEnabled = ref(false)
@@ -196,6 +197,8 @@ const savedMessage = ref('')
 const loadFailed = ref(false)
 
 const busy = computed(() => isLoading.value || isSaving.value || loadFailed.value)
+
+watch(isSaving, value => emit('saving-change', value))
 
 let requestId = 0
 let copyTimer: ReturnType<typeof setTimeout> | undefined

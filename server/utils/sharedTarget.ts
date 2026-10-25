@@ -1,4 +1,5 @@
-import { createError, getQuery, type H3Event } from 'h3'
+import { throwError } from './error'
+import { getQuery, type H3Event } from 'h3'
 import { getPublicShare } from './shares'
 import { prisma } from './prisma'
 import { isUuid } from './validation'
@@ -18,7 +19,7 @@ export async function getSharedTarget(event: H3Event) {
                 !isUuid(query.itemId) ||
                 !['file', 'folder', 'note'].includes(String(query.itemType))
             ) {
-                throw createError({ statusCode: 400, message: 'Invalid shared item.' })
+                throwError(400, 'Invalid shared item.')
             }
 
             id = query.itemId
@@ -37,13 +38,13 @@ export async function getSharedTarget(event: H3Event) {
                 ? await prisma.folders.findFirst({ where })
                 : null
 
-    if (!item) throw createError({ statusCode: 404, message: 'Shared item not found.' })
+    if (!item) throwError(404, 'Shared item not found.')
 
     if (share.item_type === 'folder') {
         const folderId = type === 'folder' ? item.id : 'folder_id' in item ? item.folder_id : null
 
         if (!folderId)
-            throw createError({ statusCode: 404, message: 'Item not found in this shared folder.' })
+            throwError(404, 'Item not found in this shared folder.')
 
         await requireFolderWithin(share.user_id, share.item_id, folderId)
     }

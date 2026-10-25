@@ -5,7 +5,7 @@
         hover:bg-control hover:border-[#454550] selected:border-[#454550]"
         :class="{ selected }"
     >
-        <div class="file-preview relative w-full rounded-preview aspect-4/3 overflow-hidden bg-[#141417] shrink-0" :class="{ 'after:absolute after:inset-0 after:z-1 after:rounded-[inherit] after:border-2 after:border-[#7865ee] after:pointer-events-none': selected }">
+        <div class="file-preview relative w-full rounded-preview aspect-4/3 overflow-hidden bg-[#141417] shrink-0" :class="{ 'after:absolute after:inset-0 after:z-1 after:rounded-[inherit] after:border-2 after:border-accent after:pointer-events-none': selected }">
             <slot name="preview"
                 ><div class="file-preview-placeholder h-full flex items-center justify-center text-highlight text-[3.5rem]"><Icon :name="icon" /></div
             ></slot>

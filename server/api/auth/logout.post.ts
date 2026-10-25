@@ -1,3 +1,4 @@
+import { throwError } from '~~/server/utils/error'
 export default defineEventHandler(event => {
     try {
         clearAuthSession(event)
@@ -6,9 +7,6 @@ export default defineEventHandler(event => {
             success: true
         }
     } catch {
-        throw createError({
-            statusCode: 500,
-            message: 'Çıkış yapılırken bir hata oluştu.'
-        })
+        throwError(500, 'An error occurred while logging out.')
     }
 })

@@ -1,5 +1,6 @@
+import { throwError } from './error'
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
-import { createError, getCookie, setCookie, setHeader, type H3Event } from 'h3'
+import { getCookie, setCookie, setHeader, type H3Event } from 'h3'
 
 export interface ShareAccess {
     token: string
@@ -17,7 +18,7 @@ const secret = () => {
     const value = process.env.AUTH_SECRET
 
     if (!value || value.length < 32)
-        throw createError({ statusCode: 500, message: 'Share authentication is not configured.' })
+        throwError(500, 'Share authentication is not configured.')
 
     return value
 }
@@ -71,16 +72,14 @@ export function assertShareNotExpired(event: H3Event, share: ShareAccess) {
     setHeader(event, 'Cache-Control', 'no-store')
 
     if (shareExpired(share))
-        throw createError({ statusCode: 410, message: 'This share link has expired.' })
+        throwError(410, 'This share link has expired.')
 }
 
 export function assertShareAccess(event: H3Event, share: ShareAccess) {
     assertShareNotExpired(event, share)
 
     if (share.password_hash && !validShareGrant(getCookie(event, cookieName(share.token)), share)) {
-        throw createError({
-            statusCode: 401,
-            message: 'A password is required for this share link.',
+        throwError(401, 'A password is required for this share link.', {
             data: { passwordRequired: true }
         })
     }

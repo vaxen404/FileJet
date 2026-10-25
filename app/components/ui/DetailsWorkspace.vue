@@ -46,8 +46,8 @@
                         type="button"
                         class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
                         px-3.5 text-white bg-primary border rounded-control text-control-size font-medium leading-normal
-                        cursor-pointer transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
-                        hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                        cursor-pointer transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
+                        hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
                         disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="busy"

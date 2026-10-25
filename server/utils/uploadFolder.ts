@@ -1,4 +1,5 @@
-import { createError, getQuery, type H3Event } from 'h3'
+import { throwError } from './error'
+import { getQuery, type H3Event } from 'h3'
 import { prisma } from './prisma'
 import { isUuid } from './validation'
 
@@ -8,7 +9,7 @@ export async function getUploadFolder(event: H3Event, userId: string) {
     if (id === undefined) return null
 
     if (typeof id !== 'string' || !isUuid(id)) {
-        throw createError({ statusCode: 400, message: 'Invalid destination folder.' })
+        throwError(400, 'Invalid destination folder.')
     }
 
     const folder = await prisma.folders.findFirst({
@@ -16,7 +17,7 @@ export async function getUploadFolder(event: H3Event, userId: string) {
         select: { id: true }
     })
 
-    if (!folder) throw createError({ statusCode: 404, message: 'Destination folder not found.' })
+    if (!folder) throwError(404, 'Destination folder not found.')
 
     return folder.id
 }

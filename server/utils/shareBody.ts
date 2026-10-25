@@ -1,13 +1,14 @@
-import { createError, getHeader, getRequestWebStream, type H3Event } from 'h3'
+import { throwError } from './error'
+import { getHeader, getRequestWebStream, type H3Event } from 'h3'
 
 export async function readShareBody(event: H3Event): Promise<Record<string, unknown>> {
     if (!getHeader(event, 'content-type')?.toLowerCase().startsWith('application/json')) {
-        throw createError({ statusCode: 415, message: 'JSON request body required.' })
+        throwError(415, 'JSON request body required.')
     }
 
     const reader = getRequestWebStream(event)?.getReader()
 
-    if (!reader) throw createError({ statusCode: 400, message: 'Request body required.' })
+    if (!reader) throwError(400, 'Request body required.')
 
     const chunks: Uint8Array[] = []
     let size = 0
@@ -23,7 +24,7 @@ export async function readShareBody(event: H3Event): Promise<Record<string, unkn
             if (size > 8192) {
                 await reader.cancel().catch(() => {})
 
-                throw createError({ statusCode: 413, message: 'Request body is too large.' })
+                throwError(413, 'Request body is too large.')
             }
 
             chunks.push(value)
@@ -39,6 +40,6 @@ export async function readShareBody(event: H3Event): Promise<Record<string, unkn
 
         return value
     } catch {
-        throw createError({ statusCode: 400, message: 'Invalid JSON request body.' })
+        throwError(400, 'Invalid JSON request body.')
     }
 }

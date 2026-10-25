@@ -1,4 +1,5 @@
-import { createError, getHeader, getRequestURL, getRouterParam, setHeader, type H3Event } from 'h3'
+import { throwError } from './error'
+import { getHeader, getRequestURL, getRouterParam, setHeader, type H3Event } from 'h3'
 import { prisma } from './prisma'
 import { isUuid } from './validation'
 import { assertShareAccess, assertShareNotExpired } from './shareSecurity'
@@ -19,7 +20,7 @@ export function assertShareOrigin(event: H3Event) {
     const origin = getHeader(event, 'origin')
 
     if (origin && origin !== getRequestURL(event).origin)
-        throw createError({ statusCode: 403, message: 'Invalid request origin.' })
+        throwError(403, 'Invalid request origin.')
 }
 
 export async function getPublicShare(event: H3Event, requirePassword = true) {
@@ -27,14 +28,14 @@ export async function getPublicShare(event: H3Event, requirePassword = true) {
     const token = getRouterParam(event, 'token')
 
     if (!token || !isUuid(token))
-        throw createError({ statusCode: 404, message: 'Shared item not found.' })
+        throwError(404, 'Shared item not found.')
 
     const share = await prisma.shared_items.findUnique({
         where: { token },
         include: { users: { select: { username: true } } }
     })
 
-    if (!share) throw createError({ statusCode: 404, message: 'Shared item not found.' })
+    if (!share) throwError(404, 'Shared item not found.')
 
     if (requirePassword) assertShareAccess(event, share)
     else assertShareNotExpired(event, share)
@@ -48,7 +49,7 @@ export async function requireOwnedShareItem(userId: string, itemId: unknown, ite
         !isUuid(itemId) ||
         !['file', 'folder', 'note'].includes(String(itemType))
     ) {
-        throw createError({ statusCode: 400, message: 'Invalid shared item.' })
+        throwError(400, 'Invalid shared item.')
     }
 
     const where = { id: itemId, user_id: userId }
@@ -60,7 +61,7 @@ export async function requireOwnedShareItem(userId: string, itemId: unknown, ite
               ? await prisma.folders.findFirst({ where, select: { id: true } })
               : await prisma.notes.findFirst({ where, select: { id: true } })
 
-    if (!item) throw createError({ statusCode: 404, message: 'Item not found.' })
+    if (!item) throwError(404, 'Item not found.')
 
     return { itemId, itemType: itemType as 'file' | 'folder' | 'note' }
 }

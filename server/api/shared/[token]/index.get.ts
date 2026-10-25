@@ -24,9 +24,7 @@ export default defineEventHandler(async event => {
 
             if (sharedItem.item_type === 'file' && !file) throwError(404, 'File not found.')
 
-            throw createError({
-                statusCode: 401,
-                message: 'A password is required for this share link.',
+            throwError(401, 'A password is required for this share link.', {
                 data: {
                     passwordRequired: true,
                     fileName: file?.original_name || file?.name || null,

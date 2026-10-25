@@ -1,3 +1,4 @@
+import { throwError } from '~~/server/utils/error'
 import { readShareBody } from '../../../utils/shareBody'
 import argon2 from 'argon2'
 import { getPublicShare, assertShareOrigin } from '../../../utils/shares'
@@ -17,21 +18,19 @@ export default defineEventHandler(async event => {
         !body.password ||
         body.password.length > 128
     ) {
-        throw createError({ statusCode: 400, message: 'Enter a valid password.' })
+        throwError(400, 'Enter a valid password.')
     }
 
     if (share.password_hash && !(await argon2.verify(share.password_hash, body.password))) {
-        throw createError({
-            statusCode: 401,
-            statusMessage: 'Incorrect password. Please try again.',
-            message: 'Incorrect password. Please try again.'
+        throwError(401, 'Incorrect password. Please try again.', {
+            statusMessage: 'Incorrect password. Please try again.'
         })
     }
 
     const current = await getPublicShare(event, false)
 
     if (current.access_version !== share.access_version) {
-        throw createError({ statusCode: 409, message: 'Share settings changed. Please try again.' })
+        throwError(409, 'Share settings changed. Please try again.')
     }
 
     if (current.password_hash) setShareGrant(event, current)

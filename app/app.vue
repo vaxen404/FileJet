@@ -2,6 +2,7 @@
 import Toast from '~/components/ui/Toast.vue'
 
 const { toasts, runToastAction, resumeToasts, closeToast } = useToast()
+const { confirmation, resolveConfirm } = useConfirm()
 
 onMounted(resumeToasts)
 </script>
@@ -10,6 +11,17 @@ onMounted(resumeToasts)
     <NuxtLayout>
         <NuxtPage />
     </NuxtLayout>
+
+    <ConfirmModal
+        :show="Boolean(confirmation)"
+        :title="confirmation?.title ?? ''"
+        :message="confirmation?.message ?? ''"
+        :confirm-text="confirmation?.confirmText"
+        :cancel-text="confirmation?.cancelText"
+        :variant="confirmation?.variant ?? 'neutral'"
+        @confirm="resolveConfirm(true)"
+        @cancel="resolveConfirm(false)"
+    />
 
     <div class="toast-stack fixed right-[calc(1rem_+_env(safe-area-inset-right,_0px))]
         bottom-[calc(1rem_+_env(safe-area-inset-bottom,_0px))] z-9999 flex flex-col items-end gap-2

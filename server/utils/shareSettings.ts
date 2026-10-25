@@ -1,6 +1,6 @@
+import { throwError } from './error'
 import argon2 from 'argon2'
 import { randomUUID } from 'node:crypto'
-import { createError } from 'h3'
 import { z } from 'zod'
 
 const settingsSchema = z
@@ -21,10 +21,7 @@ export async function parseShareSettings(body: unknown, currentExpiration?: Date
     const parsed = settingsSchema.safeParse(body)
 
     if (!parsed.success)
-        throw createError({
-            statusCode: 400,
-            message: parsed.error.issues[0]?.message || 'Invalid share settings.'
-        })
+        throwError(400, parsed.error.issues[0]?.message || 'Invalid share settings.')
 
     const value = parsed.data
 
@@ -42,7 +39,7 @@ export async function parseShareSettings(body: unknown, currentExpiration?: Date
             expires.getTime() <= Date.now() &&
             expires.getTime() !== currentExpiration?.getTime()
         ) {
-            throw createError({ statusCode: 400, message: 'Expiration must be in the future.' })
+            throwError(400, 'Expiration must be in the future.')
         }
 
         data.expires_at = expires

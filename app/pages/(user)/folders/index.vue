@@ -19,12 +19,12 @@
                     <button
                         type="button"
                         class="new-folder-button inline-flex items-center justify-center shrink-0 gap-2 h-control py-0 px-3.5
-                        text-white bg-[#424dcc] border border-[#626de5] rounded-control
+                        text-white bg-primary border border-primary rounded-control
                         shadow-[inset_0_1px_0_#ffffff12,_0_2px_6px_#0003] text-control-size font-medium leading-normal
                         whitespace-nowrap cursor-pointer transition-[background,border-color,transform] duration-180
-                        ease-[ease] hover:enabled:bg-[#505ed8] hover:enabled:border-[#818bf3] hover:enabled:-translate-y-px
-                        active:enabled:bg-[#3944b8] active:enabled:translate-y-0
-                        active:enabled:shadow-[inset_0_1px_3px_#0003] focus-visible:outline-2 focus-visible:outline-[#d3d7ff]
+                        ease-[ease] hover:enabled:bg-primary/85 hover:enabled:border-accent hover:enabled:-translate-y-px
+                        active:enabled:bg-primary/85 active:enabled:translate-y-0
+                        active:enabled:shadow-[inset_0_1px_3px_#0003] focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:-outline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
                         motion-reduce:transition-none motion-reduce:hover:enabled:translate-y-0"
                         :disabled="pending || folderActions.isLoading.value"
@@ -65,7 +65,7 @@
                     <Icon
                         name="solar:folder-linear"
                         size="2.5rem"
-                        class="empty-state-icon empty-state-folder-icon block shrink-0 mb-2 text-[#5da9ff] text-[2.5rem]"
+                        class="empty-state-icon empty-state-folder-icon block shrink-0 mb-2 text-accent text-[2.5rem]"
                     />
                     <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
                     <span class="empty-state-description text-muted text-sm font-normal leading-normal">
@@ -113,7 +113,7 @@
                         </thead>
 
                         <tbody>
-                            <tr class="hover:bg-surface-hover selected:bg-[#201d2d]"
+                            <tr class="hover:bg-surface-hover selected:bg-accent/8"
                                 v-for="folder in paginatedFolders"
                                 :key="folder.id"
                                 :class="{ selected: selectedFolders.includes(folder.id) }"
@@ -309,6 +309,7 @@ const filteredFolders = computed(() => {
 })
 
 const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
+const { itemsPerPage } = useBrowsePreferences(viewMode, sortMode)
 
 const { sortedItems: sortedFolders } = useSort(
     filteredFolders,
@@ -358,10 +359,6 @@ const deleteFolder = async (folder: FolderItem) => {
         openToast(err.data?.message || err.message || 'Could not delete folder.', 'error')
     }
 }
-
-const itemsPerPage = computed(() => {
-    return viewMode.value === 'list' ? 12 : 24
-})
 
 const {
     currentPage,

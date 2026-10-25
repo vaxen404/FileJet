@@ -37,7 +37,7 @@
                 <label class="w-full text-left text-[#d5d5da] text-sm leading-[inherit]" for="public-share-password">Password</label>
                 <div class="unlock-password-field relative w-full">
                     <input class="w-full h-11 py-0 px-3 text-white bg-[#151518] border border-control-border rounded-md text-sm
-                        outline-none pr-11 focus:border-[#5965ed] leading-[inherit]"
+                        outline-none pr-11 focus:border-accent leading-[inherit]"
                         id="public-share-password"
                         v-model="sharePassword"
                         :type="showPassword ? 'text' : 'password'"
@@ -74,9 +74,9 @@
                 <button
                     type="submit"
                     class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
-                    px-[1.4rem] text-white bg-primary border border-[#4f5bdf] rounded-md [font-family:inherit]
+                    px-[1.4rem] text-white bg-primary border border-primary rounded-md [font-family:inherit]
                     text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
-                    hover:bg-[#505cf0] hover:border-[#6b75ff] focus-visible:outline-2 focus-visible:outline-[#b5acff]
+                    hover:bg-primary/85 hover:border-accent focus-visible:outline-2 focus-visible:outline-accent
                     focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
                     short-screen:mt-0 short-screen:py-[0.65rem] short-screen:px-[1.1rem]"
                     :disabled="unlocking || !sharePassword"
@@ -100,8 +100,8 @@
         >
             <div class="shared-error-card w-full max-w-108 flex flex-col items-center gap-4 p-[clamp(1.25rem,_4vw,_2.5rem)]
                 bg-surface border border-divider rounded-3xl text-center short-screen:gap-[0.6rem] short-screen:p-4">
-                <div class="shared-error-icon flex items-center justify-center bg-[linear-gradient(145deg,_#30295f,_#211d3b)]
-                    border border-[#42386f] rounded-md text-[#a79aff] short-screen:w-16 short-screen:h-16 size-22">
+                <div class="shared-error-icon flex items-center justify-center bg-accent/12
+                    border border-accent/25 rounded-md text-accent short-screen:w-16 short-screen:h-16 size-22">
                     <Icon class=""
                         :name="
                             error.statusCode === 404
@@ -112,7 +112,7 @@
                     />
                 </div>
 
-                <span class="shared-error-code py-[0.35rem] px-3 text-[#b5acff] bg-[#242039] border border-[#37304f] rounded-md
+                <span class="shared-error-code py-[0.35rem] px-3 text-accent bg-accent/12 border border-accent/25 rounded-md
                     text-xs leading-[inherit] font-semibold tracking-[0.08em]">{{ error.statusCode || 'Error' }}</span>
 
                 <h1 class="m-0 text-white text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">
@@ -227,7 +227,7 @@
                     short-screen:text-left"
                 >
                     <div class="download-icon flex-none flex items-center justify-center
-                        bg-[linear-gradient(145deg,_#30295f,_#211d3b)] border border-[#42386f] text-accent rounded-md
+                        bg-accent/12 border border-accent/25 text-accent rounded-md
                         max-mobile:w-22 max-mobile:h-22 short-screen:col-start-1 short-screen:row-start-1
                         short-screen:row-span-4 short-screen:self-center short-screen:w-14 short-screen:h-14 size-26">
                         <Icon class="short-screen:text-3xl! short-screen:leading-[inherit]!"
@@ -240,8 +240,8 @@
                         text-[clamp(1.1rem,_2.5vw,_1.5rem)] font-semibold leading-[1.4] wrap-anywhere overflow-hidden
                         short-screen:col-start-2 short-screen:m-0 short-screen:text-[1.1rem]" :title="itemName">{{ itemName }}</h2>
 
-                    <div class="download-status flex-none inline-flex items-center gap-2 py-[0.45rem] px-3 text-[#b5acff]
-                        bg-[#242039] border border-[#37304f] rounded-md text-xs font-medium leading-[1.4]
+                    <div class="download-status flex-none inline-flex items-center gap-2 py-[0.45rem] px-3 text-accent
+                        bg-accent/12 border border-accent/25 rounded-md text-xs font-medium leading-[1.4]
                         short-screen:col-start-2">
                         <span class="status-dot flex-none bg-accent rounded-full shadow-[0_0_0_3px_#8b7cff1a] size-[0.4rem]" />
                         {{
@@ -258,9 +258,9 @@
                     <button
                         type="button"
                         class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
-                        px-[1.4rem] text-white bg-primary border border-[#4f5bdf] rounded-md [font-family:inherit]
+                        px-[1.4rem] text-white bg-primary border border-primary rounded-md [font-family:inherit]
                         text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
-                        hover:bg-[#505cf0] hover:border-[#6b75ff] focus-visible:outline-2 focus-visible:outline-[#b5acff]
+                        hover:bg-primary/85 hover:border-accent focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
                         short-screen:mt-0 short-screen:py-[0.65rem] short-screen:px-[1.1rem]"
                         :disabled="isDownloading"
@@ -285,10 +285,10 @@
                     <h1 class="m-0 text-[1.1rem] wrap-anywhere">{{ sharedItem.item.title }}</h1>
                     <a
                         class="download-btn m-0 no-underline flex-none inline-flex items-center justify-center gap-[0.65rem]
-                        py-[0.8rem] px-[1.4rem] text-white bg-primary border border-[#4f5bdf] rounded-md
+                        py-[0.8rem] px-[1.4rem] text-white bg-primary border border-primary rounded-md
                         [font-family:inherit] text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200
-                        ease-[ease] hover:bg-[#505cf0] hover:border-[#6b75ff] focus-visible:outline-2
-                        focus-visible:outline-[#b5acff] focus-visible:outline-offset-4 disabled:opacity-65
+                        ease-[ease] hover:bg-primary/85 hover:border-accent focus-visible:outline-2
+                        focus-visible:outline-accent focus-visible:outline-offset-4 disabled:opacity-65
                         disabled:cursor-wait short-screen:col-start-2 short-screen:mt-0 short-screen:py-[0.65rem]
                         short-screen:px-[1.1rem]"
                         :href="downloadUrl"

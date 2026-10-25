@@ -17,7 +17,7 @@
             py-0 px-3 text-control-size font-medium border-0 rounded-control whitespace-nowrap shrink-0
             cursor-pointer transition-all duration-200 ease-[ease] leading-normal disabled:opacity-50
             disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-            focus-visible:outline-offset-3 hover:enabled:bg-[#4a56d4] hover:enabled:-translate-y-[0.5px]
+            focus-visible:outline-offset-3 hover:enabled:bg-primary/85 hover:enabled:-translate-y-[0.5px]
             active:translate-y-0"
             :disabled="disabled"
             @click="openPicker"

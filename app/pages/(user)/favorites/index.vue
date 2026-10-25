@@ -76,7 +76,7 @@
                         </thead>
 
                         <tbody>
-                            <tr class="hover:bg-surface-hover selected:bg-[#201d2d]"
+                            <tr class="hover:bg-surface-hover selected:bg-accent/8"
                                 v-for="item in paginatedItems"
                                 :key="item.id"
                                 :class="{ selected: selectedFavorites.includes(item.id) }"
@@ -95,9 +95,9 @@
                                 <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
                                     <div class="favorite-name flex items-center gap-3 min-w-0">
                                         <div
-                                            class="favorite-icon flex items-center justify-center shrink-0 text-[#9c8cff] bg-[#29215c] border
-                                            border-[#443b82] rounded-md text-[1.2rem] is-file:text-accent is-file:bg-[#252543]
-                                            is-file:border-[#3a3a64] is-folder:text-[#63a8ff] is-folder:bg-[#1c2d49] is-folder:border-[#345580]
+                                            class="favorite-icon flex items-center justify-center shrink-0 text-accent bg-accent/12 border
+                                            border-accent/25 rounded-md text-[1.2rem] is-file:text-accent is-file:bg-accent/12
+                                            is-file:border-accent/25 is-folder:text-accent is-folder:bg-accent/12 is-folder:border-accent/25
                                             size-10"
                                             :class="getItemType(item)"
                                         >
@@ -263,6 +263,7 @@ const viewMode = ref<'list' | 'grid'>('grid')
 const activeCategory = ref('All')
 const filterOptions = ['All', 'Files', 'Folders', 'Notes'] as const
 const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
+const { itemsPerPage } = useBrowsePreferences(viewMode, sortMode)
 const isRemoving = ref(false)
 const isBulkDeleting = ref(false)
 
@@ -313,7 +314,6 @@ const { sortedItems: sortedFavorites } = useSort(
     item => item.created_at
 )
 
-const itemsPerPage = computed(() => (viewMode.value === 'list' ? 12 : 24))
 const { currentPage, totalPages, paginatedItems } = usePagination(sortedFavorites, itemsPerPage)
 const {
     selectedItems: selectedFavorites,

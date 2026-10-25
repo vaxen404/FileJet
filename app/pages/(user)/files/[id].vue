@@ -112,8 +112,8 @@
                         type="button"
                         class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
                         px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
-                        transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
-                        hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                        transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
+                        hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
                         disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
                         :class="{ 'is-busy': isDownloading }"
@@ -272,14 +272,14 @@
                                 automatically.
                             </p>
                             <div class="rename-input-group flex items-stretch min-w-0 border border-control-border rounded-md overflow-hidden
-                                focus-within:border-[#5965ed]">
+                                focus-within:border-accent">
                                 <input
                                     id="file-rename-input"
                                     ref="nameInput"
                                     v-model="editingFileName"
                                     type="text"
                                     class="name-input w-full min-w-0 min-h-11 py-2.5 px-3 text-white bg-control border-0 rounded-md text-sm
-                                    leading-normal outline-none flex-1 focus:border-[#5965ed] is-invalid:border-[#ff6b6b]"
+                                    leading-normal outline-none flex-1 focus:border-accent is-invalid:border-[#ff6b6b]"
                                     :class="{ invalid: Boolean(renameError) }"
                                     maxlength="255"
                                     required
@@ -319,8 +319,8 @@
                                 type="submit"
                                 class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
                                 px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
-                                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
-                                hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
+                                hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
                                 disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                                 focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                                 :class="{ 'is-busy': isSavingRename }"
@@ -390,8 +390,8 @@
                 type="button"
                 class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
                 px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
-                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-[#4652d1]
-                hover:enabled:text-white hover:enabled:border-[#4652d1] disabled:opacity-60
+                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
+                hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
                 disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
                 @click="refresh()"
             >

@@ -1,3 +1,4 @@
+import { throwError } from './error'
 import type { H3Event } from 'h3'
 
 type Bucket = {
@@ -23,10 +24,7 @@ export function enforceRateLimit(event: H3Event, key: string, limit: number, win
 
     if (!current || current.resetAt <= now) {
         if (!current && buckets.size >= 10000) {
-            throw createError({
-                statusCode: 429,
-                message: 'Too many requests. Please try again later.'
-            })
+            throwError(429, 'Too many requests. Please try again later.')
         }
 
         buckets.set(bucketKey, {
@@ -44,10 +42,7 @@ export function enforceRateLimit(event: H3Event, key: string, limit: number, win
 
         setResponseHeader(event, 'Retry-After', retryAfter)
 
-        throw createError({
-            statusCode: 429,
-            message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.'
-        })
+        throwError(429, 'Too many requests. Please try again later.')
     }
 
     if (buckets.size > 10000) {
