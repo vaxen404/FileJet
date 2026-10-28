@@ -20,7 +20,7 @@
                     <button
                         type="button"
                         class="new-note-button h-control shrink-0 whitespace-nowrap flex items-center justify-center gap-2 py-0 px-3
-                        bg-primary text-white border-0 rounded-control text-control-size font-medium cursor-pointer
+                        bg-primary text-on-primary border-0 rounded-control text-control-size font-medium cursor-pointer
                         transition-[background,transform] duration-200 ease-[ease] leading-normal hover:bg-primary/85
                         hover:-translate-y-px active:translate-y-0"
                         @click="createNote"
@@ -54,7 +54,7 @@
                         size="2.5rem"
                         class="empty-state-icon block shrink-0 mb-2 text-accent text-[2.5rem]"
                     />
-                    <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{
+                    <strong class="text-foreground text-sm font-semibold leading-normal">{{
                         error
                             ? 'Unable to load notes'
                             : notes.length
@@ -72,7 +72,7 @@
 
             <template #list>
                 <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-                    <table class="notes-table w-full border-separate border-spacing-0 bg-transparent border-0 min-w-176 table-fixed">
+                    <table class="mobile-item-table notes-table w-full border-separate border-spacing-0 bg-transparent border-0 min-w-176 table-fixed">
                         <thead>
                             <tr>
                                 <th class="w-14 pl-4 pr-3 text-center file-table-heading">
@@ -111,7 +111,7 @@
                                 @click="openNote(note)"
                                 @contextmenu.prevent.stop="openContextMenu($event, note.id)"
                             >
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
+                                <td class="item-selection-cell h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedNotes"
                                         type="checkbox"
@@ -121,7 +121,7 @@
                                     />
                                 </td>
 
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
+                                <td class="item-name-cell h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
                                     <div class="note-name flex items-center gap-3">
                                         <div class="note-icon flex items-center justify-center shrink-0 text-accent bg-accent/12 border
                                             border-accent/25 rounded-md text-[1.2rem] size-10">
@@ -129,7 +129,7 @@
                                         </div>
 
                                         <div class="note-info min-w-0 flex flex-col gap-1">
-                                            <strong class="text-white text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="note.title">{{ note.title }}</strong>
+                                            <strong class="text-foreground text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="note.title">{{ note.title }}</strong>
                                             <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis">
                                                 {{ formatFileSize(note.size) }} •
                                                 {{ formatFileTime(note.created_at) }}
@@ -138,11 +138,11 @@
                                     </div>
                                 </td>
 
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Note</td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileSize(note.size) }}</td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(note.updated_at) }}</td>
+                                <td data-label="Type" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Note</td>
+                                <td data-label="Size" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileSize(note.size) }}</td>
+                                <td data-label="Modified" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(note.updated_at) }}</td>
 
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell" @click.stop>
+                                <td class="item-actions-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell" @click.stop>
                                     <ItemMenu
                                         :ref="menu => setNoteMenuRef(note.id, menu)"
                                         type="note"
@@ -181,12 +181,12 @@
                         @contextmenu.prevent.stop="openContextMenu($event, note.id)"
                     >
                         <template #actions>
-                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
                                 cursor-pointer size-8">
                                 <input
                                     v-model="selectedNotes"
                                     type="checkbox"
-                                    class="note-checkbox file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
+                                    class="note-checkbox file-checkbox m-0 accent-accent cursor-pointer size-[1.1rem]"
                                     :value="note.id"
                                     :disabled="busy"
                                 />

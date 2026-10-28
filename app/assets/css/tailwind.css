@@ -1,5 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+@import "./motion.css";
+@import "./responsive.css";
+@import "./account-menu.css";
+@import "./themes.css";
 
 /* Shared design values. Component layouts use Tailwind classes in Vue templates. */
 @theme {
@@ -20,6 +24,28 @@
     --color-heading-muted: #a3a3ab;
     --color-foreground: #f3f3f5;
     --color-highlight: #5a5aff;
+    --color-content: #d5d5da;
+    --color-input: #151518;
+    --color-preview: #141417;
+    --color-subtle: #1d1d21;
+    --color-hover-border: #3a3a41;
+    --color-strong-border: #505057;
+    --color-danger: #ff6b6b;
+    --color-danger-hover: #ff8793;
+    --color-danger-surface: #352024;
+    --color-danger-border: #4a292d;
+    --color-danger-content: #ffc5cd;
+    --color-info-surface: #17263a;
+    --color-info-border: #294568;
+    --color-info-content: #c5dcff;
+    --color-selection-surface: #36363ee6;
+    --color-selection-border: #3a3a42;
+    --color-toast-surface: #16161c;
+    --color-toast-border: #34343f;
+    --color-meter-track: #2c2c31;
+    --color-scrollbar: #39393f;
+    --color-on-primary: #ffffff;
+    --color-warning: #fcd34d;
     --spacing-control: var(--ui-control-height, 2.5rem);
     --spacing-control-icon: var(--ui-control-icon-size, 1.125rem);
     --text-control-size: var(--ui-control-font-size, 0.875rem);
@@ -95,7 +121,7 @@
 
 /* The same custom checkbox is used in file, folder, note and favorite views. */
 @utility file-checkbox {
-    @apply relative m-0 grid size-[1.1rem] shrink-0 cursor-pointer appearance-none place-items-center rounded-sm border border-[#505057] bg-control;
+    @apply relative m-0 grid size-[1.1rem] shrink-0 cursor-pointer appearance-none place-items-center rounded-sm border border-strong-border bg-control;
     @apply transition-colors duration-200 ease-[ease] enabled:hover:border-accent;
     @apply checked:border-primary checked:bg-primary indeterminate:border-primary indeterminate:bg-primary;
     @apply checked:after:-mt-[0.15rem] checked:after:h-[0.55rem] checked:after:w-[0.3rem] checked:after:rotate-45;
@@ -118,7 +144,7 @@
 @utility grid-name-input {
     @apply block w-full min-w-0 min-h-6 overflow-hidden text-ellipsis whitespace-nowrap;
     @apply rounded-md border border-transparent bg-transparent p-0 text-sm leading-normal font-semibold text-foreground outline-none;
-    @apply disabled:opacity-100 disabled:[-webkit-text-fill-color:#f3f3f5] disabled:cursor-pointer;
+    @apply disabled:opacity-100 disabled:[-webkit-text-fill-color:var(--color-foreground)] disabled:cursor-pointer;
     @apply is-active:border-accent is-active:px-1 is-active:py-0;
 }
 
@@ -136,5 +162,5 @@
 }
 
 @utility info-value {
-    @apply min-w-0 max-w-[68%] overflow-hidden text-ellipsis whitespace-nowrap text-right text-xs leading-normal font-medium text-[#d5d5da];
+    @apply min-w-0 max-w-[68%] overflow-hidden text-ellipsis whitespace-nowrap text-right text-xs leading-normal font-medium text-content;
 }

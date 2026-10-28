@@ -8,7 +8,7 @@
                     placeholder="Search files..."
                 />
 
-                <div class="flex min-w-0 flex-wrap items-center gap-2">
+                <div class="flex min-w-0 flex-wrap items-center gap-2 max-tablet:w-full max-tablet:justify-between">
                     <ViewSwitcher v-model="viewMode" />
                     <UploadButton
                         text="Upload"
@@ -47,7 +47,7 @@
                         size="2.5rem"
                         class="empty-state-icon block shrink-0 mb-2 text-accent text-[2.5rem]"
                     />
-                    <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{
+                    <strong class="text-foreground text-sm font-semibold leading-normal">{{
                         error
                             ? 'Unable to load files'
                             : files.length
@@ -66,7 +66,7 @@
             <template #list>
                 <div class="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
                     <table
-                        class="files-table w-full border-separate border-spacing-0"
+                        class="mobile-item-table files-table w-full border-separate border-spacing-0"
                     >
                         <thead>
                             <tr>
@@ -103,12 +103,12 @@
                                 v-for="file in paginatedFiles"
                                 :key="file.id"
                                 :class="selectedFiles.includes(file.id)
-                                    ? 'bg-accent/12 text-[#d1d2e5] hover:bg-accent/18'
-                                    : 'hover:bg-[#1f1f23]'"
+                                    ? 'bg-accent/12 text-content hover:bg-accent/18'
+                                    : 'hover:bg-surface-hover'"
                                 @click="openFile(file)"
                                 @contextmenu.prevent.stop="openContextMenu($event, file.id)"
                             >
-                                <td class="h-[4.2rem] w-14 pr-3 text-center file-table-cell" @click.stop>
+                                <td class="item-selection-cell h-[4.2rem] w-14 pr-3 text-center file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedFiles"
                                         type="checkbox"
@@ -118,10 +118,10 @@
                                     />
                                 </td>
 
-                                <td class="h-[4.2rem] w-[42%] file-table-cell">
+                                <td class="item-name-cell h-[4.2rem] w-[42%] file-table-cell">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="file-icon flex shrink-0 items-center justify-center rounded-md text-white text-[1.15rem]
+                                            class="file-icon flex shrink-0 items-center justify-center rounded-md text-on-primary text-[1.15rem]
                                             size-[2.4rem]"
                                             :class="selectedFiles.includes(file.id) ? 'bg-primary/80' : 'bg-primary'"
                                         >
@@ -136,7 +136,7 @@
                                             <input
                                                 type="text"
                                                 class="list-name-input w-lg min-w-0 max-w-full text-ellipsis whitespace-nowrap rounded-control border
-                                                bg-transparent text-sm leading-normal font-semibold text-white outline-none
+                                                bg-transparent text-sm leading-normal font-semibold text-foreground outline-none
                                                 disabled:pointer-events-none border-transparent is-active:py-[0.2rem] is-active:px-[0.4rem]
                                                 is-active:border-primary"
                                                 :data-file-id="file.id"
@@ -158,7 +158,7 @@
                                                 "
                                                 @click.stop
                                             />
-                                            <span class="whitespace-nowrap text-xs leading-normal text-[#898991]">
+                                            <span class="whitespace-nowrap text-xs leading-normal text-muted">
                                                 {{ formatFileSize(file.size) }} •
                                                 {{ formatFileTime(file.created_at) }}
                                             </span>
@@ -166,11 +166,11 @@
                                     </div>
                                 </td>
 
-                                <td class="h-[4.2rem] file-table-cell">{{ getFileType(file.original_name) }}</td>
-                                <td class="h-[4.2rem] file-table-cell">{{ formatFileSize(file.size) }}</td>
-                                <td class="h-[4.2rem] file-table-cell">{{ formatFileTime(file.updated_at) }}</td>
+                                <td data-label="Type" class="item-meta-cell h-[4.2rem] file-table-cell">{{ getFileType(file.original_name) }}</td>
+                                <td data-label="Size" class="item-meta-cell h-[4.2rem] file-table-cell">{{ formatFileSize(file.size) }}</td>
+                                <td data-label="Modified" class="item-meta-cell h-[4.2rem] file-table-cell">{{ formatFileTime(file.updated_at) }}</td>
 
-                                <td class="h-[4.2rem] file-table-cell" @click.stop>
+                                <td class="item-actions-cell h-[4.2rem] file-table-cell" @click.stop>
                                     <ItemMenu
                                         :ref="menu => setFileMenuRef(file.id, menu)"
                                         type="file"
@@ -212,7 +212,7 @@
                             <div
                                 v-if="file.mime_type?.startsWith('video/')"
                                 class="video-play-icon pointer-events-none absolute top-1/2 left-1/2 z-1 grid size-12 -translate-x-1/2
-                                -translate-y-1/2 place-items-center rounded-full bg-black/65 text-white text-[1.4rem]
+                                -translate-y-1/2 place-items-center rounded-full bg-black/65 text-on-primary text-[1.4rem]
                                 group-hover/file-grid-card:bg-[rgba(60,_71,_190,_0.9)]"
                             >
                                 <Icon name="solar:play-bold" />
@@ -236,10 +236,10 @@
                             />
                         </template>
                         <template #actions>
-                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
                                 cursor-pointer size-8">
                                 <input
-                                    class="file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
+                                    class="file-checkbox m-0 accent-accent cursor-pointer size-[1.1rem]"
                                     v-model="selectedFiles"
                                     type="checkbox"
                                     :value="file.id"

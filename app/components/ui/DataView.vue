@@ -14,7 +14,7 @@
             is-list-view:overflow-hidden is-grid-view:grid is-grid-view:grid-cols-[repeat(5,_1fr)]
             is-grid-view:content-start is-grid-view:gap-3 is-grid-view:overflow-y-auto empty-view:flex
             empty-view:items-center empty-view:justify-center loading-view:flex loading-view:items-center
-            loading-view:justify-center max-desktop:is-grid-view:grid-cols-[repeat(4,_1fr)]"
+            loading-view:justify-center max-desktop:is-grid-view:grid-cols-[repeat(4,_1fr)] max-laptop:is-grid-view:grid-cols-3 max-tablet:is-grid-view:grid-cols-2 max-phone:is-grid-view:grid-cols-1"
             :class="[
                 viewMode === 'list' ? 'list-view' : 'grid-view',
                 { 'empty-view': $slots.empty && !isLoading, 'loading-view': isLoading }
@@ -33,14 +33,16 @@
                 :name="viewMode"
             />
         </div>
-        <div
-            v-if="isDragging"
-            class="drop-overlay absolute inset-0 flex items-center justify-center border-2 border-dashed
-            border-highlight rounded-[inherit] pointer-events-none z-20"
-        >
-            <span class="drop-message flex items-center gap-2 max-w-[calc(100%_-_2rem)] py-3 px-4 text-[#d5d5da] bg-surface
-                border border-divider rounded-md text-sm leading-[inherit] font-medium text-center"><Icon class="text-accent shrink-0" name="solar:cloud-upload-bold" />{{ dropText }}</span>
-        </div>
+        <Transition name="fade">
+            <div
+                v-if="isDragging"
+                class="drop-overlay absolute inset-0 flex items-center justify-center border-2 border-dashed
+                border-highlight rounded-[inherit] pointer-events-none z-20"
+            >
+                <span class="drop-message flex items-center gap-2 max-w-[calc(100%_-_2rem)] py-3 px-4 text-content bg-surface
+                    border border-divider rounded-md text-sm leading-[inherit] font-medium text-center"><Icon class="text-accent shrink-0" name="solar:cloud-upload-bold" />{{ dropText }}</span>
+            </div>
+        </Transition>
     </div>
 </template>
 

@@ -14,14 +14,14 @@
                 rounded-panel max-preview:flex-none max-phone:p-3">
                 <div class="file-heading flex items-start gap-3">
                     <div class="file-heading-text flex-1 min-w-0">
-                        <h1 class="m-0 text-white text-xl font-semibold leading-[1.35] wrap-anywhere">{{ title }}</h1>
+                        <h1 class="m-0 text-foreground text-xl font-semibold leading-[1.35] wrap-anywhere">{{ title }}</h1>
                         <p class="file-summary flex items-center flex-wrap gap-1.5 mt-1.5 mr-0 mb-0 ml-0 text-muted text-[0.8125rem]
                             leading-normal">{{ summary }}</p>
                     </div>
                     <button
                         type="button"
-                        class="close-details shrink-0 grid place-items-center p-0 text-[#cfcfd5] bg-transparent border-0
-                        rounded-control cursor-pointer hover:bg-divider hover:text-white focus-visible:outline-2
+                        class="close-details shrink-0 grid place-items-center p-0 text-content bg-transparent border-0
+                        rounded-control cursor-pointer hover:bg-divider hover:text-foreground focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:outline-offset-2 size-7"
                         @click="$emit('back')"
                     >
@@ -45,9 +45,9 @@
                     <button
                         type="button"
                         class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                        px-3.5 text-white bg-primary border rounded-control text-control-size font-medium leading-normal
+                        px-3.5 text-on-primary bg-primary border rounded-control text-control-size font-medium leading-normal
                         cursor-pointer transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                        hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
+                        hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
                         disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="busy"
@@ -62,9 +62,9 @@
                     <button
                         type="button"
                         class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-[#cfcfd5] bg-control border border-control-border rounded-control text-control-size font-medium
+                        text-content bg-control border border-control-border rounded-control text-control-size font-medium
                         leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13
-                        hover:enabled:bg-divider hover:enabled:text-white hover:enabled:border-[#3a3a41] favorite:text-accent
+                        hover:enabled:bg-divider hover:enabled:text-foreground hover:enabled:border-hover-border favorite:text-accent
                         disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :class="{ 'is-favorite': isFavorite }"
@@ -79,9 +79,9 @@
                     <button
                         type="button"
                         class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-[#cfcfd5] bg-control border border-control-border rounded-control text-control-size font-medium
+                        text-content bg-control border border-control-border rounded-control text-control-size font-medium
                         leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13
-                        hover:enabled:bg-divider hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                        hover:enabled:bg-divider hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
                         disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="busy"
@@ -95,9 +95,9 @@
                     <button
                         type="button"
                         class="action-button icon-action delete-button min-w-0 min-h-11 inline-flex items-center justify-center
-                        gap-2 p-0 text-[#ff6b6b] bg-[#352024] border rounded-control text-control-size font-medium
-                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-[#4a292d]
-                        hover:enabled:bg-[#3a2024] hover:enabled:text-[#ff7d7d] hover:enabled:border-[#4a292d]
+                        gap-2 p-0 text-danger bg-danger-surface border rounded-control text-control-size font-medium
+                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-danger-border
+                        hover:enabled:bg-danger-surface hover:enabled:text-danger-hover hover:enabled:border-danger-border
                         disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="busy"
@@ -110,11 +110,11 @@
                     </button>
                 </div>
                 <div
-                    class="detail-tabs grid grid-cols-3 gap-1 p-[3px] bg-[#151518] border border-divider rounded-control"
+                    class="detail-tabs grid grid-cols-3 gap-1 p-[3px] bg-input border border-divider rounded-control"
                     @keydown="navigateTabs"
                 >
                     <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-control-inner text-control-size
-                        font-medium leading-normal cursor-pointer hover:text-white is-active:bg-raised is-active:text-white
+                        font-medium leading-normal cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground
                         is-active:font-semibold disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2"
                         v-for="tab in tabs"
@@ -144,7 +144,7 @@
                             max-phone:px-2.5"
                         >
                             <dt class="text-muted">{{ row.label }}</dt>
-                            <dd class="min-w-0 m-0 text-[#d5d5da] wrap-anywhere">{{ row.value ?? 'Unavailable' }}</dd>
+                            <dd class="min-w-0 m-0 text-content wrap-anywhere">{{ row.value ?? 'Unavailable' }}</dd>
                         </div>
                     </dl>
                 </div>

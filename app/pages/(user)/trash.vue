@@ -55,7 +55,7 @@
 
             <template #list>
                 <div class="min-h-0 flex-1 overflow-auto">
-                    <table class="w-full min-w-200 table-fixed border-separate border-spacing-0">
+                    <table class="mobile-item-table trash-table w-full min-w-200 table-fixed border-separate border-spacing-0">
                         <caption class="sr-only">Deleted files, folders and notes</caption>
                         <thead>
                             <tr>
@@ -71,10 +71,10 @@
                         </thead>
                         <tbody>
                             <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-surface-hover selected:bg-accent/8" :class="{ selected: selectedItems.includes(item.id) }">
-                                <td class="file-table-cell h-[4.2rem]">
+                                <td class="item-selection-cell file-table-cell h-[4.2rem]">
                                     <input v-model="selectedItems" type="checkbox" class="file-checkbox" :value="item.id" :aria-label="`Select ${itemName(item)}`" :disabled="busy" />
                                 </td>
-                                <td class="file-table-cell h-[4.2rem]">
+                                <td class="item-name-cell file-table-cell h-[4.2rem]">
                                     <div class="flex min-w-0 items-center gap-3">
                                         <div class="flex size-10 shrink-0 items-center justify-center rounded-md border border-accent/25 bg-accent/12 text-xl text-accent">
                                             <Icon :name="itemIcon(item)" />
@@ -85,15 +85,15 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="file-table-cell truncate text-sm text-secondary" :title="originalLocation(item)">{{ originalLocation(item) }}</td>
-                                <td class="file-table-cell text-sm text-secondary">{{ itemSize(item) }}</td>
-                                <td class="file-table-cell text-sm text-secondary" :title="item.deleted_at">{{ formatFileTime(item.deleted_at) }}</td>
-                                <td class="file-table-cell">
+                                <td data-label="Location" class="item-meta-cell file-table-cell truncate text-sm text-secondary" :title="originalLocation(item)">{{ originalLocation(item) }}</td>
+                                <td data-label="Size" class="item-meta-cell file-table-cell text-sm text-secondary">{{ itemSize(item) }}</td>
+                                <td data-label="Deleted" class="item-meta-cell file-table-cell text-sm text-secondary" :title="item.deleted_at">{{ formatFileTime(item.deleted_at) }}</td>
+                                <td class="item-actions-cell file-table-cell">
                                     <div class="flex items-center gap-1">
                                         <button type="button" :class="iconButtonClass" :disabled="busy" :aria-label="`Restore ${itemName(item)}`" title="Restore" @click="restoreItems([item])">
                                             <Icon name="solar:restart-linear" class="text-lg" />
                                         </button>
-                                        <button type="button" :class="iconButtonClass" class="text-[#ff6b7b] hover:enabled:bg-[#3a2024]" :disabled="busy" :aria-label="`Permanently delete ${itemName(item)}`" title="Delete permanently" @click="requestDelete([item])">
+                                        <button type="button" :class="iconButtonClass" class="text-danger hover:enabled:bg-danger-surface" :disabled="busy" :aria-label="`Permanently delete ${itemName(item)}`" title="Delete permanently" @click="requestDelete([item])">
                                             <Icon name="solar:trash-bin-trash-linear" class="text-lg" />
                                         </button>
                                     </div>
@@ -107,16 +107,19 @@
 
         <Pagination v-if="!isLoading && !loadError" v-model="currentPage" :total-pages="totalPages" />
 
-        <div v-if="selectedItems.length" role="region" aria-label="Selected trash items" class="mt-3 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-xl border border-divider bg-surface p-3">
-            <span class="mr-2 text-sm text-foreground" aria-live="polite">{{ selectedItems.length }} selected</span>
-            <button type="button" :class="buttonClass" :disabled="busy" @click="restoreItems(selectedEntries)">
-                <Icon name="solar:restart-linear" /> Restore
-            </button>
-            <button type="button" :class="dangerButtonClass" :disabled="busy" @click="requestDelete(selectedEntries)">
-                <Icon name="solar:trash-bin-trash-linear" /> Delete permanently
-            </button>
-            <button type="button" :class="buttonClass" :disabled="busy" @click="selectedItems = []">Deselect all</button>
-        </div>
+        <Transition name="dock">
+            <div v-if="selectedItems.length" role="region" aria-label="Selected trash items" class="selection-region mt-3 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-xl border border-divider bg-surface p-3">
+                <span class="mr-2 text-sm text-foreground" aria-live="polite">{{ selectedItems.length }} selected</span>
+                <button type="button" :class="buttonClass" :disabled="busy" @click="restoreItems(selectedEntries)">
+                    <Icon name="solar:restart-linear" /> Restore
+                </button>
+                <button type="button" :class="dangerButtonClass" :disabled="busy" @click="requestDelete(selectedEntries)">
+                    <Icon name="solar:trash-bin-trash-linear" /> Delete permanently
+                </button>
+                <button type="button" :class="buttonClass" :disabled="busy" @click="selectedItems = []">Deselect all</button>
+            </div>
+
+        </Transition>
 
         <div v-if="isWorking" role="status" class="mt-2 shrink-0 text-center text-xs text-label">{{ operation === 'restore' ? 'Restoring items...' : 'Deleting items permanently...' }}</div>
 
@@ -140,8 +143,8 @@ const { trash, folders, error, fetchTrash, fetchFolders, syncTrash, fetchUser } 
 const { openToast } = useToast()
 type TrashItem = (typeof trash.value)[number]
 
-const buttonClass = 'inline-flex min-h-control items-center justify-center gap-2 rounded-control border border-control-border bg-control px-3 text-control-size font-medium text-secondary cursor-pointer hover:enabled:bg-raised hover:enabled:text-white disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
-const dangerButtonClass = `${buttonClass} text-[#ff6b7b] hover:enabled:bg-[#3a2024] hover:enabled:text-[#ff8793]`
+const buttonClass = 'inline-flex min-h-control items-center justify-center gap-2 rounded-control border border-control-border bg-control px-3 text-control-size font-medium text-secondary cursor-pointer hover:enabled:bg-raised hover:enabled:text-foreground disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+const dangerButtonClass = `${buttonClass} text-danger hover:enabled:bg-danger-surface hover:enabled:text-danger-hover`
 const iconButtonClass = 'inline-flex size-9 shrink-0 items-center justify-center rounded-control border-0 bg-transparent text-accent cursor-pointer hover:enabled:bg-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-accent'
 
 const searchQuery = ref('')

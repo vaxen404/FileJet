@@ -55,11 +55,14 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - Username and optional email editing.
 - Password changes with current-password verification and new-password confirmation.
 - Six accent colors applied throughout the interface.
+- Light, dark, and system themes, with live appearance previews and quick selection from the account menu.
 - Default grid/list view, sort order, and custom items per page, with an Auto option.
 - Collapsible Profile and Password sections; Profile starts open.
 - A themed confirmation dialog for unsaved changes during in-app navigation.
 
 Profile and password changes are stored in PostgreSQL. Appearance and browsing preferences are stored per account in the current browser's `localStorage`; they do not sync across devices.
+
+Theme and accent choices can be changed in **Appearance** or the account menu. System mode follows device appearance changes automatically. A validated appearance cookie restores the signed-in account's last theme during server rendering; older preferences continue to use the original dark theme.
 
 ## 🧰 Technology
 

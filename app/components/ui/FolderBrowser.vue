@@ -35,7 +35,7 @@
             </template>
             <template #list>
                 <div class="table-scroll min-h-0 overflow-auto">
-                    <table class="contents-table border-collapse w-full min-w-144 text-left text-[0.85rem] text-secondary">
+                    <table class="mobile-item-table contents-table border-collapse w-full min-w-144 text-left text-[0.85rem] text-secondary">
                         <thead>
                             <tr>
                                 <th class="p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted" v-if="!readOnly">
@@ -63,7 +63,7 @@
                                 @click="$emit('open', item)"
                                 @contextmenu.prevent.stop="contextMenu($event, item)"
                             >
-                                <td class="p-3 border-b border-b-divider"
+                                <td class="item-selection-cell p-3 border-b border-b-divider"
                                     v-if="!readOnly"
                                     @click.stop
                                 >
@@ -75,19 +75,19 @@
                                         :disabled="busy"
                                     />
                                 </td>
-                                <td class="p-3 border-b border-b-divider">
+                                <td class="item-name-cell p-3 border-b border-b-divider">
                                     <div class="item-name flex items-center gap-3 min-w-0">
                                         <span class="item-icon grid place-items-center shrink-0 rounded-[10px] bg-accent/12 text-accent text-control-icon
                                             size-[2.7rem]"><Icon :name="icon(item)" /></span>
                                         <strong class="max-w-72 overflow-hidden text-ellipsis whitespace-nowrap" :title="item.name">{{ item.name }}</strong>
                                     </div>
                                 </td>
-                                <td class="p-3 border-b border-b-divider">{{ item.type }}</td>
-                                <td class="p-3 border-b border-b-divider">
+                                <td data-label="Type" class="item-meta-cell p-3 border-b border-b-divider">{{ item.type }}</td>
+                                <td data-label="Size" class="item-meta-cell p-3 border-b border-b-divider">
                                     {{ item.type === 'folder' ? '—' : formatFileSize(item.size) }}
                                 </td>
-                                <td class="p-3 border-b border-b-divider">{{ formatFileTime(item.updated_at ?? item.created_at) }}</td>
-                                <td class="p-3 border-b border-b-divider"
+                                <td data-label="Modified" class="item-meta-cell p-3 border-b border-b-divider">{{ formatFileTime(item.updated_at ?? item.created_at) }}</td>
+                                <td class="item-actions-cell p-3 border-b border-b-divider"
                                     v-if="!readOnly"
                                     @click.stop
                                 >
@@ -154,12 +154,12 @@
                             v-if="!readOnly"
                             #actions
                         >
-                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
                                 cursor-pointer size-8">
                                 <input
                                     v-model="selected"
                                     type="checkbox"
-                                    class="item-checkbox file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
+                                    class="item-checkbox file-checkbox m-0 accent-accent cursor-pointer size-[1.1rem]"
                                     :value="item.id"
                                     :disabled="busy"
                                 />

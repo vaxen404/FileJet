@@ -6,7 +6,7 @@
     >
         <div
             v-if="!embedded"
-            class="share-title flex items-center gap-2 mb-3 text-white text-[0.9rem] font-semibold"
+            class="share-title flex items-center gap-2 mb-3 text-foreground text-[0.9rem] font-semibold"
         >
             <Icon name="solar:link-bold" /> Share
         </div>
@@ -21,7 +21,7 @@
                 v-if="state.url"
                 class="share-link flex gap-2 mb-2"
             >
-                <input class="flex-1 min-w-0 w-full h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border
+                <input class="flex-1 min-w-0 w-full h-10 py-0 px-3 text-content bg-input border border-control-border
                     rounded-md text-sm outline-none focus:border-accent disabled:opacity-60
                     disabled:cursor-not-allowed leading-[inherit]"
                     :value="state.url"
@@ -31,8 +31,8 @@
                 <button
                     type="button"
                     class="copy-btn min-h-10 p-0 inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium
-                    leading-normal cursor-pointer w-10 shrink-0 bg-raised text-[#d5d5da] border border-control-border
-                    hover:bg-[#2a2a2f] hover:text-white disabled:opacity-60 disabled:cursor-not-allowed
+                    leading-normal cursor-pointer w-10 shrink-0 bg-raised text-content border border-control-border
+                    hover:bg-raised hover:text-foreground disabled:opacity-60 disabled:cursor-not-allowed
                     focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                     title="Copy link"
                     @click="copyShareLink"
@@ -54,7 +54,7 @@
                 class="share-settings flex flex-col gap-3"
                 @submit.prevent="saveSettings"
             >
-                <label class="password-toggle text-[#d5d5da] text-sm leading-normal flex items-center gap-2 cursor-pointer">
+                <label class="password-toggle text-content text-sm leading-normal flex items-center gap-2 cursor-pointer">
                     <input class="accent-primary m-0 rounded-sm disabled:opacity-60 disabled:cursor-not-allowed size-4"
                         v-model="passwordEnabled"
                         type="checkbox"
@@ -66,10 +66,10 @@
                     v-if="passwordEnabled"
                     class="setting-field flex flex-col gap-2"
                 >
-                    <label class="text-[#d5d5da] text-sm leading-normal" :for="`share-password-${itemId}`">{{
+                    <label class="text-content text-sm leading-normal" :for="`share-password-${itemId}`">{{
                         state.hasPassword ? 'Change password' : 'Link password'
                     }}</label>
-                    <input class="w-full min-w-0 h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md
+                    <input class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md
                         text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
                         leading-[inherit]"
                         :id="`share-password-${itemId}`"
@@ -91,8 +91,8 @@
                     >
                 </div>
                 <div class="setting-field flex flex-col gap-2">
-                    <label class="text-[#d5d5da] text-sm leading-normal" :for="`share-expiration-${itemId}`">Link expiration</label>
-                    <select class="w-full min-w-0 h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md
+                    <label class="text-content text-sm leading-normal" :for="`share-expiration-${itemId}`">Link expiration</label>
+                    <select class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md
                         text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
                         leading-[inherit]"
                         :id="`share-expiration-${itemId}`"
@@ -105,7 +105,7 @@
                         <option value="30">30 days</option>
                         <option value="custom">Custom expiration date</option>
                     </select>
-                    <input class="w-full min-w-0 h-10 py-0 px-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md
+                    <input class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md
                         text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
                         leading-[inherit]"
                         v-if="expiration === 'custom'"
@@ -117,7 +117,7 @@
                 </div>
                 <p
                     v-if="errorMessage"
-                    class="share-error text-[#ff6b6b] m-0 text-[0.8125rem] leading-normal"
+                    class="share-error text-danger m-0 text-[0.8125rem] leading-normal"
                 >
                     {{ errorMessage }}
                 </p>
@@ -131,7 +131,7 @@
                     <button
                         type="submit"
                         class="create-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
-                        font-medium leading-normal cursor-pointer bg-primary text-white border border-primary
+                        font-medium leading-normal cursor-pointer bg-primary text-on-primary border border-primary
                         hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:outline-offset-2"
                         :disabled="busy"
@@ -143,8 +143,8 @@
                         v-if="state.url && allowRemove"
                         type="button"
                         class="remove-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
-                        font-medium leading-normal cursor-pointer bg-transparent text-[#ff6b6b] border border-[#4a292d]
-                        hover:enabled:bg-[#3a2024] disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
+                        font-medium leading-normal cursor-pointer bg-transparent text-danger border border-danger-border
+                        hover:enabled:bg-danger-surface disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:outline-offset-2"
                         :disabled="busy"
                         @click="removeShareLink"
@@ -158,7 +158,7 @@
             v-if="errorMessage && isLoading === false && loadFailed"
             type="button"
             class="create-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
-            font-medium leading-normal cursor-pointer bg-primary text-white border border-primary
+            font-medium leading-normal cursor-pointer bg-primary text-on-primary border border-primary
             hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
             focus-visible:outline-accent focus-visible:outline-offset-2"
             @click="loadShareLink"

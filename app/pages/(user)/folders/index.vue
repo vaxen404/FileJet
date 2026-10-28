@@ -19,7 +19,7 @@
                     <button
                         type="button"
                         class="new-folder-button inline-flex items-center justify-center shrink-0 gap-2 h-control py-0 px-3.5
-                        text-white bg-primary border border-primary rounded-control
+                        text-on-primary bg-primary border border-primary rounded-control
                         shadow-[inset_0_1px_0_#ffffff12,_0_2px_6px_#0003] text-control-size font-medium leading-normal
                         whitespace-nowrap cursor-pointer transition-[background,border-color,transform] duration-180
                         ease-[ease] hover:enabled:bg-primary/85 hover:enabled:border-accent hover:enabled:-translate-y-px
@@ -32,7 +32,7 @@
                     >
                         <Icon
                             name="solar:add-folder-bold"
-                            class="new-folder-icon block shrink-0 text-white text-control-icon size-control-icon"
+                            class="new-folder-icon block shrink-0 text-on-primary text-control-icon size-control-icon"
                         />
                         <span>New Folder</span>
                     </button>
@@ -67,7 +67,7 @@
                         size="2.5rem"
                         class="empty-state-icon empty-state-folder-icon block shrink-0 mb-2 text-accent text-[2.5rem]"
                     />
-                    <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
+                    <strong class="text-foreground text-sm font-semibold leading-normal">{{ folders.length ? 'No matching folders' : 'No folders yet' }}</strong>
                     <span class="empty-state-description text-muted text-sm font-normal leading-normal">
                         {{
                             folders.length
@@ -80,7 +80,7 @@
 
             <template #list>
                 <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-                    <table class="folders-table w-full border-separate border-spacing-0 bg-transparent border-0 rounded-none min-w-176
+                    <table class="mobile-item-table folders-table w-full border-separate border-spacing-0 bg-transparent border-0 rounded-none min-w-176
                         table-fixed">
                         <thead>
                             <tr>
@@ -120,7 +120,7 @@
                                 @click="openFolder(folder)"
                                 @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
                             >
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
+                                <td class="item-selection-cell h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedFolders"
                                         type="checkbox"
@@ -130,15 +130,15 @@
                                     />
                                 </td>
 
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
+                                <td class="item-name-cell h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
                                     <div class="folder-name flex items-center gap-3">
-                                        <div class="folder-icon flex items-center justify-center shrink-0 text-white bg-primary border border-primary
+                                        <div class="folder-icon flex items-center justify-center shrink-0 text-on-primary bg-primary border border-primary
                                             rounded-md text-[1.2rem] size-10">
                                             <Icon name="solar:folder-bold" />
                                         </div>
 
                                         <div class="folder-info flex flex-col gap-1 min-w-0">
-                                            <strong class="text-white text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="folder.name">{{ folder.name }}</strong>
+                                            <strong class="text-foreground text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="folder.name">{{ folder.name }}</strong>
                                             <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis">
                                                 Folder • {{ formatFileTime(folder.created_at) }}
                                             </span>
@@ -146,11 +146,11 @@
                                     </div>
                                 </td>
 
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Folder</td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(folder.created_at) }}</td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(folder.updated_at) }}</td>
+                                <td data-label="Type" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Folder</td>
+                                <td data-label="Created" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(folder.created_at) }}</td>
+                                <td data-label="Modified" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(folder.updated_at) }}</td>
 
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell" @click.stop>
+                                <td class="item-actions-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell" @click.stop>
                                     <ItemMenu
                                         :ref="menu => setFolderMenuRef(folder.id, menu)"
                                         type="folder"
@@ -187,12 +187,12 @@
                         @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
                     >
                         <template #actions>
-                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
                                 cursor-pointer size-8">
                                 <input
                                     v-model="selectedFolders"
                                     type="checkbox"
-                                    class="folder-checkbox file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
+                                    class="folder-checkbox file-checkbox m-0 accent-accent cursor-pointer size-[1.1rem]"
                                     :value="folder.id"
                                     :disabled="pending"
                                 />

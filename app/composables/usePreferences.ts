@@ -1,10 +1,12 @@
 import { accentColors, type AccentColor } from '~/utils/appearance'
+import type { ThemeMode } from '~/utils/themes'
 
 export type FileJetPreferences = {
     defaultView: 'grid' | 'list'
     defaultSort: 'newest' | 'oldest' | 'name-asc' | 'name-desc'
     pageSize: 'auto' | number
     accentColor: AccentColor
+    theme: ThemeMode
 }
 
 export const isValidPageSize = (value: unknown): value is number =>
@@ -14,7 +16,8 @@ const getDefaultPreferences = (): FileJetPreferences => ({
     defaultView: 'grid',
     defaultSort: 'newest',
     pageSize: 'auto',
-    accentColor: 'indigo'
+    accentColor: 'indigo',
+    theme: 'dark'
 })
 
 const normalizePreferences = (value: unknown): FileJetPreferences => {
@@ -32,7 +35,8 @@ const normalizePreferences = (value: unknown): FileJetPreferences => {
         pageSize: isValidPageSize(stored.pageSize)
             ? stored.pageSize
             : defaults.pageSize,
-        accentColor: accentColors.find(color => color.value === stored.accentColor)?.value ?? defaults.accentColor
+        accentColor: accentColors.find(color => color.value === stored.accentColor)?.value ?? defaults.accentColor,
+        theme: stored.theme === 'light' || stored.theme === 'system' ? stored.theme : defaults.theme
     }
 }
 

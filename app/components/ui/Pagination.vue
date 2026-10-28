@@ -1,6 +1,7 @@
 <template>
     <div
         v-if="totalPages > 0"
+        aria-label="Pagination"
         class="pagination h-14 shrink-0 flex items-center justify-center gap-1 bg-surface border border-divider
         border-t-0 rounded-bl-panel rounded-br-panel grid-pagination:bg-transparent grid-pagination:border-0
         grid-pagination:rounded-none grid-pagination:mt-3"
@@ -10,7 +11,8 @@
             type="button"
             class="page-button flex items-center justify-center bg-transparent text-label border border-divider
             rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
-            hover:enabled:text-white disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
+            hover:enabled:text-foreground disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
+            aria-label="Previous page"
             :disabled="modelValue === 1"
             @click="previousPage"
         >
@@ -33,9 +35,11 @@
                 type="button"
                 class="page-button flex items-center justify-center bg-transparent text-label border border-divider
                 rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
-                hover:enabled:text-white is-active:bg-primary is-active:text-white is-active:border-primary
-                disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
+                hover:enabled:text-foreground is-active:bg-primary is-active:text-on-primary is-active:border-primary
+                disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem] is-active:hover:bg-primary is-active:hover:text-on-primary"
                 :class="{ active: modelValue === page }"
+                :aria-current="modelValue === page ? 'page' : undefined"
+                :aria-label="`Page ${page}`"
                 @click="goToPage(Number(page))"
             >
                 {{ page }}
@@ -46,7 +50,8 @@
             type="button"
             class="page-button flex items-center justify-center bg-transparent text-label border border-divider
             rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
-            hover:enabled:text-white disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
+            hover:enabled:text-foreground disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
+            aria-label="Next page"
             :disabled="modelValue === totalPages"
             @click="nextPage"
         >

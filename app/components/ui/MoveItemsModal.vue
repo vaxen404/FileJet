@@ -3,7 +3,7 @@
         <dialog
             ref="dialog"
             class="move-modal w-[min(34rem,_calc(100vw_-_2rem))] max-h-[calc(100dvh_-_2rem)] p-0 overflow-y-auto
-            text-foreground bg-surface border border-[#35353c] rounded-[20px] shadow-[0_24px_80px_#0008]
+            text-foreground bg-surface border border-control-border rounded-[20px] shadow-[0_24px_80px_#0008]
             backdrop:bg-[#0009]"
             @cancel.prevent="close"
             @click.self="close"
@@ -18,7 +18,7 @@
                     </div>
                     <button
                         type="button"
-                        class="close-button inline-flex items-center justify-center gap-2 min-h-8 p-0 text-[#d5d5da] bg-transparent
+                        class="close-button inline-flex items-center justify-center gap-2 min-h-8 p-0 text-content bg-transparent
                         border-0 rounded-control text-control-size cursor-pointer w-8 shrink-0
                         hover:enabled:bg-control-border disabled:opacity-40 disabled:cursor-not-allowed
                         focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-2"
@@ -58,7 +58,7 @@
                         </button>
                     </template>
                 </nav>
-                <label class="search-field flex items-center gap-2 py-0 px-3 min-h-10 text-muted bg-canvas border border-[#35353c]
+                <label class="search-field flex items-center gap-2 py-0 px-3 min-h-10 text-muted bg-canvas border border-control-border
                     rounded-control focus-within:border-accent">
                     <Icon name="solar:magnifier-linear" />
                     <input class="flex-1 min-w-0 py-[0.6rem] px-0 text-foreground bg-transparent border-0 outline-none text-sm
@@ -83,8 +83,8 @@
                         class="list-message flex flex-col items-center justify-center min-h-36 py-0 px-4 text-center"
                     >
                         <p class="text-heading-muted text-[0.8125rem] leading-normal">{{ loadError }}</p>
-                        <button class="inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-[#d5d5da] bg-raised border
-                            border-[#35353c] rounded-control text-control-size cursor-pointer hover:enabled:bg-control-border
+                        <button class="inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-content bg-raised border
+                            border-control-border rounded-control text-control-size cursor-pointer hover:enabled:bg-control-border
                             disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                             focus-visible:-outline-offset-2"
                             type="button"
@@ -98,7 +98,7 @@
                             v-for="folder in childFolders"
                             :key="folder.id"
                             type="button"
-                            class="folder-row flex items-center justify-center gap-3 min-h-10 p-3 text-[#d5d5da] bg-transparent border-0
+                            class="folder-row flex items-center justify-center gap-3 min-h-10 p-3 text-content bg-transparent border-0
                             rounded-control text-control-size cursor-pointer w-full text-left hover:enabled:bg-control-border
                             disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                             focus-visible:-outline-offset-2"
@@ -132,7 +132,7 @@
                 </div>
                 <p
                     v-if="saveError"
-                    class="form-error text-[#ff8181] text-[0.8125rem] leading-normal wrap-anywhere"
+                    class="form-error text-danger text-[0.8125rem] leading-normal wrap-anywhere"
                 >
                     {{ saveError }}
                 </p>
@@ -141,8 +141,8 @@
                     <span class="destination-label max-w-56 overflow-hidden text-ellipsis whitespace-nowrap text-muted
                         text-[0.8125rem]">To: {{ destinationLabel }}</span>
                     <div class="footer-actions flex gap-2 ml-auto">
-                        <button class="inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-[#d5d5da] bg-raised border
-                            border-[#35353c] rounded-control text-control-size cursor-pointer hover:enabled:bg-control-border
+                        <button class="inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-content bg-raised border
+                            border-control-border rounded-control text-control-size cursor-pointer hover:enabled:bg-control-border
                             disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                             focus-visible:-outline-offset-2"
                             type="button"
@@ -153,7 +153,7 @@
                         </button>
                         <button
                             type="button"
-                            class="primary inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-white bg-primary border
+                            class="primary inline-flex items-center justify-center gap-2 min-h-10 py-0 px-3 text-on-primary bg-primary border
                             rounded-control text-control-size cursor-pointer border-primary hover:enabled:bg-primary/85
                             disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                             focus-visible:-outline-offset-2"

@@ -22,7 +22,7 @@
                             name="solar:document-linear"
                             size="3rem"
                         />
-                        <p class="m-0 text-[#d5d5da] text-sm leading-[inherit]">{{ previewError }}</p>
+                        <p class="m-0 text-content text-sm leading-[inherit]">{{ previewError }}</p>
                         <span>Use the Download button to download this file.</span>
                     </div>
                     <img class="block min-h-0 object-contain rounded-md border-0 size-full"
@@ -33,7 +33,7 @@
                         @load="captureImageMetadata"
                         @error="handlePreviewError"
                     />
-                    <pre class="m-0 text-[#d5d5da] whitespace-pre-wrap wrap-anywhere font-mono text-[0.85rem] leading-[1.7]" v-else-if="isText">{{ textContent }}</pre>
+                    <pre class="m-0 text-content whitespace-pre-wrap wrap-anywhere font-mono text-[0.85rem] leading-[1.7]" v-else-if="isText">{{ textContent }}</pre>
                     <iframe class="block min-h-0 object-contain rounded-md border-0 size-full"
                         v-else-if="isPdf"
                         :src="previewUrl"
@@ -59,7 +59,7 @@
                             :name="getFileIcon(file.mime_type, file.original_name)"
                             size="3.75rem"
                         />
-                        <p class="m-0 text-[#d5d5da] text-sm leading-[inherit]">Preview is not available for this file type.</p>
+                        <p class="m-0 text-content text-sm leading-[inherit]">Preview is not available for this file type.</p>
                         <span>Use the Download button to download this file.</span>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                 rounded-xl max-preview:flex-none max-phone:p-3">
                 <div class="file-heading flex items-start gap-3">
                     <div class="file-heading-text flex-1 min-w-0">
-                        <h1 class="m-0 text-white text-xl font-semibold leading-[1.35] wrap-anywhere" id="file-detail-title">{{ displayFileName }}</h1>
+                        <h1 class="m-0 text-foreground text-xl font-semibold leading-[1.35] wrap-anywhere" id="file-detail-title">{{ displayFileName }}</h1>
                         <p class="file-summary flex items-center flex-wrap gap-1.5 mt-1.5 mr-0 mb-0 ml-0 text-muted text-[0.8125rem]
                             leading-normal">
                             <span>{{ formatFileSize(file.size) }}</span>
@@ -84,8 +84,8 @@
                     </div>
                     <button
                         type="button"
-                        class="close-details shrink-0 grid place-items-center p-0 text-[#cfcfd5] bg-transparent border-0
-                        cursor-pointer hover:bg-divider hover:text-white focus-visible:outline-2 focus-visible:outline-accent
+                        class="close-details shrink-0 grid place-items-center p-0 text-content bg-transparent border-0
+                        cursor-pointer hover:bg-divider hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 size-7"
                         :title="`Back to ${returnPage.name}`"
                         @click="goBack"
@@ -111,9 +111,9 @@
                     <button
                         type="button"
                         class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                        px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
+                        px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
                         transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                        hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
+                        hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
                         disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
                         :class="{ 'is-busy': isDownloading }"
@@ -129,9 +129,9 @@
                     <button
                         type="button"
                         class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                        text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
                         cursor-pointer transition-colors duration-200 ease-[ease] w-13 hover:enabled:bg-divider
-                        hover:enabled:text-white hover:enabled:border-[#3a3a41] favorite:text-accent disabled:opacity-60
+                        hover:enabled:text-foreground hover:enabled:border-hover-border favorite:text-accent disabled:opacity-60
                         disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :class="{
@@ -154,9 +154,9 @@
                     <button
                         type="button"
                         class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                        text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
                         cursor-pointer transition-colors duration-200 ease-[ease] w-13 hover:enabled:bg-divider
-                        hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                        hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
                         disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="isDeleting || isSavingRename"
@@ -171,9 +171,9 @@
                     <button
                         type="button"
                         class="action-button icon-action delete-button min-w-0 min-h-11 inline-flex items-center justify-center
-                        gap-2 p-0 text-[#ff6b6b] bg-[#352024] border rounded-md text-sm font-medium leading-normal
-                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-[#4a292d]
-                        hover:enabled:bg-[#3a2024] hover:enabled:text-[#ff7d7d] hover:enabled:border-[#4a292d]
+                        gap-2 p-0 text-danger bg-danger-surface border rounded-md text-sm font-medium leading-normal
+                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-danger-border
+                        hover:enabled:bg-danger-surface hover:enabled:text-danger-hover hover:enabled:border-danger-border
                         disabled:opacity-60 disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2
                         max-phone:pr-2"
@@ -190,11 +190,11 @@
                 </div>
 
                 <div
-                    class="detail-tabs grid grid-cols-3 gap-1 p-1 bg-[#151518] border border-divider rounded-md"
+                    class="detail-tabs grid grid-cols-3 gap-1 p-1 bg-input border border-divider rounded-md"
                     @keydown="handleTabKeydown"
                 >
                     <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
-                        cursor-pointer hover:text-white is-active:bg-raised is-active:text-white is-active:font-semibold
+                        cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground is-active:font-semibold
                         disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2"
                         id="file-details-tab"
@@ -207,7 +207,7 @@
                         Details
                     </button>
                     <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
-                        cursor-pointer hover:text-white is-active:bg-raised is-active:text-white is-active:font-semibold
+                        cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground is-active:font-semibold
                         disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2"
                         id="file-edit-tab"
@@ -220,7 +220,7 @@
                         Edit
                     </button>
                     <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
-                        cursor-pointer hover:text-white is-active:bg-raised is-active:text-white is-active:font-semibold
+                        cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground is-active:font-semibold
                         disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2"
                         id="file-share-tab"
@@ -249,7 +249,7 @@
                             max-phone:px-2.5"
                         >
                             <dt class="text-muted">{{ row.label }}</dt>
-                            <dd class="min-w-0 m-0 text-[#d5d5da] wrap-anywhere">{{ row.value }}</dd>
+                            <dd class="min-w-0 m-0 text-content wrap-anywhere">{{ row.value }}</dd>
                         </div>
                     </dl>
                 </div>
@@ -266,7 +266,7 @@
                         @submit.prevent="saveRename"
                     >
                         <div class="rename-field flex flex-col gap-2">
-                            <label class="text-white text-sm leading-[inherit] font-medium" for="file-rename-input">Filename</label>
+                            <label class="text-foreground text-sm leading-[inherit] font-medium" for="file-rename-input">Filename</label>
                             <p class="m-0 text-muted text-[0.8125rem] leading-normal">
                                 Update the filename. The existing extension is preserved
                                 automatically.
@@ -278,8 +278,8 @@
                                     ref="nameInput"
                                     v-model="editingFileName"
                                     type="text"
-                                    class="name-input w-full min-w-0 min-h-11 py-2.5 px-3 text-white bg-control border-0 rounded-md text-sm
-                                    leading-normal outline-none flex-1 focus:border-accent is-invalid:border-[#ff6b6b]"
+                                    class="name-input w-full min-w-0 min-h-11 py-2.5 px-3 text-foreground bg-control border-0 rounded-md text-sm
+                                    leading-normal outline-none flex-1 focus:border-accent is-invalid:border-danger"
                                     :class="{ invalid: Boolean(renameError) }"
                                     maxlength="255"
                                     required
@@ -288,7 +288,7 @@
                                     @input="renameError = ''"
                                     @keydown.esc.prevent="cancelRename"
                                 />
-                                <span class="rename-extension flex items-center shrink-0 max-w-[35%] overflow-hidden py-0 px-2.5 bg-[#151518]
+                                <span class="rename-extension flex items-center shrink-0 max-w-[35%] overflow-hidden py-0 px-2.5 bg-input
                                     border-l border-l-control-border text-muted text-[0.8125rem] whitespace-nowrap">{{
                                     originalExtension || 'No extension'
                                 }}</span>
@@ -296,7 +296,7 @@
                             <p
                                 v-if="renameError"
                                 id="file-rename-error"
-                                class="rename-error m-0 text-[#ff6b6b] text-[0.8125rem] leading-normal"
+                                class="rename-error m-0 text-danger text-[0.8125rem] leading-normal"
                             >
                                 {{ renameError }}
                             </p>
@@ -305,9 +305,9 @@
                             <button
                                 type="button"
                                 class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
-                                text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                                text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
                                 cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
-                                hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                                hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
                                 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
                                 focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                                 :disabled="isSavingRename"
@@ -318,9 +318,9 @@
                             <button
                                 type="submit"
                                 class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                                px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
+                                px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
                                 transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                                hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
+                                hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
                                 disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                                 focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                                 :class="{ 'is-busy': isSavingRename }"
@@ -337,9 +337,9 @@
                         <button
                             type="button"
                             class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
-                            text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                            text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
                             cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
-                            hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                            hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
                             disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                             focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                             :class="{ 'is-busy': isCopying }"
@@ -370,17 +370,17 @@
     </div>
     <div
         v-else
-        class="file-empty-state p-6 bg-surface border border-divider rounded-xl text-[#d5d5da]"
+        class="file-empty-state p-6 bg-surface border border-divider rounded-xl text-content"
     >
-        <h1 class="m-0 text-white text-xl leading-[inherit]">Unable to load file</h1>
+        <h1 class="m-0 text-foreground text-xl leading-[inherit]">Unable to load file</h1>
         <p class="text-sm leading-normal">The file could not be found or accessed.</p>
         <div class="edit-actions flex justify-end flex-wrap gap-2">
             <button
                 type="button"
                 class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
-                text-[#cfcfd5] bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
                 cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
-                hover:enabled:text-white hover:enabled:border-[#3a3a41] disabled:opacity-60
+                hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
                 disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
                 @click="goBack"
             >
@@ -389,9 +389,9 @@
             <button
                 type="button"
                 class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                px-3.5 text-white bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
+                px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
                 transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                hover:enabled:text-white hover:enabled:border-primary disabled:opacity-60
+                hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
                 disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
                 @click="refresh()"
             >

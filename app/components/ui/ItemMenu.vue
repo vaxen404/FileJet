@@ -5,137 +5,141 @@
     >
         <button
             type="button"
+            aria-label="Item actions"
+            :aria-expanded="isOpen"
             class="menu-trigger flex items-center justify-center bg-surface text-label border-0 rounded-control
-            text-control-icon cursor-pointer hover:bg-[#252529] hover:text-white size-8"
+            text-control-icon cursor-pointer hover:bg-control hover:text-foreground size-8"
             @click="toggleMenu"
         >
             <Icon class="shrink-0 rotate-90 size-control-icon" name="solar:menu-dots-bold" />
         </button>
 
         <Teleport to="body">
-            <div
-                v-if="isOpen"
-                ref="dropdownRef"
-                class="menu-dropdown fixed w-max min-w-[min(11rem,_calc(100vw_-_2rem))] p-[3px] flex flex-col
-                bg-surface-hover border border-control-border rounded-menu shadow-[0_0.6rem_2rem_rgba(0,_0,_0,_0.35)]
-                overflow-y-auto z-1000"
-                :style="menuPosition"
-                @click.stop
-                @contextmenu.stop
-            >
-                <button
-                    v-if="hasAction('open')"
-                    type="button"
-                    class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-[#d5d5da] border-0
-                    rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
-                    font-medium leading-normal hover:bg-[#2a2a2f] hover:text-white"
-                    @click="handleAction('open')"
+            <Transition name="dropdown">
+                <div
+                    v-if="isOpen"
+                    ref="dropdownRef"
+                    class="menu-dropdown fixed w-max min-w-[min(11rem,_calc(100vw_-_2rem))] p-[3px] flex flex-col
+                    bg-surface-hover border border-control-border rounded-menu shadow-[0_0.6rem_2rem_rgba(0,_0,_0,_0.35)]
+                    overflow-y-auto z-1000"
+                    :style="menuPosition"
+                    @click.stop
+                    @contextmenu.stop
                 >
-                    <Icon
-                        class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
-                        :name="
-                            type === 'folder'
-                                ? 'solar:folder-open-bold'
-                                : type === 'note'
-                                  ? 'solar:notebook-bold'
-                                  : 'solar:document-bold'
-                        "
-                    />
+                    <button
+                        v-if="hasAction('open')"
+                        type="button"
+                        class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-content border-0
+                        rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
+                        font-medium leading-normal hover:bg-raised hover:text-foreground"
+                        @click="handleAction('open')"
+                    >
+                        <Icon
+                            class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
+                            :name="
+                                type === 'folder'
+                                    ? 'solar:folder-open-bold'
+                                    : type === 'note'
+                                      ? 'solar:notebook-bold'
+                                      : 'solar:document-bold'
+                            "
+                        />
 
-                    Open
-                </button>
+                        Open
+                    </button>
 
-                <button
-                    v-if="hasAction('rename')"
-                    type="button"
-                    class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-[#d5d5da] border-0
-                    rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
-                    font-medium leading-normal hover:bg-[#2a2a2f] hover:text-white"
-                    @click="handleAction('rename')"
-                >
-                    <Icon
-                        class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
-                        name="solar:pen-bold"
-                    />
-                    Rename
-                </button>
+                    <button
+                        v-if="hasAction('rename')"
+                        type="button"
+                        class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-content border-0
+                        rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
+                        font-medium leading-normal hover:bg-raised hover:text-foreground"
+                        @click="handleAction('rename')"
+                    >
+                        <Icon
+                            class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
+                            name="solar:pen-bold"
+                        />
+                        Rename
+                    </button>
 
-                <button
-                    v-if="type === 'file' && canCopy && hasAction('copy')"
-                    type="button"
-                    class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-[#d5d5da] border-0
-                    rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
-                    font-medium leading-normal hover:bg-[#2a2a2f] hover:text-white"
-                    @click="handleAction('copy')"
-                >
-                    <Icon
-                        class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
-                        name="solar:copy-bold"
-                    />
-                    Copy
-                </button>
+                    <button
+                        v-if="type === 'file' && canCopy && hasAction('copy')"
+                        type="button"
+                        class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-content border-0
+                        rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
+                        font-medium leading-normal hover:bg-raised hover:text-foreground"
+                        @click="handleAction('copy')"
+                    >
+                        <Icon
+                            class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
+                            name="solar:copy-bold"
+                        />
+                        Copy
+                    </button>
 
-                <button
-                    v-if="hasAction('edit')"
-                    type="button"
-                    class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-[#d5d5da] border-0
-                    rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
-                    font-medium leading-normal hover:bg-[#2a2a2f] hover:text-white"
-                    @click="handleAction('edit')"
-                >
-                    <Icon
-                        class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
-                        name="solar:pen-bold"
-                    />
-                    Edit
-                </button>
+                    <button
+                        v-if="hasAction('edit')"
+                        type="button"
+                        class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-content border-0
+                        rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
+                        font-medium leading-normal hover:bg-raised hover:text-foreground"
+                        @click="handleAction('edit')"
+                    >
+                        <Icon
+                            class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
+                            name="solar:pen-bold"
+                        />
+                        Edit
+                    </button>
 
-                <button
-                    v-if="hasAction('download')"
-                    type="button"
-                    class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-[#d5d5da] border-0
-                    rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
-                    font-medium leading-normal hover:bg-[#2a2a2f] hover:text-white"
-                    @click="handleAction('download')"
-                >
-                    <Icon
-                        class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
-                        name="solar:download-bold"
-                    />
-                    Download
-                </button>
+                    <button
+                        v-if="hasAction('download')"
+                        type="button"
+                        class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-content border-0
+                        rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
+                        font-medium leading-normal hover:bg-raised hover:text-foreground"
+                        @click="handleAction('download')"
+                    >
+                        <Icon
+                            class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
+                            name="solar:download-bold"
+                        />
+                        Download
+                    </button>
 
-                <button
-                    v-if="hasAction('favorite')"
-                    type="button"
-                    class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-[#d5d5da] border-0
-                    rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
-                    font-medium leading-normal hover:bg-[#2a2a2f] hover:text-white"
-                    @click="handleAction('favorite')"
-                >
-                    <Icon
-                        class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
-                        :name="isFavorite ? 'solar:star-bold' : 'solar:star-linear'"
-                    />
+                    <button
+                        v-if="hasAction('favorite')"
+                        type="button"
+                        class="menu-item w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-content border-0
+                        rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
+                        font-medium leading-normal hover:bg-raised hover:text-foreground"
+                        @click="handleAction('favorite')"
+                    >
+                        <Icon
+                            class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
+                            :name="isFavorite ? 'solar:star-bold' : 'solar:star-linear'"
+                        />
 
-                    {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
-                </button>
+                        {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
+                    </button>
 
-                <button
-                    v-if="hasAction('delete')"
-                    type="button"
-                    class="menu-item danger w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-[#ff6b6b]
-                    border-0 rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
-                    font-medium leading-normal hover:bg-[#3a2024] hover:text-[#ff6b6b]"
-                    @click="handleAction('delete')"
-                >
-                    <Icon
-                        class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
-                        name="solar:trash-bin-trash-bold"
-                    />
-                    Delete
-                </button>
-            </div>
+                    <button
+                        v-if="hasAction('delete')"
+                        type="button"
+                        class="menu-item danger w-full shrink-0 flex items-center gap-2 py-2 px-3 bg-transparent text-danger
+                        border-0 rounded-control text-control-size cursor-pointer text-left whitespace-normal wrap-anywhere
+                        font-medium leading-normal hover:bg-danger-surface hover:text-danger"
+                        @click="handleAction('delete')"
+                    >
+                        <Icon
+                            class="menu-item-icon text-control-icon [flex:0_0_var(--ui-control-icon-size,_1.125rem)] size-control-icon"
+                            name="solar:trash-bin-trash-bold"
+                        />
+                        Delete
+                    </button>
+                </div>
+            </Transition>
         </Teleport>
     </div>
 </template>

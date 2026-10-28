@@ -1,5 +1,5 @@
 <template>
-    <div class="shared-page w-full h-dvh min-h-0 p-3 flex flex-col bg-canvas text-white overflow-hidden
+    <div class="shared-page public-share-page w-full h-dvh min-h-0 p-3 flex flex-col bg-canvas text-foreground overflow-hidden
         max-mobile:p-[0.6rem]">
         <div
             v-if="passwordRequired"
@@ -16,10 +16,10 @@
                     name="solar:lock-keyhole-linear"
                     size="2.75rem"
                 />
-                <h1 class="m-0 text-white text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">Password Protected</h1>
+                <h1 class="m-0 text-foreground text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">Password Protected</h1>
                 <p
                     v-if="lockedFileName"
-                    class="locked-filename max-w-84 m-0 text-[#d5d5da] text-[0.85rem] leading-[1.7] w-full wrap-anywhere
+                    class="locked-filename max-w-84 m-0 text-content text-[0.85rem] leading-[1.7] w-full wrap-anywhere
                     font-medium"
                     :title="lockedFileName"
                 >
@@ -34,9 +34,9 @@
                               : 'This file is protected by a password.'
                     }}
                 </p>
-                <label class="w-full text-left text-[#d5d5da] text-sm leading-[inherit]" for="public-share-password">Password</label>
+                <label class="w-full text-left text-content text-sm leading-[inherit]" for="public-share-password">Password</label>
                 <div class="unlock-password-field relative w-full">
-                    <input class="w-full h-11 py-0 px-3 text-white bg-[#151518] border border-control-border rounded-md text-sm
+                    <input class="w-full h-11 py-0 px-3 text-foreground bg-input border border-control-border rounded-md text-sm
                         outline-none pr-11 focus:border-accent leading-[inherit]"
                         id="public-share-password"
                         v-model="sharePassword"
@@ -51,7 +51,7 @@
                     <button
                         type="button"
                         class="password-visibility absolute top-0 right-0 flex items-center justify-center p-0 border-0 rounded-md
-                        text-muted bg-transparent cursor-pointer hover:text-white focus-visible:outline-2
+                        text-muted bg-transparent cursor-pointer hover:text-foreground focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:-outline-offset-2 disabled:opacity-65 disabled:cursor-wait
                         size-11"
                         :title="showPassword ? 'Hide password' : 'Show password'"
@@ -67,14 +67,14 @@
                 <p
                     v-if="unlockError"
                     id="unlock-error"
-                    class="unlock-error max-w-84 m-0 text-[#ff6b6b] text-[0.85rem] leading-[1.7]"
+                    class="unlock-error max-w-84 m-0 text-danger text-[0.85rem] leading-[1.7]"
                 >
                     {{ unlockError }}
                 </p>
                 <button
                     type="submit"
                     class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
-                    px-[1.4rem] text-white bg-primary border border-primary rounded-md [font-family:inherit]
+                    px-[1.4rem] text-on-primary bg-primary border border-primary rounded-md [font-family:inherit]
                     text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
                     hover:bg-primary/85 hover:border-accent focus-visible:outline-2 focus-visible:outline-accent
                     focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
@@ -115,7 +115,7 @@
                 <span class="shared-error-code py-[0.35rem] px-3 text-accent bg-accent/12 border border-accent/25 rounded-md
                     text-xs leading-[inherit] font-semibold tracking-[0.08em]">{{ error.statusCode || 'Error' }}</span>
 
-                <h1 class="m-0 text-white text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">
+                <h1 class="m-0 text-foreground text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">
                     {{
                         error.statusCode === 410
                             ? 'Link Expired'
@@ -168,9 +168,9 @@
 
                     <button
                         type="button"
-                        class="image-fullscreen-btn absolute right-4 bottom-4 flex items-center justify-center p-0 text-[#cfcfd5]
+                        class="image-fullscreen-btn absolute right-4 bottom-4 flex items-center justify-center p-0 text-content
                         bg-control border border-control-border rounded-md cursor-pointer transition-colors duration-200
-                        ease-[ease] hover:text-white hover:bg-divider focus-visible:outline-2 focus-visible:outline-accent
+                        ease-[ease] hover:text-foreground hover:bg-divider focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2 size-[2.6rem]"
                         :title="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
                         @click="toggleImageFullscreen"
@@ -189,7 +189,7 @@
                 <template v-else-if="isText">
                     <div
                         v-if="textPreviewError"
-                        class="error-message p-4 text-[#ef6666] text-[0.9rem] min-h-0 overflow-auto wrap-anywhere"
+                        class="error-message p-4 text-danger text-[0.9rem] min-h-0 overflow-auto wrap-anywhere"
                     >
                         Text preview could not be loaded.
                     </div>
@@ -236,7 +236,7 @@
                         />
                     </div>
 
-                    <h2 class="shrink-0 line-clamp-2 w-full max-w-136 mt-1 mr-0 mb-0 ml-0 text-white
+                    <h2 class="shrink-0 line-clamp-2 w-full max-w-136 mt-1 mr-0 mb-0 ml-0 text-foreground
                         text-[clamp(1.1rem,_2.5vw,_1.5rem)] font-semibold leading-[1.4] wrap-anywhere overflow-hidden
                         short-screen:col-start-2 short-screen:m-0 short-screen:text-[1.1rem]" :title="itemName">{{ itemName }}</h2>
 
@@ -258,7 +258,7 @@
                     <button
                         type="button"
                         class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
-                        px-[1.4rem] text-white bg-primary border border-primary rounded-md [font-family:inherit]
+                        px-[1.4rem] text-on-primary bg-primary border border-primary rounded-md [font-family:inherit]
                         text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
                         hover:bg-primary/85 hover:border-accent focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
@@ -285,7 +285,7 @@
                     <h1 class="m-0 text-[1.1rem] wrap-anywhere">{{ sharedItem.item.title }}</h1>
                     <a
                         class="download-btn m-0 no-underline flex-none inline-flex items-center justify-center gap-[0.65rem]
-                        py-[0.8rem] px-[1.4rem] text-white bg-primary border border-primary rounded-md
+                        py-[0.8rem] px-[1.4rem] text-on-primary bg-primary border border-primary rounded-md
                         [font-family:inherit] text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200
                         ease-[ease] hover:bg-primary/85 hover:border-accent focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:outline-offset-4 disabled:opacity-65

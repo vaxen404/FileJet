@@ -1,45 +1,47 @@
 <template>
     <Teleport to="body">
-        <div
-            v-if="show"
-            class="modal-overlay fixed inset-0 z-10000 flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs"
-            @click.self="emit('cancel')"
-        >
+        <Transition name="modal">
             <div
-                ref="dialog"
-                role="alertdialog"
-                aria-modal="true"
-                :aria-labelledby="titleId"
-                :aria-describedby="messageId"
-                class="confirm-modal w-full max-w-100 rounded-xl border border-divider bg-surface p-6 shadow-2xl"
-                @keydown.esc.prevent.stop="emit('cancel')"
-                @keydown.tab="trapFocus"
+                v-if="show"
+                class="modal-overlay fixed inset-0 z-10000 flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs"
+                @click.self="emit('cancel')"
             >
-                <h3 :id="titleId" class="mb-2 text-base font-semibold text-foreground">{{ title }}</h3>
+                <div
+                    ref="dialog"
+                    role="alertdialog"
+                    aria-modal="true"
+                    :aria-labelledby="titleId"
+                    :aria-describedby="messageId"
+                    class="confirm-modal max-h-[calc(100dvh_-_2rem)] overflow-y-auto w-full max-w-100 rounded-xl border border-divider bg-surface p-6 shadow-2xl"
+                    @keydown.esc.prevent.stop="emit('cancel')"
+                    @keydown.tab="trapFocus"
+                >
+                    <h3 :id="titleId" class="mb-2 text-base font-semibold text-foreground">{{ title }}</h3>
 
-                <p :id="messageId" class="text-sm leading-6 text-label">{{ message }}</p>
+                    <p :id="messageId" class="text-sm leading-6 text-label">{{ message }}</p>
 
-                <div class="modal-actions mt-6 flex justify-end gap-3">
-                    <button
-                        ref="cancelButton"
-                        type="button"
-                        class="cancel-button h-10 cursor-pointer rounded-control border border-control-border bg-control px-4 text-xs font-medium text-secondary hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                        @click="emit('cancel')"
-                    >
-                        {{ cancelText || 'Cancel' }}
-                    </button>
+                    <div class="modal-actions mt-6 flex justify-end gap-3">
+                        <button
+                            ref="cancelButton"
+                            type="button"
+                            class="cancel-button h-10 cursor-pointer rounded-control border border-control-border bg-control px-4 text-xs font-medium text-secondary hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            @click="emit('cancel')"
+                        >
+                            {{ cancelText || 'Cancel' }}
+                        </button>
 
-                    <button
-                        type="button"
-                        class="confirm-button h-10 cursor-pointer rounded-control border px-4 text-xs font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                        :class="variant === 'danger' ? 'border-red-700 bg-red-700 hover:bg-red-600' : 'border-primary bg-primary hover:brightness-110'"
-                        @click="emit('confirm')"
-                    >
-                        {{ confirmText || 'Confirm' }}
-                    </button>
+                        <button
+                            type="button"
+                            class="confirm-button h-10 cursor-pointer rounded-control border px-4 text-xs font-medium text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            :class="variant === 'danger' ? 'border-red-700 bg-red-700 hover:bg-red-600' : 'border-primary bg-primary hover:brightness-110'"
+                            @click="emit('confirm')"
+                        >
+                            {{ confirmText || 'Confirm' }}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Transition>
     </Teleport>
 </template>
 

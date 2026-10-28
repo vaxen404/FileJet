@@ -2,7 +2,7 @@
     <dialog
         ref="dialog"
         :aria-labelledby="`${id}-title`"
-        class="m-auto w-[min(28rem,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border border-divider bg-surface p-0 text-foreground shadow-2xl backdrop:bg-black/65 [color-scheme:dark]"
+        class="m-auto w-[min(28rem,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border border-divider bg-surface p-0 text-foreground shadow-2xl backdrop:bg-black/65"
         @cancel.prevent="close"
     >
         <template v-if="item">

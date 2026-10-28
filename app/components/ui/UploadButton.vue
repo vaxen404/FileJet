@@ -13,7 +13,7 @@
 
         <button
             type="button"
-            class="upload-button w-max min-w-32 h-control flex items-center justify-between gap-3 bg-primary text-white
+            class="upload-button w-max min-w-32 h-control flex items-center justify-between gap-3 bg-primary text-on-primary
             py-0 px-3 text-control-size font-medium border-0 rounded-control whitespace-nowrap shrink-0
             cursor-pointer transition-all duration-200 ease-[ease] leading-normal disabled:opacity-50
             disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent

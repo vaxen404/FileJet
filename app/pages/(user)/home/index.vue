@@ -11,8 +11,8 @@
                 </div>
 
                 <div class="stat-info flex flex-col gap-[0.2rem]">
-                    <strong class="text-white text-[1.7rem] font-bold">{{ files.length }}</strong>
-                    <span class="text-[#92929a] text-[0.9rem]">Files</span>
+                    <strong class="text-foreground text-[1.7rem] font-bold">{{ files.length }}</strong>
+                    <span class="text-muted text-[0.9rem]">Files</span>
                 </div>
             </div>
 
@@ -26,8 +26,8 @@
                 </div>
 
                 <div class="stat-info flex flex-col gap-[0.2rem]">
-                    <strong class="text-white text-[1.7rem] font-bold">{{ folders.length }}</strong>
-                    <span class="text-[#92929a] text-[0.9rem]">Folders</span>
+                    <strong class="text-foreground text-[1.7rem] font-bold">{{ folders.length }}</strong>
+                    <span class="text-muted text-[0.9rem]">Folders</span>
                 </div>
             </div>
 
@@ -41,8 +41,8 @@
                 </div>
 
                 <div class="stat-info flex flex-col gap-[0.2rem]">
-                    <strong class="text-white text-[1.7rem] font-bold">{{ notes.length }}</strong>
-                    <span class="text-[#92929a] text-[0.9rem]">Notes</span>
+                    <strong class="text-foreground text-[1.7rem] font-bold">{{ notes.length }}</strong>
+                    <span class="text-muted text-[0.9rem]">Notes</span>
                 </div>
             </div>
         </section>
@@ -52,7 +52,7 @@
                 <div class="dashboard-card h-full flex flex-col min-h-0 bg-surface border border-divider rounded-3xl
                     overflow-hidden">
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
-                        <h2 class="m-0 text-white text-lg font-semibold leading-tight">Recent Files</h2>
+                        <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Recent Files</h2>
 
                         <NuxtLink class="flex items-center gap-[0.3rem] text-accent no-underline text-sm font-medium leading-normal
                             hover:text-accent" to="/files">
@@ -63,7 +63,7 @@
 
                     <div
                         class="files-list flex-1 min-h-0 pt-0 pr-[1.4rem] pb-2 pl-[1.4rem] overflow-y-auto overflow-x-hidden
-                        [scrollbar-width:thin] [scrollbar-color:#39393f_transparent] files-empty:flex files-empty:flex-col"
+                        [scrollbar-width:thin] [scrollbar-color:var(--color-scrollbar)_transparent] files-empty:flex files-empty:flex-col"
                         :class="{ 'files-list-empty': files.length === 0 }"
                     >
                         <div
@@ -79,7 +79,7 @@
                                 />
                             </div>
 
-                            <strong class="text-[0.95rem] font-semibold text-[#f5f5f5]">No files yet</strong>
+                            <strong class="text-[0.95rem] font-semibold text-foreground">No files yet</strong>
 
                             <span class="text-[0.825rem] text-muted"> Your recent files will appear here. </span>
 
@@ -117,7 +117,7 @@
                                             "
                                             v-model="editingFileName"
                                             type="text"
-                                            class="file-name-input w-full min-w-0 py-1 px-2 text-white bg-control border border-primary rounded-md
+                                            class="file-name-input w-full min-w-0 py-1 px-2 text-foreground bg-control border border-primary rounded-md
                                             text-sm font-semibold outline-none leading-normal focus-visible:border-accent"
                                             :readonly="isSavingRename"
                                             @keydown.enter.prevent="saveRename(file)"
@@ -125,7 +125,7 @@
                                             @blur="saveRename(file)"
                                             @click.stop
                                         />
-                                        <strong class="text-white text-sm font-semibold overflow-hidden text-ellipsis whitespace-nowrap leading-normal" v-else>{{ file.name }}</strong>
+                                        <strong class="text-foreground text-sm font-semibold overflow-hidden text-ellipsis whitespace-nowrap leading-normal" v-else>{{ file.name }}</strong>
                                         <span class="text-muted text-xs font-normal leading-normal"
                                             >{{ getFileType(file.original_name) }} •
                                             {{ formatFileTime(file.created_at) }}</span
@@ -134,7 +134,7 @@
                                 </div>
 
                                 <div class="file-right shrink-0 flex items-center gap-[0.675rem]">
-                                    <span class="file-size min-w-18 text-[#b0b0b8] text-[0.85rem] text-right">{{ formatFileSize(file.size) }}</span>
+                                    <span class="file-size min-w-18 text-muted text-[0.85rem] text-right">{{ formatFileSize(file.size) }}</span>
 
                                     <ItemMenu
                                         type="file"
@@ -159,21 +159,21 @@
                 <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1
                     min-h-0">
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
-                        <h2 class="m-0 text-white text-lg font-semibold leading-tight">Storage Usage</h2>
+                        <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Storage Usage</h2>
                     </div>
 
                     <div class="storage-content w-full pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]">
                         <div class="storage-top flex items-center justify-between pt-0 pr-[0.8rem] pb-0 pl-[0.2rem] mb-[0.4rem]">
-                            <strong class="text-white text-[1.275rem]">{{ storagePercent }}%</strong>
+                            <strong class="text-foreground text-[1.275rem]">{{ storagePercent }}%</strong>
 
-                            <span class="text-[#8d8d95] text-[0.85rem]">
-                                <b class="text-white font-semibold">{{ formatFileSize(user?.storageUsed ?? 0) }}</b> /
+                            <span class="text-muted text-[0.85rem]">
+                                <b class="text-foreground font-semibold">{{ formatFileSize(user?.storageUsed ?? 0) }}</b> /
                                 {{ formatFileSize(user?.storageLimit ?? 0) }}
                             </span>
                         </div>
 
                         <meter
-                            class="storage-meter w-full max-w-full h-4 block appearance-none border-0 rounded-sm bg-[#2c2c31]"
+                            class="storage-meter w-full max-w-full h-4 block appearance-none border-0 rounded-sm bg-meter-track"
                             min="0"
                             max="100"
                             :value="storagePercent"
@@ -182,7 +182,7 @@
                         </meter>
 
                         <div class="storage-types flex flex-col gap-[1.1rem] mt-12">
-                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
                                 <div class="storage-name flex items-center gap-[0.55rem]">
                                     <span class="storage-dot blue-dot rounded-full shrink-0 bg-[#5da9ff] size-[0.55rem]"></span>
                                     Images
@@ -191,7 +191,7 @@
                                 <span>{{ imagesSize }} GB</span>
                             </div>
 
-                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
                                 <div class="storage-name flex items-center gap-[0.55rem]">
                                     <span class="storage-dot purple-dot rounded-full shrink-0 bg-accent size-[0.55rem]"></span>
                                     Documents
@@ -200,7 +200,7 @@
                                 <span>{{ documentsSize }} GB</span>
                             </div>
 
-                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
                                 <div class="storage-name flex items-center gap-[0.55rem]">
                                     <span class="storage-dot cyan-dot rounded-full shrink-0 bg-[#55c2d4] size-[0.55rem]"></span>
                                     Videos
@@ -209,7 +209,7 @@
                                 <span>{{ videosSize }} GB</span>
                             </div>
 
-                            <div class="storage-item flex items-center justify-between w-full text-[#92929a] text-[0.85rem]">
+                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
                                 <div class="storage-name flex items-center gap-[0.55rem]">
                                     <span class="storage-dot gray-dot rounded-full shrink-0 bg-[#6b6b75] size-[0.55rem]"></span>
                                     Others
@@ -223,69 +223,69 @@
                 <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 min-h-0
                     pb-4">
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
-                        <h2 class="m-0 text-white text-lg font-semibold leading-tight">Quick Actions</h2>
+                        <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Quick Actions</h2>
                     </div>
 
                     <div class="quick-actions-grid grid grid-cols-2 gap-3 py-0 px-4">
                         <button
                             @click="navigateTo('/files')"
                             type="button"
-                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
-                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
+                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
                             <div class="quick-action-icon upload-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
-                                text-white bg-primary size-[3.4rem]">
+                                text-on-primary bg-primary size-[3.4rem]">
                                 <Icon name="solar:upload-linear" />
                             </div>
 
-                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">Upload File</span>
+                            <span class="quick-action-title text-foreground text-[0.95rem] font-semibold text-left">Upload File</span>
                         </button>
 
                         <button
                             @click="navigateTo('/folders')"
                             type="button"
-                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
-                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
+                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
                             <div class="quick-action-icon folder-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
                                 text-accent bg-accent/12 border border-accent/25 size-[3.4rem]">
                                 <Icon name="solar:add-linear" />
                             </div>
 
-                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">New Folder</span>
+                            <span class="quick-action-title text-foreground text-[0.95rem] font-semibold text-left">New Folder</span>
                         </button>
 
                         <button
                             type="button"
-                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
-                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
+                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
                             <div class="quick-action-icon note-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
                                 text-accent bg-accent/12 border border-accent/25 size-[3.4rem]">
                                 <Icon name="solar:notebook-linear" />
                             </div>
 
-                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">New Note</span>
+                            <span class="quick-action-title text-foreground text-[0.95rem] font-semibold text-left">New Note</span>
                         </button>
 
                         <button
                             type="button"
-                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-white bg-[#1d1d21] border
-                            border-[#2d2d33] rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-[#232328] hover:border-[#383840] hover:-translate-y-px"
+                            class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
+                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
+                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
                             <div class="quick-action-icon inbox-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
-                                text-white bg-primary border border-primary size-[3.4rem]">
+                                text-on-primary bg-primary border border-primary size-[3.4rem]">
                                 <Icon
                                     name="solar:users-group-rounded-linear"
                                     class=""
                                 />
                             </div>
 
-                            <span class="quick-action-title text-white text-[0.95rem] font-semibold text-left">Shared Inbox</span>
+                            <span class="quick-action-title text-foreground text-[0.95rem] font-semibold text-left">Shared Inbox</span>
                         </button>
                     </div>
                 </div>
@@ -456,16 +456,16 @@ const othersSize = ref(0)
 }
 
 .files-list::-webkit-scrollbar-thumb {
-    background: #39393f;
+    background: var(--color-scrollbar);
     border-radius: 4px;
 }
 
 .files-list::-webkit-scrollbar-thumb:hover {
-    background: #4a4a52;
+    background: var(--color-hover-border);
 }
 
 .storage-meter::-webkit-meter-bar {
-    background: #29292e;
+    background: var(--color-meter-track);
     border: none;
     border-radius: 4px;
 

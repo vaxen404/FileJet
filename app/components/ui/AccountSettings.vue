@@ -186,7 +186,7 @@ const changePassword = async () => {
     @apply flex items-center justify-end gap-3 border-t border-divider bg-control/20 px-5 py-4;
 }
 .account-save {
-    @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-control border border-primary bg-primary px-4 text-xs font-medium text-white hover:enabled:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-control border border-primary bg-primary px-4 text-xs font-medium text-on-primary hover:enabled:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
 }
 .account-cancel {
     @apply h-10 cursor-pointer rounded-control border border-control-border bg-control px-4 text-xs font-medium text-label hover:enabled:bg-raised disabled:cursor-not-allowed disabled:opacity-40;

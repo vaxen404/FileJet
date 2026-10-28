@@ -1,5 +1,5 @@
 <template>
-    <div class="preferences-page min-h-0 flex-1 overflow-y-auto [color-scheme:dark]">
+    <div class="preferences-page min-h-0 flex-1 overflow-y-auto">
         <div class="mx-auto w-full max-w-300 p-6 max-mobile:p-3">
             <AccountSettings @state-change="accountState = $event" />
 
@@ -48,7 +48,7 @@
                                             class="h-10 w-28 rounded-control border border-control-border bg-control px-3 text-sm text-secondary outline-none focus:border-accent"
                                         >
                                     </div>
-                                    <p v-if="!pageSizeValid" id="page-size-error" role="alert" class="mt-2 text-xs text-red-400">Enter a positive whole number.</p>
+                                    <p v-if="!pageSizeValid" id="page-size-error" role="alert" class="mt-2 text-xs text-danger">Enter a positive whole number.</p>
                                 </div>
                             </div>
                         </div>
@@ -59,7 +59,7 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <span v-if="dirty" class="text-xs text-muted" aria-live="polite">Unsaved changes</span>
                             <button type="button" :disabled="!dirty" class="settings-button border-control-border bg-control text-secondary hover:enabled:bg-raised" @click="cancel">Cancel</button>
-                            <button type="submit" :disabled="!dirty || !pageSizeValid" class="settings-button border-primary bg-primary text-white hover:enabled:brightness-110">Save preferences</button>
+                            <button type="submit" :disabled="!dirty || !pageSizeValid" class="settings-button border-primary bg-primary text-on-primary hover:enabled:brightness-110">Save preferences</button>
                         </div>
                     </footer>
                 </fieldset>

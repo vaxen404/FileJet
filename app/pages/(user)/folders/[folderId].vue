@@ -64,7 +64,7 @@
             <div
                 v-if="isDragging && !busy && !pending"
                 class="folder-drop-overlay absolute inset-2 z-20 flex items-center justify-center p-4 text-foreground
-                bg-[#121214e8] border-2 border-dashed border-accent rounded-[18px] pointer-events-none"
+                bg-canvas border-2 border-dashed border-accent rounded-[18px] pointer-events-none"
             >
                 <div class="folder-drop-message flex flex-col items-center gap-[0.65rem] max-w-full text-center">
                     <Icon class="max-w-full text-heading-muted text-[0.8125rem] wrap-anywhere first:text-accent first:text-[2.5rem]" name="solar:cloud-upload-bold" />
@@ -84,8 +84,8 @@
                 class="folder-edit flex flex-col gap-3"
                 @submit.prevent="saveRename"
             >
-                <label class="text-white text-sm leading-[inherit]" for="folder-name">Folder name</label>
-                <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
+                <label class="text-foreground text-sm leading-[inherit]" for="folder-name">Folder name</label>
+                <input class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
                     focus:outline-none focus:border-accent"
                     id="folder-name"
                     ref="nameInput"
@@ -102,12 +102,12 @@
                 </span>
                 <p
                     v-if="saveError"
-                    class="error text-[#ff6b6b] m-0"
+                    class="error text-danger m-0"
                 >
                     {{ saveError }}
                 </p>
                 <div class="edit-actions flex justify-end flex-wrap gap-3">
-                    <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                    <button class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
                         hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                         type="button"
                         :disabled="busy"
@@ -117,7 +117,7 @@
                     </button>
                     <button
                         type="submit"
-                        class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
+                        class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
                         hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
@@ -129,11 +129,11 @@
     </DetailsWorkspace>
     <div
         v-else
-        class="detail-error p-5 text-[#d5d5da]"
+        class="detail-error p-5 text-content"
     >
         <h1>Unable to load folder</h1>
         <p>The folder could not be found or accessed.</p>
-        <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+        <button class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
             hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
             type="button"
             @click="refresh()"

@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <Transition name="note-modal">
+        <Transition name="modal">
             <div
                 v-if="open"
                 class="note-overlay fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/65"
@@ -9,7 +9,7 @@
                 <div
                     ref="dialog"
                     class="note-modal-conteiner w-full max-w-144 max-h-[calc(100dvh_-_2rem)] overflow-y-auto bg-surface border
-                    border-divider rounded-xl p-6 text-[#d5d5da] max-phone:p-4"
+                    border-divider rounded-xl p-6 text-content max-phone:p-4"
                     @keydown.esc="closeModal"
                     @keydown.tab="trapFocus"
                 >
@@ -20,7 +20,7 @@
                             </div>
 
                             <div class="header-text min-w-0">
-                                <h2 class="m-0 text-white text-[1.1rem] font-semibold" id="note-modal-title">
+                                <h2 class="m-0 text-foreground text-[1.1rem] font-semibold" id="note-modal-title">
                                     {{ isEditing ? 'Edit note' : 'Create a note' }}
                                 </h2>
 
@@ -37,7 +37,7 @@
                         <button
                             type="button"
                             class="clouse-button flex items-center justify-center shrink-0 p-0 text-label border border-control-border
-                            bg-raised rounded-md cursor-pointer hover:enabled:bg-[#2a2a2f] disabled:opacity-60
+                            bg-raised rounded-md cursor-pointer hover:enabled:bg-raised disabled:opacity-60
                             disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                             focus-visible:outline-offset-2 size-8"
                             :disabled="isLoading"
@@ -56,7 +56,7 @@
                                     <span class="text-muted text-xs leading-[inherit]">{{ title.length }} / 32</span>
                                 </div>
 
-                                <input class="w-full min-w-0 p-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md text-sm
+                                <input class="w-full min-w-0 p-3 text-content bg-input border border-control-border rounded-md text-sm
                                     leading-normal outline-none focus:border-accent disabled:opacity-60 disabled:cursor-wait"
                                     id="note-form-title"
                                     ref="titleInput"
@@ -77,7 +77,7 @@
                                     <span class="text-muted text-xs leading-[inherit]">{{ content.length }} characters</span>
                                 </div>
 
-                                <textarea class="w-full min-w-0 p-3 text-[#d5d5da] bg-[#151518] border border-control-border rounded-md text-sm
+                                <textarea class="w-full min-w-0 p-3 text-content bg-input border border-control-border rounded-md text-sm
                                     leading-normal outline-none resize-y min-h-32 focus:border-accent disabled:opacity-60
                                     disabled:cursor-wait"
                                     id="note-form-content"
@@ -100,8 +100,8 @@
                                 <button
                                     type="button"
                                     class="cancel-btn inline-flex items-center justify-center gap-2 min-h-10 py-2 px-3 border
-                                    border-control-border rounded-md text-white bg-raised [font-family:inherit] text-sm font-medium
-                                    leading-normal cursor-pointer hover:enabled:bg-[#2a2a2f] disabled:opacity-60 disabled:cursor-wait
+                                    border-control-border rounded-md text-foreground bg-raised [font-family:inherit] text-sm font-medium
+                                    leading-normal cursor-pointer hover:enabled:bg-raised disabled:opacity-60 disabled:cursor-wait
                                     focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                                     :disabled="isLoading"
                                     @click="closeModal"
@@ -112,7 +112,7 @@
                                 <button
                                     type="submit"
                                     class="save-btn inline-flex items-center justify-center gap-2 min-h-10 py-2 px-3 border rounded-md
-                                    text-white bg-primary [font-family:inherit] text-sm font-medium leading-normal cursor-pointer
+                                    text-on-primary bg-primary [font-family:inherit] text-sm font-medium leading-normal cursor-pointer
                                     border-primary hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-wait
                                     focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                                     :disabled="!canSubmit"

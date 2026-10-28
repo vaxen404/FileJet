@@ -3,7 +3,7 @@
         <div class="mb-3 flex shrink-0 flex-col gap-3">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <SearchBox v-model="searchQuery" placeholder="Search shared items..." aria-label="Search shared items" class="min-w-0 max-w-128 [flex:1_1_18rem] max-tablet:max-w-none" />
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 max-mobile:w-full max-mobile:justify-between">
                     <span class="text-xs text-muted">{{ entries.length }} {{ entries.length === 1 ? 'link' : 'links' }}</span>
                     <button type="button" :disabled="busy" class="shared-button" @click="loadShares">
                         <Icon name="solar:refresh-linear" size="17" :class="{ 'animate-spin': isLoading }" />
@@ -13,14 +13,14 @@
             </div>
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <ItemFilters v-model="activeCategory" :options="filterOptions" />
-                <div class="flex items-center gap-2">
-                    <select v-model="statusFilter" aria-label="Filter links by status" class="h-control cursor-pointer border border-divider bg-surface px-3 text-control-size text-label outline-none focus:border-accent [color-scheme:dark]">
+                <div class="shared-status-controls flex min-w-0 flex-wrap items-center gap-2">
+                    <select v-model="statusFilter" aria-label="Filter links by status" class="h-control cursor-pointer border border-divider bg-surface px-3 text-control-size text-label outline-none focus:border-accent">
                         <option value="all">All statuses</option>
                         <option value="active">Active</option>
                         <option value="expired">Expired</option>
                         <option value="unavailable">Unavailable</option>
                     </select>
-                    <SortDropdown v-model="sortMode" />
+                    <SortDropdown v-model="sortMode" class="ml-auto" />
                 </div>
             </div>
         </div>
@@ -41,7 +41,7 @@
             </template>
             <template #list>
                 <div class="min-h-0 flex-1 overflow-auto">
-                    <table class="w-full min-w-252 table-fixed border-separate border-spacing-0">
+                    <table class="mobile-item-table shared-table w-full min-w-252 table-fixed border-separate border-spacing-0">
                         <caption class="sr-only">Your shared files, folders, and notes</caption>
                         <thead>
                             <tr>
@@ -57,10 +57,10 @@
                         </thead>
                         <tbody>
                             <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-surface-hover selected:bg-accent/8" :class="{ selected: selectedIds.includes(item.id) }">
-                                <td class="file-table-cell">
+                                <td class="item-selection-cell file-table-cell">
                                     <input v-model="selectedIds" type="checkbox" class="file-checkbox" :value="item.id" :disabled="busy" :aria-label="`Select share link for ${item.name}`">
                                 </td>
-                                <td class="file-table-cell h-19">
+                                <td class="item-name-cell file-table-cell h-19">
                                     <div class="flex min-w-0 items-center gap-3">
                                         <span class="grid size-10 shrink-0 place-items-center rounded-md border border-accent/25 bg-accent/12 text-xl text-accent"><Icon :name="itemIcon(item)" /></span>
                                         <div class="min-w-0">
@@ -70,23 +70,23 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="file-table-cell">
+                                <td data-label="Share link" class="item-meta-cell file-table-cell">
                                     <input :value="item.url" :aria-label="`Share link for ${item.name}`" readonly type="text" class="h-9 w-full min-w-0 border border-divider bg-canvas/60 px-3 text-xs text-label outline-none focus:border-accent" @focus="($event.target as HTMLInputElement).select()">
                                 </td>
-                                <td class="file-table-cell">
+                                <td data-label="Access" class="item-meta-cell file-table-cell">
                                     <div class="flex items-center gap-2">
-                                        <span class="rounded-md px-2 py-1 text-xs" :class="itemStatus(item) === 'active' ? 'bg-accent/10 text-accent' : itemStatus(item) === 'expired' ? 'bg-amber-400/10 text-amber-300' : 'bg-control text-muted'">{{ statusLabels[itemStatus(item)] }}</span>
+                                        <span class="rounded-md px-2 py-1 text-xs" :class="itemStatus(item) === 'active' ? 'bg-accent/10 text-accent' : itemStatus(item) === 'expired' ? 'bg-warning/10 text-warning' : 'bg-control text-muted'">{{ statusLabels[itemStatus(item)] }}</span>
                                         <Icon v-if="item.hasPassword" name="solar:lock-password-linear" size="16" class="shrink-0 text-muted" title="Password protected" aria-label="Password protected" />
                                     </div>
                                 </td>
-                                <td class="file-table-cell text-xs text-label" :title="item.expiresAt ? `${item.expiresAt} (UTC)` : 'No expiration'">{{ item.expiresAt ? formatDate(item.expiresAt) : 'Never' }}</td>
-                                <td class="file-table-cell">
+                                <td data-label="Expires" class="item-meta-cell file-table-cell text-xs text-label" :title="item.expiresAt ? `${item.expiresAt} (UTC)` : 'No expiration'">{{ item.expiresAt ? formatDate(item.expiresAt) : 'Never' }}</td>
+                                <td class="item-actions-cell file-table-cell">
                                     <div class="flex items-center justify-end gap-1">
                                         <button type="button" :disabled="busy || !item.isAvailable" :aria-label="`Copy link for ${item.name}`" title="Copy link" class="shared-icon" @click="copyLink(item)"><Icon name="solar:copy-linear" size="18" /></button>
                                         <a v-if="item.isAvailable" :href="item.url" target="_blank" rel="noopener noreferrer" :aria-label="`Open public link for ${item.name}`" title="Open public link" class="shared-icon"><Icon name="solar:arrow-right-up-linear" size="18" /></a>
                                         <span v-else class="shared-icon pointer-events-none opacity-35" aria-hidden="true"><Icon name="solar:arrow-right-up-linear" size="18" /></span>
                                         <button type="button" :disabled="busy || !item.isAvailable" :aria-label="`Share settings for ${item.name}`" title="Share settings" class="shared-icon" @click="settingsItem = item"><Icon name="solar:tuning-2-linear" size="18" /></button>
-                                        <button type="button" :disabled="busy" :aria-label="`Remove share link for ${item.name}`" title="Remove link" class="shared-icon text-red-400! hover:enabled:bg-red-400/10!" @click="removeLink(item)"><Icon :name="removingId === item.id ? 'solar:refresh-linear' : 'solar:link-broken-linear'" size="18" :class="{ 'animate-spin': removingId === item.id }" /></button>
+                                        <button type="button" :disabled="busy" :aria-label="`Remove share link for ${item.name}`" title="Remove link" class="shared-icon text-danger! hover:enabled:bg-danger/10!" @click="removeLink(item)"><Icon :name="removingId === item.id ? 'solar:refresh-linear' : 'solar:link-broken-linear'" size="18" :class="{ 'animate-spin': removingId === item.id }" /></button>
                                     </div>
                                 </td>
                             </tr>
@@ -97,16 +97,18 @@
         </DataView>
 
         <Pagination v-if="!loadError && !isLoading && filteredItems.length" v-model="currentPage" :total-pages="totalPages" />
-        <div v-if="selectedEntries.length" role="region" aria-label="Selected share links" class="mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-divider bg-surface px-4 py-3">
-            <span class="text-sm text-secondary" aria-live="polite">{{ selectedEntries.length }} selected</span>
-            <div class="flex items-center gap-2">
-                <button type="button" :disabled="busy" class="shared-button" @click="selectedIds = []">Deselect all</button>
-                <button type="button" :disabled="busy" class="shared-button text-red-400! hover:enabled:bg-red-400/10!" @click="removeSelected">
-                    <Icon :name="bulkRemoving ? 'solar:refresh-linear' : 'solar:link-broken-linear'" size="17" :class="{ 'animate-spin': bulkRemoving }" />
-                    {{ bulkRemoving ? 'Removing...' : selectedEntries.length === 1 ? 'Remove link' : 'Remove links' }}
-                </button>
+        <Transition name="dock">
+            <div v-if="selectedEntries.length" role="region" aria-label="Selected share links" class="selection-region mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-divider bg-surface px-4 py-3">
+                <span class="text-sm text-secondary" aria-live="polite">{{ selectedEntries.length }} selected</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" :disabled="busy" class="shared-button" @click="selectedIds = []">Deselect all</button>
+                    <button type="button" :disabled="busy" class="shared-button text-danger! hover:enabled:bg-danger/10!" @click="removeSelected">
+                        <Icon :name="bulkRemoving ? 'solar:refresh-linear' : 'solar:link-broken-linear'" size="17" :class="{ 'animate-spin': bulkRemoving }" />
+                        {{ bulkRemoving ? 'Removing...' : selectedEntries.length === 1 ? 'Remove link' : 'Remove links' }}
+                    </button>
+                </div>
             </div>
-        </div>
+        </Transition>
         <ShareSettingsModal :item="settingsItem" v-model:saving="settingsSaving" @close="settingsItem = null" @changed="shareChanged" />
     </div>
 </template>

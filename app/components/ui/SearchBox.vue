@@ -4,12 +4,13 @@
         focus-within:border-highlight">
         <Icon
             name="lucide:search"
-            class="search-icon block shrink-0 text-[#a3a3a3] text-control-icon size-control-icon"
+            class="search-icon block shrink-0 text-muted text-control-icon size-control-icon"
         />
 
-        <input class="bg-transparent border-0 outline-none text-[#dadada] text-control-size font-medium leading-normal
+        <input class="bg-transparent border-0 outline-none text-content text-control-size font-medium leading-normal
             min-w-0 p-0 size-full"
-            type="text"
+            type="search"
+            :aria-label="placeholder || 'Search'"
             :value="modelValue"
             :placeholder="placeholder || 'Search...'"
             @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"

@@ -1,0 +1,83 @@
+.account-menu { min-width: 0; }
+.account-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 4rem;
+    padding: 0.625rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--color-foreground);
+    text-align: left;
+    cursor: pointer;
+}
+.account-trigger:hover, .account-trigger.is-open { background: var(--color-control); border-color: var(--color-control-border); }
+.account-trigger:focus-visible, .account-menu-item:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+.account-avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid #ffffff14;
+    border-radius: 12px;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.account-trigger-text, .account-identity-text { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 0.25rem; }
+.account-trigger-text strong, .account-identity-text strong { overflow: hidden; color: var(--color-foreground); font-size: 0.8125rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.account-trigger-text > span, .account-identity-text > span { overflow: hidden; color: var(--color-muted); font-size: 0.6875rem; text-overflow: ellipsis; white-space: nowrap; }
+.account-chevron { flex: none; margin-left: auto; color: var(--color-muted); transition: rotate 150ms ease-out; }
+.account-trigger.is-open .account-chevron { rotate: 180deg; }
+.account-menu--header .account-trigger { width: auto; min-height: 2.75rem; gap: 0.5rem; padding: 0.25rem 0.5rem 0.25rem 0.25rem; border-color: var(--color-control-border); background: var(--color-control); }
+.account-menu--header .account-avatar { width: 2rem; height: 2rem; border-radius: 9px; font-size: 0.75rem; }
+.account-popover {
+    position: fixed;
+    inset: auto;
+    z-index: 10001;
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--color-control-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    color: var(--color-foreground);
+    box-shadow: 0 16px 48px #0008, 0 2px 8px #0004;
+}
+.account-popover:popover-open { animation: account-menu-open 140ms ease-out; }
+.account-identity { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1rem 0.875rem; }
+.account-avatar--large { width: 2.75rem; height: 2.75rem; border-radius: 14px; }
+.account-identity-text strong { font-size: 0.875rem; }
+.account-identity-text > span { font-size: 0.75rem; }
+.account-storage { margin: 0 1rem 0.875rem; padding: 0.75rem; border: 1px solid var(--color-divider); border-radius: 10px; background: var(--color-canvas); }
+.account-storage > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.5rem; margin-bottom: 0.625rem; font-size: 0.6875rem; color: var(--color-secondary); }
+.account-storage-limit { color: var(--color-muted); }
+.account-storage meter { display: block; width: 100%; height: 0.25rem; overflow: hidden; border: 0; border-radius: 999px; background: var(--color-control-border); appearance: none; }
+.account-storage meter::-webkit-meter-bar { height: 0.25rem; border: 0; border-radius: 999px; background: var(--color-control-border); }
+.account-storage meter::-webkit-meter-optimum-value { border-radius: 999px; background: var(--color-accent); }
+.account-storage meter::-moz-meter-bar { border-radius: 999px; background: var(--color-accent); }
+.account-menu-items { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.375rem; border-top: 1px solid var(--color-divider); }
+.account-menu-item { display: flex; align-items: center; gap: 0.625rem; width: 100%; min-height: 2.75rem; padding: 0.625rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: var(--color-secondary); font-size: 0.8125rem; font-weight: 500; text-align: left; text-decoration: none; cursor: pointer; }
+.account-menu-item > .icon { flex: none; color: var(--color-muted); }
+.account-menu-item:hover, .account-menu-item:focus-visible { background: var(--color-raised); color: var(--color-foreground); }
+.account-menu-item:hover > .icon, .account-menu-item:focus-visible > .icon { color: var(--color-accent); }
+.account-item-arrow { margin-left: auto; }
+.account-menu-footer { padding: 0.375rem; border-top: 1px solid var(--color-divider); }
+.account-logout { color: var(--color-danger); }
+.account-logout > .icon { color: inherit; }
+.account-logout:hover, .account-logout:focus-visible { background: color-mix(in srgb, var(--color-danger) 8%, transparent); color: var(--color-danger-hover); }
+.account-logout:disabled { opacity: 0.5; cursor: wait; }
+@keyframes account-menu-open { from { opacity: 0; translate: 0 4px; } to { opacity: 1; translate: 0 0; } }
+@media (max-width: 600px) {
+    .account-menu--header .account-trigger { padding: 0.25rem; }
+    .account-menu--header .account-chevron { display: none; }
+}

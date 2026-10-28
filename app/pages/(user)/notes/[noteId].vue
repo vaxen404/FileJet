@@ -23,7 +23,7 @@
             overscroll-contain text-left max-phone:p-3"
         >
             <div class="reader-heading w-full min-w-0 m-0 flex items-baseline justify-between flex-wrap gap-2">
-                <h2 class="m-0 text-white text-xl font-semibold leading-[1.4] wrap-anywhere">{{ note.title }}</h2>
+                <h2 class="m-0 text-foreground text-xl font-semibold leading-[1.4] wrap-anywhere">{{ note.title }}</h2>
                 <span
                     v-if="dirty"
                     class="unsaved-state text-muted text-[0.8125rem]"
@@ -34,7 +34,7 @@
 
             <div
                 v-if="note.content"
-                class="note-reading-content w-full min-w-0 m-0 text-[#d5d5da] text-sm leading-normal whitespace-pre-wrap
+                class="note-reading-content w-full min-w-0 m-0 text-content text-sm leading-normal whitespace-pre-wrap
                 wrap-anywhere"
                 v-text="note.content"
             />
@@ -47,7 +47,7 @@
                     name="solar:notebook-linear"
                     size="2rem"
                 />
-                <strong class="text-[#d5d5da] text-sm leading-[inherit]">This note is empty</strong>
+                <strong class="text-content text-sm leading-[inherit]">This note is empty</strong>
                 <p class="m-0 text-[0.8125rem] leading-[1.6]">Choose Edit to add content.</p>
             </div>
         </article>
@@ -58,7 +58,7 @@
             @submit.prevent="save"
         >
             <div class="editor-heading flex items-center justify-between gap-3 flex-wrap">
-                <label class="text-white text-sm leading-[inherit] font-medium" for="note-title">Note title</label>
+                <label class="text-foreground text-sm leading-[inherit] font-medium" for="note-title">Note title</label>
                 <span
                     v-if="dirty"
                     class="unsaved-state text-muted text-[0.8125rem]"
@@ -66,7 +66,7 @@
                     Unsaved changes
                 </span>
             </div>
-            <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
+            <input class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
                 focus:outline-none focus:border-accent"
                 id="note-title"
                 ref="titleInput"
@@ -75,8 +75,8 @@
                 required
                 :disabled="busy"
             />
-            <label class="text-white text-sm leading-[inherit] font-medium" for="note-content">Content</label>
-            <textarea class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 flex-1 min-h-24
+            <label class="text-foreground text-sm leading-[inherit] font-medium" for="note-content">Content</label>
+            <textarea class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 flex-1 min-h-24
                 resize-none leading-[1.7] focus:outline-none focus:border-accent"
                 id="note-content"
                 v-model="draftContent"
@@ -86,12 +86,12 @@
             />
             <p
                 v-if="saveError"
-                class="editor-error text-[#ff6b6b] m-0"
+                class="editor-error text-danger m-0"
             >
                 {{ saveError }}
             </p>
             <div class="editor-actions flex items-center justify-end gap-3 flex-wrap">
-                <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                <button class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
                     hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                     type="button"
                     :disabled="busy || !dirty"
@@ -101,7 +101,7 @@
                 </button>
                 <button
                     type="submit"
-                    class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
+                    class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
                     hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="busy || !dirty"
                 >
@@ -115,8 +115,8 @@
                 class="note-edit-title flex flex-col gap-3"
                 @submit.prevent="save"
             >
-                <label class="text-white text-sm leading-[inherit] font-medium" for="note-edit-title">Note title</label>
-                <input class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
+                <label class="text-foreground text-sm leading-[inherit] font-medium" for="note-edit-title">Note title</label>
+                <input class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
                     focus:outline-none focus:border-accent"
                     id="note-edit-title"
                     v-model="draftTitle"
@@ -127,12 +127,12 @@
                 <p class="text-muted text-[0.8125rem]">Content can be edited in the editor. Save applies both title and content.</p>
                 <p
                     v-if="saveError"
-                    class="editor-error text-[#ff6b6b] text-[0.8125rem] m-0"
+                    class="editor-error text-danger text-[0.8125rem] m-0"
                 >
                     {{ saveError }}
                 </p>
                 <div class="editor-actions flex items-center justify-end gap-3 flex-wrap">
-                    <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                    <button class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
                         hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                         type="button"
                         :disabled="busy"
@@ -142,7 +142,7 @@
                     </button>
                     <button
                         type="submit"
-                        class="primary text-white bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
+                        class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
                         hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
@@ -154,11 +154,11 @@
     </DetailsWorkspace>
     <div
         v-else
-        class="detail-error p-5 text-[#d5d5da]"
+        class="detail-error p-5 text-content"
     >
         <h1>Unable to load note</h1>
         <p>The note could not be found or accessed.</p>
-        <button class="text-[#cfcfd5] bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+        <button class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
             hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
             type="button"
             @click="refresh()"

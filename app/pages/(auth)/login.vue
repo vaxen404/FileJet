@@ -1,12 +1,12 @@
 <template>
-    <div class="login-page w-full min-h-dvh bg-canvas flex justify-center items-center">
-        <div class="login-card w-152 p-8 bg-surface border border-[#202025] rounded-3xl flex flex-col">
-            <h2 class="[font-family:Arial,_Helvetica,_sans-serif] text-[1.8rem] text-[#f5f5f5] mt-0 mr-0 mb-14 ml-0">Login</h2>
+    <div class="login-page w-full min-h-dvh p-4 bg-canvas flex justify-center items-center">
+        <div class="login-card w-full max-w-152 p-8 max-mobile:p-5 bg-surface border border-control-border rounded-3xl flex flex-col">
+            <h2 class="[font-family:Arial,_Helvetica,_sans-serif] text-[1.8rem] text-foreground mt-0 mr-0 mb-14 ml-0">Login</h2>
 
             <div class="form-group flex flex-col mt-0 mr-0 mb-8 ml-0 gap-[0.3rem]">
-                <label class="block [font-family:Arial,_Helvetica,_sans-serif] text-sm leading-[inherit] font-medium text-[#f1f1f1]
-                    uppercase">Username<i class="text-[#ff3b3b] not-italic ml-1">*</i></label>
-                <input class="w-full text-base leading-[inherit] p-3.5 bg-[#252529] text-white border border-[#2f2f33] rounded-md
+                <label class="block [font-family:Arial,_Helvetica,_sans-serif] text-sm leading-[inherit] font-medium text-foreground
+                    uppercase">Username<i class="text-danger not-italic ml-1">*</i></label>
+                <input class="w-full text-base leading-[inherit] p-3.5 bg-control text-foreground border border-control-border rounded-md
                     outline-none focus:border focus:border-highlight"
                     type="text"
                     v-model="username"
@@ -14,10 +14,10 @@
             </div>
 
             <div class="form-group flex flex-col mt-0 mr-0 mb-8 ml-0 gap-[0.3rem]">
-                <label class="block [font-family:Arial,_Helvetica,_sans-serif] text-sm leading-[inherit] font-medium text-[#f1f1f1]
-                    uppercase">Password<i class="text-[#ff3b3b] not-italic ml-1">*</i></label>
+                <label class="block [font-family:Arial,_Helvetica,_sans-serif] text-sm leading-[inherit] font-medium text-foreground
+                    uppercase">Password<i class="text-danger not-italic ml-1">*</i></label>
                 <div class="input-box relative w-full">
-                    <input class="w-full text-base leading-[inherit] p-3.5 bg-[#252529] text-white border border-[#2f2f33] rounded-md
+                    <input class="w-full text-base leading-[inherit] p-3.5 bg-control text-foreground border border-control-border rounded-md
                         outline-none pr-12 focus:border focus:border-highlight"
                         :type="isView ? 'text' : 'password'"
                         @keyup.enter="handleLogin"
@@ -27,7 +27,7 @@
                         v-if="password.length > 0"
                         @click="isView = !isView"
                         class="password-icon flex justify-center items-center absolute right-[0.6rem] top-1/2 -translate-y-1/2
-                        text-[1.1rem] border-0 rounded-md bg-[#232327] text-[#f5f5f5] cursor-pointer transition-colors
+                        text-[1.1rem] border-0 rounded-md bg-control text-foreground cursor-pointer transition-colors
                         duration-300 ease-[ease] hover:bg-divider size-8"
                     >
                         <Icon :name="isView ? 'lucide:eye' : 'lucide:eye-closed'" />
@@ -38,14 +38,14 @@
             <div class="login-actions flex flex-row gap-3">
                 <button
                     @click="handleLogin"
-                    class="login-btn flex-1 p-2.5 text-[1.1rem] bg-highlight rounded-md border border-highlight text-white
-                    cursor-pointer transition-colors duration-300 ease-[ease] hover:border-[#f1f1f1]"
+                    class="login-btn flex-1 p-2.5 text-[1.1rem] bg-highlight rounded-md border border-highlight text-on-primary
+                    cursor-pointer transition-colors duration-300 ease-[ease] hover:border-foreground"
                 >
                     <Icon name="lucide:lock" />
                     Login
                 </button>
 
-                <button class="auth-btn flex justify-center items-center bg-[#2f2f33] text-white rounded-md border border-[#2f2f33]
+                <button class="auth-btn flex justify-center items-center bg-control text-foreground rounded-md border border-control-border
                     text-2xl leading-[inherit] shrink-0 cursor-pointer transition-colors duration-300 ease-[ease]
                     hover:border-highlight size-[2.8rem]">
                     <Icon name="lucide:fingerprint" />

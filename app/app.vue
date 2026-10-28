@@ -9,7 +9,7 @@ onMounted(resumeToasts)
 
 <template>
     <NuxtLayout>
-        <NuxtPage />
+        <NuxtPage :transition="{ name: 'page', mode: 'out-in' }" />
     </NuxtLayout>
 
     <ConfirmModal
@@ -23,7 +23,7 @@ onMounted(resumeToasts)
         @cancel="resolveConfirm(false)"
     />
 
-    <div class="toast-stack fixed right-[calc(1rem_+_env(safe-area-inset-right,_0px))]
+    <TransitionGroup name="toast" tag="div" class="toast-stack fixed right-[calc(1rem_+_env(safe-area-inset-right,_0px))]
         bottom-[calc(1rem_+_env(safe-area-inset-bottom,_0px))] z-9999 flex flex-col items-end gap-2
         max-w-[calc(100vw_-_2rem)] max-h-[calc(100dvh_-_2rem)] overflow-y-auto pointer-events-none">
         <Toast
@@ -38,5 +38,5 @@ onMounted(resumeToasts)
             @action="runToastAction(toast.id)"
             @close="closeToast(toast.id)"
         />
-    </div>
+    </TransitionGroup>
 </template>

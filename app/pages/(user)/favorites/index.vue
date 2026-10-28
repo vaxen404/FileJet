@@ -39,14 +39,14 @@
                         name="solar:star-bold"
                         class="empty-state-icon block shrink-0 mb-2 text-accent text-[2.5rem]"
                     />
-                    <strong class="text-[#f5f5f5] text-sm font-semibold leading-normal">{{ emptyTitle }}</strong>
+                    <strong class="text-foreground text-sm font-semibold leading-normal">{{ emptyTitle }}</strong>
                     <span class="empty-state-description text-muted text-sm font-normal leading-normal">{{ emptyDescription }}</span>
                 </div>
             </template>
 
             <template #list>
                 <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-                    <table class="favorites-table w-full border-separate border-spacing-0 bg-transparent border-0 min-w-176 table-fixed">
+                    <table class="mobile-item-table favorites-table w-full border-separate border-spacing-0 bg-transparent border-0 min-w-176 table-fixed">
                         <thead>
                             <tr>
                                 <th class="w-14 pl-4 pr-3 text-center file-table-heading" scope="col">
@@ -80,10 +80,10 @@
                                 v-for="item in paginatedItems"
                                 :key="item.id"
                                 :class="{ selected: selectedFavorites.includes(item.id) }"
-                                @dblclick="openItem(item)"
+                                @click="openItem(item)"
                                 @contextmenu.prevent.stop="openContextMenu($event, item.id)"
                             >
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @dblclick.stop>
+                                <td class="item-selection-cell h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedFavorites"
                                         type="checkbox"
@@ -92,7 +92,7 @@
                                         :disabled="busy"
                                     />
                                 </td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
+                                <td class="item-name-cell h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
                                     <div class="favorite-name flex items-center gap-3 min-w-0">
                                         <div
                                             class="favorite-icon flex items-center justify-center shrink-0 text-accent bg-accent/12 border
@@ -104,7 +104,7 @@
                                             <Icon :name="itemIcon(item)" />
                                         </div>
                                         <div class="favorite-info min-w-0 flex flex-col gap-1">
-                                            <strong class="text-white text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="getItemName(item)">{{
+                                            <strong class="text-foreground text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="getItemName(item)">{{
                                                 getItemName(item)
                                             }}</strong>
                                             <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis"
@@ -114,12 +114,11 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="favorite-type h-[4.2rem] text-secondary text-[0.85rem] capitalize file-table-cell">{{ getItemType(item) }}</td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ getItemSize(item) }}</td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(item.created_at) }}</td>
-                                <td class="h-[4.2rem] text-secondary text-[0.85rem] file-table-cell"
+                                <td data-label="Type" class="item-meta-cell favorite-type h-[4.2rem] text-secondary text-[0.85rem] capitalize file-table-cell">{{ getItemType(item) }}</td>
+                                <td data-label="Size" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ getItemSize(item) }}</td>
+                                <td data-label="Added" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ formatFileTime(item.created_at) }}</td>
+                                <td class="item-actions-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell"
                                     @click.stop
-                                    @dblclick.stop
                                 >
                                     <ItemMenu
                                         :ref="menu => setMenuRef(item.id, menu)"
@@ -164,7 +163,7 @@
                                 group-hover/file-card:scale-[1.035] size-full"
                             />
                             <template v-else>
-                                <div class="video-play-icon absolute inset-0 z-1 grid place-items-center text-white text-[2.5rem]
+                                <div class="video-play-icon absolute inset-0 z-1 grid place-items-center text-on-primary text-[2.5rem]
                                     pointer-events-none"><Icon name="solar:play-bold" /></div>
                                 <video
                                     :src="`/api/files/${item.file_id}/preview`"
@@ -178,12 +177,12 @@
                         </template>
 
                         <template #actions>
-                            <label class="file-select flex items-center justify-center bg-[#36363ee6] border border-[#3a3a42] rounded-full
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
                                 cursor-pointer size-8">
                                 <input
                                     v-model="selectedFavorites"
                                     type="checkbox"
-                                    class="favorite-checkbox file-checkbox m-0 accent-[#7063d8] cursor-pointer size-[1.1rem]"
+                                    class="favorite-checkbox file-checkbox m-0 accent-accent cursor-pointer size-[1.1rem]"
                                     :value="item.id"
                                     :disabled="busy"
                                 />
