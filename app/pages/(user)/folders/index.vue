@@ -321,7 +321,7 @@ const { sortedItems: sortedFolders } = useSort(
 const handleFolders = async (folder: FileSystemDirectoryHandle | FileList) => {
     try {
         await uploadFolders(folder, fetchAll)
-        openToast('Folder uploaded successfully.', 'success')
+        openToast('Folder uploaded successfully.', 'success', { notification: { title: 'Folder upload complete', category: 'upload', href: '/folders' } })
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'Folder upload failed.', 'error')
     }

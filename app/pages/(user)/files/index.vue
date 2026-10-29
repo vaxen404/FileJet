@@ -411,7 +411,7 @@ const { sortedItems: sortedFiles } = useSort(
 
 const handleFiles = async (files: FileList) => {
     if (!files.length) {
-        openToast('Please select a file', 'error')
+        openToast('Please select a file', 'error', { notification: false })
 
         return
     }
@@ -423,7 +423,7 @@ const handleFiles = async (files: FileList) => {
             if (error.value) throw new Error(error.value)
         })
 
-        openToast('File uploaded successfully.', 'success')
+        openToast('File uploaded successfully.', 'success', { notification: { title: 'Upload complete', category: 'upload', href: '/files' } })
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'File upload failed.', 'error')
     }
@@ -448,7 +448,7 @@ const saveRename = async (file: any) => {
 
         editingFileId.value = null
 
-        openToast('File renamed successfully', 'success')
+        openToast('File renamed successfully', 'success', { notification: { title: 'File renamed', category: 'library', href: '/files' } })
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'File could not be renamed.', 'error')
     }

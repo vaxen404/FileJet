@@ -129,7 +129,7 @@ const saveProfile = async () => {
         currentUser.value = response.user
         user.value = response.user
         resetProfile()
-        openToast('Your account details have been updated.', 'success')
+        openToast('Your account details have been updated.', 'success', { notification: { title: 'Account updated', category: 'account', href: '/settings/preferences' } })
     } catch (error: any) {
         openToast(error.data?.message || error.message || 'Your account details could not be updated.', 'error')
     } finally {
@@ -143,7 +143,7 @@ const changePassword = async () => {
     const parsed = passwordChangeSchema.safeParse(password)
 
     if (!parsed.success) {
-        openToast(parsed.error.issues[0]?.message || 'Check your password details.', 'error')
+        openToast(parsed.error.issues[0]?.message || 'Check your password details.', 'error', { notification: false })
         return
     }
 
@@ -152,7 +152,7 @@ const changePassword = async () => {
     try {
         await $fetch('/api/users/@me/password', { method: 'PATCH', body: parsed.data })
         resetPassword()
-        openToast('Your password has been updated.', 'success')
+        openToast('Your password has been updated.', 'success', { notification: { title: 'Password changed', category: 'account', href: '/settings/preferences' } })
     } catch (error: any) {
         openToast(error.data?.message || error.message || 'Your password could not be updated.', 'error')
     } finally {

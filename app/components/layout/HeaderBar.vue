@@ -43,17 +43,20 @@
             </ClientOnly>
         </div>
 
-        <div class="header-actions shrink-0 flex items-center gap-2">
-            <button
-                class="icon-button [&_svg]:text-[1.3rem] relative flex items-center justify-center text-foreground bg-control
-                border border-control-border rounded-md cursor-pointer transition-colors duration-200 ease-[ease]
-                hover:bg-raised hover:border-control-border size-10"
-                type="button"
-                aria-label="Notifications"
-            >
-                <Icon name="solar:bell-linear" />
-                <span class="notification-dot absolute top-[0.55rem] right-[0.55rem] bg-highlight rounded-full size-[0.4rem]"></span>
+        <div class="header-actions header-workspace-actions shrink-0 flex items-center gap-2">
+            <NuxtLink to="/home" class="header-storage" :class="{ 'is-full': storage.level !== 'normal' }" :title="`${storageUsed} of ${storageLimit} used`" :aria-label="`Storage: ${storageUsed} of ${storageLimit} used`">
+                <Icon name="solar:server-square-linear" size="20" aria-hidden="true" />
+                <span class="header-storage-details"><span><span>Storage</span><strong>{{ Math.floor(storage.percent) }}%</strong></span><span class="header-storage-track"><i :style="{ width: `${storage.percent}%` }" /></span></span>
+            </NuxtLink>
+            <span class="header-action-divider" aria-hidden="true" />
+            <button class="header-theme-shortcut" type="button" :disabled="!preferencesLoaded"
+                :aria-label="resolvedTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+                :title="resolvedTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+                @click="setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')">
+                <Icon :name="resolvedTheme === 'dark' ? 'solar:sun-2-linear' : 'solar:moon-linear'" size="20" />
             </button>
+
+            <NotificationCenter />
 
             <div class="header-account hidden max-laptop:block">
                 <AccountMenu placement="header" />
@@ -64,6 +67,9 @@
 
 <script setup lang="ts">
 import AccountMenu from './AccountMenu.vue'
+import NotificationCenter from './NotificationCenter.vue'
+import { formatFileSize } from '~/utils/file'
+import { getStorageStatus } from '~/utils/notifications'
 
 defineProps({
     navigationOpen: { type: Boolean, default: false },
@@ -77,6 +83,14 @@ defineEmits<{ openNavigation: [] }>()
 
 const fileHeader = useFileHeader()
 const route = useRoute()
+const currentUser = useAuthUser()
+const { user: accountProfile } = useUser()
+const { resolvedTheme, setTheme } = useTheme()
+const { preferencesLoaded } = usePreferences()
+const storageProfile = computed(() => accountProfile.value?.id === currentUser.value?.id ? accountProfile.value : currentUser.value)
+const storage = computed(() => getStorageStatus(storageProfile.value?.storageUsed ?? 0, storageProfile.value?.storageLimit ?? 0))
+const storageUsed = computed(() => formatFileSize(storageProfile.value?.storageUsed ?? 0))
+const storageLimit = computed(() => formatFileSize(storageProfile.value?.storageLimit ?? 0))
 
 const isFileDetails = computed(
     () =>

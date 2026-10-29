@@ -1,5 +1,8 @@
+import type { NotificationInput } from '~~/shared/types/notification'
+
 interface ToastOptions {
     duration?: number
+    notification?: false | Pick<NotificationInput, 'title' | 'category' | 'href'>
     action?: {
         label: string
         variant?: 'trash-undo'
@@ -27,6 +30,8 @@ const toastRuntimes = new WeakMap<
 
 export const useToast = () => {
     const app = useNuxtApp()
+    const notificationOwner = useAuthUser().value?.id ?? null
+    const { addNotification } = useNotifications()
     const toasts = useState<ToastEntry[]>('toasts', () => [])
 
     if (!toastRuntimes.has(app)) {
@@ -67,6 +72,11 @@ export const useToast = () => {
 
         toasts.value.push(toast)
         schedule(toast)
+
+        if (import.meta.client && notificationOwner && options.notification !== false && (type === 'error' || options.notification)) {
+            const details = options.notification || { title: 'Something needs attention', category: 'activity' as const }
+            addNotification({ ...details, message, kind: type }, notificationOwner)
+        }
 
         return toast.id
     }

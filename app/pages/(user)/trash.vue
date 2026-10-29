@@ -286,7 +286,7 @@ const runOperation = async (items: TrashItem[], action: 'restore' | 'delete') =>
         }
         completed = true
         selectedItems.value = []
-        openToast(action === 'restore' ? 'Items restored successfully.' : 'Items permanently deleted.', 'success')
+        openToast(action === 'restore' ? 'Items restored successfully.' : 'Items permanently deleted.', 'success', { notification: { title: action === 'restore' ? 'Items restored' : 'Trash updated', category: 'library', href: '/trash' } })
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'The operation could not be completed.', 'error')
     } finally {

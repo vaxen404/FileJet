@@ -313,7 +313,7 @@ const saveSettings = async () => {
 
         applyState(value)
         savedMessage.value = 'Share settings saved.'
-        openToast(savedMessage.value, 'success')
+        openToast(savedMessage.value, 'success', { notification: { title: 'Sharing updated', category: 'sharing', href: '/shared' } })
     } catch (err: any) {
         if (id === requestId)
             errorMessage.value =
@@ -339,7 +339,7 @@ const removeShareLink = async () => {
         if (id !== requestId) return
 
         applyState(emptyShareState())
-        openToast('Share link removed successfully.', 'success')
+        openToast('Share link removed successfully.', 'success', { notification: { title: 'Share link removed', category: 'sharing', href: '/shared' } })
     } catch (err: any) {
         if (id === requestId)
             errorMessage.value = err?.data?.message || 'Could not remove share link.'

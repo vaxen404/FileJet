@@ -14,6 +14,7 @@ export const useTrashActions = () => {
 
         openToast(bulk ? `${count} items moved to Trash` : `${label} moved to Trash`, 'success', {
             duration: 8000,
+            notification: { title: 'Moved to Trash', category: 'library', href: '/trash' },
             action: {
                 label: 'Undo',
                 variant: 'trash-undo',
@@ -41,7 +42,8 @@ export const useTrashActions = () => {
                         bulk
                             ? `${count} items restored successfully`
                             : `${label} restored successfully`,
-                        'success'
+                        'success',
+                        { notification: { title: 'Items restored', category: 'library', href: '/files' } }
                     )
                 }
             }

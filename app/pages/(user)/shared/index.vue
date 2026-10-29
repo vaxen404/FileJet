@@ -243,7 +243,7 @@ const removeLink = async (item: SharedListItem) => {
 
         await $fetch(`/api/shared/items/${item.itemType}/${encodeURIComponent(item.itemId)}`, { method: 'DELETE' })
         entries.value = entries.value.filter(entry => entry.id !== item.id)
-        openToast('Share link removed.', 'success')
+        openToast('Share link removed.', 'success', { notification: { title: 'Share link removed', category: 'sharing', href: '/shared' } })
     } catch (error: any) {
         openToast(error.data?.message || error.message || 'Could not remove the share link.', 'error')
     } finally {
@@ -270,7 +270,7 @@ const removeSelected = async () => {
         const deleted = new Set(result.deletedIds)
         entries.value = entries.value.filter(item => !deleted.has(item.id))
         selectedIds.value = selectedIds.value.filter(id => !deleted.has(id))
-        openToast(result.deletedCount === 1 ? 'Share link removed.' : `${result.deletedCount} share links removed.`, 'success')
+        openToast(result.deletedCount === 1 ? 'Share link removed.' : `${result.deletedCount} share links removed.`, 'success', { notification: { title: 'Share links removed', category: 'sharing', href: '/shared' } })
     } catch (error: any) {
         openToast(error.data?.message || error.message || 'Could not remove the selected share links.', 'error')
     } finally {

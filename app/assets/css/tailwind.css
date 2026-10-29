@@ -4,6 +4,7 @@
 @import "./responsive.css";
 @import "./account-menu.css";
 @import "./themes.css";
+@import "./notifications.css";
 
 /* Shared design values. Component layouts use Tailwind classes in Vue templates. */
 @theme {

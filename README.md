@@ -33,6 +33,13 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - Notes with editing, TXT/Markdown import, and download.
 - Favorites, search, filtering, sorting, pagination, and grid/list views.
 
+### Desktop and mobile interface
+
+- A desktop sidebar with the account menu anchored at the bottom; on compact screens, navigation opens as a drawer and the account menu stays in the top-right corner.
+- Compact two-column file cards on phones, with smaller image previews.
+- List views retain table columns on mobile, with horizontal scrolling inside the table.
+- Responsive toolbars, horizontally scrollable type filters, and touch-friendly controls.
+
 ### Sharing
 
 - Public links for files, folders, and notes at `/shared/<token>`.
@@ -59,10 +66,14 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - Default grid/list view, sort order, and custom items per page, with an Auto option.
 - Collapsible Profile and Password sections; Profile starts open.
 - A themed confirmation dialog for unsaved changes during in-app navigation.
+- An in-app notification center for uploads, file changes, sharing updates, account changes, and operation errors, with unread filters and read/dismiss controls.
+- A desktop header with live storage usage and a theme shortcut; storage warnings appear at 85% and 100% usage.
 
 Profile and password changes are stored in PostgreSQL. Appearance and browsing preferences are stored per account in the current browser's `localStorage`; they do not sync across devices.
 
 Theme and accent choices can be changed in **Appearance** or the account menu. System mode follows device appearance changes automatically. A validated appearance cookie restores the signed-in account's last theme during server rendering; older preferences continue to use the original dark theme.
+
+Notification history is saved separately for each account in this browser, retaining up to 50 updates for 30 days. It remains usable for the current session if browser storage is unavailable. Storage warnings are deduplicated per threshold per day, including after dismissal. Notifications record actions performed in this browser; they do not sync across devices or provide operating-system push notifications.
 
 ## 🧰 Technology
 
@@ -105,9 +116,10 @@ Nuxt serves both the interface and API. PostgreSQL holds users, item metadata, n
 
 ### Requirements
 
-- Node.js 24.11+ within the 24.x release line, or 22.19+ within 22.x, with npm.
-- A PostgreSQL database and Git.
+- Node.js 24.11+ within the 24.x release line, 22.19+ within 22.x, or 26+, with npm (matching Nuxt's declared Node.js support).
+- PostgreSQL 15 or newer and Git.
 - A writable, persistent local filesystem for uploaded files.
+- A modern browser with native dialog and popover support. Folder uploads depend on browser support; clipboard access requires HTTPS or localhost.
 - Optional: `ffprobe` on `PATH` for media dimensions, duration, and other technical metadata. Set `FFPROBE_PATH` to use a specific executable.
 
 ### Clone and install
@@ -122,7 +134,7 @@ Run the following commands from the project root.
 
 ### Environment
 
-Create `.env`:
+Copy `.env.example` to `.env` in the project root and replace its placeholders. For example:
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/filejet"
@@ -226,7 +238,7 @@ File paths resolve relative to the process working directory as `storage/<userId
 | `app/pages/` | Application and public share routes |
 | `app/components/` | Layout, forms, dialogs, and reusable UI |
 | `app/composables/` | Frontend state, preferences, and item actions |
-| `app/plugins/` | Client initialization and authentication |
+| `app/plugins/` | Authentication, server-rendered theme restoration, and client preferences/notifications |
 | `app/assets/css/` | Tailwind CSS entry point and theme styles |
 | `server/api/` | Authenticated and public API endpoints |
 | `server/utils/` | Sessions, storage, sharing, and backend helpers |
@@ -256,10 +268,17 @@ File paths resolve relative to the process working directory as `storage/<userId
 - [x] Preserving share links when trashed items are restored
 - [x] Username, email, and password settings
 - [x] Accent colors and default grid/list preferences
+- [x] Light, dark, and system themes with account-specific preferences
+- [x] Responsive navigation, compact mobile cards, and scrollable mobile tables
+- [x] Desktop sidebar account menu and mobile header account menu
+- [x] In-app notification history, unread controls, and storage warnings
+- [x] Desktop header storage usage and theme shortcut
 - [x] Custom items per page
 - [x] Collapsible account sections and unsaved-change confirmation
 
 ## 🛠️ Development commands
+
+Complete the environment and Prisma client generation steps above before running these commands. Regenerate the client with `npx prisma generate --config prisma7.config.ts` after changing the Prisma schema.
 
 ```bash
 npm run typecheck

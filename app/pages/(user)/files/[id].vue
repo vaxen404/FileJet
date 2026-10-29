@@ -606,7 +606,7 @@ const saveRename = async () => {
         editingFileName.value = editableFileName.value
         isRenaming.value = false
         activeTab.value = 'details'
-        openToast('File renamed successfully.', 'success')
+        openToast('File renamed successfully.', 'success', { notification: { title: 'File renamed', category: 'library', href: '/files' } })
     } catch (err: any) {
         renameError.value = err?.data?.message || err?.message || 'File could not be renamed.'
         openToast(renameError.value, 'error')

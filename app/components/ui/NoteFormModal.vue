@@ -239,13 +239,13 @@ const saveNote = async () => {
     })
 
     if (!result.success) {
-        openToast(result.error.issues[0]?.message ?? 'Invalid note.', 'error')
+        openToast(result.error.issues[0]?.message ?? 'Invalid note.', 'error', { notification: false })
 
         return
     }
 
     if (isEditing.value && !props.note?.id) {
-        openToast('No note selected.', 'error')
+        openToast('No note selected.', 'error', { notification: false })
 
         return
     }
@@ -259,7 +259,7 @@ const saveNote = async () => {
 
         openToast(
             isEditing.value ? 'Note updated successfully.' : 'Note created successfully.',
-            'success'
+            'success', { notification: { title: isEditing.value ? 'Note updated' : 'Note created', category: 'library', href: '/notes' } }
         )
 
         emit('saved')

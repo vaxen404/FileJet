@@ -260,7 +260,7 @@ const saveRename = async () => {
 
         if (listed) listed.name = folder.value.name
 
-        openToast('Folder renamed successfully.', 'success')
+        openToast('Folder renamed successfully.', 'success', { notification: { title: 'Folder renamed', category: 'library', href: '/folders' } })
     } catch (error: any) {
         saveError.value = error.data?.message || error.message || 'Could not rename folder.'
 
@@ -470,7 +470,7 @@ const handleDrop = async (event: DragEvent) => {
                 failures.length
                     ? 'Some items were uploaded successfully.'
                     : 'Files and folders uploaded successfully.',
-                'success'
+                'success', { notification: { title: 'Upload complete', category: 'upload', href: `/folders/${id}` } }
             )
         }
 
@@ -500,7 +500,7 @@ const uploadFilesHere = async (files: FileList) => {
     try {
         await fileActions.uploadFiles(files, refreshContents)
 
-        openToast('Files uploaded successfully.', 'success')
+        openToast('Files uploaded successfully.', 'success', { notification: { title: 'Upload complete', category: 'upload', href: '/files' } })
     } catch (error: any) {
         openToast(error.data?.message || error.message || 'Upload failed.', 'error')
     }
@@ -512,7 +512,7 @@ const uploadFolderHere = async (directory: FileSystemDirectoryHandle | FileList)
     try {
         await folderActions.uploadFolders(directory, refreshContents, id)
 
-        openToast('Folder uploaded successfully.', 'success')
+        openToast('Folder uploaded successfully.', 'success', { notification: { title: 'Folder upload complete', category: 'upload', href: '/folders' } })
     } catch (error: any) {
         openToast(error.data?.message || error.message || 'Upload failed.', 'error')
     }

@@ -347,7 +347,7 @@ const handleNoteUpload = async (files: FileList) => {
 
             if (error.value) throw new Error(error.value)
         })
-        openToast('Notes uploaded successfully.', 'success')
+        openToast('Notes uploaded successfully.', 'success', { notification: { title: 'Notes imported', category: 'upload', href: '/notes' } })
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'Note upload failed.', 'error')
     }

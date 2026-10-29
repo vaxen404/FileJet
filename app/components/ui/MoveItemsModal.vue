@@ -390,7 +390,7 @@ const move = async () => {
             result.movedCount
                 ? 'Selection moved successfully.'
                 : 'The items are already in this folder.',
-            'success'
+            'success', { notification: result.movedCount ? { title: 'Items moved', category: 'library', href: '/folders' } : false }
         )
         emit('moved')
         emit('close')

@@ -163,7 +163,7 @@ const save = async () => {
 
         openToast(
             isEditing.value ? 'Folder renamed successfully.' : 'Folder created successfully.',
-            'success'
+            'success', { notification: { title: isEditing.value ? 'Folder renamed' : 'Folder created', category: 'library', href: '/folders' } }
         )
         emit('saved')
         emit('close')
