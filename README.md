@@ -11,6 +11,14 @@ A self-hosted file manager with folders, notes, public share links, and per-user
 ![Development](https://img.shields.io/badge/Status-In%20Development-F59E0B?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 
+<br />
+
+<a href="docs/images/dashboard.png">
+  <img src="docs/images/dashboard.png" alt="FileJet dashboard in dark mode with sidebar navigation, recent files, storage usage, and quick actions" width="1200" />
+</a>
+
+<sub>FileJet Dashboard · Dark theme</sub>
+
 </div>
 
 ---
