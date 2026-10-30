@@ -159,16 +159,15 @@
             </div>
 
             <div class="dashboard-right flex flex-col min-w-0 h-full min-h-0 gap-4 overflow-y-auto">
-                <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-none w-full self-start
+                <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 w-full self-stretch
                     min-h-0 flex flex-col">
-                    <div class="card-header flex items-center justify-between px-4 py-3 shrink-0">
-                        <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Storage Usage</h2>
-                        <span class="text-xs text-muted" title="Items in Trash still count toward storage usage.">Includes Trash</span>
+                    <div class="card-header flex items-center justify-between p-4 shrink-0">
+                        <h2 class="m-0 text-foreground text-lg font-semibold leading-tight" title="Includes items in Trash">Storage Usage</h2>
                     </div>
 
-                    <div class="storage-content w-full flex-none min-h-0 flex flex-col overflow-y-auto pt-0 pr-[1.4rem] pb-4 pl-[1.4rem]" :aria-busy="storageStatus === 'pending'">
+                    <div class="storage-content w-full flex-1 max-laptop:flex-none min-h-0 flex flex-col overflow-y-auto pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]" :aria-busy="storageStatus === 'pending'">
                         <template v-if="storageUsage && !storageError">
-                            <div class="storage-top flex shrink-0 items-center justify-between gap-3 mb-2">
+                            <div class="storage-top flex shrink-0 items-center justify-between gap-3 pr-[0.8rem] pl-[0.2rem] mb-[0.4rem]">
                                 <strong class="text-foreground text-[1.275rem]">{{ storagePercent.toFixed(2) }}%</strong>
                                 <span class="text-muted text-[0.85rem]">
                                     <b class="text-foreground font-semibold">{{ formatFileSize(storageUsage.storageUsed) }}</b> /
@@ -182,7 +181,7 @@
                                 :value="Math.min(100, storagePercent)"
                                 aria-label="Storage used"
                             >{{ storagePercent.toFixed(2) }}%</meter>
-                            <div class="storage-types flex shrink-0 flex-col gap-[1.1rem] mt-6">
+                            <div class="storage-types flex shrink-0 flex-col gap-[1.1rem] mt-12">
                                 <div v-for="type in storageTypes" :key="type.key" class="storage-item flex items-center justify-between gap-3 w-full text-muted text-[0.85rem]">
                                     <div class="storage-name flex items-center gap-[0.55rem]" :title="type.key === 'documents' ? 'Document files and notes' : undefined">
                                         <span class="storage-dot rounded-full shrink-0 size-[0.55rem]" :class="type.color"></span>
@@ -205,7 +204,7 @@
                         <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Quick Actions</h2>
                     </div>
 
-                    <div class="quick-actions-grid flex-1 min-h-0 overflow-y-auto grid grid-cols-2 grid-rows-[repeat(2,minmax(min-content,1fr))] gap-3 py-0 px-4">
+                    <div class="quick-actions-grid flex-1 max-laptop:flex-none min-h-0 overflow-y-auto grid grid-cols-2 content-start gap-3 py-0 px-4">
                         <button
                             @click="navigateTo('/files')"
                             type="button"
