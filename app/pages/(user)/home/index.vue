@@ -182,7 +182,7 @@
                                 :value="Math.min(100, storagePercent)"
                                 aria-label="Storage used"
                             >{{ storagePercent.toFixed(2) }}%</meter>
-                            <div class="storage-types flex flex-1 flex-col justify-between gap-2 mt-4">
+                            <div class="storage-types flex shrink-0 flex-col gap-[1.1rem] mt-12">
                                 <div v-for="type in storageTypes" :key="type.key" class="storage-item flex items-center justify-between gap-3 w-full text-muted text-[0.85rem]">
                                     <div class="storage-name flex items-center gap-[0.55rem]" :title="type.key === 'documents' ? 'Document files and notes' : undefined">
                                         <span class="storage-dot rounded-full shrink-0 size-[0.55rem]" :class="type.color"></span>
