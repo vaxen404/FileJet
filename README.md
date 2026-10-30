@@ -48,6 +48,7 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - List views switch to individual cards on mobile across files, folders, notes, favorites, Shared, Trash, and folder contents; desktop views retain their table columns.
 - Share links, access settings, expiration details, and Trash actions stay inside their mobile cards, with pagination below the list.
 - Responsive toolbars, type filters that wrap on mobile, and touch-friendly controls.
+- Dashboard Files, Folders, and Notes summary cards stack vertically on mobile.
 
 ### Sharing
 
@@ -59,7 +60,7 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - Copying links, changing share settings, and removing individual or selected links.
 - Removing a share link leaves the original item intact.
 
-To share by QR code, open an item's **Share** tab and create a link if needed, then select **QR code**. You can also open an existing link's settings from **Shared**. Scan the code with a phone camera or select **Download QR code** to save it as a PNG.
+To share by QR code, open an item's **Share** tab and create a link if needed, then select **QR code**. In **Shared**, click an item's name or row to open its share settings, or use the action buttons or right-click menu. Scan the code with a phone camera or select **Download QR code** to save it as a PNG.
 
 QR codes are generated in the browser and contain the existing public link. The same password and expiration settings apply; removing the link also revokes access through its QR code. Expired links cannot display a QR code.
 

@@ -56,7 +56,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-surface-hover selected:bg-accent/8" :class="{ selected: selectedIds.includes(item.id) }">
+                            <tr
+                                v-for="item in paginatedItems"
+                                :key="item.id"
+                                class="hover:bg-surface-hover selected:bg-accent/8"
+                                :class="{ selected: selectedIds.includes(item.id), 'cursor-pointer': item.isAvailable && !busy }"
+                                @click="openRowSettings($event, item)"
+                                @contextmenu.prevent.stop="openContextMenu($event, item)"
+                            >
                                 <td class="item-selection-cell file-table-cell">
                                     <input v-model="selectedIds" type="checkbox" class="file-checkbox" :value="item.id" :disabled="busy" :aria-label="`Select share link for ${item.name}`">
                                 </td>
@@ -64,7 +71,16 @@
                                     <div class="flex min-w-0 items-center gap-3">
                                         <span class="grid size-10 shrink-0 place-items-center rounded-md border border-accent/25 bg-accent/12 text-xl text-accent"><Icon :name="itemIcon(item)" /></span>
                                         <div class="min-w-0">
-                                            <NuxtLink v-if="item.isAvailable" :to="itemLocation(item)" class="block truncate text-sm font-semibold text-foreground hover:text-accent" :title="item.name">{{ item.name }}</NuxtLink>
+                                            <button
+                                                v-if="item.isAvailable"
+                                                type="button"
+                                                :disabled="busy"
+                                                class="block max-w-full cursor-pointer truncate text-left text-sm font-semibold text-foreground hover:text-accent
+                                                    disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-accent"
+                                                :title="item.name"
+                                                :aria-label="`Open share settings for ${item.name}`"
+                                                @click.stop="openShareSettings(item)"
+                                            >{{ item.name }}</button>
                                             <span v-else class="block truncate text-sm font-semibold text-muted">{{ item.name }}</span>
                                             <span class="mt-1 block truncate text-xs text-muted">{{ typeLabels[item.itemType] }} · {{ formatDate(item.createdAt, false) }}</span>
                                         </div>
@@ -85,8 +101,17 @@
                                         <button type="button" :disabled="busy || !item.isAvailable" :aria-label="`Copy link for ${item.name}`" title="Copy link" class="shared-icon" @click="copyLink(item)"><Icon name="solar:copy-linear" size="18" /></button>
                                         <a v-if="item.isAvailable" :href="item.url" target="_blank" rel="noopener noreferrer" :aria-label="`Open public link for ${item.name}`" title="Open public link" class="shared-icon"><Icon name="solar:arrow-right-up-linear" size="18" /></a>
                                         <span v-else class="shared-icon pointer-events-none opacity-35" aria-hidden="true"><Icon name="solar:arrow-right-up-linear" size="18" /></span>
-                                        <button type="button" :disabled="busy || !item.isAvailable" :aria-label="`Share settings for ${item.name}`" title="Share settings" class="shared-icon" @click="settingsItem = item"><Icon name="solar:tuning-2-linear" size="18" /></button>
+                                        <button type="button" :disabled="busy || !item.isAvailable" :aria-label="`Share settings for ${item.name}`" title="Share settings" class="shared-icon" @click="openShareSettings(item)"><Icon name="solar:tuning-2-linear" size="18" /></button>
                                         <button type="button" :disabled="busy" :aria-label="`Remove share link for ${item.name}`" title="Remove link" class="shared-icon text-danger! hover:enabled:bg-danger/10!" @click="removeLink(item)"><Icon :name="removingId === item.id ? 'solar:refresh-linear' : 'solar:link-broken-linear'" size="18" :class="{ 'animate-spin': removingId === item.id }" /></button>
+                                        <ItemMenu
+                                            :ref="menu => setShareMenuRef(item.id, menu)"
+                                            :type="item.itemType"
+                                            :actions="[]"
+                                            :custom-actions="shareMenuActions(item)"
+                                            :disabled="busy"
+                                            context-only
+                                            @custom-action="handleMenuAction($event, item)"
+                                        />
                                     </div>
                                 </td>
                             </tr>
@@ -116,6 +141,7 @@
 <script setup lang="ts">
 import type { SharedListItem, ShareState } from '~~/shared/types/share'
 import { getFileIcon } from '~/utils/file'
+import type ItemMenu from '~/components/ui/ItemMenu.vue'
 
 definePageMeta({
     middleware: 'auth',
@@ -143,6 +169,42 @@ const selectedEntries = computed(() => entries.value.filter(item => selectedIds.
 const settingsItem = ref<SharedListItem | null>(null)
 const settingsSaving = ref(false)
 const busy = computed(() => isLoading.value || removingId.value !== null || bulkRemoving.value || settingsSaving.value)
+const shareMenus = new Map<string, InstanceType<typeof ItemMenu>>()
+
+const setShareMenuRef = (id: string, menu: Element | ComponentPublicInstance | null) => {
+    if (menu) shareMenus.set(id, menu as InstanceType<typeof ItemMenu>)
+    else shareMenus.delete(id)
+}
+
+const openShareSettings = (item: SharedListItem) => {
+    if (!busy.value && item.isAvailable) settingsItem.value = item
+}
+
+const openRowSettings = (event: MouseEvent, item: SharedListItem) => {
+    if ((event.target as HTMLElement | null)?.closest('a, button, input, select, textarea, label')) return
+    openShareSettings(item)
+}
+
+const openContextMenu = (event: MouseEvent, item: SharedListItem) => {
+    if (busy.value) return
+    shareMenus.get(item.id)?.openAt(event.clientX, event.clientY)
+}
+
+const shareMenuActions = (item: SharedListItem) => [
+    { id: 'share', label: 'Share settings / QR code', icon: 'solar:qr-code-linear', disabled: !item.isAvailable },
+    { id: 'copy', label: 'Copy link', icon: 'solar:copy-linear', disabled: !item.isAvailable },
+    { id: 'public', label: 'Open public link', icon: 'solar:arrow-right-up-linear', href: item.url, disabled: !item.isAvailable },
+    { id: 'open', label: 'Open original item', icon: 'solar:document-linear', disabled: !item.isAvailable },
+    { id: 'remove', label: 'Remove link', icon: 'solar:link-broken-linear', danger: true }
+]
+
+const handleMenuAction = (action: string, item: SharedListItem) => {
+    if (busy.value) return
+    if (action === 'share') openShareSettings(item)
+    else if (action === 'copy') copyLink(item)
+    else if (action === 'open' && item.isAvailable) navigateTo(itemLocation(item))
+    else if (action === 'remove') removeLink(item)
+}
 const now = ref(Date.now())
 const typeLabels = { file: 'File', folder: 'Folder', note: 'Note' }
 const statusLabels = { active: 'Active', expired: 'Expired', unavailable: 'Unavailable' }

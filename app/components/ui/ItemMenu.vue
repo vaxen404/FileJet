@@ -4,7 +4,9 @@
         class="item-menu relative inline-flex"
     >
         <button
+            v-if="!contextOnly"
             type="button"
+            :disabled="disabled"
             aria-label="Item actions"
             :aria-expanded="isOpen"
             class="menu-trigger flex items-center justify-center bg-surface text-label border-0 rounded-control
@@ -26,6 +28,22 @@
                     @click.stop
                     @contextmenu.stop
                 >
+                    <component
+                        :is="action.href && !action.disabled ? 'a' : 'button'"
+                        v-for="action in customActions"
+                        :key="action.id"
+                        :type="action.href && !action.disabled ? undefined : 'button'"
+                        :href="action.disabled ? undefined : action.href"
+                        :target="action.href ? '_blank' : undefined"
+                        :rel="action.href ? 'noopener noreferrer' : undefined"
+                        :disabled="disabled || action.disabled"
+                        class="menu-item no-underline disabled:cursor-not-allowed disabled:opacity-40"
+                        :class="action.danger ? 'text-danger hover:bg-danger-surface' : 'text-content hover:bg-raised hover:text-foreground'"
+                        @click="handleCustomAction(action)"
+                    >
+                        <Icon class="text-lg flex-none size-4.5" :name="action.icon" />
+                        {{ action.label }}
+                    </component>
                     <button
                         v-if="hasAction('open')"
                         type="button"
@@ -148,6 +166,7 @@
 import { onClickOutside } from '@vueuse/core'
 
 type Action = 'open' | 'rename' | 'copy' | 'edit' | 'download' | 'favorite' | 'delete'
+type CustomAction = { id: string; label: string; icon: string; href?: string; disabled?: boolean; danger?: boolean }
 
 const props = withDefaults(
     defineProps<{
@@ -155,11 +174,17 @@ const props = withDefaults(
         actions?: Action[]
         isFavorite?: boolean
         canCopy?: boolean
+        contextOnly?: boolean
+        disabled?: boolean
+        customActions?: CustomAction[]
     }>(),
     {
         actions: () => ['open', 'rename', 'copy', 'download', 'favorite', 'delete'],
         isFavorite: false,
-        canCopy: false
+        canCopy: false,
+        contextOnly: false,
+        disabled: false,
+        customActions: () => []
     }
 )
 
@@ -171,6 +196,7 @@ const emit = defineEmits<{
     download: []
     favorite: []
     delete: []
+    customAction: [id: string]
 }>()
 
 const menuId = useId()
@@ -360,22 +386,33 @@ const actionHandlers = {
 }
 
 const toggleMenu = () => {
+    if (props.disabled) return
     contextPosition.value = null
     isOpen.value = !isOpen.value
 }
 
 const openAt = (x: number, y: number) => {
+    if (props.disabled) return
     contextPosition.value = { x, y }
     isOpen.value = true
 }
 
 defineExpose({ openAt })
 
+watch(() => props.disabled, disabled => { if (disabled) isOpen.value = false })
+
+const handleCustomAction = (action: CustomAction) => {
+    if (props.disabled || action.disabled) return
+    emit('customAction', action.id)
+    isOpen.value = false
+}
+
 onBeforeUnmount(() => {
     isOpen.value = false
 })
 
 const handleAction = (action: Action) => {
+    if (props.disabled) return
     actionHandlers[action]()
     isOpen.value = false
 }

@@ -1,6 +1,6 @@
 <template>
     <div class="dashboard-page flex flex-col gap-3 size-full">
-        <section class="stats-grid grid grid-cols-[repeat(3,_1fr)] gap-3 shrink-0">
+        <section class="stats-grid grid grid-cols-[repeat(3,_1fr)] max-mobile:grid-cols-1 gap-3 shrink-0">
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
                 <div class="stat-icon purple-bg flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem]
                     text-[1.6rem] size-[3.4rem]">
