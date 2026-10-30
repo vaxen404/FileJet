@@ -161,7 +161,7 @@
             <div class="dashboard-right flex flex-col min-w-0 h-full min-h-0 gap-4 overflow-y-auto">
                 <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 w-full self-stretch
                     min-h-0 flex flex-col">
-                    <div class="card-header flex items-center justify-between p-4 shrink-0">
+                    <div class="card-header flex items-center justify-between p-4 mb-2 shrink-0">
                         <h2 class="m-0 text-foreground text-lg font-semibold leading-tight" title="Includes items in Trash">Storage Usage</h2>
                     </div>
 
