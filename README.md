@@ -45,8 +45,9 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 
 - A desktop sidebar with the account menu anchored at the bottom; on compact screens, navigation opens as a drawer and the account menu stays in the top-right corner.
 - Compact two-column file cards on phones, with smaller image previews.
-- List views retain table columns on mobile, with horizontal scrolling inside the table.
-- Responsive toolbars, horizontally scrollable type filters, and touch-friendly controls.
+- List views switch to individual cards on mobile across files, folders, notes, favorites, Shared, Trash, and folder contents; desktop views retain their table columns.
+- Share links, access settings, expiration details, and Trash actions stay inside their mobile cards, with pagination below the list.
+- Responsive toolbars, type filters that wrap on mobile, and touch-friendly controls.
 
 ### Sharing
 
@@ -75,7 +76,7 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - Collapsible Profile and Password sections; Profile starts open.
 - A themed confirmation dialog for unsaved changes during in-app navigation.
 - An in-app notification center for uploads, file changes, sharing updates, account changes, and operation errors, with unread filters and read/dismiss controls.
-- A desktop header with live storage usage and a theme shortcut; storage warnings appear at 85% and 100% usage.
+- A desktop header with a theme shortcut and notification controls. Storage usage remains on the dashboard, with storage warnings at 85% and 100% usage.
 
 Profile and password changes are stored in PostgreSQL. Appearance and browsing preferences are stored per account in the current browser's `localStorage`; they do not sync across devices.
 
@@ -277,10 +278,10 @@ File paths resolve relative to the process working directory as `storage/<userId
 - [x] Username, email, and password settings
 - [x] Accent colors and default grid/list preferences
 - [x] Light, dark, and system themes with account-specific preferences
-- [x] Responsive navigation, compact mobile cards, and scrollable mobile tables
+- [x] Responsive navigation, mobile card list views, and wrapping mobile filters
 - [x] Desktop sidebar account menu and mobile header account menu
 - [x] In-app notification history, unread controls, and storage warnings
-- [x] Desktop header storage usage and theme shortcut
+- [x] Desktop header theme shortcut and notification controls
 - [x] Custom items per page
 - [x] Collapsible account sections and unsaved-change confirmation
 
