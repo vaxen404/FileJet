@@ -160,66 +160,42 @@
 
             <div class="dashboard-right flex flex-col min-w-0 h-full min-h-0 gap-4">
                 <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1
-                    min-h-0">
+                    min-h-0 flex flex-col">
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
                         <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Storage Usage</h2>
+                        <span class="text-xs text-muted" title="Items in Trash still count toward storage usage.">Includes Trash</span>
                     </div>
 
-                    <div class="storage-content w-full pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]">
-                        <div class="storage-top flex items-center justify-between pt-0 pr-[0.8rem] pb-0 pl-[0.2rem] mb-[0.4rem]">
-                            <strong class="text-foreground text-[1.275rem]">{{ storagePercent }}%</strong>
-
-                            <span class="text-muted text-[0.85rem]">
-                                <b class="text-foreground font-semibold">{{ formatFileSize(user?.storageUsed ?? 0) }}</b> /
-                                {{ formatFileSize(user?.storageLimit ?? 0) }}
-                            </span>
-                        </div>
-
-                        <meter
-                            class="storage-meter w-full max-w-full h-4 block appearance-none border-0 rounded-sm bg-meter-track"
-                            min="0"
-                            max="100"
-                            :value="storagePercent"
-                        >
-                            {{ storagePercent }}%
-                        </meter>
-
-                        <div class="storage-types flex flex-col gap-[1.1rem] mt-12">
-                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
-                                <div class="storage-name flex items-center gap-[0.55rem]">
-                                    <span class="storage-dot blue-dot rounded-full shrink-0 bg-[#5da9ff] size-[0.55rem]"></span>
-                                    Images
-                                </div>
-
-                                <span>{{ imagesSize }} GB</span>
+                    <div class="storage-content w-full min-h-0 overflow-y-auto pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]" :aria-busy="storageStatus === 'pending'">
+                        <template v-if="storageUsage && !storageError">
+                            <div class="storage-top flex items-center justify-between gap-3 mb-2">
+                                <strong class="text-foreground text-[1.275rem]">{{ storagePercent.toFixed(2) }}%</strong>
+                                <span class="text-muted text-[0.85rem]">
+                                    <b class="text-foreground font-semibold">{{ formatFileSize(storageUsage.storageUsed) }}</b> /
+                                    {{ formatFileSize(storageUsage.storageLimit) }}
+                                </span>
                             </div>
-
-                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
-                                <div class="storage-name flex items-center gap-[0.55rem]">
-                                    <span class="storage-dot purple-dot rounded-full shrink-0 bg-accent size-[0.55rem]"></span>
-                                    Documents
+                            <meter
+                                class="storage-meter w-full max-w-full h-4 block appearance-none border-0 rounded-sm bg-meter-track"
+                                min="0"
+                                max="100"
+                                :value="Math.min(100, storagePercent)"
+                                aria-label="Storage used"
+                            >{{ storagePercent.toFixed(2) }}%</meter>
+                            <div class="storage-types flex flex-col gap-2 mt-4">
+                                <div v-for="type in storageTypes" :key="type.key" class="storage-item flex items-center justify-between gap-3 w-full text-muted text-[0.85rem]">
+                                    <div class="storage-name flex items-center gap-[0.55rem]" :title="type.key === 'documents' ? 'Document files and notes' : undefined">
+                                        <span class="storage-dot rounded-full shrink-0 size-[0.55rem]" :class="type.color"></span>
+                                        {{ type.label }}
+                                    </div>
+                                    <span>{{ formatFileSize(storageUsage.categories[type.key]) }}</span>
                                 </div>
-
-                                <span>{{ documentsSize }} GB</span>
                             </div>
-
-                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
-                                <div class="storage-name flex items-center gap-[0.55rem]">
-                                    <span class="storage-dot cyan-dot rounded-full shrink-0 bg-[#55c2d4] size-[0.55rem]"></span>
-                                    Videos
-                                </div>
-
-                                <span>{{ videosSize }} GB</span>
-                            </div>
-
-                            <div class="storage-item flex items-center justify-between w-full text-muted text-[0.85rem]">
-                                <div class="storage-name flex items-center gap-[0.55rem]">
-                                    <span class="storage-dot gray-dot rounded-full shrink-0 bg-[#6b6b75] size-[0.55rem]"></span>
-                                    Others
-                                </div>
-
-                                <span>{{ othersSize }} GB</span>
-                            </div>
+                        </template>
+                        <div v-else class="py-4" :role="storageError ? 'alert' : 'status'">
+                            <p class="m-0 text-sm text-muted">{{ storageError ? 'Storage usage could not be loaded.' : 'Loading storage usage...' }}</p>
+                            <button v-if="storageError" type="button" class="mt-3 min-h-10 cursor-pointer rounded-md border border-control-border bg-control px-3 text-sm text-content disabled:opacity-50"
+                                :disabled="storageStatus === 'pending'" @click="refreshStorage()">Try again</button>
                         </div>
                     </div>
                 </div>
@@ -304,6 +280,7 @@ definePageMeta({
 })
 
 import { canCopyFile, getFileIcon, getFileType, formatFileSize, formatFileTime } from '~/utils/file'
+import type { StorageUsage } from '~~/shared/types/storage'
 
 const { openToast } = useToast()
 
@@ -312,6 +289,15 @@ const { deleteFile, renameFile, copyFile, downloadFile, isDeleting } = useFileAc
 const { addFavorite, removeFavorite } = useFavoriteActions()
 
 await fetchAll()
+
+const { data: storageUsage, error: storageError, status: storageStatus, refresh: refreshStorage } =
+    await useFetch<StorageUsage>('/api/users/@me/storage', { key: `storage-usage:${user.value?.id ?? 'current'}` })
+const storageTypes = [
+    { key: 'images', label: 'Images', color: 'bg-[#5da9ff]' },
+    { key: 'documents', label: 'Documents', color: 'bg-accent' },
+    { key: 'videos', label: 'Videos', color: 'bg-[#55c2d4]' },
+    { key: 'others', label: 'Others', color: 'bg-[#6b6b75]' }
+] as const
 
 if (error.value) {
     openToast(error.value, 'error')
@@ -364,7 +350,7 @@ const saveRename = async (file: FileItem) => {
         await renameFile(file.id, newName)
         file.name = newName
         editingFileId.value = null
-        await fetchAll()
+        await Promise.all([fetchAll(), refreshStorage()])
         openToast(error.value || 'File renamed successfully.', error.value ? 'error' : 'success')
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'File could not be renamed.', 'error')
@@ -405,6 +391,7 @@ const handleDelete = async (file: FileItem) => {
     try {
         await deleteFile(file.id)
         files.value = files.value.filter(item => item.id !== file.id)
+        await refreshStorage()
     } catch (err: any) {
         openToast(err.data?.message || err.message || 'File could not be deleted.', 'error')
     }
@@ -439,18 +426,11 @@ const handleFavorite = async (file: FileItem) => {
 }
 
 const storagePercent = computed(() => {
-    const used = Number(user.value?.storageUsed ?? 0)
-    const limit = Number(user.value?.storageLimit ?? 0)
-
-    if (limit === 0) return 0
-
-    return ((used / limit) * 100).toFixed(2)
+    const used = Number(storageUsage.value?.storageUsed ?? 0)
+    const limit = Number(storageUsage.value?.storageLimit ?? 0)
+    if (!Number.isFinite(used) || !Number.isFinite(limit) || limit <= 0) return 0
+    return Math.max(0, used / limit * 100)
 })
-
-const imagesSize = ref(0)
-const documentsSize = ref(0)
-const videosSize = ref(0)
-const othersSize = ref(0)
 </script>
 
 <style scoped>

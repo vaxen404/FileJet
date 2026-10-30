@@ -243,6 +243,7 @@ File paths resolve relative to the process working directory as `storage/<userId
 - Regular file uploads accept **1–6 files per request**.
 - TXT/Markdown note imports accept up to **10 notes per request**, with a **5 MiB limit per note**.
 - Storage quotas are enforced per user. Items in Trash continue to count toward usage until permanently deleted.
+- Dashboard storage categories include files in every folder and items in Trash, with notes counted under Documents. Sizes use B, KB, MB, or GB, and category totals add up to the displayed usage.
 - Each user can have up to **20 share records**. Expired links and links retained for trashed items still count until their records are removed.
 - Login, upload, account changes, and sharing endpoints have rate limits.
 - Sessions expire after seven days.
