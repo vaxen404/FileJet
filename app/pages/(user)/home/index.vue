@@ -158,15 +158,15 @@
                 </div>
             </div>
 
-            <div class="dashboard-right flex flex-col min-w-0 h-full min-h-0 gap-4">
-                <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1
+            <div class="dashboard-right flex flex-col min-w-0 h-full min-h-0 gap-4 overflow-y-auto">
+                <div class="dashboard-card storage-card bg-surface border border-divider rounded-3xl overflow-hidden flex-none w-full self-start
                     min-h-0 flex flex-col">
-                    <div class="card-header flex items-center justify-between p-4 shrink-0">
+                    <div class="card-header flex items-center justify-between px-4 py-3 shrink-0">
                         <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Storage Usage</h2>
                         <span class="text-xs text-muted" title="Items in Trash still count toward storage usage.">Includes Trash</span>
                     </div>
 
-                    <div class="storage-content w-full flex-1 min-h-0 flex flex-col overflow-y-auto pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]" :aria-busy="storageStatus === 'pending'">
+                    <div class="storage-content w-full flex-none min-h-0 flex flex-col overflow-y-auto pt-0 pr-[1.4rem] pb-4 pl-[1.4rem]" :aria-busy="storageStatus === 'pending'">
                         <template v-if="storageUsage && !storageError">
                             <div class="storage-top flex shrink-0 items-center justify-between gap-3 mb-2">
                                 <strong class="text-foreground text-[1.275rem]">{{ storagePercent.toFixed(2) }}%</strong>
@@ -182,7 +182,7 @@
                                 :value="Math.min(100, storagePercent)"
                                 aria-label="Storage used"
                             >{{ storagePercent.toFixed(2) }}%</meter>
-                            <div class="storage-types flex shrink-0 flex-col gap-[1.1rem] mt-12">
+                            <div class="storage-types flex shrink-0 flex-col gap-[1.1rem] mt-6">
                                 <div v-for="type in storageTypes" :key="type.key" class="storage-item flex items-center justify-between gap-3 w-full text-muted text-[0.85rem]">
                                     <div class="storage-name flex items-center gap-[0.55rem]" :title="type.key === 'documents' ? 'Document files and notes' : undefined">
                                         <span class="storage-dot rounded-full shrink-0 size-[0.55rem]" :class="type.color"></span>
@@ -199,7 +199,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 min-h-0
+                <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-none w-full self-start min-h-0
                     pb-4">
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
                         <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Quick Actions</h2>
