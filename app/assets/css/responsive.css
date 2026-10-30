@@ -182,6 +182,228 @@
     .trash-toast-controls { gap: 0.25rem; }
 }
 
+.mobile-list-preview {
+    display: none;
+}
+
+/* All library tables use cards on mobile; desktop tables keep their columns. */
+@media (max-width: 800px) {
+    .item-filters {
+        width: 100%;
+        flex-wrap: wrap;
+        overflow: visible;
+    }
+
+    .item-filters .filter-btn {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: 100%;
+        min-height: 2.25rem;
+        height: auto;
+        padding: 0.5rem 0.75rem;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .view-content:has(.mobile-item-table) {
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .view-content > div:has(> .mobile-item-table) {
+        overflow: visible;
+    }
+
+    table.mobile-item-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        table-layout: auto;
+    }
+
+    .mobile-item-table thead {
+        display: none;
+    }
+
+    .mobile-item-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .mobile-item-table tbody > tr {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        min-width: 0;
+        min-height: 5.125rem;
+        align-items: center;
+        gap: 0.75rem 0.5rem;
+        padding: 1rem;
+        border: 1px solid var(--color-divider);
+        border-radius: 2rem;
+        background: var(--color-surface);
+    }
+
+    .mobile-item-table tbody > tr:has(.file-checkbox:checked) {
+        border-color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+    }
+
+    table.mobile-item-table tbody > tr > td,
+    table.mobile-item-table tbody > tr > td.file-table-cell {
+        min-width: 0;
+        width: auto;
+        height: auto;
+        padding: 0;
+        border: 0;
+    }
+
+    .mobile-item-table .item-name-cell {
+        display: block;
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .mobile-item-table .item-name-cell > div {
+        gap: 0.75rem;
+    }
+
+    .mobile-item-table .item-name-cell > div > :first-child {
+        flex: 0 0 3rem;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.875rem;
+    }
+
+    .files-table .item-name-cell .file-icon {
+        display: none;
+    }
+
+    .mobile-item-table .mobile-list-preview {
+        position: relative;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: var(--color-preview);
+        color: var(--color-accent);
+        font-size: 1.75rem;
+    }
+
+    .mobile-list-preview :is(img, video) {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .mobile-list-preview .mobile-list-play {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--color-on-primary);
+        font-size: 1.125rem;
+        pointer-events: none;
+    }
+
+    .user-content .mobile-item-table .item-name-cell .list-name-input:disabled {
+        font-size: 0.875rem;
+    }
+
+    .mobile-item-table .item-name-cell > div > div:last-child {
+        gap: 0;
+    }
+
+    .mobile-item-table .item-selection-cell {
+        display: grid;
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 2rem;
+        min-height: 2.75rem;
+        place-items: center;
+    }
+
+    .mobile-item-table .item-meta-cell {
+        display: flex;
+        grid-column: 1 / -1;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        color: var(--color-secondary);
+        font-size: 0.75rem;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .mobile-item-table .item-meta-cell::before {
+        flex-shrink: 0;
+        color: var(--color-muted);
+        content: attr(data-label);
+    }
+
+    /* These tables already show their size/date below each item name. */
+    :is(.files-table, .folders-table, .notes-table, .favorites-table) .item-meta-cell {
+        display: none;
+    }
+
+    .mobile-item-table .item-actions-cell {
+        display: block;
+        grid-column: 1 / -1;
+    }
+
+    .mobile-item-table .item-actions-cell > div:not(.item-menu) {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* Keep existing item menus available by long press and keyboard focus. */
+    .mobile-item-table .item-actions-cell:has(> .item-menu) {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .mobile-item-table tr:focus-within .item-actions-cell {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .shared-table .item-meta-cell[data-label="Share link"] {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.375rem;
+    }
+
+    .shared-table .item-meta-cell input {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0.5rem;
+    }
+
+    .data-view:has(.mobile-item-table) ~ .pagination {
+        height: auto;
+        min-height: 3.75rem;
+        margin-top: 0.75rem;
+        padding: 0.5rem 0 max(0.5rem, env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .data-view:has(.mobile-item-table) ~ .pagination .page-button {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.75rem;
+    }
+}
+
+
 /* Touch targets and 16px fields prevent accidental taps and iOS input zoom. */
 @media (pointer: coarse), (max-width: 600px) {
     :root { --ui-control-height: 2.75rem; }

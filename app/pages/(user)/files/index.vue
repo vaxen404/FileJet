@@ -120,6 +120,24 @@
 
                                 <td class="item-name-cell h-[4.2rem] w-[42%] file-table-cell">
                                     <div class="flex items-center gap-3">
+                                        <div class="mobile-list-preview">
+                                            <img
+                                                v-if="file.mime_type?.startsWith('image/')"
+                                                :src="`/api/files/${file.id}/preview`"
+                                                :alt="file.name"
+                                                loading="lazy"
+                                            />
+                                            <template v-else-if="file.mime_type?.startsWith('video/')">
+                                                <video
+                                                    :src="`/api/files/${file.id}/preview`"
+                                                    preload="metadata"
+                                                    muted
+                                                    playsinline
+                                                />
+                                                <Icon class="mobile-list-play" name="solar:play-bold" />
+                                            </template>
+                                            <Icon v-else :name="getFileIcon(file.mime_type, file.original_name)" />
+                                        </div>
                                         <div
                                             class="file-icon flex shrink-0 items-center justify-center rounded-md text-on-primary text-[1.15rem]
                                             size-[2.4rem]"

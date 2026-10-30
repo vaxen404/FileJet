@@ -44,11 +44,6 @@
         </div>
 
         <div class="header-actions header-workspace-actions shrink-0 flex items-center gap-2">
-            <NuxtLink to="/home" class="header-storage" :class="{ 'is-full': storage.level !== 'normal' }" :title="`${storageUsed} of ${storageLimit} used`" :aria-label="`Storage: ${storageUsed} of ${storageLimit} used`">
-                <Icon name="solar:server-square-linear" size="20" aria-hidden="true" />
-                <span class="header-storage-details"><span><span>Storage</span><strong>{{ Math.floor(storage.percent) }}%</strong></span><span class="header-storage-track"><i :style="{ width: `${storage.percent}%` }" /></span></span>
-            </NuxtLink>
-            <span class="header-action-divider" aria-hidden="true" />
             <button class="header-theme-shortcut" type="button" :disabled="!preferencesLoaded"
                 :aria-label="resolvedTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
                 :title="resolvedTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
@@ -68,8 +63,6 @@
 <script setup lang="ts">
 import AccountMenu from './AccountMenu.vue'
 import NotificationCenter from './NotificationCenter.vue'
-import { formatFileSize } from '~/utils/file'
-import { getStorageStatus } from '~/utils/notifications'
 
 defineProps({
     navigationOpen: { type: Boolean, default: false },
@@ -83,14 +76,8 @@ defineEmits<{ openNavigation: [] }>()
 
 const fileHeader = useFileHeader()
 const route = useRoute()
-const currentUser = useAuthUser()
-const { user: accountProfile } = useUser()
 const { resolvedTheme, setTheme } = useTheme()
 const { preferencesLoaded } = usePreferences()
-const storageProfile = computed(() => accountProfile.value?.id === currentUser.value?.id ? accountProfile.value : currentUser.value)
-const storage = computed(() => getStorageStatus(storageProfile.value?.storageUsed ?? 0, storageProfile.value?.storageLimit ?? 0))
-const storageUsed = computed(() => formatFileSize(storageProfile.value?.storageUsed ?? 0))
-const storageLimit = computed(() => formatFileSize(storageProfile.value?.storageLimit ?? 0))
 
 const isFileDetails = computed(
     () =>
