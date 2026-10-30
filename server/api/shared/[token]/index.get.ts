@@ -14,21 +14,32 @@ export default defineEventHandler(async event => {
         } catch (err: any) {
             if (err.statusCode !== 401) throw err
 
-            const file =
+            const itemName =
                 sharedItem.item_type === 'file'
                     ? await prisma.files.findFirst({
                           where: { id: sharedItem.item_id, user_id: sharedItem.user_id },
                           select: { name: true, original_name: true }
-                      })
-                    : null
+                      }).then(item => item ? item.original_name || item.name : null)
+                    : sharedItem.item_type === 'folder'
+                      ? await prisma.folders.findFirst({
+                            where: { id: sharedItem.item_id, user_id: sharedItem.user_id },
+                            select: { name: true }
+                        }).then(item => item?.name ?? null)
+                      : sharedItem.item_type === 'note'
+                        ? await prisma.notes.findFirst({
+                              where: { id: sharedItem.item_id, user_id: sharedItem.user_id },
+                              select: { title: true }
+                          }).then(item => item?.title ?? null)
+                        : null
 
-            if (sharedItem.item_type === 'file' && !file) throwError(404, 'File not found.')
+            if (itemName === null) throwError(404, 'Shared item not found.')
 
             throwError(401, 'A password is required for this share link.', {
                 data: {
                     passwordRequired: true,
-                    fileName: file?.original_name || file?.name || null,
-                    ...(sharedItem.item_type !== 'file' ? { itemType: sharedItem.item_type } : {})
+                    fileName: sharedItem.item_type === 'file' ? itemName : null,
+                    itemName,
+                    itemType: sharedItem.item_type
                 }
             })
         }

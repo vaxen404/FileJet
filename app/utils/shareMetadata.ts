@@ -13,6 +13,7 @@ export interface SocialShareItem {
 const supportedImages = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'] as const
 type ImageMime = typeof supportedImages[number]
 const isSupportedImage = (mime: string): mime is ImageMime => supportedImages.some(value => value === mime)
+const cleanName = (value: string | null | undefined) => value?.replace(/\s+/g, ' ').trim().slice(0, 240) || ''
 
 const readableSize = (value: string | null | undefined) => {
     const bytes = Number(value)
@@ -27,6 +28,8 @@ export function createShareMetadata(input: {
     token: string
     share: SocialShareItem | null | undefined
     passwordRequired?: boolean
+    protectedName?: string | null
+    protectedType?: 'file' | 'folder' | 'note'
     unavailable?: boolean
 }) {
     const url = new URL(`/shared/${encodeURIComponent(input.token)}`, input.origin).href
@@ -40,18 +43,25 @@ export function createShareMetadata(input: {
         card: 'summary' as 'summary' | 'summary_large_image'
     }
 
-    // Even an unlocked visitor must not publish protected content into social metadata.
-    if (input.passwordRequired || input.share?.isPasswordProtected) {
-        return { ...base, title: 'Password-protected share · FileJet', description: 'Enter the link password to access this shared item.' }
-    }
     if (input.unavailable) {
         return { ...base, title: 'Share unavailable · FileJet', description: 'This share link is invalid, expired, or no longer available.' }
+    }
+    // Item names are public; protected image pixels and note contents stay behind the password.
+    if (input.passwordRequired || input.share?.isPasswordProtected) {
+        const share = input.share
+        const name = cleanName(input.protectedName) || cleanName(share?.type === 'note'
+            ? share.item.title : share?.item.original_name || share?.item.name)
+        const kind = input.protectedType || share?.type || 'item'
+        return {
+            ...base,
+            title: name || 'Password-protected share · FileJet',
+            description: `🔒 Password-protected ${kind}. Enter the link password to access it.`
+        }
     }
     if (!input.share) return base
 
     const { type, item } = input.share
-    const name = (type === 'note' ? item.title : item.original_name || item.name)
-        ?.replace(/\s+/g, ' ').trim().slice(0, 240)
+    const name = cleanName(type === 'note' ? item.title : item.original_name || item.name)
     const mime = item.mime_type?.toLowerCase() ?? ''
     const kind = type === 'folder' ? 'Folder' : type === 'note' ? 'Note'
         : isSupportedImage(mime) ? 'Image' : mime.startsWith('video/') ? 'Video'

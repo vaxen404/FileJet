@@ -339,6 +339,7 @@ const { data: sharedItem, error, refresh } = await useFetch<SharedResponse>(shar
 interface PasswordChallenge {
     passwordRequired?: boolean
     fileName?: string | null
+    itemName?: string | null
     itemType?: 'file' | 'folder' | 'note'
 }
 
@@ -351,7 +352,7 @@ const passwordRequired = computed(
 )
 
 const lockedFileName = computed(() =>
-    passwordRequired.value ? passwordChallenge.value.fileName || '' : ''
+    passwordRequired.value ? passwordChallenge.value.itemName || passwordChallenge.value.fileName || '' : ''
 )
 
 const requestOrigin = useRequestURL().origin
@@ -360,7 +361,9 @@ const socialMetadata = computed(() => createShareMetadata({
     token: token.value,
     share: sharedItem.value,
     passwordRequired: passwordRequired.value,
-    unavailable: Boolean(error.value)
+    protectedName: lockedFileName.value,
+    protectedType: passwordChallenge.value.itemType,
+    unavailable: Boolean(error.value && !passwordRequired.value)
 }))
 
 useSeoMeta({

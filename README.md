@@ -55,7 +55,7 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - Public links for files, folders, and notes at `/shared/<token>`.
 - QR codes for public share links, with PNG download for files, folders, and notes.
 - Optional link passwords and expiration dates.
-- Social link cards with file names and large previews for public PNG, JPEG, WebP, and GIF images. Password-protected shares use a generic card without content previews.
+- Social link cards with file names and large previews for public PNG, JPEG, WebP, and GIF images. Password-protected shares show the item name and a lock notice while keeping image previews and note contents private.
 - Browsing and downloading shared folder contents.
 - A Shared page with search, type/status filters, sorting, and pagination.
 - Copying links, changing share settings, and removing individual or selected links.
