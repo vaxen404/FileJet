@@ -166,9 +166,9 @@
                         <span class="text-xs text-muted" title="Items in Trash still count toward storage usage.">Includes Trash</span>
                     </div>
 
-                    <div class="storage-content w-full min-h-0 overflow-y-auto pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]" :aria-busy="storageStatus === 'pending'">
+                    <div class="storage-content w-full flex-1 min-h-0 flex flex-col overflow-y-auto pt-0 pr-[1.4rem] pb-[1.4rem] pl-[1.4rem]" :aria-busy="storageStatus === 'pending'">
                         <template v-if="storageUsage && !storageError">
-                            <div class="storage-top flex items-center justify-between gap-3 mb-2">
+                            <div class="storage-top flex shrink-0 items-center justify-between gap-3 mb-2">
                                 <strong class="text-foreground text-[1.275rem]">{{ storagePercent.toFixed(2) }}%</strong>
                                 <span class="text-muted text-[0.85rem]">
                                     <b class="text-foreground font-semibold">{{ formatFileSize(storageUsage.storageUsed) }}</b> /
@@ -176,13 +176,13 @@
                                 </span>
                             </div>
                             <meter
-                                class="storage-meter w-full max-w-full h-4 block appearance-none border-0 rounded-sm bg-meter-track"
+                                class="storage-meter w-full max-w-full h-4 shrink-0 block appearance-none border-0 rounded-sm bg-meter-track"
                                 min="0"
                                 max="100"
                                 :value="Math.min(100, storagePercent)"
                                 aria-label="Storage used"
                             >{{ storagePercent.toFixed(2) }}%</meter>
-                            <div class="storage-types flex flex-col gap-2 mt-4">
+                            <div class="storage-types flex flex-1 flex-col justify-between gap-2 mt-4">
                                 <div v-for="type in storageTypes" :key="type.key" class="storage-item flex items-center justify-between gap-3 w-full text-muted text-[0.85rem]">
                                     <div class="storage-name flex items-center gap-[0.55rem]" :title="type.key === 'documents' ? 'Document files and notes' : undefined">
                                         <span class="storage-dot rounded-full shrink-0 size-[0.55rem]" :class="type.color"></span>
