@@ -48,13 +48,14 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - List views switch to individual cards on mobile across files, folders, notes, favorites, Shared, Trash, and folder contents; desktop views retain their table columns.
 - Share links, access settings, expiration details, and Trash actions stay inside their mobile cards, with pagination below the list.
 - Responsive toolbars, type filters that wrap on mobile, and touch-friendly controls.
-- Dashboard Files, Folders, and Notes summary cards stack vertically on mobile.
+- Dashboard Files, Folders, and Notes summary cards stack vertically on mobile, with a title, large count, top-right icon, and description.
 
 ### Sharing
 
 - Public links for files, folders, and notes at `/shared/<token>`.
 - QR codes for public share links, with PNG download for files, folders, and notes.
 - Optional link passwords and expiration dates.
+- Social link cards with file names and large previews for public PNG, JPEG, WebP, and GIF images. Password-protected shares use a generic card without content previews.
 - Browsing and downloading shared folder contents.
 - A Shared page with search, type/status filters, sorting, and pagination.
 - Copying links, changing share settings, and removing individual or selected links.
@@ -76,7 +77,7 @@ QR codes are generated in the browser and contain the existing public link. The 
 - Username/password login with signed, HttpOnly session cookies.
 - Username and optional email editing.
 - Password changes with current-password verification and new-password confirmation.
-- Six accent colors applied throughout the interface.
+- Six accent colors applied throughout the interface, including the FileJet logo.
 - Light, dark, and system themes, with live appearance previews and quick selection from the account menu.
 - Default grid/list view, sort order, and custom items per page, with an Auto option.
 - Collapsible Profile and Password sections; Profile starts open.

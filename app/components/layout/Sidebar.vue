@@ -1,9 +1,7 @@
 <template>
     <aside class="sidebar-area w-64 h-full min-h-0 overflow-hidden p-4 bg-surface border border-divider rounded-xl shrink-0 flex flex-col gap-5">
         <NuxtLink to="/home" aria-label="FileJet home" class="logo-area flex w-40 h-12 items-center gap-1 overflow-hidden no-underline">
-            <span class="h-12 w-13 shrink-0 overflow-hidden" aria-hidden="true">
-                <img class="-ml-4 h-12 w-40 max-w-none object-cover" src="/images/filejetlogo.png" alt="" />
-            </span>
+            <BrandMark />
             <span class="text-xl font-bold tracking-tight text-foreground">FileJet</span>
         </NuxtLink>
 
@@ -129,6 +127,7 @@
 
 <script setup lang="ts">
 import AccountMenu from './AccountMenu.vue'
+import BrandMark from '~/components/ui/BrandMark.vue'
 
 const route = useRoute()
 </script>

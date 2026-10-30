@@ -6,7 +6,7 @@
                     text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:document-linear"
-                        class="purple text-accent"
+                        aria-hidden="true"
                     />
                 </div>
 
@@ -14,6 +14,7 @@
                     <strong class="text-foreground text-[1.7rem] font-bold">{{ files.length }}</strong>
                     <span class="text-muted text-[0.9rem]">Files</span>
                 </div>
+                <p class="stat-description hidden">Uploaded files</p>
             </div>
 
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
@@ -21,7 +22,7 @@
                     text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:folder-linear"
-                        class="blue text-accent"
+                        aria-hidden="true"
                     />
                 </div>
 
@@ -29,6 +30,7 @@
                     <strong class="text-foreground text-[1.7rem] font-bold">{{ folders.length }}</strong>
                     <span class="text-muted text-[0.9rem]">Folders</span>
                 </div>
+                <p class="stat-description hidden">Created folders</p>
             </div>
 
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
@@ -36,7 +38,7 @@
                     text-[1.6rem] size-[3.4rem]">
                     <Icon
                         name="solar:notebook-linear"
-                        class="text-accent"
+                        aria-hidden="true"
                     />
                 </div>
 
@@ -44,6 +46,7 @@
                     <strong class="text-foreground text-[1.7rem] font-bold">{{ notes.length }}</strong>
                     <span class="text-muted text-[0.9rem]">Notes</span>
                 </div>
+                <p class="stat-description hidden">Saved notes</p>
             </div>
         </section>
 
@@ -451,6 +454,59 @@ const othersSize = ref(0)
 </script>
 
 <style scoped>
+@media (max-width: 600px) {
+    .stats-grid {
+        gap: 0.875rem;
+    }
+
+    .stats-grid .stat-card {
+        position: relative;
+        align-items: stretch;
+        min-height: 10rem;
+        padding: 1.5rem;
+        gap: 0;
+        border-radius: 1.75rem;
+    }
+
+    .stats-grid .stat-icon {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        font-size: 1.25rem;
+        color: var(--color-muted);
+        background: transparent;
+        border-radius: 0;
+    }
+
+    .stats-grid .stat-info {
+        gap: 0.5rem;
+        padding-right: 2rem;
+        text-align: left;
+    }
+
+    .stats-grid .stat-info span {
+        order: -1;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .stats-grid .stat-info strong {
+        font-size: 1.875rem;
+        line-height: 1.2;
+    }
+
+    .stats-grid .stat-description {
+        display: block;
+        margin: auto 0 0;
+        padding-top: 1.5rem;
+        color: var(--color-muted);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+}
+
 .files-list::-webkit-scrollbar-track {
     background: transparent;
 }

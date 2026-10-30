@@ -317,6 +317,7 @@
 
 <script setup lang="ts">
 import { useEventListener, useFullscreen } from '@vueuse/core'
+import { createShareMetadata } from '~/utils/shareMetadata'
 
 const route = useRoute()
 
@@ -324,6 +325,7 @@ const token = computed(() => route.params.token as string)
 
 interface SharedResponse {
     type: 'file' | 'folder' | 'note'
+    isPasswordProtected: boolean
     sharedBy: string
     item: any
 }
@@ -351,6 +353,37 @@ const passwordRequired = computed(
 const lockedFileName = computed(() =>
     passwordRequired.value ? passwordChallenge.value.fileName || '' : ''
 )
+
+const requestOrigin = useRequestURL().origin
+const socialMetadata = computed(() => createShareMetadata({
+    origin: requestOrigin,
+    token: token.value,
+    share: sharedItem.value,
+    passwordRequired: passwordRequired.value,
+    unavailable: Boolean(error.value)
+}))
+
+useSeoMeta({
+    title: () => socialMetadata.value.title,
+    description: () => socialMetadata.value.description,
+    ogTitle: () => socialMetadata.value.title,
+    ogDescription: () => socialMetadata.value.description,
+    ogSiteName: 'FileJet',
+    ogType: 'website',
+    ogUrl: () => socialMetadata.value.url,
+    ogImage: () => socialMetadata.value.image,
+    ogImageType: () => socialMetadata.value.imageType,
+    ogImageAlt: () => socialMetadata.value.imageAlt,
+    twitterCard: () => socialMetadata.value.card,
+    twitterTitle: () => socialMetadata.value.title,
+    twitterDescription: () => socialMetadata.value.description,
+    twitterImage: () => socialMetadata.value.image,
+    twitterImageAlt: () => socialMetadata.value.imageAlt,
+    robots: 'noindex, nofollow, noarchive',
+    themeColor: '#8b7cff'
+})
+useHead(() => ({ link: [{ rel: 'canonical', href: socialMetadata.value.url }] }))
+if (import.meta.server) useResponseHeader('Cache-Control').value = 'private, no-store'
 
 const sharePassword = ref('')
 const showPassword = ref(false)

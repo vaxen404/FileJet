@@ -56,6 +56,7 @@ export default defineEventHandler(async event => {
 
             return {
                 type: 'file',
+                isPasswordProtected: Boolean(sharedItem.password_hash),
                 sharedBy: sharedItem.users.username,
                 item: {
                     ...file,
@@ -84,6 +85,7 @@ export default defineEventHandler(async event => {
 
             return {
                 type: 'folder',
+                isPasswordProtected: Boolean(sharedItem.password_hash),
                 sharedBy: sharedItem.users.username,
                 item: folder
             }
@@ -111,6 +113,7 @@ export default defineEventHandler(async event => {
 
             return {
                 type: 'note',
+                isPasswordProtected: Boolean(sharedItem.password_hash),
                 sharedBy: sharedItem.users.username,
                 item: {
                     ...note,
