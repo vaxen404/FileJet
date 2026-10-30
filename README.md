@@ -52,11 +52,16 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 ### Sharing
 
 - Public links for files, folders, and notes at `/shared/<token>`.
+- QR codes for public share links, with PNG download for files, folders, and notes.
 - Optional link passwords and expiration dates.
 - Browsing and downloading shared folder contents.
 - A Shared page with search, type/status filters, sorting, and pagination.
 - Copying links, changing share settings, and removing individual or selected links.
 - Removing a share link leaves the original item intact.
+
+To share by QR code, open an item's **Share** tab and create a link if needed, then select **QR code**. You can also open an existing link's settings from **Shared**. Scan the code with a phone camera or select **Download QR code** to save it as a PNG.
+
+QR codes are generated in the browser and contain the existing public link. The same password and expiration settings apply; removing the link also revokes access through its QR code. Expired links cannot display a QR code.
 
 ### Trash
 
@@ -271,6 +276,7 @@ File paths resolve relative to the process working directory as `storage/<userId
 - [x] Notes with editing, import, and download
 - [x] Favorites, search, filtering, sorting, and pagination
 - [x] Public links for files, folders, and notes
+- [x] QR code sharing with downloadable PNGs
 - [x] Password-protected links and expiration settings
 - [x] Shared page with checkboxes and bulk link removal
 - [x] Trash with bulk restore, permanent deletion, and Undo

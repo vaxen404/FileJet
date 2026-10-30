@@ -35,20 +35,38 @@
                     hover:bg-raised hover:text-foreground disabled:opacity-60 disabled:cursor-not-allowed
                     focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                     title="Copy link"
+                    aria-label="Copy share link"
                     @click="copyShareLink"
                 >
                     <Icon :name="copied ? 'solar:check-circle-bold' : 'solar:copy-bold'" />
+                </button>
+                <button
+                    type="button"
+                    class="min-h-10 shrink-0 inline-flex items-center justify-center gap-2 rounded-md border border-control-border
+                        bg-raised px-3 text-sm font-medium text-content cursor-pointer hover:text-foreground
+                        disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
+                        focus-visible:outline-accent focus-visible:outline-offset-2"
+                    :disabled="busy || shareExpired"
+                    :aria-expanded="showQrCode && !busy && !shareExpired"
+                    :aria-controls="qrPanelId"
+                    @click="showQrCode = !showQrCode"
+                >
+                    <Icon name="solar:qr-code-linear" /> QR code
                 </button>
             </div>
             <p class="share-description block mt-0 mr-0 mb-3 ml-0 text-muted text-xs leading-normal">
                 {{
                     state.url
-                        ? state.isExpired
+                        ? shareExpired
                             ? 'This link has expired.'
                             : 'Share this link to give access to this item.'
                         : 'Create a share link for this item.'
                 }}
             </p>
+
+            <div v-if="showQrCode && state.url && !busy && !shareExpired" :id="qrPanelId" class="mb-4">
+                <LazyShareQrCode :url="state.url" :item-type="itemType" :has-password="state.hasPassword" />
+            </div>
 
             <form
                 class="share-settings flex flex-col gap-3"
@@ -192,16 +210,22 @@ const customExpiration = ref('')
 const isLoading = ref(false)
 const isSaving = ref(false)
 const copied = ref(false)
+const showQrCode = ref(false)
+const qrPanelId = useId()
+const now = ref(Date.now())
 const errorMessage = ref('')
 const savedMessage = ref('')
 const loadFailed = ref(false)
 
 const busy = computed(() => isLoading.value || isSaving.value || loadFailed.value)
-
+const shareExpired = computed(() => state.value.isExpired || Boolean(
+    state.value.expiresAt && new Date(state.value.expiresAt).getTime() <= now.value
+))
 watch(isSaving, value => emit('saving-change', value))
 
 let requestId = 0
 let copyTimer: ReturnType<typeof setTimeout> | undefined
+let expirationTimer: ReturnType<typeof setInterval> | undefined
 
 const localDate = (iso: string) => {
     const date = new Date(iso)
@@ -210,6 +234,8 @@ const localDate = (iso: string) => {
 }
 
 const applyState = (value: ShareState) => {
+    if (value.url !== state.value.url) showQrCode.value = false
+    now.value = Date.now()
     state.value = { ...value }
     passwordEnabled.value = value.hasPassword
     password.value = ''
@@ -371,6 +397,9 @@ watch(
         isSaving.value = false
         errorMessage.value = ''
         savedMessage.value = ''
+        showQrCode.value = false
+        state.value = emptyShareState()
+        isLoading.value = false
 
         if (props.initialState !== undefined) applyState(props.initialState)
         else loadShareLink()
@@ -378,8 +407,13 @@ watch(
     { immediate: true }
 )
 
+onMounted(() => {
+    expirationTimer = setInterval(() => { now.value = Date.now() }, 1000)
+})
+
 onBeforeUnmount(() => {
     requestId++
     clearTimeout(copyTimer)
+    clearInterval(expirationTimer)
 })
 </script>
