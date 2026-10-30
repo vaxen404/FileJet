@@ -199,13 +199,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-none w-full self-start min-h-0
+                <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 w-full self-stretch min-h-0 flex flex-col
                     pb-4">
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
                         <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Quick Actions</h2>
                     </div>
 
-                    <div class="quick-actions-grid grid grid-cols-2 gap-3 py-0 px-4">
+                    <div class="quick-actions-grid flex-1 min-h-0 overflow-y-auto grid grid-cols-2 grid-rows-[repeat(2,minmax(min-content,1fr))] gap-3 py-0 px-4">
                         <button
                             @click="navigateTo('/files')"
                             type="button"
