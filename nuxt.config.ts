@@ -9,7 +9,11 @@ export default defineNuxtConfig({
 
     modules: ['@nuxt/icon'],
 
-    css: ['~/assets/css/tailwind.css', '~/assets/css/inbox.css'],
+    css: [
+        '~/assets/css/layers.css',
+        '~/assets/css/tailwind.css',
+        '~/assets/css/inbox.css'
+    ],
 
     app: {
         head: {
