@@ -1,5 +1,5 @@
 <template>
-    <div class="favorites-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
+    <QuickPreviewScope :items="quickPreviewItems" :selected-ids="selectedFavorites" class="favorites-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
         <div class="favorites-header flex flex-col shrink-0 p-0 gap-3 mb-3">
             <div class="favorites-toolbar flex items-center justify-between flex-wrap gap-2 min-w-0">
                 <SearchBox class="[flex:1_1_18rem] min-w-0 max-w-128 max-tablet:basis-full max-tablet:max-w-none"
@@ -80,6 +80,7 @@
                             <tr class="hover:bg-surface-hover selected:bg-accent/8"
                                 v-for="item in paginatedItems"
                                 :key="item.id"
+                                :data-preview-id="item.id" tabindex="0" aria-keyshortcuts="Space"
                                 :class="{ selected: selectedFavorites.includes(item.id) }"
                                 @click="openItem(item)"
                                 @contextmenu.prevent.stop="openContextMenu($event, item.id)"
@@ -146,6 +147,7 @@
                     <ItemGridCard
                         v-for="item in paginatedItems"
                         :key="item.id"
+                                :data-preview-id="item.id" tabindex="0" aria-keyshortcuts="Space"
                         :title="getItemName(item)"
                         :icon="itemIcon(item)"
                         :selected="selectedFavorites.includes(item.id)"
@@ -228,7 +230,7 @@
             @delete="handleDeleteSelected"
             @moved="handleSelectionMoved"
         />
-    </div>
+    </QuickPreviewScope>
 </template>
 
 <script setup lang="ts">
@@ -505,4 +507,5 @@ watch(totalPages, total => {
 watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     currentPage.value = 1
 })
+const quickPreviewItems = computed(() => paginatedItems.value.map(item => ({ id: item.id, resourceId: getItemId(item), type: getItemType(item), name: getItemName(item), mime_type: item.files?.mime_type, size: item.files?.size ?? item.notes?.size })))
 </script>

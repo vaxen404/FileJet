@@ -1,5 +1,5 @@
 <template>
-    <div class="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+    <QuickPreviewScope :items="quickPreviewItems" :selected-ids="selectedFiles" class="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
         <div class="mb-3 flex shrink-0 flex-col gap-3">
             <div class="flex min-w-0 flex-wrap items-center justify-between gap-2">
                 <SearchBox
@@ -102,6 +102,7 @@
                             <tr class="transition-colors duration-200"
                                 v-for="file in paginatedFiles"
                                 :key="file.id"
+                                :data-preview-id="file.id" tabindex="0" aria-keyshortcuts="Space"
                                 :class="selectedFiles.includes(file.id)
                                     ? 'bg-accent/12 text-content hover:bg-accent/18'
                                     : 'hover:bg-surface-hover'"
@@ -213,6 +214,7 @@
                     <ItemGridCard
                         v-for="file in paginatedFiles"
                         :key="file.id"
+                                :data-preview-id="file.id" tabindex="0" aria-keyshortcuts="Space"
                         class="file-grid-card group/file-grid-card"
                         :selected="selectedFiles.includes(file.id)"
                         :title="file.name"
@@ -319,7 +321,7 @@
             @delete="handleDeleteSelected"
             @moved="handleSelectionMoved"
         />
-    </div>
+    </QuickPreviewScope>
 </template>
 
 <script setup lang="ts">
@@ -596,4 +598,5 @@ watch(totalPages, total => {
 watch([searchQuery, activeCategory, sortMode, viewMode], () => {
     currentPage.value = 1
 })
+const quickPreviewItems = computed(() => paginatedFiles.value.map(file => ({ id: file.id, type: 'file' as const, name: file.original_name || file.name, mime_type: file.mime_type, size: file.size })))
 </script>

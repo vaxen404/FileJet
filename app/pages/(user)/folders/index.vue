@@ -2,7 +2,7 @@
     <div class="folders-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
         <div class="folders-header flex flex-col shrink-0 p-0 gap-3 mb-3">
             <div class="folders-toolbar flex flex-row items-center justify-between gap-2 flex-wrap min-w-0">
-                <SearchBox class="max-tablet:w-full max-tablet:min-w-0 max-tablet:box-border"
+                <SearchBox class="[flex:1_1_12rem] min-w-0 max-tablet:basis-full max-tablet:w-full max-tablet:box-border"
                     v-model="searchQuery"
                     placeholder="Search folders..."
                 />

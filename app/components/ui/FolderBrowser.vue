@@ -1,10 +1,10 @@
 <template>
-    <div
+    <QuickPreviewScope :items="paginatedItems" :selected-ids="selected"
         class="folder-browser group/folder-browser flex-1 min-h-0 min-w-0 flex flex-col gap-3 p-5 max-phone:p-3"
         :class="{ 'is-read-only': readOnly }"
     >
         <div class="contents-toolbar flex items-center flex-wrap gap-2 justify-between">
-            <SearchBox class="[flex:1_1_12rem] max-w-128 min-w-0"
+            <SearchBox class="[flex:1_1_12rem] min-w-0"
                 v-model="search"
                 placeholder="Search this folder..."
             />
@@ -35,11 +35,11 @@
             </template>
             <template #list>
                 <div class="table-scroll min-h-0 overflow-auto">
-                    <table class="mobile-item-table contents-table border-collapse w-full min-w-144 text-left text-[0.85rem]
+                    <table class="mobile-item-table contents-table table-fixed border-collapse w-full min-w-144 text-left text-[0.85rem]
                         text-secondary">
                         <thead>
                             <tr>
-                                <th class="p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted" v-if="!readOnly">
+                                <th class="w-14 p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted" v-if="!readOnly">
                                     <input
                                         type="checkbox"
                                         class="item-checkbox file-checkbox"
@@ -49,7 +49,7 @@
                                         @change="toggleSelectAll"
                                     />
                                 </th>
-                                <th class="p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted">Name</th>
+                                <th class="w-[42%] p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted">Name</th>
                                 <th class="p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted">Type</th>
                                 <th class="p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted">Size</th>
                                 <th class="p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted">Modified</th>
@@ -60,6 +60,7 @@
                             <tr class="cursor-pointer hover:bg-surface-hover selected:bg-surface-hover"
                                 v-for="item in paginatedItems"
                                 :key="item.id"
+                                :data-preview-id="item.id" tabindex="0" aria-keyshortcuts="Space"
                                 :class="{ selected: selected.includes(item.id) }"
                                 @click="$emit('open', item)"
                                 @contextmenu.prevent.stop="contextMenu($event, item)"
@@ -80,7 +81,7 @@
                                     <div class="item-name flex items-center gap-3 min-w-0">
                                         <span class="item-icon grid place-items-center shrink-0 rounded-[10px] bg-accent/12 text-accent text-lg
                                             size-[2.7rem]"><Icon :name="icon(item)" /></span>
-                                        <strong class="max-w-72 truncate" :title="item.name">{{ item.name }}</strong>
+                                        <strong class="min-w-0 flex-1 truncate" :title="item.name">{{ item.name }}</strong>
                                     </div>
                                 </td>
                                 <td data-label="Type" class="item-meta-cell p-3 border-b border-b-divider">{{ item.type }}</td>
@@ -119,6 +120,7 @@
                     <ItemGridCard
                         v-for="item in paginatedItems"
                         :key="item.id"
+                                :data-preview-id="item.id" tabindex="0" aria-keyshortcuts="Space"
                         :title="item.name"
                         :icon="icon(item)"
                         :selected="selected.includes(item.id)"
@@ -212,7 +214,7 @@
             "
             @moved="handleSelectionMoved"
         />
-    </div>
+    </QuickPreviewScope>
 </template>
 
 <script setup lang="ts">

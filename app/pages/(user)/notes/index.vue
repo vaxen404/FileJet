@@ -1,5 +1,5 @@
 <template>
-    <div class="notes-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
+    <QuickPreviewScope :items="quickPreviewItems" :selected-ids="selectedNotes" class="notes-page w-full flex-1 min-h-0 flex flex-col bg-transparent overflow-hidden">
         <div class="notes-header flex flex-col shrink-0 p-0 gap-3 mb-3">
             <div class="notes-toolbar flex items-center justify-between flex-wrap gap-2 min-w-0">
                 <SearchBox class="[flex:1_1_18rem] min-w-0 max-w-128 max-tablet:basis-full max-tablet:max-w-none"
@@ -108,6 +108,7 @@
                             <tr class="hover:bg-surface-hover selected:bg-accent/8"
                                 v-for="note in paginatedNotes"
                                 :key="note.id"
+                                :data-preview-id="note.id" tabindex="0" aria-keyshortcuts="Space"
                                 :class="{ selected: selectedNotes.includes(note.id) }"
                                 @click="openNote(note)"
                                 @contextmenu.prevent.stop="openContextMenu($event, note.id)"
@@ -176,6 +177,7 @@
                     <ItemGridCard
                         v-for="note in paginatedNotes"
                         :key="note.id"
+                                :data-preview-id="note.id" tabindex="0" aria-keyshortcuts="Space"
                         :title="note.title"
                         icon="solar:notebook-bold"
                         :selected="selectedNotes.includes(note.id)"
@@ -248,7 +250,7 @@
             @delete="handleDeleteSelected"
             @moved="handleSelectionMoved"
         />
-    </div>
+    </QuickPreviewScope>
 </template>
 
 <script setup lang="ts">
@@ -484,4 +486,5 @@ watch(totalPages, total => {
 watch([searchQuery, sortMode, viewMode], () => {
     currentPage.value = 1
 })
+const quickPreviewItems = computed(() => paginatedNotes.value.map(note => ({ id: note.id, type: 'note' as const, name: note.title, size: note.size })))
 </script>
