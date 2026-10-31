@@ -1,43 +1,34 @@
 <template>
-    <div class="view-switcher w-24 h-control shrink-0 flex items-center justify-center bg-surface-hover p-[3px]
-        gap-[3px] border border-divider rounded-control">
+    <div class="view-switcher w-24 h-10 max-mobile:h-11 pointer-coarse:h-11 shrink-0 flex items-center
+        justify-center bg-surface-hover p-0.75 gap-0.75 border border-divider rounded-lg">
         <button
+            v-for="view in views"
+            :key="view.value"
             type="button"
-            aria-label="Grid view"
-            :aria-pressed="modelValue === 'grid'"
-            class="view-button flex-1 h-full min-w-0 p-0 flex items-center justify-center text-foreground bg-transparent
-            border-0 rounded-control-inner cursor-pointer text-control-size font-medium leading-normal
-            hover:bg-raised is-active:bg-primary focus-visible:outline-2 focus-visible:outline-accent
-            focus-visible:-outline-offset-2 is-active:text-on-primary is-active:hover:bg-primary is-active:hover:text-on-primary"
-            :class="{ active: modelValue === 'grid' }"
-            @click="emit('update:modelValue', 'grid')"
+            :aria-label="view.label"
+            :aria-pressed="modelValue === view.value"
+            class="view-button flex-1 h-full min-w-0 p-0 flex items-center justify-center text-foreground
+                bg-transparent border-0 rounded-sm cursor-pointer text-sm font-medium leading-normal hover:bg-raised
+                is-active:bg-primary focus-visible:outline-2 focus-visible:outline-accent
+                focus-visible:-outline-offset-2 is-active:text-on-primary is-active:hover:bg-primary
+                is-active:hover:text-on-primary"
+            :class="{ active: modelValue === view.value }"
+            @click="emit('update:modelValue', view.value)"
         >
             <Icon
-                name="solar:widget-4-linear"
-                class="view-icon block text-control-icon shrink-0 text-inherit size-control-icon"
-            />
-        </button>
-
-        <button
-            type="button"
-            aria-label="List view"
-            :aria-pressed="modelValue === 'list'"
-            class="view-button flex-1 h-full min-w-0 p-0 flex items-center justify-center text-foreground bg-transparent
-            border-0 rounded-control-inner cursor-pointer text-control-size font-medium leading-normal
-            hover:bg-raised is-active:bg-primary focus-visible:outline-2 focus-visible:outline-accent
-            focus-visible:-outline-offset-2 is-active:text-on-primary is-active:hover:bg-primary is-active:hover:text-on-primary"
-            :class="{ active: modelValue === 'list' }"
-            @click="emit('update:modelValue', 'list')"
-        >
-            <Icon
-                name="solar:list-linear"
-                class="view-icon block text-control-icon shrink-0 text-inherit size-control-icon"
+                :name="view.icon"
+                class="block text-lg shrink-0 text-inherit size-4.5"
             />
         </button>
     </div>
 </template>
 
 <script setup lang="ts">
+const views = [
+    { value: 'grid', label: 'Grid view', icon: 'solar:widget-4-linear' },
+    { value: 'list', label: 'List view', icon: 'solar:list-linear' }
+] as const
+
 defineProps<{
     modelValue: 'grid' | 'list'
 }>()

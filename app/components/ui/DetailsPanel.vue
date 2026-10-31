@@ -3,11 +3,8 @@
         <div class="details-actions w-full grid grid-cols-2 gap-2 p-2 bg-surface border border-divider rounded-3xl">
             <button
                 v-if="actions.includes('download')"
-                class="actions-btn details-action-icons download w-full min-w-0 h-10 py-0 px-2 flex items-center
-                justify-center gap-2 bg-primary text-on-primary border rounded-md text-sm font-medium whitespace-nowrap
-                cursor-pointer transition-colors duration-200 ease-[ease] leading-normal border-primary
-                hover:bg-primary/85 hover:text-on-primary hover:border-primary nth-2:row-start-2 nth-2:col-start-1
-                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
+                class="actions-btn download bg-primary text-on-primary border-primary hover:bg-primary/85
+                    hover:text-on-primary hover:border-primary"
                 @click="emit('download')"
             >
                 <Icon name="solar:download-bold" />
@@ -16,11 +13,8 @@
 
             <button
                 v-if="actions.includes('rename')"
-                class="actions-btn details-action-icons w-full min-w-0 h-10 py-0 px-2 flex items-center justify-center gap-2
-                bg-control text-content border border-control-border rounded-md text-sm font-medium
-                whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease] leading-normal
-                hover:bg-divider hover:text-foreground hover:border-hover-border nth-2:row-start-2 nth-2:col-start-1
-                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
+                class="actions-btn bg-control text-content border-control-border hover:bg-divider hover:text-foreground
+                    hover:border-hover-border"
                 @click="emit('rename')"
             >
                 <Icon name="solar:pen-bold" />
@@ -29,11 +23,8 @@
 
             <button
                 v-if="actions.includes('favorite')"
-                class="actions-btn details-action-icons w-full min-w-0 h-10 py-0 px-2 flex items-center justify-center gap-2
-                bg-control text-content border border-control-border rounded-md text-sm font-medium
-                whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease] leading-normal
-                hover:bg-divider hover:text-foreground hover:border-hover-border nth-2:row-start-2 nth-2:col-start-1
-                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
+                class="actions-btn bg-control text-content border-control-border hover:bg-divider hover:text-foreground
+                    hover:border-hover-border"
                 @click="emit('favorite')"
             >
                 <Icon :name="isFavorite ? 'solar:star-bold' : 'solar:star-linear'" />
@@ -44,11 +35,8 @@
             <button
                 v-if="itemType === 'file' && canCopy && actions.includes('copy')"
                 type="button"
-                class="actions-btn details-action-icons copy w-full min-w-0 h-10 py-0 px-2 flex items-center justify-center
-                gap-2 bg-control text-content border border-control-border rounded-md text-sm font-medium
-                whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease] leading-normal
-                hover:bg-divider hover:text-foreground hover:border-hover-border nth-2:row-start-2 nth-2:col-start-1
-                max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1"
+                class="actions-btn copy bg-control text-content border-control-border hover:bg-divider
+                    hover:text-foreground hover:border-hover-border"
                 :disabled="isCopying"
                 @click="emit('copy')"
             >
@@ -58,12 +46,8 @@
 
             <button
                 v-if="actions.includes('delete')"
-                class="actions-btn details-action-icons delete w-full min-w-0 h-10 py-0 px-2 flex items-center
-                justify-center gap-2 bg-control text-danger border border-control-border rounded-md text-sm
-                font-medium whitespace-nowrap cursor-pointer transition-colors duration-200 ease-[ease]
-                leading-normal hover:bg-danger-surface hover:text-danger-hover hover:border-danger-border nth-2:row-start-2
-                nth-2:col-start-1 max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1
-                max-tiny:gap-1"
+                class="actions-btn delete bg-control text-danger border-control-border hover:bg-danger-surface
+                    hover:text-danger-hover hover:border-danger-border"
                 @click="emit('delete')"
             >
                 <Icon name="solar:trash-bin-trash-bold" />
@@ -122,3 +106,17 @@ const emit = defineEmits<{
     delete: []
 }>()
 </script>
+
+<style scoped>
+@reference "~/assets/css/tailwind.css";
+
+@layer components {
+    .actions-btn {
+        @apply details-action-icons w-full min-w-0 h-10 py-0 px-2 flex;
+        @apply items-center justify-center gap-2 border rounded-md text-sm font-medium;
+        @apply whitespace-nowrap cursor-pointer transition-colors duration-200 leading-normal;
+        @apply nth-2:row-start-2 nth-2:col-start-1;
+        @apply max-tiny:text-xs max-tiny:leading-[inherit] max-tiny:py-0 max-tiny:px-1 max-tiny:gap-1;
+    }
+}
+</style>

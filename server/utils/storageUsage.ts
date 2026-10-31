@@ -26,9 +26,11 @@ export function summarizeStorageUsage(input: {
     files: SizeGroup[]
     notes: bigint | null
     trash: (SizeGroup & { item_type: string })[]
+    pending?: SizeGroup[]
 }): StorageUsage {
     const categories = { images: 0n, documents: input.notes ?? 0n, videos: 0n, others: 0n }
     for (const file of input.files) categories[getStorageCategory(file.mime_type)] += file._sum.size ?? 0n
+    for (const file of input.pending ?? []) categories[getStorageCategory(file.mime_type)] += file._sum.size ?? 0n
     for (const item of input.trash) {
         if (item.item_type === 'note') categories.documents += item._sum.size ?? 0n
         else if (item.item_type === 'file') categories[getStorageCategory(item.mime_type)] += item._sum.size ?? 0n

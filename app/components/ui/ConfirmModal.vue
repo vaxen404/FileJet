@@ -3,7 +3,8 @@
         <Transition name="modal">
             <div
                 v-if="show"
-                class="modal-overlay fixed inset-0 z-10000 flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs"
+                class="modal-overlay fixed inset-0 z-10000 flex items-center justify-center bg-black/65 p-4
+                    backdrop-blur-xs"
                 @click.self="emit('cancel')"
             >
                 <div
@@ -12,7 +13,8 @@
                     aria-modal="true"
                     :aria-labelledby="titleId"
                     :aria-describedby="messageId"
-                    class="confirm-modal max-h-[calc(100dvh_-_2rem)] overflow-y-auto w-full max-w-100 rounded-xl border border-divider bg-surface p-6 shadow-2xl"
+                    class="confirm-modal max-h-[calc(100dvh_-_2rem)] overflow-y-auto w-full max-w-100 rounded-xl border
+                        border-divider bg-surface p-6 shadow-2xl"
                     @keydown.esc.prevent.stop="emit('cancel')"
                     @keydown.tab="trapFocus"
                 >
@@ -24,7 +26,9 @@
                         <button
                             ref="cancelButton"
                             type="button"
-                            class="cancel-button h-10 cursor-pointer rounded-control border border-control-border bg-control px-4 text-xs font-medium text-secondary hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            class="cancel-button h-10 cursor-pointer rounded-lg border border-control-border bg-control px-4 text-xs
+                                font-medium text-secondary hover:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2
+                                focus-visible:outline-accent"
                             @click="emit('cancel')"
                         >
                             {{ cancelText || 'Cancel' }}
@@ -32,7 +36,8 @@
 
                         <button
                             type="button"
-                            class="confirm-button h-10 cursor-pointer rounded-control border px-4 text-xs font-medium text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                            class="confirm-button h-10 cursor-pointer rounded-lg border px-4 text-xs font-medium text-on-primary
+                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                             :class="variant === 'danger' ? 'border-red-700 bg-red-700 hover:bg-red-600' : 'border-primary bg-primary hover:brightness-110'"
                             @click="emit('confirm')"
                         >

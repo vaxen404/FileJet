@@ -45,7 +45,8 @@
                                             aria-label="Custom items per page"
                                             :aria-invalid="!pageSizeValid"
                                             :aria-describedby="!pageSizeValid ? 'page-size-error' : undefined"
-                                            class="h-10 w-28 rounded-control border border-control-border bg-control px-3 text-sm text-secondary outline-none focus:border-accent"
+                                            class="h-10 w-28 rounded-lg border border-control-border bg-control px-3 text-sm text-secondary
+                                                outline-none focus:border-accent"
                                         >
                                     </div>
                                     <p v-if="!pageSizeValid" id="page-size-error" role="alert" class="mt-2 text-xs text-danger">Enter a positive whole number.</p>
@@ -58,8 +59,17 @@
                         <button type="button" class="h-10 cursor-pointer text-xs text-label hover:text-foreground" @click="reset">Reset preferences</button>
                         <div class="flex flex-wrap items-center gap-3">
                             <span v-if="dirty" class="text-xs text-muted" aria-live="polite">Unsaved changes</span>
-                            <button type="button" :disabled="!dirty" class="settings-button border-control-border bg-control text-secondary hover:enabled:bg-raised" @click="cancel">Cancel</button>
-                            <button type="submit" :disabled="!dirty || !pageSizeValid" class="settings-button border-primary bg-primary text-on-primary hover:enabled:brightness-110">Save preferences</button>
+                            <button
+                                type="button"
+                                :disabled="!dirty"
+                                class="settings-button border-control-border bg-control text-secondary hover:enabled:bg-raised"
+                                @click="cancel"
+                            >Cancel</button>
+                            <button
+                                type="submit"
+                                :disabled="!dirty || !pageSizeValid"
+                                class="settings-button border-primary bg-primary text-on-primary hover:enabled:brightness-110"
+                            >Save preferences</button>
                         </div>
                     </footer>
                 </fieldset>
@@ -119,9 +129,12 @@ const save = () => {
     @apply flex flex-wrap items-center justify-between gap-3 border-b border-divider py-4;
 }
 .settings-select {
-    @apply h-10 w-52 cursor-pointer rounded-control border border-control-border bg-control px-3 text-sm text-secondary outline-none focus:border-accent;
+    @apply h-10 w-52 cursor-pointer rounded-lg border border-control-border bg-control px-3 text-sm;
+    @apply text-secondary outline-none focus:border-accent;
 }
 .settings-button {
-    @apply h-10 cursor-pointer rounded-control border px-4 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply h-10 cursor-pointer rounded-lg border px-4 text-xs font-medium disabled:cursor-not-allowed;
+    @apply disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2;
+    @apply focus-visible:outline-accent;
 }
 </style>

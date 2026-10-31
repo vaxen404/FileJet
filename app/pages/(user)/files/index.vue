@@ -99,7 +99,7 @@
                         </thead>
 
                         <tbody class="text-secondary text-[0.85rem]">
-                            <tr class="transition-colors duration-200 ease-[ease]"
+                            <tr class="transition-colors duration-200"
                                 v-for="file in paginatedFiles"
                                 :key="file.id"
                                 :class="selectedFiles.includes(file.id)
@@ -140,7 +140,7 @@
                                         </div>
                                         <div
                                             class="file-icon flex shrink-0 items-center justify-center rounded-md text-on-primary text-[1.15rem]
-                                            size-[2.4rem]"
+                                                size-[2.4rem]"
                                             :class="selectedFiles.includes(file.id) ? 'bg-primary/80' : 'bg-primary'"
                                         >
                                             <Icon
@@ -153,10 +153,10 @@
                                         <div class="flex min-w-0 flex-col gap-1">
                                             <input
                                                 type="text"
-                                                class="list-name-input w-lg min-w-0 max-w-full text-ellipsis whitespace-nowrap rounded-control border
-                                                bg-transparent text-sm leading-normal font-semibold text-foreground outline-none
-                                                disabled:pointer-events-none border-transparent is-active:py-[0.2rem] is-active:px-[0.4rem]
-                                                is-active:border-primary"
+                                                class="list-name-input w-lg min-w-0 max-w-full text-ellipsis whitespace-nowrap rounded-lg border
+                                                    bg-transparent text-sm leading-normal font-semibold text-foreground outline-none
+                                                    disabled:pointer-events-none border-transparent is-active:py-[0.2rem] is-active:px-[0.4rem]
+                                                    is-active:border-primary"
                                                 :data-file-id="file.id"
                                                 :class="{ active: editingFileId === file.id }"
                                                 :value="
@@ -230,8 +230,8 @@
                             <div
                                 v-if="file.mime_type?.startsWith('video/')"
                                 class="video-play-icon pointer-events-none absolute top-1/2 left-1/2 z-1 grid size-12 -translate-x-1/2
-                                -translate-y-1/2 place-items-center rounded-full bg-black/65 text-on-primary text-[1.4rem]
-                                group-hover/file-grid-card:bg-[rgba(60,_71,_190,_0.9)]"
+                                    -translate-y-1/2 place-items-center rounded-full bg-black/65 text-on-primary text-[1.4rem]
+                                    group-hover/file-grid-card:bg-[rgba(60,_71,_190,_0.9)]"
                             >
                                 <Icon name="solar:play-bold" />
                             </div>
@@ -240,22 +240,22 @@
                                 :src="`/api/files/${file.id}/preview`"
                                 :alt="file.name"
                                 loading="lazy"
-                                class="file-preview-image object-cover block transition-transform duration-250 ease-[ease]
-                                group-hover/file-card:scale-[1.035] size-full"
+                                class="file-preview-image object-cover block transition-transform duration-250
+                                    group-hover/file-card:scale-[1.035] size-full"
                             />
                             <video
                                 v-else
                                 :src="`/api/files/${file.id}/preview`"
-                                class="file-preview-image object-cover block transition-transform duration-250 ease-[ease]
-                                group-hover/file-card:scale-[1.035] size-full"
+                                class="file-preview-image object-cover block transition-transform duration-250
+                                    group-hover/file-card:scale-[1.035] size-full"
                                 preload="metadata"
                                 muted
                                 playsinline
                             />
                         </template>
                         <template #actions>
-                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
-                                cursor-pointer size-8">
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border
+                                rounded-full cursor-pointer size-8">
                                 <input
                                     class="file-checkbox m-0 accent-accent cursor-pointer size-[1.1rem]"
                                     v-model="selectedFiles"
@@ -292,9 +292,9 @@
                             />
                         </template>
                         <template #metadata>
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileSize(file.size) }}</span>
+                            <span class="min-w-0 first:shrink-0 truncate">{{ formatFileSize(file.size) }}</span>
                             ·
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileTime(file.created_at) }}</span>
+                            <span class="min-w-0 first:shrink-0 truncate">{{ formatFileTime(file.created_at) }}</span>
                         </template>
                     </ItemGridCard>
                 </ItemGrid>

@@ -91,7 +91,7 @@ export const useFolderActions = () => {
         try {
             const formData = new FormData()
 
-            Array.from(files).forEach(file => {
+            files.forEach(file => {
                 formData.append('files', file)
                 formData.append('paths', file.webkitRelativePath || file.name)
             })

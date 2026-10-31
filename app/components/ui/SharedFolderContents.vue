@@ -6,7 +6,7 @@
                     v-if="history.length"
                     type="button"
                     class="folder-button py-2.5 px-3 text-content bg-control border border-control-border rounded-md text-sm
-                    cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
+                        cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
                     @click="goBack"
                 >
                     Back
@@ -15,8 +15,8 @@
                 <h1 class="m-0 text-[1.1rem] wrap-anywhere">{{ contents?.name ?? rootName }}</h1>
             </div>
             <a
-                class="folder-button primary py-2.5 px-3 text-on-primary bg-primary border rounded-md text-sm cursor-pointer
-                no-underline border-primary hover:brightness-110 leading-[inherit]"
+                class="folder-button primary py-2.5 px-3 text-on-primary bg-primary border rounded-md text-sm
+                    cursor-pointer no-underline border-primary hover:brightness-110 leading-[inherit]"
                 :href="resourceUrl('download', currentFolder)"
                 >Download Folder</a
             >
@@ -29,7 +29,7 @@
             <button
                 type="button"
                 class="folder-button py-2.5 px-3 text-content bg-control border border-control-border rounded-md text-sm
-                cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
+                    cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
                 @click="refresh()"
             >
                 Try again
@@ -48,7 +48,7 @@
             <div
                 v-if="selected"
                 class="preview-overlay fixed inset-3 flex flex-col bg-canvas border border-divider rounded-xl z-1100
-                overflow-hidden"
+                    overflow-hidden"
                 @keydown.esc="selected = null"
                 @click.self="selected = null"
             >
@@ -56,8 +56,8 @@
                     <h2 class="m-0 text-[1.1rem] wrap-anywhere">{{ selected.name }}</h2>
                     <div class="folder-path flex items-center gap-3 min-w-0 flex-wrap">
                         <a
-                            class="folder-button primary py-2.5 px-3 text-on-primary bg-primary border rounded-md text-sm cursor-pointer
-                            no-underline border-primary hover:brightness-110 leading-[inherit]"
+                            class="folder-button primary py-2.5 px-3 text-on-primary bg-primary border rounded-md text-sm
+                                cursor-pointer no-underline border-primary hover:brightness-110 leading-[inherit]"
                             :href="resourceUrl('download', selected)"
                             >Download</a
                         >
@@ -65,7 +65,7 @@
                             ref="closeButton"
                             type="button"
                             class="folder-button py-2.5 px-3 text-content bg-control border border-control-border rounded-md text-sm
-                            cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
+                                cursor-pointer no-underline hover:brightness-110 leading-[inherit]"
                             @click="selected = null"
                         >
                             Close preview
@@ -97,7 +97,11 @@
                     :src="resourceUrl('preview', selected)"
                     :title="selected.name"
                 />
-                <pre class="flex-1 min-h-0 w-full object-contain border-0 p-5 m-0 overflow-auto whitespace-pre-wrap wrap-anywhere" v-else-if="selected.type === 'note' || selected.mime_type?.startsWith('text/')">{{
+                <pre
+                    class="flex-1 min-h-0 w-full object-contain border-0 p-5 m-0 overflow-auto whitespace-pre-wrap
+                        wrap-anywhere"
+                    v-else-if="selected.type === 'note' || selected.mime_type?.startsWith('text/')"
+                >{{
                     loadingText ? 'Loading preview...' : textContent
                 }}</pre>
                 <p

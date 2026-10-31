@@ -5,6 +5,7 @@ const fileReturnPages: Record<string, string> = {
     '/notes': 'Notes',
     '/favorites': 'Favorites',
     '/shared': 'Shared',
+    '/inbox': 'Inbox',
     '/trash': 'Trash',
     '/settings/preferences': 'Preferences',
     '/settings/personalization': 'Personalization'
@@ -17,7 +18,8 @@ export const getFileReturnPage = (value: unknown) => {
 
     const name =
         fileReturnPages[pathname] ||
-        (/^\/folders\/[0-9a-f-]{36}$/i.test(pathname) ? 'Folder' : undefined)
+        (/^\/folders\/[0-9a-f-]{36}$/i.test(pathname) ? 'Folder' : undefined) ||
+        (/^\/inbox\/[0-9a-f-]{36}$/i.test(pathname) ? 'Inbox' : undefined)
 
     return name ? { path: value, name } : null
 }

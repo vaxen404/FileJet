@@ -2,9 +2,7 @@ type FavoriteType = 'file' | 'folder' | 'note'
 
 export const useFavoriteActions = () => {
     const addFavorite = async (itemId: string, itemType: FavoriteType) => {
-        const url: string = '/api/favorites'
-
-        await $fetch(url, {
+        await $fetch('/api/favorites', {
             method: 'POST',
             body: {
                 itemId,
@@ -14,9 +12,7 @@ export const useFavoriteActions = () => {
     }
 
     const removeFavorite = async (itemId: string, itemType: FavoriteType) => {
-        const url: string = `/api/favorites/${itemType}/${encodeURIComponent(itemId)}`
-
-        await $fetch(url, {
+        await $fetch(`/api/favorites/${itemType}/${encodeURIComponent(itemId)}`, {
             method: 'DELETE'
         })
     }

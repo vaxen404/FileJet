@@ -27,7 +27,7 @@
             <NuxtLink
                 v-if="folder.parent"
                 class="parent-link flex gap-2 items-center pt-5 pr-5 pb-0 pl-5 text-accent no-underline text-sm
-                leading-[inherit]"
+                    leading-[inherit]"
                 :to="`/folders/${folder.parent.id}`"
             >
                 <Icon name="solar:arrow-left-linear" />
@@ -64,10 +64,13 @@
             <div
                 v-if="isDragging && !busy && !pending"
                 class="folder-drop-overlay absolute inset-2 z-20 flex items-center justify-center p-4 text-foreground
-                bg-canvas border-2 border-dashed border-accent rounded-[18px] pointer-events-none"
+                    bg-canvas border-2 border-dashed border-accent rounded-[18px] pointer-events-none"
             >
                 <div class="folder-drop-message flex flex-col items-center gap-[0.65rem] max-w-full text-center">
-                    <Icon class="max-w-full text-heading-muted text-[0.8125rem] wrap-anywhere first:text-accent first:text-[2.5rem]" name="solar:cloud-upload-bold" />
+                    <Icon
+                        class="max-w-full text-heading-muted text-[0.8125rem] wrap-anywhere first:text-accent first:text-[2.5rem]"
+                        name="solar:cloud-upload-bold"
+                    />
                     <strong class="text-[0.9375rem] first:text-accent first:text-[2.5rem]">Drop files or folders to upload</strong>
                     <span class="max-w-full text-heading-muted text-[0.8125rem] wrap-anywhere first:text-accent first:text-[2.5rem]">Upload to {{ folder.name }}</span>
                 </div>
@@ -117,8 +120,8 @@
                     </button>
                     <button
                         type="submit"
-                        class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
-                        hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
+                        class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                            border-primary hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
                         {{ isSaving ? 'Saving...' : 'Save' }}

@@ -1,15 +1,15 @@
 <template>
-    <div class="shared-page public-share-page w-full h-dvh min-h-0 p-3 flex flex-col bg-canvas text-foreground overflow-hidden
-        max-mobile:p-[0.6rem]">
+    <div class="shared-page public-share-page w-full h-dvh min-h-0 p-3 flex flex-col bg-canvas text-foreground
+        overflow-hidden max-mobile:p-[0.6rem]">
         <div
             v-if="passwordRequired"
             class="shared-error flex-1 basis-0 min-w-0 min-h-0 flex items-center justify-center p-4 short-screen:p-0
-            has-unlock:overflow-y-auto"
+                has-unlock:overflow-y-auto"
         >
             <form
                 class="shared-error-card share-unlock w-full max-w-108 flex flex-col items-center gap-4
-                p-[clamp(1.25rem,_4vw,_2.5rem)] bg-surface border border-divider rounded-3xl text-center text-accent
-                my-auto shrink-0 short-screen:gap-[0.6rem] short-screen:p-4"
+                    p-[clamp(1.25rem,_4vw,_2.5rem)] bg-surface border border-divider rounded-3xl text-center text-accent
+                    my-auto shrink-0 short-screen:gap-[0.6rem] short-screen:p-4"
                 @submit.prevent="unlockShare"
             >
                 <Icon class=""
@@ -20,7 +20,7 @@
                 <p
                     v-if="lockedFileName"
                     class="locked-filename max-w-84 m-0 text-content text-[0.85rem] leading-[1.7] w-full wrap-anywhere
-                    font-medium"
+                        font-medium"
                     :title="lockedFileName"
                 >
                     {{ lockedFileName }}
@@ -51,9 +51,9 @@
                     <button
                         type="button"
                         class="password-visibility absolute top-0 right-0 flex items-center justify-center p-0 border-0 rounded-md
-                        text-muted bg-transparent cursor-pointer hover:text-foreground focus-visible:outline-2
-                        focus-visible:outline-accent focus-visible:-outline-offset-2 disabled:opacity-65 disabled:cursor-wait
-                        size-11"
+                            text-muted bg-transparent cursor-pointer hover:text-foreground focus-visible:outline-2
+                            focus-visible:outline-accent focus-visible:-outline-offset-2 disabled:opacity-65
+                            disabled:cursor-wait size-11"
                         :title="showPassword ? 'Hide password' : 'Show password'"
                         :disabled="unlocking"
                         @click="showPassword = !showPassword"
@@ -73,12 +73,7 @@
                 </p>
                 <button
                     type="submit"
-                    class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
-                    px-[1.4rem] text-on-primary bg-primary border border-primary rounded-md [font-family:inherit]
-                    text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
-                    hover:bg-primary/85 hover:border-accent focus-visible:outline-2 focus-visible:outline-accent
-                    focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
-                    short-screen:mt-0 short-screen:py-[0.65rem] short-screen:px-[1.1rem]"
+                    class="download-btn mt-1"
                     :disabled="unlocking || !sharePassword"
                 >
                     {{
@@ -96,12 +91,12 @@
         <div
             v-else-if="error"
             class="shared-error flex-1 basis-0 min-w-0 min-h-0 flex items-center justify-center p-4 short-screen:p-0
-            has-unlock:overflow-y-auto"
+                has-unlock:overflow-y-auto"
         >
             <div class="shared-error-card w-full max-w-108 flex flex-col items-center gap-4 p-[clamp(1.25rem,_4vw,_2.5rem)]
                 bg-surface border border-divider rounded-3xl text-center short-screen:gap-[0.6rem] short-screen:p-4">
-                <div class="shared-error-icon flex items-center justify-center bg-accent/12
-                    border border-accent/25 rounded-md text-accent short-screen:w-16 short-screen:h-16 size-22">
+                <div class="shared-error-icon flex items-center justify-center bg-accent/12 border border-accent/25 rounded-md
+                    text-accent short-screen:w-16 short-screen:h-16 size-22">
                     <Icon class=""
                         :name="
                             error.statusCode === 404
@@ -141,10 +136,10 @@
             <div
                 v-if="sharedItem.type === 'file'"
                 class="shared-content basis-0 flex-1 min-w-0 min-h-0 flex bg-surface border border-divider rounded-3xl
-                overflow-hidden media-content:items-center media-content:justify-center media-content:bg-[#0d0d10]
-                image-content:bg-transparent image-content:border-0 text-content:block text-content:py-4
-                text-content:px-[1.2rem] text-content:overflow-auto text-content:overscroll-contain
-                text-content:wrap-anywhere"
+                    overflow-hidden media-content:items-center media-content:justify-center media-content:bg-[#0d0d10]
+                    image-content:bg-transparent image-content:border-0 text-content:block text-content:py-4
+                    text-content:px-[1.2rem] text-content:overflow-auto text-content:overscroll-contain
+                    text-content:wrap-anywhere"
                 :class="{
                     'media-content': isImage || isPdf || isVideo,
                     'image-content': isImage,
@@ -155,9 +150,10 @@
                     v-if="isImage"
                     ref="imageStage"
                     class="image-stage relative flex items-center justify-center min-w-0 min-h-0 fullscreen:w-full
-                    fullscreen:h-dvh fullscreen:p-[clamp(0.5rem,_1.5vmin,_1rem)] fullscreen:bg-canvas
-                    fullscreen:overflow-hidden expanded:w-full expanded:h-dvh expanded:p-[clamp(0.5rem,_1.5vmin,_1rem)]
-                    expanded:bg-canvas expanded:overflow-hidden expanded:fixed expanded:inset-0 expanded:z-2000 size-full"
+                        fullscreen:h-dvh fullscreen:p-[clamp(0.5rem,_1.5vmin,_1rem)] fullscreen:bg-canvas
+                        fullscreen:overflow-hidden expanded:w-full expanded:h-dvh expanded:p-[clamp(0.5rem,_1.5vmin,_1rem)]
+                        expanded:bg-canvas expanded:overflow-hidden expanded:fixed expanded:inset-0 expanded:z-2000
+                        size-full"
                     :class="{ 'is-expanded': isImageExpanded }"
                 >
                     <img
@@ -169,9 +165,9 @@
                     <button
                         type="button"
                         class="image-fullscreen-btn absolute right-4 bottom-4 flex items-center justify-center p-0 text-content
-                        bg-control border border-control-border rounded-md cursor-pointer transition-colors duration-200
-                        ease-[ease] hover:text-foreground hover:bg-divider focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 size-[2.6rem]"
+                            bg-control border border-control-border rounded-md cursor-pointer transition-colors duration-200
+                            hover:text-foreground hover:bg-divider focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:outline-offset-2 size-[2.6rem]"
                         :title="isImageFullscreen ? 'Exit fullscreen' : 'View fullscreen'"
                         @click="toggleImageFullscreen"
                     >
@@ -221,15 +217,15 @@
                 <div
                     v-else
                     class="download-message w-full min-w-0 min-h-0 flex flex-col items-center justify-center gap-4 p-6
-                    text-center max-mobile:py-5 max-mobile:px-4 max-mobile:gap-[0.85rem] short-screen:grid
-                    short-screen:grid-cols-[3.5rem_minmax(0,_28rem)] short-screen:content-center
-                    short-screen:justify-items-start short-screen:gap-[0.4rem_1rem] short-screen:p-3
-                    short-screen:text-left"
+                        text-center max-mobile:py-5 max-mobile:px-4 max-mobile:gap-[0.85rem] short-screen:grid
+                        short-screen:grid-cols-[3.5rem_minmax(0,_28rem)] short-screen:content-center
+                        short-screen:justify-items-start short-screen:gap-[0.4rem_1rem] short-screen:p-3
+                        short-screen:text-left"
                 >
-                    <div class="download-icon flex-none flex items-center justify-center
-                        bg-accent/12 border border-accent/25 text-accent rounded-md
-                        max-mobile:w-22 max-mobile:h-22 short-screen:col-start-1 short-screen:row-start-1
-                        short-screen:row-span-4 short-screen:self-center short-screen:w-14 short-screen:h-14 size-26">
+                    <div class="download-icon flex-none flex items-center justify-center bg-accent/12 border border-accent/25
+                        text-accent rounded-md max-mobile:w-22 max-mobile:h-22 short-screen:col-start-1
+                        short-screen:row-start-1 short-screen:row-span-4 short-screen:self-center short-screen:w-14
+                        short-screen:h-14 size-26">
                         <Icon class="short-screen:text-3xl! short-screen:leading-[inherit]!"
                             name="solar:file-bold"
                             size="3rem"
@@ -240,9 +236,8 @@
                         text-[clamp(1.1rem,_2.5vw,_1.5rem)] font-semibold leading-[1.4] wrap-anywhere overflow-hidden
                         short-screen:col-start-2 short-screen:m-0 short-screen:text-[1.1rem]" :title="itemName">{{ itemName }}</h2>
 
-                    <div class="download-status flex-none inline-flex items-center gap-2 py-[0.45rem] px-3 text-accent
-                        bg-accent/12 border border-accent/25 rounded-md text-xs font-medium leading-[1.4]
-                        short-screen:col-start-2">
+                    <div class="download-status flex-none inline-flex items-center gap-2 py-[0.45rem] px-3 text-accent bg-accent/12
+                        border border-accent/25 rounded-md text-xs font-medium leading-[1.4] short-screen:col-start-2">
                         <span class="status-dot flex-none bg-accent rounded-full shadow-[0_0_0_3px_#8b7cff1a] size-[0.4rem]" />
                         {{
                             downloadedToken === token ? 'Download started' : 'Starting download...'
@@ -257,12 +252,7 @@
 
                     <button
                         type="button"
-                        class="download-btn flex-none inline-flex items-center justify-center gap-[0.65rem] mt-1 py-[0.8rem]
-                        px-[1.4rem] text-on-primary bg-primary border border-primary rounded-md [font-family:inherit]
-                        text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200 ease-[ease]
-                        hover:bg-primary/85 hover:border-accent focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait short-screen:col-start-2
-                        short-screen:mt-0 short-screen:py-[0.65rem] short-screen:px-[1.1rem]"
+                        class="download-btn mt-1"
                         :disabled="isDownloading"
                         @click="manualDownload"
                     >
@@ -279,18 +269,12 @@
             <div
                 v-else-if="sharedItem.type === 'note'"
                 class="shared-content basis-0 text-content flex-1 min-w-0 min-h-0 block bg-surface border border-divider
-                rounded-3xl overflow-auto py-4 px-[1.2rem] overscroll-contain wrap-anywhere"
+                    rounded-3xl overflow-auto py-4 px-[1.2rem] overscroll-contain wrap-anywhere"
             >
                 <div class="shared-note-heading flex items-center justify-between flex-wrap gap-3 mb-4">
                     <h1 class="m-0 text-[1.1rem] wrap-anywhere">{{ sharedItem.item.title }}</h1>
                     <a
-                        class="download-btn m-0 no-underline flex-none inline-flex items-center justify-center gap-[0.65rem]
-                        py-[0.8rem] px-[1.4rem] text-on-primary bg-primary border border-primary rounded-md
-                        [font-family:inherit] text-[0.9rem] font-semibold cursor-pointer transition-colors duration-200
-                        ease-[ease] hover:bg-primary/85 hover:border-accent focus-visible:outline-2
-                        focus-visible:outline-accent focus-visible:outline-offset-4 disabled:opacity-65
-                        disabled:cursor-wait short-screen:col-start-2 short-screen:mt-0 short-screen:py-[0.65rem]
-                        short-screen:px-[1.1rem]"
+                        class="download-btn m-0 no-underline"
                         :href="downloadUrl"
                         >Download Note</a
                     >
@@ -301,7 +285,7 @@
             <div
                 v-else-if="sharedItem.type === 'folder'"
                 class="shared-content basis-0 shared-folder-content flex-1 min-w-0 min-h-0 flex bg-surface border
-                border-divider rounded-3xl overflow-hidden"
+                    border-divider rounded-3xl overflow-hidden"
             >
                 <SharedFolderContents class=""
                     :key="token"
@@ -586,3 +570,18 @@ watch(
     }
 )
 </script>
+
+<style scoped>
+@reference "~/assets/css/tailwind.css";
+
+@layer components {
+    .download-btn {
+        @apply flex-none inline-flex items-center justify-center gap-[0.65rem] py-[0.8rem] px-[1.4rem];
+        @apply text-on-primary bg-primary border border-primary rounded-md text-[0.9rem] font-semibold;
+        @apply cursor-pointer transition-colors duration-200 hover:bg-primary/85 hover:border-accent;
+        @apply focus-visible:outline-2 focus-visible:outline-accent;
+        @apply focus-visible:outline-offset-4 disabled:opacity-65 disabled:cursor-wait;
+        @apply short-screen:col-start-2 short-screen:mt-0 short-screen:py-[0.65rem] short-screen:px-[1.1rem];
+    }
+}
+</style>

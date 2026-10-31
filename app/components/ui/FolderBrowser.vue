@@ -35,7 +35,8 @@
             </template>
             <template #list>
                 <div class="table-scroll min-h-0 overflow-auto">
-                    <table class="mobile-item-table contents-table border-collapse w-full min-w-144 text-left text-[0.85rem] text-secondary">
+                    <table class="mobile-item-table contents-table border-collapse w-full min-w-144 text-left text-[0.85rem]
+                        text-secondary">
                         <thead>
                             <tr>
                                 <th class="p-3 border-b border-b-divider sticky top-0 bg-surface font-medium text-heading-muted" v-if="!readOnly">
@@ -77,9 +78,9 @@
                                 </td>
                                 <td class="item-name-cell p-3 border-b border-b-divider">
                                     <div class="item-name flex items-center gap-3 min-w-0">
-                                        <span class="item-icon grid place-items-center shrink-0 rounded-[10px] bg-accent/12 text-accent text-control-icon
+                                        <span class="item-icon grid place-items-center shrink-0 rounded-[10px] bg-accent/12 text-accent text-lg
                                             size-[2.7rem]"><Icon :name="icon(item)" /></span>
-                                        <strong class="max-w-72 overflow-hidden text-ellipsis whitespace-nowrap" :title="item.name">{{ item.name }}</strong>
+                                        <strong class="max-w-72 truncate" :title="item.name">{{ item.name }}</strong>
                                     </div>
                                 </td>
                                 <td data-label="Type" class="item-meta-cell p-3 border-b border-b-divider">{{ item.type }}</td>
@@ -154,8 +155,8 @@
                             v-if="!readOnly"
                             #actions
                         >
-                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
-                                cursor-pointer size-8">
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border
+                                rounded-full cursor-pointer size-8">
                                 <input
                                     v-model="selected"
                                     type="checkbox"
@@ -182,11 +183,11 @@
                             />
                         </template>
                         <template #metadata>
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{
+                            <span class="min-w-0 first:shrink-0 truncate">{{
                                 item.type === 'folder' ? 'Folder' : formatFileSize(item.size)
                             }}</span>
                             &middot;
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileTime(item.created_at) }}</span>
+                            <span class="min-w-0 first:shrink-0 truncate">{{ formatFileTime(item.created_at) }}</span>
                         </template>
                     </ItemGridCard>
                 </ItemGrid>

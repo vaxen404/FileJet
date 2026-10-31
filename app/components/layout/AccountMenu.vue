@@ -166,9 +166,13 @@ const onMenuKeydown = (event: KeyboardEvent) => {
         const items = menuItems()
         if (!items.length) return
         const index = items.indexOf(document.activeElement as HTMLElement)
-        const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
-            : index === -1 ? (event.key === 'ArrowUp' ? items.length - 1 : 0)
-              : (index + (event.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length
+        let next: number
+
+        if (event.key === 'Home') next = 0
+        else if (event.key === 'End') next = items.length - 1
+        else if (event.key === 'ArrowUp') next = index <= 0 ? items.length - 1 : index - 1
+        else next = (index + 1) % items.length
+
         items[next]?.focus()
     }
 }

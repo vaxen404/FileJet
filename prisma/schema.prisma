@@ -22,6 +22,7 @@ model users {
   favorites    favorites[]
   shared_items shared_items[]
   trash trash[]
+  file_requests file_requests[]
 }
 
 model files {
@@ -42,6 +43,45 @@ model files {
   folders   folders?    @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_folder")
   users     users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_files_user")
   favorites favorites[]
+  request_uploads request_uploads[]
+}
+
+model file_requests {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+  folder_id String? @db.Uuid
+  title String @db.VarChar(120)
+  description String @default("") @db.VarChar(1000)
+  token String @unique @db.VarChar(120)
+  is_open Boolean @default(true)
+  expires_at DateTime? @db.Timestamptz(6)
+  max_file_size Int @default(10485760)
+  max_files Int @default(100)
+  received_count Int @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  uploads request_uploads[]
+
+  @@index([user_id, created_at])
+}
+
+model request_uploads {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  request_id String @db.Uuid
+  file_id String? @db.Uuid
+  name String @db.VarChar(255)
+  sender_name String @default("") @db.VarChar(100)
+  size BigInt
+  status String @default("pending") @db.VarChar(20)
+  storage_key String?
+  mime_type String? @db.VarChar(150)
+  reviewed_at DateTime? @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  request file_requests @relation(fields: [request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  file files? @relation(fields: [file_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([request_id, created_at])
+  @@index([request_id, status])
 }
 
 model folders {

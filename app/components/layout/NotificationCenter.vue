@@ -26,7 +26,12 @@
 
                 <div class="notification-feed">
                     <ul v-if="visibleEntries.length" class="notification-list" aria-label="Workspace notifications">
-                        <li v-for="entry in visibleEntries" :key="entry.id" class="notification-entry" :class="[{ 'is-unread': !entry.read }, `notification-entry--${entry.kind}`]">
+                        <li
+                            v-for="entry in visibleEntries"
+                            :key="entry.id"
+                            class="notification-entry"
+                            :class="[{ 'is-unread': !entry.read }, `notification-entry--${entry.kind}`]"
+                        >
                             <span class="notification-entry-icon" aria-hidden="true"><Icon :name="entryIcon(entry)" size="20" /></span>
                             <button type="button" class="notification-entry-content" @click="openEntry(entry)">
                                 <span class="notification-entry-title">{{ entry.title }}<i v-if="!entry.read" aria-label="Unread" /></span>
@@ -34,7 +39,13 @@
                                 <span class="notification-entry-meta"><time :datetime="new Date(entry.createdAt).toISOString()" :title="new Date(entry.createdAt).toLocaleString()">{{ formatNotificationTime(entry.createdAt, now) }}</time><Icon v-if="entry.href" name="solar:arrow-right-up-linear" size="13" aria-hidden="true" /></span>
                             </button>
                             <div class="notification-entry-actions">
-                                <button v-if="!entry.read" type="button" class="notification-icon-button" :aria-label="`Mark ${entry.title} as read`" @click="markRead(entry.id)"><Icon name="solar:check-read-linear" size="16" /></button>
+                                <button
+                                    v-if="!entry.read"
+                                    type="button"
+                                    class="notification-icon-button"
+                                    :aria-label="`Mark ${entry.title} as read`"
+                                    @click="markRead(entry.id)"
+                                ><Icon name="solar:check-read-linear" size="16" /></button>
                                 <button type="button" class="notification-icon-button" :aria-label="`Dismiss ${entry.title}`" @click="dismiss(entry.id)"><Icon name="solar:close-circle-linear" size="16" /></button>
                             </div>
                         </li>
@@ -95,7 +106,11 @@ const close = (restoreFocus = false) => {
     if (restoreFocus) trigger.value?.focus()
 }
 const toggle = async () => {
-    if (isOpen.value) { close(true); return }
+    if (isOpen.value) {
+        close(true)
+        return
+    }
+
     panel.value?.showPopover()
     isOpen.value = true
     now.value = Date.now()
@@ -110,17 +125,35 @@ const onToggle = (event: Event) => {
 }
 const openEntry = async (entry: ActivityNotification) => {
     markRead(entry.id)
-    if (entry.href) { close(true); await navigateTo(entry.href) }
+    if (!entry.href) return
+
+    close(true)
+    await navigateTo(entry.href)
 }
 const entryIcon = (entry: ActivityNotification) => {
     if (entry.kind === 'error') return 'solar:danger-triangle-linear'
-    return { upload: 'solar:cloud-upload-linear', library: 'solar:folder-check-linear', sharing: 'solar:link-circle-linear', account: 'solar:user-circle-linear', storage: 'solar:server-square-linear', activity: 'solar:check-circle-linear' }[entry.category]
+
+    return {
+        upload: 'solar:cloud-upload-linear',
+        library: 'solar:folder-check-linear',
+        sharing: 'solar:link-circle-linear',
+        account: 'solar:user-circle-linear',
+        storage: 'solar:server-square-linear',
+        activity: 'solar:check-circle-linear'
+    }[entry.category]
 }
 
 watch(() => route.fullPath, () => close())
 watch(compact, () => close())
-watch([visibleEntries, filter], async () => { if (isOpen.value) { await nextTick(); updatePosition() } })
-useEventListener('resize', () => { if (isOpen.value) updatePosition() })
+watch([visibleEntries, filter], async () => {
+    if (!isOpen.value) return
+
+    await nextTick()
+    updatePosition()
+})
+useEventListener('resize', () => {
+    if (isOpen.value) updatePosition()
+})
 useEventListener('scroll', event => {
     if (event.target instanceof Node && panel.value?.contains(event.target)) return
     if (isOpen.value) close()

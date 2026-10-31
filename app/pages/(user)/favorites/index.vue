@@ -46,7 +46,8 @@
 
             <template #list>
                 <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-                    <table class="mobile-item-table favorites-table w-full border-separate border-spacing-0 bg-transparent border-0 min-w-176 table-fixed">
+                    <table class="mobile-item-table favorites-table w-full border-separate border-spacing-0 bg-transparent border-0
+                        min-w-176 table-fixed">
                         <thead>
                             <tr>
                                 <th class="w-14 pl-4 pr-3 text-center file-table-heading" scope="col">
@@ -64,7 +65,7 @@
                                         Name
                                         <Icon
                                             name="solar:sort-vertical-linear"
-                                            class="sort-icon text-base leading-[inherit]"
+                                            class="text-base leading-[inherit]"
                                         />
                                     </div>
                                 </th>
@@ -83,7 +84,8 @@
                                 @click="openItem(item)"
                                 @contextmenu.prevent.stop="openContextMenu($event, item.id)"
                             >
-                                <td class="item-selection-cell h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
+                                <td class="item-selection-cell h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center
+                                    file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedFavorites"
                                         type="checkbox"
@@ -96,18 +98,18 @@
                                     <div class="favorite-name flex items-center gap-3 min-w-0">
                                         <div
                                             class="favorite-icon flex items-center justify-center shrink-0 text-accent bg-accent/12 border
-                                            border-accent/25 rounded-md text-[1.2rem] is-file:text-accent is-file:bg-accent/12
-                                            is-file:border-accent/25 is-folder:text-accent is-folder:bg-accent/12 is-folder:border-accent/25
-                                            size-10"
+                                                border-accent/25 rounded-md text-[1.2rem] is-file:text-accent is-file:bg-accent/12
+                                                is-file:border-accent/25 is-folder:text-accent is-folder:bg-accent/12 is-folder:border-accent/25
+                                                size-10"
                                             :class="getItemType(item)"
                                         >
                                             <Icon :name="itemIcon(item)" />
                                         </div>
                                         <div class="favorite-info min-w-0 flex flex-col gap-1">
-                                            <strong class="text-foreground text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="getItemName(item)">{{
+                                            <strong class="text-foreground text-sm font-semibold leading-normal truncate" :title="getItemName(item)">{{
                                                 getItemName(item)
                                             }}</strong>
-                                            <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis"
+                                            <span class="text-muted text-xs font-normal leading-normal truncate"
                                                 >{{ getItemSize(item) }} ·
                                                 {{ formatFileTime(item.created_at) }}</span
                                             >
@@ -159,16 +161,16 @@
                                 :src="`/api/files/${item.file_id}/preview`"
                                 :alt="getItemName(item)"
                                 loading="lazy"
-                                class="file-preview-image object-cover block transition-transform duration-250 ease-[ease]
-                                group-hover/file-card:scale-[1.035] size-full"
+                                class="file-preview-image object-cover block transition-transform duration-250
+                                    group-hover/file-card:scale-[1.035] size-full"
                             />
                             <template v-else>
                                 <div class="video-play-icon absolute inset-0 z-1 grid place-items-center text-on-primary text-[2.5rem]
                                     pointer-events-none"><Icon name="solar:play-bold" /></div>
                                 <video
                                     :src="`/api/files/${item.file_id}/preview`"
-                                    class="file-preview-image object-cover block transition-transform duration-250 ease-[ease]
-                                    group-hover/file-card:scale-[1.035] size-full"
+                                    class="file-preview-image object-cover block transition-transform duration-250
+                                        group-hover/file-card:scale-[1.035] size-full"
                                     preload="metadata"
                                     muted
                                     playsinline
@@ -177,8 +179,8 @@
                         </template>
 
                         <template #actions>
-                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
-                                cursor-pointer size-8">
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border
+                                rounded-full cursor-pointer size-8">
                                 <input
                                     v-model="selectedFavorites"
                                     type="checkbox"
@@ -202,11 +204,11 @@
                         </template>
 
                         <template #metadata>
-                            <span class="favorite-type min-w-0 overflow-hidden text-ellipsis whitespace-nowrap capitalize first:shrink-0">{{ getItemType(item) }}</span>
+                            <span class="favorite-type min-w-0 capitalize first:shrink-0 truncate">{{ getItemType(item) }}</span>
                             ·
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ getItemSize(item) }}</span>
+                            <span class="min-w-0 first:shrink-0 truncate">{{ getItemSize(item) }}</span>
                             ·
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileTime(item.created_at) }}</span>
+                            <span class="min-w-0 first:shrink-0 truncate">{{ formatFileTime(item.created_at) }}</span>
                         </template>
                     </ItemGridCard>
                 </ItemGrid>

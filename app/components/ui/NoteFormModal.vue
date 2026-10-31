@@ -9,7 +9,7 @@
                 <div
                     ref="dialog"
                     class="note-modal-conteiner w-full max-w-144 max-h-[calc(100dvh_-_2rem)] overflow-y-auto bg-surface border
-                    border-divider rounded-xl p-6 text-content max-phone:p-4"
+                        border-divider rounded-xl p-6 text-content max-phone:p-4"
                     @keydown.esc="closeModal"
                     @keydown.tab="trapFocus"
                 >
@@ -37,9 +37,8 @@
                         <button
                             type="button"
                             class="clouse-button flex items-center justify-center shrink-0 p-0 text-label border border-control-border
-                            bg-raised rounded-md cursor-pointer hover:enabled:bg-raised disabled:opacity-60
-                            disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                            focus-visible:outline-offset-2 size-8"
+                                bg-raised rounded-md cursor-pointer hover:enabled:bg-raised disabled:opacity-60 disabled:cursor-wait
+                                focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 size-8"
                             :disabled="isLoading"
                             @click="closeModal"
                         >
@@ -100,9 +99,9 @@
                                 <button
                                     type="button"
                                     class="cancel-btn inline-flex items-center justify-center gap-2 min-h-10 py-2 px-3 border
-                                    border-control-border rounded-md text-foreground bg-raised [font-family:inherit] text-sm font-medium
-                                    leading-normal cursor-pointer hover:enabled:bg-raised disabled:opacity-60 disabled:cursor-wait
-                                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                                        border-control-border rounded-md text-foreground bg-raised text-sm font-medium leading-normal
+                                        cursor-pointer hover:enabled:bg-raised disabled:opacity-60 disabled:cursor-wait
+                                        focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                                     :disabled="isLoading"
                                     @click="closeModal"
                                 >
@@ -112,9 +111,9 @@
                                 <button
                                     type="submit"
                                     class="save-btn inline-flex items-center justify-center gap-2 min-h-10 py-2 px-3 border rounded-md
-                                    text-on-primary bg-primary [font-family:inherit] text-sm font-medium leading-normal cursor-pointer
-                                    border-primary hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-wait
-                                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                                        text-on-primary bg-primary text-sm font-medium leading-normal cursor-pointer border-primary
+                                        hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-wait focus-visible:outline-2
+                                        focus-visible:outline-accent focus-visible:outline-offset-2"
                                     :disabled="!canSubmit"
                                 >
                                     <Icon

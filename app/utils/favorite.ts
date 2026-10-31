@@ -1,31 +1,31 @@
 export const getItemIcon = (item: any) => {
-    return item.file_id
-        ? 'solar:file-bold'
-        : item.folder_id
-          ? 'solar:folder-bold'
-          : 'solar:notebook-bold'
+    if (item.file_id) return 'solar:file-bold'
+    if (item.folder_id) return 'solar:folder-bold'
+    return 'solar:notebook-bold'
 }
 
 export const getItemName = (item: any) => {
-    return item.file_id ? item.files.name : item.folder_id ? item.folders.name : item.notes.title
+    if (item.file_id) return item.files.name
+    if (item.folder_id) return item.folders.name
+    return item.notes.title
 }
 
 export const getItemType = (item: any): 'file' | 'folder' | 'note' => {
-    return item.file_id ? 'file' : item.folder_id ? 'folder' : 'note'
+    if (item.file_id) return 'file'
+    if (item.folder_id) return 'folder'
+    return 'note'
 }
 
 export const getItemId = (item: any): string => {
-    return item.file_id ? item.file_id : item.folder_id ? item.folder_id : item.note_id
+    if (item.file_id) return item.file_id
+    if (item.folder_id) return item.folder_id
+    return item.note_id
 }
 
 export const getItemActions = (item: any) => {
     const type = getItemType(item)
 
-    if (type === 'file') {
-        return ['open', 'rename', 'download', 'favorite', 'delete'] as const
-    }
-
-    if (type === 'folder') {
+    if (type !== 'note') {
         return ['open', 'rename', 'download', 'favorite', 'delete'] as const
     }
 

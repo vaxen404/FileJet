@@ -9,12 +9,12 @@
                     aria-label="Search trash"
                 />
                 <div class="flex flex-wrap items-center gap-2">
-                    <button type="button" :class="buttonClass" :disabled="busy || !entries.length" @click="restoreItems(entries)">
-                        <Icon name="solar:restart-linear" class="text-control-icon" />
+                    <button type="button" class="trash-button" :disabled="busy || !entries.length" @click="restoreItems(entries)">
+                        <Icon name="solar:restart-linear" class="text-lg" />
                         Restore all
                     </button>
-                    <button type="button" :class="dangerButtonClass" :disabled="busy || !entries.length" @click="requestDelete(entries, true)">
-                        <Icon name="solar:trash-bin-trash-linear" class="text-control-icon" />
+                    <button type="button" class="trash-button trash-danger-button" :disabled="busy || !entries.length" @click="requestDelete(entries, true)">
+                        <Icon name="solar:trash-bin-trash-linear" class="text-lg" />
                         Empty trash
                     </button>
                 </div>
@@ -47,9 +47,9 @@
                     <Icon :name="loadError ? 'solar:danger-triangle-linear' : 'solar:trash-bin-trash-linear'" class="mb-2 text-[2.5rem] text-accent" />
                     <strong class="text-sm font-semibold text-foreground">{{ emptyTitle }}</strong>
                     <p class="m-0 max-w-96 text-sm leading-relaxed text-muted">{{ emptyDescription }}</p>
-                    <button v-if="loadError" type="button" :class="buttonClass" class="mt-3" @click="loadTrash">Try again</button>
-                    <button v-else-if="entries.length" type="button" :class="buttonClass" class="mt-3" @click="clearFilters">Clear filters</button>
-                    <NuxtLink v-else to="/files" :class="buttonClass" class="mt-3 no-underline">Go to files</NuxtLink>
+                    <button v-if="loadError" type="button" class="trash-button mt-3" @click="loadTrash">Try again</button>
+                    <button v-else-if="entries.length" type="button" class="trash-button mt-3" @click="clearFilters">Clear filters</button>
+                    <NuxtLink v-else to="/files" class="trash-button mt-3 no-underline">Go to files</NuxtLink>
                 </div>
             </template>
 
@@ -60,7 +60,15 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="file-table-heading w-14">
-                                    <input type="checkbox" class="file-checkbox" aria-label="Select all items on this page" :checked="allSelected" :indeterminate="partiallySelected" :disabled="busy" @change="toggleSelectAll" />
+                                    <input
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        aria-label="Select all items on this page"
+                                        :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="busy"
+                                        @change="toggleSelectAll"
+                                    />
                                 </th>
                                 <th scope="col" class="file-table-heading w-[32%]">Name</th>
                                 <th scope="col" class="file-table-heading">Original location</th>
@@ -70,13 +78,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-surface-hover selected:bg-accent/8" :class="{ selected: selectedItems.includes(item.id) }">
+                            <tr
+                                v-for="item in paginatedItems"
+                                :key="item.id"
+                                class="hover:bg-surface-hover selected:bg-accent/8"
+                                :class="{ selected: selectedItems.includes(item.id) }"
+                            >
                                 <td class="item-selection-cell file-table-cell h-[4.2rem]">
-                                    <input v-model="selectedItems" type="checkbox" class="file-checkbox" :value="item.id" :aria-label="`Select ${itemName(item)}`" :disabled="busy" />
+                                    <input
+                                        v-model="selectedItems"
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        :value="item.id"
+                                        :aria-label="`Select ${itemName(item)}`"
+                                        :disabled="busy"
+                                    />
                                 </td>
                                 <td class="item-name-cell file-table-cell h-[4.2rem]">
                                     <div class="flex min-w-0 items-center gap-3">
-                                        <div class="flex size-10 shrink-0 items-center justify-center rounded-md border border-accent/25 bg-accent/12 text-xl text-accent">
+                                        <div class="flex size-10 shrink-0 items-center justify-center rounded-md border border-accent/25 bg-accent/12
+                                            text-xl text-accent">
                                             <Icon :name="itemIcon(item)" />
                                         </div>
                                         <div class="flex min-w-0 flex-col gap-1">
@@ -90,10 +111,24 @@
                                 <td data-label="Deleted" class="item-meta-cell file-table-cell text-sm text-secondary" :title="item.deleted_at">{{ formatFileTime(item.deleted_at) }}</td>
                                 <td class="item-actions-cell file-table-cell">
                                     <div class="flex items-center gap-1">
-                                        <button type="button" :class="iconButtonClass" :disabled="busy" :aria-label="`Restore ${itemName(item)}`" title="Restore" @click="restoreItems([item])">
+                                        <button
+                                            type="button"
+                                            class="trash-icon-button"
+                                            :disabled="busy"
+                                            :aria-label="`Restore ${itemName(item)}`"
+                                            title="Restore"
+                                            @click="restoreItems([item])"
+                                        >
                                             <Icon name="solar:restart-linear" class="text-lg" />
                                         </button>
-                                        <button type="button" :class="iconButtonClass" class="text-danger hover:enabled:bg-danger-surface" :disabled="busy" :aria-label="`Permanently delete ${itemName(item)}`" title="Delete permanently" @click="requestDelete([item])">
+                                        <button
+                                            type="button"
+                                            class="trash-icon-button text-danger hover:enabled:bg-danger-surface"
+                                            :disabled="busy"
+                                            :aria-label="`Permanently delete ${itemName(item)}`"
+                                            title="Delete permanently"
+                                            @click="requestDelete([item])"
+                                        >
                                             <Icon name="solar:trash-bin-trash-linear" class="text-lg" />
                                         </button>
                                     </div>
@@ -108,15 +143,16 @@
         <Pagination v-if="!isLoading && !loadError" v-model="currentPage" :total-pages="totalPages" />
 
         <Transition name="dock">
-            <div v-if="selectedItems.length" role="region" aria-label="Selected trash items" class="selection-region mt-3 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-xl border border-divider bg-surface p-3">
+            <div v-if="selectedItems.length" role="region" aria-label="Selected trash items" class="selection-region mt-3 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-xl border
+                border-divider bg-surface p-3">
                 <span class="mr-2 text-sm text-foreground" aria-live="polite">{{ selectedItems.length }} selected</span>
-                <button type="button" :class="buttonClass" :disabled="busy" @click="restoreItems(selectedEntries)">
+                <button type="button" class="trash-button" :disabled="busy" @click="restoreItems(selectedEntries)">
                     <Icon name="solar:restart-linear" /> Restore
                 </button>
-                <button type="button" :class="dangerButtonClass" :disabled="busy" @click="requestDelete(selectedEntries)">
+                <button type="button" class="trash-button trash-danger-button" :disabled="busy" @click="requestDelete(selectedEntries)">
                     <Icon name="solar:trash-bin-trash-linear" /> Delete permanently
                 </button>
-                <button type="button" :class="buttonClass" :disabled="busy" @click="selectedItems = []">Deselect all</button>
+                <button type="button" class="trash-button" :disabled="busy" @click="selectedItems = []">Deselect all</button>
             </div>
 
         </Transition>
@@ -143,9 +179,6 @@ const { trash, folders, error, fetchTrash, fetchFolders, syncTrash, fetchUser } 
 const { openToast } = useToast()
 type TrashItem = (typeof trash.value)[number]
 
-const buttonClass = 'inline-flex min-h-control items-center justify-center gap-2 rounded-control border border-control-border bg-control px-3 text-control-size font-medium text-secondary cursor-pointer hover:enabled:bg-raised hover:enabled:text-foreground disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
-const dangerButtonClass = `${buttonClass} text-danger hover:enabled:bg-danger-surface hover:enabled:text-danger-hover`
-const iconButtonClass = 'inline-flex size-9 shrink-0 items-center justify-center rounded-control border-0 bg-transparent text-accent cursor-pointer hover:enabled:bg-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-accent'
 
 const searchQuery = ref('')
 const activeCategory = ref('All')
@@ -160,9 +193,11 @@ const emptyingTrash = ref(false)
 const busy = computed(() => isLoading.value || isWorking.value || Boolean(loadError.value) || deleteTargets.value.length > 0)
 
 const itemName = (item: TrashItem) => item.original_name || item.name || 'Untitled'
-const itemIcon = (item: TrashItem) => item.item_type === 'folder'
-    ? 'solar:folder-bold'
-    : item.item_type === 'note' ? 'solar:document-text-bold' : getFileIcon(item.mime_type, itemName(item))
+const itemIcon = (item: TrashItem) => {
+    if (item.item_type === 'folder') return 'solar:folder-bold'
+    if (item.item_type === 'note') return 'solar:document-text-bold'
+    return getFileIcon(item.mime_type, itemName(item))
+}
 
 const entries = computed(() => {
     const folderIds = new Set(trash.value.filter(item => item.item_type === 'folder').map(item => item.item_id))
@@ -211,7 +246,10 @@ const { currentPage, totalPages, paginatedItems } = usePagination(sortedItems, r
 const { selectedItems, allSelected, toggleSelectAll } = useSelection(paginatedItems)
 const selectedEntries = computed(() => entries.value.filter(item => selectedItems.value.includes(item.id)))
 const partiallySelected = computed(() => !allSelected.value && paginatedItems.value.some(item => selectedItems.value.includes(item.id)))
-const emptyTitle = computed(() => loadError.value ? 'Unable to load trash' : entries.value.length ? 'No matching items' : 'Your trash is empty')
+const emptyTitle = computed(() => {
+    if (loadError.value) return 'Unable to load trash'
+    return entries.value.length ? 'No matching items' : 'Your trash is empty'
+})
 const emptyDescription = computed(() => loadError.value || (entries.value.length ? 'Try a different search or filter.' : 'Deleted files, folders and notes will appear here.'))
 const deleteMessage = computed(() => {
     const label = deleteTargets.value.length === 1 ? `"${itemName(deleteTargets.value[0]!)}"` : `${deleteTargets.value.length} items`
@@ -320,3 +358,27 @@ watch([searchQuery, activeCategory, sortMode], () => {
 
 await loadTrash()
 </script>
+
+<style scoped>
+@reference "~/assets/css/tailwind.css";
+
+@layer components {
+    .trash-button {
+        @apply inline-flex min-h-10 max-mobile:min-h-11 pointer-coarse:min-h-11 items-center justify-center;
+        @apply gap-2 rounded-lg border border-control-border bg-control px-3 text-sm font-medium;
+        @apply text-secondary cursor-pointer hover:enabled:bg-raised hover:enabled:text-foreground;
+        @apply disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2;
+        @apply focus-visible:outline-offset-2 focus-visible:outline-accent;
+    }
+
+    .trash-danger-button {
+        @apply text-danger hover:enabled:bg-danger-surface hover:enabled:text-danger-hover;
+    }
+
+    .trash-icon-button {
+        @apply inline-flex size-9 shrink-0 items-center justify-center rounded-lg border-0 bg-transparent;
+        @apply text-accent cursor-pointer hover:enabled:bg-raised disabled:cursor-not-allowed;
+        @apply disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-accent;
+    }
+}
+</style>

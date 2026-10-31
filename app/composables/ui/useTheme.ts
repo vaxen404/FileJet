@@ -1,4 +1,4 @@
-import { themeModes, type ThemeMode, type ResolvedTheme } from '~/utils/themes'
+import { isThemeMode, type ThemeMode, type ResolvedTheme } from '~/utils/themes'
 
 export const useTheme = () => {
     const { preferences, preferencesLoaded, savePreferences } = usePreferences()
@@ -7,7 +7,7 @@ export const useTheme = () => {
     const { openToast } = useToast()
 
     const setTheme = (theme: ThemeMode) => {
-        if (!preferencesLoaded.value || !themeModes.some(mode => mode.value === theme)) return
+        if (!preferencesLoaded.value || !isThemeMode(theme)) return
         try {
             savePreferences({ ...preferences.value, theme })
         } catch {

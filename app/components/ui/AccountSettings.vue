@@ -4,18 +4,40 @@
             <details class="account-card group" open>
                 <summary class="account-card-heading">
                     <span>Profile</span>
-                    <Icon name="solar:alt-arrow-down-linear" size="18" aria-hidden="true" class="text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" />
+                    <Icon
+                        name="solar:alt-arrow-down-linear"
+                        size="18"
+                        aria-hidden="true"
+                        class="text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
+                    />
                 </summary>
                 <form @submit.prevent="saveProfile">
                     <fieldset :disabled="saving" class="min-w-0">
                         <div class="space-y-4 p-5">
                             <div>
                                 <label for="account-username" class="account-label">Username</label>
-                                <input id="account-username" v-model="profile.username" type="text" autocomplete="username" minlength="3" maxlength="50" required class="account-input">
+                                <input
+                                    id="account-username"
+                                    v-model="profile.username"
+                                    type="text"
+                                    autocomplete="username"
+                                    minlength="3"
+                                    maxlength="50"
+                                    required
+                                    class="account-input"
+                                >
                             </div>
                             <div>
                                 <label for="account-email" class="account-label">Email address <span class="font-normal text-muted">(optional)</span></label>
-                                <input id="account-email" v-model="profile.email" type="email" autocomplete="email" maxlength="255" placeholder="you@example.com" class="account-input">
+                                <input
+                                    id="account-email"
+                                    v-model="profile.email"
+                                    type="email"
+                                    autocomplete="email"
+                                    maxlength="255"
+                                    placeholder="you@example.com"
+                                    class="account-input"
+                                >
                             </div>
                         </div>
 
@@ -33,22 +55,54 @@
             <details class="account-card group">
                 <summary class="account-card-heading">
                     <span>Password</span>
-                    <Icon name="solar:alt-arrow-down-linear" size="18" aria-hidden="true" class="text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" />
+                    <Icon
+                        name="solar:alt-arrow-down-linear"
+                        size="18"
+                        aria-hidden="true"
+                        class="text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
+                    />
                 </summary>
                 <form @submit.prevent="changePassword">
                     <fieldset :disabled="saving" class="min-w-0">
                         <div class="space-y-4 p-5">
                             <div>
                                 <label for="password-current" class="account-label">Current password</label>
-                                <input id="password-current" v-model="password.currentPassword" :type="showPasswords ? 'text' : 'password'" autocomplete="current-password" maxlength="100" required class="account-input">
+                                <input
+                                    id="password-current"
+                                    v-model="password.currentPassword"
+                                    :type="showPasswords ? 'text' : 'password'"
+                                    autocomplete="current-password"
+                                    maxlength="100"
+                                    required
+                                    class="account-input"
+                                >
                             </div>
                             <div>
                                 <label for="password-new" class="account-label">New password</label>
-                                <input id="password-new" v-model="password.newPassword" :type="showPasswords ? 'text' : 'password'" autocomplete="new-password" minlength="8" maxlength="100" required class="account-input">
+                                <input
+                                    id="password-new"
+                                    v-model="password.newPassword"
+                                    :type="showPasswords ? 'text' : 'password'"
+                                    autocomplete="new-password"
+                                    minlength="8"
+                                    maxlength="100"
+                                    required
+                                    class="account-input"
+                                >
                             </div>
                             <div>
                                 <label for="password-confirm" class="account-label">Confirm new password</label>
-                                <input id="password-confirm" v-model="password.confirmPassword" :type="showPasswords ? 'text' : 'password'" autocomplete="new-password" minlength="8" maxlength="100" required aria-describedby="new-password-hint" class="account-input">
+                                <input
+                                    id="password-confirm"
+                                    v-model="password.confirmPassword"
+                                    :type="showPasswords ? 'text' : 'password'"
+                                    autocomplete="new-password"
+                                    minlength="8"
+                                    maxlength="100"
+                                    required
+                                    aria-describedby="new-password-hint"
+                                    class="account-input"
+                                >
                                 <p id="new-password-hint" class="mt-2 text-[11px] leading-5 text-muted">8–100 characters. Your new passwords must match.</p>
                             </div>
                             <label class="flex w-fit cursor-pointer items-center gap-2 text-xs text-label">
@@ -60,7 +114,11 @@
                         <div class="account-card-footer">
                             <button type="button" :disabled="!passwordDirty" class="account-cancel" @click="resetPassword">Clear</button>
                             <button type="submit" :disabled="!passwordDirty" class="account-save">
-                                <Icon :name="passwordSaving ? 'solar:refresh-linear' : 'solar:lock-password-linear'" size="16" :class="{ 'animate-spin': passwordSaving }" />
+                                <Icon
+                                    :name="passwordSaving ? 'solar:refresh-linear' : 'solar:lock-password-linear'"
+                                    size="16"
+                                    :class="{ 'animate-spin': passwordSaving }"
+                                />
                                 {{ passwordSaving ? 'Updating…' : 'Update password' }}
                             </button>
                         </div>
@@ -168,7 +226,9 @@ const changePassword = async () => {
     @apply overflow-hidden rounded-xl border border-divider bg-surface;
 }
 .account-card-heading {
-    @apply flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-foreground transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent;
+    @apply flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold;
+    @apply text-foreground transition-colors hover:bg-surface-hover focus-visible:outline-2;
+    @apply focus-visible:-outline-offset-2 focus-visible:outline-accent;
 }
 .account-card-heading::-webkit-details-marker {
     display: none;
@@ -180,15 +240,21 @@ const changePassword = async () => {
     @apply mb-2 block text-xs font-medium text-secondary;
 }
 .account-input {
-    @apply h-10 w-full rounded-control border border-control-border bg-control px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted/60 focus:border-accent focus:ring-2 focus:ring-accent/15;
+    @apply h-10 w-full rounded-lg border border-control-border bg-control px-3 text-sm text-foreground;
+    @apply outline-none transition-colors placeholder:text-muted/60 focus:border-accent focus:ring-2;
+    @apply focus:ring-accent/15;
 }
 .account-card-footer {
     @apply flex items-center justify-end gap-3 border-t border-divider bg-control/20 px-5 py-4;
 }
 .account-save {
-    @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-control border border-primary bg-primary px-4 text-xs font-medium text-on-primary hover:enabled:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary;
+    @apply bg-primary px-4 text-xs font-medium text-on-primary hover:enabled:brightness-110;
+    @apply disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2;
+    @apply focus-visible:outline-offset-2 focus-visible:outline-accent;
 }
 .account-cancel {
-    @apply h-10 cursor-pointer rounded-control border border-control-border bg-control px-4 text-xs font-medium text-label hover:enabled:bg-raised disabled:cursor-not-allowed disabled:opacity-40;
+    @apply h-10 cursor-pointer rounded-lg border border-control-border bg-control px-4 text-xs font-medium;
+    @apply text-label hover:enabled:bg-raised disabled:cursor-not-allowed disabled:opacity-40;
 }
 </style>

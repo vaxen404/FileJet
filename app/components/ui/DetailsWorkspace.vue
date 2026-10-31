@@ -3,7 +3,7 @@
         details-middle:grid-cols-[minmax(0,_1fr)_22rem] details-middle:gap-3 max-preview:h-auto
         max-preview:min-h-full max-preview:grid-cols-1 size-full">
         <section class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
-            <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-panel overflow-hidden
+            <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-3xl overflow-hidden
                 max-preview:flex-none max-preview:h-144 max-phone:h-96">
                 <slot />
             </div>
@@ -11,7 +11,7 @@
         <aside class="file-panel min-w-0 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain
             max-preview:overflow-visible">
             <section class="file-information flex-none min-w-0 flex flex-col gap-3 p-3.5 bg-surface border border-divider
-                rounded-panel max-preview:flex-none max-phone:p-3">
+                rounded-3xl max-preview:flex-none max-phone:p-3">
                 <div class="file-heading flex items-start gap-3">
                     <div class="file-heading-text flex-1 min-w-0">
                         <h1 class="m-0 text-foreground text-xl font-semibold leading-[1.35] wrap-anywhere">{{ title }}</h1>
@@ -20,9 +20,9 @@
                     </div>
                     <button
                         type="button"
-                        class="close-details shrink-0 grid place-items-center p-0 text-content bg-transparent border-0
-                        rounded-control cursor-pointer hover:bg-divider hover:text-foreground focus-visible:outline-2
-                        focus-visible:outline-accent focus-visible:outline-offset-2 size-7"
+                        class="close-details shrink-0 grid place-items-center p-0 text-content bg-transparent border-0 rounded-lg
+                            cursor-pointer hover:bg-divider hover:text-foreground focus-visible:outline-2
+                            focus-visible:outline-accent focus-visible:outline-offset-2 size-7"
                         @click="$emit('back')"
                     >
                         <svg
@@ -44,12 +44,9 @@
                     max-phone:grid-cols-3 max-phone:gap-2">
                     <button
                         type="button"
-                        class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                        px-3.5 text-on-primary bg-primary border rounded-control text-control-size font-medium leading-normal
-                        cursor-pointer transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                        hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
-                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
+                        class="action-button download-button py-2 px-3.5 text-on-primary bg-primary border-primary
+                            hover:enabled:bg-primary/85 hover:enabled:text-on-primary hover:enabled:border-primary
+                            max-phone:col-span-full"
                         :disabled="busy"
                         @click="$emit('download')"
                     >
@@ -61,12 +58,9 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-content bg-control border border-control-border rounded-control text-control-size font-medium
-                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13
-                        hover:enabled:bg-divider hover:enabled:text-foreground hover:enabled:border-hover-border favorite:text-accent
-                        disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
+                        class="action-button icon-action p-0 text-content bg-control border-control-border w-13
+                            hover:enabled:bg-divider hover:enabled:text-foreground hover:enabled:border-hover-border
+                            favorite:text-accent max-phone:w-full"
                         :class="{ 'is-favorite': isFavorite }"
                         :disabled="busy"
                         @click="$emit('favorite')"
@@ -78,12 +72,9 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-content bg-control border border-control-border rounded-control text-control-size font-medium
-                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13
-                        hover:enabled:bg-divider hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
-                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
+                        class="action-button icon-action p-0 text-content bg-control border-control-border w-13
+                            hover:enabled:bg-divider hover:enabled:text-foreground hover:enabled:border-hover-border
+                            max-phone:w-full"
                         :disabled="busy"
                         @click="$emit('rename')"
                     >
@@ -94,12 +85,9 @@
                     </button>
                     <button
                         type="button"
-                        class="action-button icon-action delete-button min-w-0 min-h-11 inline-flex items-center justify-center
-                        gap-2 p-0 text-danger bg-danger-surface border rounded-control text-control-size font-medium
-                        leading-normal cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-danger-border
-                        hover:enabled:bg-danger-surface hover:enabled:text-danger-hover hover:enabled:border-danger-border
-                        disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
+                        class="action-button icon-action delete-button p-0 text-danger bg-danger-surface w-13 border-danger-border
+                            hover:enabled:bg-danger-surface hover:enabled:text-danger-hover hover:enabled:border-danger-border
+                            max-phone:w-full"
                         :disabled="busy"
                         @click="$emit('delete')"
                     >
@@ -110,11 +98,11 @@
                     </button>
                 </div>
                 <div
-                    class="detail-tabs grid grid-cols-3 gap-1 p-[3px] bg-input border border-divider rounded-control"
+                    class="detail-tabs grid grid-cols-3 gap-1 p-0.75 bg-input border border-divider rounded-lg"
                     @keydown="navigateTabs"
                 >
-                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-control-inner text-control-size
-                        font-medium leading-normal cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground
+                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-sm text-sm font-medium leading-normal
+                        cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground
                         is-active:font-semibold disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
                         focus-visible:outline-offset-2"
                         v-for="tab in tabs"
@@ -132,7 +120,8 @@
                 <div
                     v-show="activeTab === 'details'"
                     :id="itemType + '-details-panel'"
-                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                     tabindex="0"
                 >
                     <dl class="file-metadata m-0 border border-divider rounded-md overflow-hidden">
@@ -140,8 +129,8 @@
                             v-for="row in metadata"
                             :key="row.label"
                             class="metadata-row grid grid-cols-[minmax(0,_3fr)_minmax(0,_2fr)] items-start gap-3 py-2 px-3.5 border-b
-                            border-b-divider text-[0.8125rem] leading-normal last:border-b-0 max-phone:gap-2 max-phone:py-2
-                            max-phone:px-2.5"
+                                border-b-divider text-[0.8125rem] leading-normal last:border-b-0 max-phone:gap-2 max-phone:py-2
+                                max-phone:px-2.5"
                         >
                             <dt class="text-muted">{{ row.label }}</dt>
                             <dd class="min-w-0 m-0 text-content wrap-anywhere">{{ row.value ?? 'Unavailable' }}</dd>
@@ -151,7 +140,8 @@
                 <div
                     v-show="activeTab === 'edit'"
                     :id="itemType + '-edit-panel'"
-                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                     tabindex="0"
                 >
                     <slot name="edit" />
@@ -159,7 +149,8 @@
                 <div
                     v-show="activeTab === 'share'"
                     :id="itemType + '-share-panel'"
-                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                     tabindex="0"
                 >
                     <ShareBox
@@ -207,15 +198,30 @@ const navigateTabs = async (event: KeyboardEvent) => {
     event.preventDefault()
     const index = tabs.indexOf(activeTab.value)
 
-    const next =
-        event.key === 'Home'
-            ? 0
-            : event.key === 'End'
-              ? 2
-              : (index + (event.key === 'ArrowRight' ? 1 : 2)) % 3
+    let next: number
+
+    if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = tabs.length - 1
+    else {
+        const direction = event.key === 'ArrowRight' ? 1 : -1
+        next = (index + direction + tabs.length) % tabs.length
+    }
 
     activeTab.value = tabs[next]!
     await nextTick()
     document.getElementById(props.itemType + '-' + activeTab.value + '-tab')?.focus()
 }
 </script>
+
+<style scoped>
+@reference "~/assets/css/tailwind.css";
+
+@layer components {
+    .action-button {
+        @apply min-w-0 min-h-11 inline-flex items-center justify-center gap-2 border;
+        @apply rounded-lg text-sm font-medium leading-normal cursor-pointer transition-colors duration-200;
+        @apply disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2;
+        @apply focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2;
+    }
+}
+</style>

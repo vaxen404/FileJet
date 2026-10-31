@@ -13,26 +13,25 @@
 
         <button
             type="button"
-            class="upload-button w-max min-w-32 h-control flex items-center justify-between gap-3 bg-primary text-on-primary
-            py-0 px-3 text-control-size font-medium border-0 rounded-control whitespace-nowrap shrink-0
-            cursor-pointer transition-all duration-200 ease-[ease] leading-normal disabled:opacity-50
-            disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-            focus-visible:outline-offset-3 hover:enabled:bg-primary/85 hover:enabled:-translate-y-[0.5px]
-            active:translate-y-0"
+            class="w-max min-w-32 h-10 max-mobile:h-11 pointer-coarse:h-11 flex items-center justify-between gap-3
+                bg-primary text-on-primary py-0 px-3 text-sm font-medium border-0 rounded-lg whitespace-nowrap
+                shrink-0 cursor-pointer transition-colors duration-200 leading-normal disabled:opacity-50
+                disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                focus-visible:outline-offset-3 hover:enabled:bg-primary/85"
             :disabled="disabled"
             @click="openPicker"
         >
-            <span class="upload-left inline-flex items-center gap-2">
+            <span class="inline-flex items-center gap-2">
                 <Icon
                     name="solar:cloud-upload-bold"
-                    class="upload-icon block text-control-icon shrink-0 size-control-icon"
+                    class="block text-lg shrink-0 size-4.5"
                 />
-                <span>{{ text }}</span>
+                {{ text }}
             </span>
 
             <Icon
                 name="solar:alt-arrow-down-linear"
-                class="small-arrow block text-control-icon shrink-0 size-control-icon"
+                class="block text-lg shrink-0 size-4.5"
             />
         </button>
     </div>

@@ -1,7 +1,7 @@
 import { throwError } from './error'
 import { getHeader, getRequestWebStream, type H3Event } from 'h3'
 
-export async function readShareBody(event: H3Event): Promise<Record<string, unknown>> {
+export async function readShareBody(event: H3Event, maxBytes = 8192): Promise<Record<string, unknown>> {
     if (!getHeader(event, 'content-type')?.toLowerCase().startsWith('application/json')) {
         throwError(415, 'JSON request body required.')
     }
@@ -21,7 +21,7 @@ export async function readShareBody(event: H3Event): Promise<Record<string, unkn
 
             size += value.byteLength
 
-            if (size > 8192) {
+            if (size > maxBytes) {
                 await reader.cancel().catch(() => {})
 
                 throwError(413, 'Request body is too large.')

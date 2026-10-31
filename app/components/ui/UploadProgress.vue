@@ -4,7 +4,7 @@
             <section
                 v-if="active"
                 class="upload-status fixed right-4 bottom-4 z-1000 w-72 max-w-[calc(100vw_-_2rem)] p-3 bg-surface border
-                border-divider rounded-xl pointer-events-none"
+                    border-divider rounded-xl pointer-events-none"
             >
                 <div class="upload-status-heading flex items-center gap-2 mb-2 text-content text-sm font-medium leading-normal">
                     <Icon class="text-accent shrink-0" name="solar:cloud-upload-bold" />

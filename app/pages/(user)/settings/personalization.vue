@@ -21,7 +21,10 @@
                                     <label v-for="color in accentColors" :key="color.value" class="cursor-pointer">
                                         <input v-model="accentColor" type="radio" name="personalization-accent" :value="color.value" class="peer sr-only">
                                         <span
-                                            class="flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border border-control-border bg-control transition-colors hover:border-muted peer-focus-visible:outline-2 peer-focus-visible:outline-offset-3 peer-focus-visible:outline-accent peer-disabled:cursor-not-allowed"
+                                            class="flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border border-control-border
+                                                bg-control transition-colors hover:border-muted peer-focus-visible:outline-2
+                                                peer-focus-visible:outline-offset-3 peer-focus-visible:outline-accent
+                                                peer-disabled:cursor-not-allowed"
                                             :style="accentColor === color.value ? { borderColor: color.accent, backgroundColor: `${color.primary}1a` } : undefined"
                                         >
                                             <span class="flex size-8 items-center justify-center rounded-full border border-white/10" :style="{ backgroundColor: color.primary }">
@@ -33,13 +36,19 @@
                                 </div>
                             </fieldset>
 
-                            <button type="button" :disabled="accentColor === 'indigo'" class="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-control py-2 text-xs text-label hover:enabled:text-foreground focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-40" @click="accentColor = 'indigo'">
+                            <button type="button" :disabled="accentColor === 'indigo'" class="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-lg py-2 text-xs text-label
+                                hover:enabled:text-foreground focus-visible:outline-2 focus-visible:outline-offset-3
+                                focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-40" @click="accentColor = 'indigo'">
                                 <Icon name="solar:restart-linear" size="15" />
                                 Restore default
                             </button>
                         </section>
 
-                        <section aria-labelledby="preview-heading" class="min-w-0 border-l border-divider bg-control/30 p-6 max-laptop:border-t max-laptop:border-l-0 max-mobile:p-4">
+                        <section
+                            aria-labelledby="preview-heading"
+                            class="min-w-0 border-l border-divider bg-control/30 p-6 max-laptop:border-t max-laptop:border-l-0
+                                max-mobile:p-4"
+                        >
                             <div class="mb-5 flex items-center justify-between gap-3">
                                 <h3 id="preview-heading" class="text-sm font-semibold text-foreground">Preview</h3>
                                 <span class="inline-flex items-center gap-2 text-xs text-muted" aria-live="polite">
@@ -54,12 +63,18 @@
                                         <Icon name="solar:folder-with-files-bold-duotone" size="19" class="text-accent" />
                                         FileJet
                                     </span>
-                                    <span class="flex size-6 items-center justify-center rounded-full bg-primary text-[9px] font-semibold text-on-primary">VX</span>
+                                    <span class="flex size-6 items-center justify-center rounded-full bg-primary text-[9px] font-semibold
+                                        text-on-primary">VX</span>
                                 </div>
 
                                 <div class="flex min-h-64">
                                     <div class="w-28 shrink-0 space-y-1 border-r border-divider bg-surface px-2 py-4 max-phone:hidden" aria-hidden="true">
-                                        <div v-for="item in previewNavigation" :key="item.label" class="flex items-center gap-2 rounded-md px-2 py-2 text-[10px]" :class="item.label === 'Files' ? 'bg-primary font-medium text-on-primary' : 'text-label'">
+                                        <div
+                                            v-for="item in previewNavigation"
+                                            :key="item.label"
+                                            class="flex items-center gap-2 rounded-md px-2 py-2 text-[10px]"
+                                            :class="item.label === 'Files' ? 'bg-primary font-medium text-on-primary' : 'text-label'"
+                                        >
                                             <Icon :name="item.icon" size="14" />
                                             {{ item.label }}
                                         </div>
@@ -68,15 +83,25 @@
                                     <div class="min-w-0 flex-1 p-4">
                                         <div class="mb-4 flex items-center justify-between gap-2">
                                             <span class="text-xs font-semibold text-foreground">Files</span>
-                                            <span class="inline-flex items-center gap-1 rounded-control bg-primary px-2.5 py-1.5 text-[10px] font-medium text-on-primary">
+                                            <span class="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1.5 text-[10px] font-medium
+                                                text-on-primary">
                                                 <Icon name="solar:add-circle-linear" size="12" />
                                                 Upload
                                             </span>
                                         </div>
 
                                         <div class="overflow-hidden rounded-md border border-divider">
-                                            <div v-for="(item, index) in previewItems" :key="item.name" class="flex items-center gap-2.5 border-b border-divider px-3 py-3 last:border-b-0" :class="index === 1 ? 'bg-accent/8' : 'bg-surface'">
-                                                <span class="flex size-3.5 shrink-0 items-center justify-center rounded-sm border" :class="index === 1 ? 'border-primary bg-primary text-on-primary' : 'border-control-border bg-control'" aria-hidden="true">
+                                            <div
+                                                v-for="(item, index) in previewItems"
+                                                :key="item.name"
+                                                class="flex items-center gap-2.5 border-b border-divider px-3 py-3 last:border-b-0"
+                                                :class="index === 1 ? 'bg-accent/8' : 'bg-surface'"
+                                            >
+                                                <span
+                                                    class="flex size-3.5 shrink-0 items-center justify-center rounded-sm border"
+                                                    :class="index === 1 ? 'border-primary bg-primary text-on-primary' : 'border-control-border bg-control'"
+                                                    aria-hidden="true"
+                                                >
                                                     <Icon v-if="index === 1" name="solar:check-read-linear" size="11" />
                                                 </span>
                                                 <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent/12 text-accent">
@@ -102,8 +127,13 @@
                     <footer class="flex flex-wrap items-center justify-between gap-4 border-t border-divider px-6 py-4 max-mobile:px-4">
                         <p class="text-xs text-muted" aria-live="polite">{{ dirty ? 'Unsaved changes' : 'All changes saved' }}</p>
                         <div class="ml-auto flex items-center gap-3">
-                            <button type="button" :disabled="!dirty" class="h-10 cursor-pointer border border-control-border bg-control px-4 text-xs text-secondary transition-colors hover:enabled:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-40" @click="cancel">Cancel</button>
-                            <button type="submit" :disabled="!dirty" class="inline-flex h-10 cursor-pointer items-center gap-2 border border-primary bg-primary px-4 text-xs font-medium text-on-primary transition-[filter] hover:enabled:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-40">
+                            <button type="button" :disabled="!dirty" class="h-10 cursor-pointer border border-control-border bg-control px-4 text-xs text-secondary
+                                transition-colors hover:enabled:bg-raised focus-visible:outline-2 focus-visible:outline-offset-2
+                                focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-40" @click="cancel">Cancel</button>
+                            <button type="submit" :disabled="!dirty" class="inline-flex h-10 cursor-pointer items-center gap-2 border border-primary bg-primary px-4 text-xs
+                                font-medium text-on-primary transition-[filter] hover:enabled:brightness-110 focus-visible:outline-2
+                                focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed
+                                disabled:opacity-40">
                                 <Icon name="solar:check-read-linear" size="16" />
                                 Save changes
                             </button>

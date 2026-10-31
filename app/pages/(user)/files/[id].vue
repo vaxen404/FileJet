@@ -2,21 +2,21 @@
     <div
         v-if="file"
         class="file-page min-w-0 min-h-0 grid grid-cols-[minmax(0,_1fr)_27rem] gap-4
-        details-middle:grid-cols-[minmax(0,_1fr)_22rem] details-middle:gap-3 max-preview:h-auto
-        max-preview:min-h-full max-preview:grid-cols-1 size-full"
+            details-middle:grid-cols-[minmax(0,_1fr)_22rem] details-middle:gap-3 max-preview:h-auto
+            max-preview:min-h-full max-preview:grid-cols-1 size-full"
     >
         <section class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
             <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-3xl overflow-hidden
                 max-preview:flex-none max-preview:h-144 max-phone:h-96">
                 <div
                     class="preview-content flex-1 min-w-0 min-h-0 flex items-center justify-center p-5 overflow-auto
-                    text-preview:block text-preview:overscroll-contain max-phone:p-3"
+                        text-preview:block text-preview:overscroll-contain max-phone:p-3"
                     :class="{ 'text-preview': isText && !previewError }"
                 >
                     <div
                         v-if="previewError"
                         class="preview-message flex flex-col items-center gap-3 max-w-96 text-muted text-center text-[0.8125rem]
-                        leading-normal"
+                            leading-normal"
                     >
                         <Icon class="text-accent"
                             name="solar:document-linear"
@@ -53,7 +53,7 @@
                     <div
                         v-else
                         class="preview-message flex flex-col items-center gap-3 max-w-96 text-muted text-center text-[0.8125rem]
-                        leading-normal"
+                            leading-normal"
                     >
                         <Icon class="text-accent"
                             :name="getFileIcon(file.mime_type, file.original_name)"
@@ -85,8 +85,8 @@
                     <button
                         type="button"
                         class="close-details shrink-0 grid place-items-center p-0 text-content bg-transparent border-0
-                        cursor-pointer hover:bg-divider hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 size-7"
+                            cursor-pointer hover:bg-divider hover:text-foreground focus-visible:outline-2
+                            focus-visible:outline-accent focus-visible:outline-offset-2 size-7"
                         :title="`Back to ${returnPage.name}`"
                         @click="goBack"
                     >
@@ -111,11 +111,11 @@
                     <button
                         type="button"
                         class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                        px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
-                        transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                        hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
-                        disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
+                            px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal
+                            cursor-pointer transition-colors duration-200 border-primary hover:enabled:bg-primary/85
+                            hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
+                            disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:outline-offset-2 max-phone:col-span-full max-phone:pl-2 max-phone:pr-2"
                         :class="{ 'is-busy': isDownloading }"
                         :disabled="isDownloading || isDeleting || isSavingRename"
                         @click="handleDownload(file.id)"
@@ -129,11 +129,12 @@
                     <button
                         type="button"
                         class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
-                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 hover:enabled:bg-divider
-                        hover:enabled:text-foreground hover:enabled:border-hover-border favorite:text-accent disabled:opacity-60
-                        disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
+                            text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                            cursor-pointer transition-colors duration-200 w-13 hover:enabled:bg-divider
+                            hover:enabled:text-foreground hover:enabled:border-hover-border favorite:text-accent
+                            disabled:opacity-60 disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2
+                            focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2
+                            max-phone:pr-2"
                         :class="{
                             'is-favorite': isFileFavorite(file.id),
                             'is-busy': isUpdatingFavorite
@@ -154,11 +155,11 @@
                     <button
                         type="button"
                         class="action-button icon-action min-w-0 min-h-11 inline-flex items-center justify-center gap-2 p-0
-                        text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
-                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 hover:enabled:bg-divider
-                        hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
-                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
+                            text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                            cursor-pointer transition-colors duration-200 w-13 hover:enabled:bg-divider
+                            hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
+                            disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2 max-phone:pr-2"
                         :disabled="isDeleting || isSavingRename"
                         title="Rename"
                         @click="startRename"
@@ -171,12 +172,12 @@
                     <button
                         type="button"
                         class="action-button icon-action delete-button min-w-0 min-h-11 inline-flex items-center justify-center
-                        gap-2 p-0 text-danger bg-danger-surface border rounded-md text-sm font-medium leading-normal
-                        cursor-pointer transition-colors duration-200 ease-[ease] w-13 border-danger-border
-                        hover:enabled:bg-danger-surface hover:enabled:text-danger-hover hover:enabled:border-danger-border
-                        disabled:opacity-60 disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2
-                        focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2
-                        max-phone:pr-2"
+                            gap-2 p-0 text-danger bg-danger-surface border rounded-md text-sm font-medium leading-normal
+                            cursor-pointer transition-colors duration-200 w-13 border-danger-border
+                            hover:enabled:bg-danger-surface hover:enabled:text-danger-hover hover:enabled:border-danger-border
+                            disabled:opacity-60 disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2
+                            focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:w-full max-phone:pl-2
+                            max-phone:pr-2"
                         :class="{ 'is-busy': isDeleting }"
                         :disabled="isDeleting || isSavingRename"
                         title="Delete file"
@@ -193,10 +194,7 @@
                     class="detail-tabs grid grid-cols-3 gap-1 p-1 bg-input border border-divider rounded-md"
                     @keydown="handleTabKeydown"
                 >
-                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
-                        cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground is-active:font-semibold
-                        disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2"
+                    <button class="detail-tab"
                         id="file-details-tab"
                         type="button"
                         :tabindex="activeTab === 'details' ? 0 : -1"
@@ -206,10 +204,7 @@
                     >
                         Details
                     </button>
-                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
-                        cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground is-active:font-semibold
-                        disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2"
+                    <button class="detail-tab"
                         id="file-edit-tab"
                         type="button"
                         :tabindex="activeTab === 'edit' ? 0 : -1"
@@ -219,10 +214,7 @@
                     >
                         Edit
                     </button>
-                    <button class="min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md text-sm font-medium leading-normal
-                        cursor-pointer hover:text-foreground is-active:bg-raised is-active:text-foreground is-active:font-semibold
-                        disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-2"
+                    <button class="detail-tab"
                         id="file-share-tab"
                         type="button"
                         :tabindex="activeTab === 'share' ? 0 : -1"
@@ -238,15 +230,16 @@
                     v-show="activeTab === 'details'"
                     id="file-details-panel"
                     tabindex="0"
-                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                 >
                     <dl class="file-metadata m-0 border border-divider rounded-md overflow-hidden">
                         <div
                             v-for="row in metadataRows"
                             :key="row.label"
                             class="metadata-row grid grid-cols-[minmax(0,_3fr)_minmax(0,_2fr)] items-start gap-3 py-2 px-3.5 border-b
-                            border-b-divider text-[0.8125rem] leading-normal last:border-b-0 max-phone:gap-2 max-phone:py-2
-                            max-phone:px-2.5"
+                                border-b-divider text-[0.8125rem] leading-normal last:border-b-0 max-phone:gap-2 max-phone:py-2
+                                max-phone:px-2.5"
                         >
                             <dt class="text-muted">{{ row.label }}</dt>
                             <dd class="min-w-0 m-0 text-content wrap-anywhere">{{ row.value }}</dd>
@@ -259,7 +252,7 @@
                     id="file-edit-panel"
                     tabindex="0"
                     class="tab-panel edit-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent
-                    focus-visible:outline-offset-2"
+                        focus-visible:outline-offset-2"
                 >
                     <form
                         class="rename-form flex flex-col gap-4"
@@ -271,15 +264,15 @@
                                 Update the filename. The existing extension is preserved
                                 automatically.
                             </p>
-                            <div class="rename-input-group flex items-stretch min-w-0 border border-control-border rounded-md overflow-hidden
-                                focus-within:border-accent">
+                            <div class="rename-input-group flex items-stretch min-w-0 border border-control-border rounded-md
+                                overflow-hidden focus-within:border-accent">
                                 <input
                                     id="file-rename-input"
                                     ref="nameInput"
                                     v-model="editingFileName"
                                     type="text"
-                                    class="name-input w-full min-w-0 min-h-11 py-2.5 px-3 text-foreground bg-control border-0 rounded-md text-sm
-                                    leading-normal outline-none flex-1 focus:border-accent is-invalid:border-danger"
+                                    class="name-input w-full min-w-0 min-h-11 py-2.5 px-3 text-foreground bg-control border-0 rounded-md
+                                        text-sm leading-normal outline-none flex-1 focus:border-accent is-invalid:border-danger"
                                     :class="{ invalid: Boolean(renameError) }"
                                     maxlength="255"
                                     required
@@ -305,11 +298,11 @@
                             <button
                                 type="button"
                                 class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
-                                text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
-                                cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
-                                hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
-                                disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                                focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
+                                    text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                                    cursor-pointer transition-colors duration-200 hover:enabled:bg-divider hover:enabled:text-foreground
+                                    hover:enabled:border-hover-border disabled:opacity-60 disabled:cursor-not-allowed
+                                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:pl-2
+                                    max-phone:pr-2"
                                 :disabled="isSavingRename"
                                 @click="cancelRename"
                             >
@@ -318,11 +311,11 @@
                             <button
                                 type="submit"
                                 class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                                px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
-                                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                                hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
-                                disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                                focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
+                                    px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal
+                                    cursor-pointer transition-colors duration-200 border-primary hover:enabled:bg-primary/85
+                                    hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
+                                    disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
+                                    focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
                                 :class="{ 'is-busy': isSavingRename }"
                                 :disabled="!canSaveRename || isDeleting"
                             >
@@ -337,11 +330,11 @@
                         <button
                             type="button"
                             class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
-                            text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
-                            cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
-                            hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
-                            disabled:cursor-not-allowed busy:cursor-wait focus-visible:outline-2 focus-visible:outline-accent
-                            focus-visible:outline-offset-2 max-phone:pl-2 max-phone:pr-2"
+                                text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                                cursor-pointer transition-colors duration-200 hover:enabled:bg-divider hover:enabled:text-foreground
+                                hover:enabled:border-hover-border disabled:opacity-60 disabled:cursor-not-allowed busy:cursor-wait
+                                focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 max-phone:pl-2
+                                max-phone:pr-2"
                             :class="{ 'is-busy': isCopying }"
                             :disabled="isCopying || isDeleting || isSavingRename"
                             @click="handleCopy"
@@ -355,7 +348,8 @@
                     v-show="activeTab === 'share'"
                     id="file-share-panel"
                     tabindex="0"
-                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                    class="tab-panel min-w-0 focus-visible:outline-2 focus-visible:outline-accent
+                        focus-visible:outline-offset-2"
                 >
                     <ShareBox
                         :item-id="file.id"
@@ -378,10 +372,10 @@
             <button
                 type="button"
                 class="action-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2 px-3.5
-                text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
-                cursor-pointer transition-colors duration-200 ease-[ease] hover:enabled:bg-divider
-                hover:enabled:text-foreground hover:enabled:border-hover-border disabled:opacity-60
-                disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
+                    text-content bg-control border border-control-border rounded-md text-sm font-medium leading-normal
+                    cursor-pointer transition-colors duration-200 hover:enabled:bg-divider hover:enabled:text-foreground
+                    hover:enabled:border-hover-border disabled:opacity-60 disabled:cursor-not-allowed max-phone:pl-2
+                    max-phone:pr-2"
                 @click="goBack"
             >
                 Back to {{ returnPage.name }}
@@ -389,10 +383,10 @@
             <button
                 type="button"
                 class="action-button download-button min-w-0 min-h-11 inline-flex items-center justify-center gap-2 py-2
-                px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal cursor-pointer
-                transition-colors duration-200 ease-[ease] border-primary hover:enabled:bg-primary/85
-                hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
-                disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
+                    px-3.5 text-on-primary bg-primary border rounded-md text-sm font-medium leading-normal
+                    cursor-pointer transition-colors duration-200 border-primary hover:enabled:bg-primary/85
+                    hover:enabled:text-on-primary hover:enabled:border-primary disabled:opacity-60
+                    disabled:cursor-not-allowed max-phone:pl-2 max-phone:pr-2"
                 @click="refresh()"
             >
                 Try again
@@ -836,3 +830,17 @@ if (isText.value) {
     }
 }
 </script>
+
+<style scoped>
+@reference "~/assets/css/tailwind.css";
+
+@layer components {
+    .detail-tab {
+        @apply min-h-8 py-1.5 px-2 text-muted bg-transparent border-0 rounded-md;
+        @apply text-sm font-medium leading-normal cursor-pointer hover:text-foreground is-active:bg-raised;
+        @apply is-active:text-foreground;
+        @apply is-active:font-semibold disabled:cursor-wait focus-visible:outline-2;
+        @apply focus-visible:outline-accent focus-visible:outline-offset-2;
+    }
+}
+</style>

@@ -12,9 +12,11 @@ export const useBrowsePreferences = (
         sortMode.value = sort
     }, { immediate: true })
 
-    const itemsPerPage = computed(() => preferences.value.pageSize === 'auto'
-        ? viewMode.value === 'list' ? 12 : 24
-        : preferences.value.pageSize)
+    const itemsPerPage = computed(() => {
+        if (preferences.value.pageSize !== 'auto') return preferences.value.pageSize
+
+        return viewMode.value === 'list' ? 12 : 24
+    })
 
     return { itemsPerPage }
 }

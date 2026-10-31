@@ -4,9 +4,7 @@ export const usePagination = <T extends { id: string }>(
 ) => {
     const currentPage = ref(1)
 
-    const totalPages = computed(() => {
-        return Math.ceil(items.value.length / itemsPerPage.value)
-    })
+    const totalPages = computed(() => Math.ceil(items.value.length / itemsPerPage.value))
 
     const paginatedItems = computed(() => {
         const start = (currentPage.value - 1) * itemsPerPage.value

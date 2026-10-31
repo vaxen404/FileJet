@@ -65,6 +65,22 @@ To share by QR code, open an item's **Share** tab and create a link if needed, t
 
 QR codes are generated in the browser and contain the existing public link. The same password and expiration settings apply; removing the link also revokes access through its QR code. Expired links cannot display a QR code.
 
+### Inbox and file requests
+
+- Use **Inbox → Create inbox** to create a named inbox and choose a default approval destination. Open an inbox card to view only the files sent to that inbox; **Edit inbox** updates its name, description, default destination, limits, and expiration while retaining the upload link.
+- Share a link or download its QR code; senders can upload without an account and cannot browse the recipient's files.
+- Set a per-file limit (up to 25 MB), a total file count (up to 1000), and an optional expiration date. Requests default to 10 MB per file, 100 files, and seven days.
+- Upload up to six files and 50 MB per submission. New files stay pending in Inbox until the recipient approves them. Pending bytes count toward the recipient's storage quota but do not appear in Files, folders, favorites, or public shares.
+- Click a pending filename to preview it inside Inbox before approving. Images, PDFs, text/code, and supported audio/video open in a private preview window; HTML and SVG appear as plain text, and large text previews show the first 1 MB. Download is a separate action; unsupported formats never download automatically.
+- Choose **Approve** from the file row or preview, then select **Files (root)** or an owned folder. Approval saves the existing stored file without charging storage twice; duplicate names receive a numeric suffix. Previewing does not approve or move a file.
+- Use row checkboxes, **Select page**, or **Select all matching** to select pending files across pages. **Approve selected / Reject selected** act on that selection; **Approve all / Reject all** act on all pending files in the inbox, across pages and filters. Bulk approval uses one destination folder and handles duplicate names within the group. Changing the search or review filter clears the selection.
+- Bulk review is atomic: if any selected file is unavailable, already reviewed, or belongs to another inbox, no selected files are changed. Rejection removes stored content only after the database transaction commits.
+- **Reject** permanently removes pending content and releases its storage space. Review statuses can be filtered; simultaneous or repeated reviews cannot save or release the same file twice.
+- Each inbox has its own received file list with search and pagination, including an optional, self-reported sender name. Refresh to check for new uploads; open **Sharing & settings** for its upload link, QR code, limits, and close/remove actions.
+- Close or reopen requests, or remove their links and Inbox history. Removing an inbox deletes its pending content and releases its quota; approved files stay in their destination folders. Expired and full links cannot accept new files.
+- A deleted default destination does not block submissions: choose an available destination when approving. Approved files removed from the live library remain in Inbox history as removed.
+- Up to 50 requests can be kept per account. Apply the `202610310001_file_requests` and `202610310002_inbox_approval` migrations and regenerate the Prisma client when updating an existing installation. Previously saved Inbox files retain approved status.
+
 ### Trash
 
 - Move files, folders, and notes to Trash, then restore or permanently delete them.

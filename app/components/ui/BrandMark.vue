@@ -12,6 +12,7 @@
 <script setup lang="ts">
 import type { AccentColor } from '~/utils/appearance'
 
+const props = defineProps<{ accentColor?: AccentColor }>()
 const { preferences } = usePreferences()
 // Native filters keep the PNG visible without SVG fragment IDs or hidden filter definitions.
 const filters: Record<AccentColor, string> = {
@@ -22,5 +23,5 @@ const filters: Record<AccentColor, string> = {
     rose: 'hue-rotate(110deg)',
     amber: 'hue-rotate(180deg)'
 }
-const logoFilter = computed(() => filters[preferences.value.accentColor] ?? 'none')
+const logoFilter = computed(() => filters[props.accentColor ?? preferences.value.accentColor] ?? 'none')
 </script>

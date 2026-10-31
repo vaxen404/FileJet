@@ -3,20 +3,20 @@
         v-if="totalPages > 0"
         aria-label="Pagination"
         class="pagination h-14 shrink-0 flex items-center justify-center gap-1 bg-surface border border-divider
-        border-t-0 rounded-bl-panel rounded-br-panel grid-pagination:bg-transparent grid-pagination:border-0
-        grid-pagination:rounded-none grid-pagination:mt-3"
+            border-t-0 rounded-bl-panel rounded-br-panel grid-pagination:bg-transparent grid-pagination:border-0
+            grid-pagination:rounded-none grid-pagination:mt-3"
         :class="{ 'grid-pagination': viewMode === 'grid' }"
     >
         <button
             type="button"
             class="page-button flex items-center justify-center bg-transparent text-label border border-divider
-            rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
-            hover:enabled:text-foreground disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
+                rounded-lg cursor-pointer text-sm font-medium leading-normal hover:enabled:bg-raised
+                hover:enabled:text-foreground disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
             aria-label="Previous page"
             :disabled="modelValue === 1"
             @click="previousPage"
         >
-            <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:alt-arrow-left-linear" />
+            <Icon class="block text-lg shrink-0 size-4.5" name="solar:alt-arrow-left-linear" />
         </button>
 
         <template
@@ -34,9 +34,10 @@
                 v-else
                 type="button"
                 class="page-button flex items-center justify-center bg-transparent text-label border border-divider
-                rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
-                hover:enabled:text-foreground is-active:bg-primary is-active:text-on-primary is-active:border-primary
-                disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem] is-active:hover:bg-primary is-active:hover:text-on-primary"
+                    rounded-lg cursor-pointer text-sm font-medium leading-normal hover:enabled:bg-raised
+                    hover:enabled:text-foreground is-active:bg-primary is-active:text-on-primary
+                    is-active:border-primary disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]
+                    is-active:hover:bg-primary is-active:hover:text-on-primary"
                 :class="{ active: modelValue === page }"
                 :aria-current="modelValue === page ? 'page' : undefined"
                 :aria-label="`Page ${page}`"
@@ -49,13 +50,13 @@
         <button
             type="button"
             class="page-button flex items-center justify-center bg-transparent text-label border border-divider
-            rounded-control cursor-pointer text-control-size font-medium leading-normal hover:enabled:bg-raised
-            hover:enabled:text-foreground disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
+                rounded-lg cursor-pointer text-sm font-medium leading-normal hover:enabled:bg-raised
+                hover:enabled:text-foreground disabled:opacity-35 disabled:cursor-not-allowed size-[2.2rem]"
             aria-label="Next page"
             :disabled="modelValue === totalPages"
             @click="nextPage"
         >
-            <Icon class="block text-control-icon shrink-0 size-control-icon" name="solar:alt-arrow-right-linear" />
+            <Icon class="block text-lg shrink-0 size-4.5" name="solar:alt-arrow-right-linear" />
         </button>
     </div>
 </template>

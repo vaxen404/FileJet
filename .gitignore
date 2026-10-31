@@ -19,7 +19,9 @@ logs
 
 /scripts/
 
-/tests/
+/tests/*
+!/tests/inbox.test.mjs
+!/tests/storage-usage.test.mjs
 
 
 # Misc

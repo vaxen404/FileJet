@@ -1,7 +1,7 @@
 <template>
     <div
         class="details-view w-full with-preview:grid with-preview:grid-cols-[minmax(0,_1fr)_28rem]
-        with-preview:gap-4 max-preview:with-preview:grid-cols-[1fr]"
+            with-preview:gap-4 max-preview:with-preview:grid-cols-1"
         :class="{ 'with-preview': previewable }"
     >
         <div

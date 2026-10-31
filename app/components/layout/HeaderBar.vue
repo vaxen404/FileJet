@@ -3,7 +3,9 @@
         rounded-xl">
         <button
             type="button"
-            class="navigation-toggle hidden max-laptop:grid size-11 shrink-0 place-items-center mr-2 rounded-control border border-control-border bg-control text-foreground cursor-pointer focus-visible:outline-2 focus-visible:outline-accent"
+            class="navigation-toggle hidden max-laptop:grid size-11 shrink-0 place-items-center mr-2 rounded-lg border
+                border-control-border bg-control text-foreground cursor-pointer focus-visible:outline-2
+                focus-visible:outline-accent"
             aria-label="Open navigation"
             aria-controls="mobile-navigation"
             aria-haspopup="dialog"
@@ -21,7 +23,7 @@
                     <NuxtLink
                         :to="fileHeader.returnPath"
                         class="header-back inline-flex items-center gap-2 shrink-0 text-accent no-underline font-medium
-                        hover:text-accent"
+                            hover:text-accent"
                     >
                         <Icon
                             name="solar:arrow-left-linear"
@@ -31,7 +33,7 @@
                     </NuxtLink>
                     <span class="header-separator text-muted">/</span>
                     <span
-                        class="header-filename min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-content"
+                        class="header-filename min-w-0 text-content truncate"
                         :title="fileHeader.fileName"
                         >{{ fileHeader.fileName }}</span
                     >

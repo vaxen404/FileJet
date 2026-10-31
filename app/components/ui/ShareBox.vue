@@ -1,7 +1,7 @@
 <template>
     <section
-        class="share-box-card w-full p-4 bg-surface border border-divider rounded-3xl embedded:p-0 embedded:border-0
-        embedded:bg-transparent"
+        class="share-box-card w-full p-4 bg-surface border border-divider rounded-3xl embedded:p-0
+            embedded:border-0 embedded:bg-transparent"
         :class="{ embedded }"
     >
         <div
@@ -21,9 +21,9 @@
                 v-if="state.url"
                 class="share-link flex gap-2 mb-2"
             >
-                <input class="flex-1 min-w-0 w-full h-10 py-0 px-3 text-content bg-input border border-control-border
-                    rounded-md text-sm outline-none focus:border-accent disabled:opacity-60
-                    disabled:cursor-not-allowed leading-[inherit]"
+                <input class="flex-1 min-w-0 w-full h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md
+                    text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
+                    leading-[inherit]"
                     :value="state.url"
                     type="text"
                     readonly
@@ -31,9 +31,9 @@
                 <button
                     type="button"
                     class="copy-btn min-h-10 p-0 inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium
-                    leading-normal cursor-pointer w-10 shrink-0 bg-raised text-content border border-control-border
-                    hover:bg-raised hover:text-foreground disabled:opacity-60 disabled:cursor-not-allowed
-                    focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+                        leading-normal cursor-pointer w-10 shrink-0 bg-raised text-content border border-control-border
+                        hover:bg-raised hover:text-foreground disabled:opacity-60 disabled:cursor-not-allowed
+                        focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                     title="Copy link"
                     aria-label="Copy share link"
                     @click="copyShareLink"
@@ -87,9 +87,8 @@
                     <label class="text-content text-sm leading-normal" :for="`share-password-${itemId}`">{{
                         state.hasPassword ? 'Change password' : 'Link password'
                     }}</label>
-                    <input class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md
-                        text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
-                        leading-[inherit]"
+                    <input class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md text-sm
+                        outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed leading-[inherit]"
                         :id="`share-password-${itemId}`"
                         v-model="password"
                         type="password"
@@ -110,9 +109,8 @@
                 </div>
                 <div class="setting-field flex flex-col gap-2">
                     <label class="text-content text-sm leading-normal" :for="`share-expiration-${itemId}`">Link expiration</label>
-                    <select class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md
-                        text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
-                        leading-[inherit]"
+                    <select class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md text-sm
+                        outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed leading-[inherit]"
                         :id="`share-expiration-${itemId}`"
                         v-model="expiration"
                         :disabled="busy"
@@ -123,9 +121,8 @@
                         <option value="30">30 days</option>
                         <option value="custom">Custom expiration date</option>
                     </select>
-                    <input class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md
-                        text-sm outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed
-                        leading-[inherit]"
+                    <input class="w-full min-w-0 h-10 py-0 px-3 text-content bg-input border border-control-border rounded-md text-sm
+                        outline-none focus:border-accent disabled:opacity-60 disabled:cursor-not-allowed leading-[inherit]"
                         v-if="expiration === 'custom'"
                         v-model="customExpiration"
                         type="datetime-local"
@@ -148,10 +145,7 @@
                 <div class="share-actions flex items-center flex-wrap gap-2">
                     <button
                         type="submit"
-                        class="create-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
-                        font-medium leading-normal cursor-pointer bg-primary text-on-primary border border-primary
-                        hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
-                        focus-visible:outline-accent focus-visible:outline-offset-2"
+                        class="create-share-btn"
                         :disabled="busy"
                     >
                         <Icon name="solar:link-circle-bold" />
@@ -161,9 +155,9 @@
                         v-if="state.url && allowRemove"
                         type="button"
                         class="remove-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
-                        font-medium leading-normal cursor-pointer bg-transparent text-danger border border-danger-border
-                        hover:enabled:bg-danger-surface disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
-                        focus-visible:outline-accent focus-visible:outline-offset-2"
+                            font-medium leading-normal cursor-pointer bg-transparent text-danger border border-danger-border
+                            hover:enabled:bg-danger-surface disabled:opacity-60 disabled:cursor-not-allowed
+                            focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                         :disabled="busy"
                         @click="removeShareLink"
                     >
@@ -175,10 +169,7 @@
         <button
             v-if="errorMessage && isLoading === false && loadFailed"
             type="button"
-            class="create-share-btn min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2 rounded-md text-sm
-            font-medium leading-normal cursor-pointer bg-primary text-on-primary border border-primary
-            hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
-            focus-visible:outline-accent focus-visible:outline-offset-2"
+            class="create-share-btn"
             @click="loadShareLink"
         >
             Try again
@@ -221,6 +212,7 @@ const busy = computed(() => isLoading.value || isSaving.value || loadFailed.valu
 const shareExpired = computed(() => state.value.isExpired || Boolean(
     state.value.expiresAt && new Date(state.value.expiresAt).getTime() <= now.value
 ))
+
 watch(isSaving, value => emit('saving-change', value))
 
 let requestId = 0
@@ -417,3 +409,17 @@ onBeforeUnmount(() => {
     clearInterval(expirationTimer)
 })
 </script>
+
+<style scoped>
+@reference "~/assets/css/tailwind.css";
+
+@layer components {
+    .create-share-btn {
+        @apply min-h-10 py-2 px-3 inline-flex items-center justify-center gap-2;
+        @apply rounded-md text-sm font-medium leading-normal cursor-pointer bg-primary text-on-primary;
+        @apply border border-primary hover:enabled:bg-primary/85 disabled:opacity-60;
+        @apply disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent;
+        @apply focus-visible:outline-offset-2;
+    }
+}
+</style>

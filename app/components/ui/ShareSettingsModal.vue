@@ -2,7 +2,8 @@
     <dialog
         ref="dialog"
         :aria-labelledby="`${id}-title`"
-        class="m-auto w-[min(28rem,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border border-divider bg-surface p-0 text-foreground shadow-2xl backdrop:bg-black/65"
+        class="m-auto w-[min(28rem,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border
+            border-divider bg-surface p-0 text-foreground shadow-2xl backdrop:bg-black/65"
         @cancel.prevent="close"
     >
         <template v-if="item">
@@ -11,7 +12,8 @@
                     <h2 :id="`${id}-title`" class="text-sm font-semibold">Share settings</h2>
                     <p class="mt-1 truncate text-xs text-muted" :title="item.name">{{ item.name }}</p>
                 </div>
-                <button type="button" :disabled="saving" aria-label="Close share settings" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-control text-label hover:bg-raised disabled:cursor-not-allowed disabled:opacity-40" @click="close">
+                <button type="button" :disabled="saving" aria-label="Close share settings" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-lg text-label hover:bg-raised
+                    disabled:cursor-not-allowed disabled:opacity-40" @click="close">
                     <Icon name="solar:close-circle-linear" size="20" />
                 </button>
             </header>

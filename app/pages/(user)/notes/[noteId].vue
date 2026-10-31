@@ -20,7 +20,7 @@
         <article
             v-if="!isEditing"
             class="note-reader flex-1 min-w-0 min-h-0 flex flex-col justify-start gap-4 p-5 overflow-auto
-            overscroll-contain text-left max-phone:p-3"
+                overscroll-contain text-left max-phone:p-3"
         >
             <div class="reader-heading w-full min-w-0 m-0 flex items-baseline justify-between flex-wrap gap-2">
                 <h2 class="m-0 text-foreground text-xl font-semibold leading-[1.4] wrap-anywhere">{{ note.title }}</h2>
@@ -35,7 +35,7 @@
             <div
                 v-if="note.content"
                 class="note-reading-content w-full min-w-0 m-0 text-content text-sm leading-normal whitespace-pre-wrap
-                wrap-anywhere"
+                    wrap-anywhere"
                 v-text="note.content"
             />
 
@@ -101,8 +101,8 @@
                 </button>
                 <button
                     type="submit"
-                    class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
-                    hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                        border-primary hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                     :disabled="busy || !dirty"
                 >
                     {{ isSaving ? 'Saving...' : 'Save' }}
@@ -142,8 +142,8 @@
                     </button>
                     <button
                         type="submit"
-                        class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer border-primary
-                        hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
+                        class="primary text-on-primary bg-primary border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
+                            border-primary hover:enabled:bg-primary/85 disabled:opacity-60 disabled:cursor-not-allowed"
                         :disabled="busy || !dirty"
                     >
                         {{ isSaving ? 'Saving...' : 'Save' }}

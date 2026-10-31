@@ -3,8 +3,8 @@
         <dialog
             ref="dialog"
             class="folder-modal w-[min(28rem,_calc(100vw_-_2rem))] max-h-[calc(100dvh_-_2rem)] p-0 overflow-y-auto
-            text-foreground bg-surface border border-control-border rounded-2xl shadow-[0_24px_80px_#0006]
-            backdrop:bg-[#0009]"
+                text-foreground bg-surface border border-control-border rounded-2xl shadow-[0_24px_80px_#0006]
+                backdrop:bg-[#0009]"
             @cancel.prevent="close"
             @click.self="close"
         >
@@ -27,9 +27,9 @@
                     <button
                         type="button"
                         class="close-button inline-flex items-center justify-center gap-2 min-h-8 p-0 border-0 rounded-md
-                        text-[1.35rem] cursor-pointer w-8 shrink-0 text-heading-muted bg-transparent disabled:opacity-50
-                        disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-3"
+                            text-[1.35rem] cursor-pointer w-8 shrink-0 text-heading-muted bg-transparent disabled:opacity-50
+                            disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:outline-offset-3"
                         :disabled="isLoading"
                         @click="close"
                     >
@@ -38,8 +38,9 @@
                 </div>
                 <div class="form-field flex flex-col gap-2 my-6 mx-0">
                     <label class="text-sm leading-[inherit] font-medium" :for="`${id}-name`">Folder name</label>
-                    <input class="w-full min-h-11 py-[0.6rem] px-3 text-foreground bg-canvas border border-control-border rounded-md text-sm
-                        focus:outline-none focus:valid-field:border-accent is-invalid:border-danger leading-[inherit]"
+                    <input class="w-full min-h-11 py-[0.6rem] px-3 text-foreground bg-canvas border border-control-border rounded-md
+                        text-sm focus:outline-none focus:valid-field:border-accent is-invalid:border-danger
+                        leading-[inherit]"
                         :id="`${id}-name`"
                         ref="nameInput"
                         v-model="name"
@@ -64,9 +65,10 @@
                     <button
                         type="button"
                         class="cancel-button inline-flex items-center justify-center gap-2 min-h-10 py-0 px-[0.9rem] border
-                        border-control-border rounded-md text-sm cursor-pointer text-content bg-raised
-                        hover:enabled:bg-control-border disabled:opacity-50 disabled:cursor-not-allowed
-                        focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-3 leading-[inherit]"
+                            border-control-border rounded-md text-sm cursor-pointer text-content bg-raised
+                            hover:enabled:bg-control-border disabled:opacity-50 disabled:cursor-not-allowed
+                            focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-3
+                            leading-[inherit]"
                         :disabled="isLoading"
                         @click="close"
                     >
@@ -74,10 +76,10 @@
                     </button>
                     <button
                         type="submit"
-                        class="save-button inline-flex items-center justify-center gap-2 min-h-10 py-0 px-[0.9rem] border rounded-md
-                        text-sm cursor-pointer text-on-primary bg-primary border-primary hover:enabled:bg-primary/85
-                        disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:outline-offset-3 leading-[inherit]"
+                        class="save-button inline-flex items-center justify-center gap-2 min-h-10 py-0 px-[0.9rem] border
+                            rounded-md text-sm cursor-pointer text-on-primary bg-primary border-primary
+                            hover:enabled:bg-primary/85 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2
+                            focus-visible:outline-accent focus-visible:outline-offset-3 leading-[inherit]"
                         :disabled="!canSubmit"
                     >
                         <Icon :name="isEditing ? 'solar:pen-bold' : 'solar:add-circle-bold'" />

@@ -18,21 +18,21 @@
 
                     <button
                         type="button"
-                        class="new-folder-button inline-flex items-center justify-center shrink-0 gap-2 h-control py-0 px-3.5
-                        text-on-primary bg-primary border border-primary rounded-control
-                        shadow-[inset_0_1px_0_#ffffff12,_0_2px_6px_#0003] text-control-size font-medium leading-normal
-                        whitespace-nowrap cursor-pointer transition-[background,border-color,transform] duration-180
-                        ease-[ease] hover:enabled:bg-primary/85 hover:enabled:border-accent hover:enabled:-translate-y-px
-                        active:enabled:bg-primary/85 active:enabled:translate-y-0
-                        active:enabled:shadow-[inset_0_1px_3px_#0003] focus-visible:outline-2 focus-visible:outline-accent
-                        focus-visible:-outline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
-                        motion-reduce:transition-none motion-reduce:hover:enabled:translate-y-0"
+                        class="new-folder-button inline-flex items-center justify-center shrink-0 gap-2 h-10 max-mobile:h-11
+                            pointer-coarse:h-11 py-0 px-3.5 text-on-primary bg-primary border border-primary rounded-lg
+                            shadow-[inset_0_1px_0_#ffffff12,_0_2px_6px_#0003] text-sm font-medium leading-normal
+                            whitespace-nowrap cursor-pointer transition-[background,border-color,transform] duration-180
+                            hover:enabled:bg-primary/85 hover:enabled:border-accent hover:enabled:-translate-y-px
+                            active:enabled:bg-primary/85 active:enabled:translate-y-0
+                            active:enabled:shadow-[inset_0_1px_3px_#0003] focus-visible:outline-2 focus-visible:outline-accent
+                            focus-visible:-outline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                            motion-reduce:transition-none motion-reduce:hover:enabled:translate-y-0"
                         :disabled="pending || folderActions.isLoading.value"
                         @click="createFolder"
                     >
                         <Icon
                             name="solar:add-folder-bold"
-                            class="new-folder-icon block shrink-0 text-on-primary text-control-icon size-control-icon"
+                            class="new-folder-icon block shrink-0 text-on-primary text-lg size-4.5"
                         />
                         <span>New Folder</span>
                     </button>
@@ -80,8 +80,8 @@
 
             <template #list>
                 <div class="table-scroll flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-                    <table class="mobile-item-table folders-table w-full border-separate border-spacing-0 bg-transparent border-0 rounded-none min-w-176
-                        table-fixed">
+                    <table class="mobile-item-table folders-table w-full border-separate border-spacing-0 bg-transparent border-0
+                        rounded-none min-w-176 table-fixed">
                         <thead>
                             <tr>
                                 <th class="w-14 pl-4 pr-3 text-center file-table-heading">
@@ -100,7 +100,7 @@
                                         Name
                                         <Icon
                                             name="solar:sort-vertical-linear"
-                                            class="sort-icon text-base leading-[inherit]"
+                                            class="text-base leading-[inherit]"
                                         />
                                     </div>
                                 </th>
@@ -120,7 +120,8 @@
                                 @click="openFolder(folder)"
                                 @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
                             >
-                                <td class="item-selection-cell h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center file-table-cell" @click.stop>
+                                <td class="item-selection-cell h-[4.2rem] text-secondary text-[0.85rem] w-14 pl-4 pr-3 text-center
+                                    file-table-cell" @click.stop>
                                     <input
                                         v-model="selectedFolders"
                                         type="checkbox"
@@ -132,14 +133,14 @@
 
                                 <td class="item-name-cell h-[4.2rem] text-secondary text-[0.85rem] w-[42%] file-table-cell">
                                     <div class="folder-name flex items-center gap-3">
-                                        <div class="folder-icon flex items-center justify-center shrink-0 text-on-primary bg-primary border border-primary
-                                            rounded-md text-[1.2rem] size-10">
+                                        <div class="folder-icon flex items-center justify-center shrink-0 text-on-primary bg-primary border
+                                            border-primary rounded-md text-[1.2rem] size-10">
                                             <Icon name="solar:folder-bold" />
                                         </div>
 
                                         <div class="folder-info flex flex-col gap-1 min-w-0">
-                                            <strong class="text-foreground text-sm font-semibold whitespace-nowrap leading-normal overflow-hidden text-ellipsis" :title="folder.name">{{ folder.name }}</strong>
-                                            <span class="text-muted text-xs whitespace-nowrap font-normal leading-normal overflow-hidden text-ellipsis">
+                                            <strong class="text-foreground text-sm font-semibold leading-normal truncate" :title="folder.name">{{ folder.name }}</strong>
+                                            <span class="text-muted text-xs font-normal leading-normal truncate">
                                                 Folder • {{ formatFileTime(folder.created_at) }}
                                             </span>
                                         </div>
@@ -187,8 +188,8 @@
                         @contextmenu.prevent.stop="openContextMenu($event, folder.id)"
                     >
                         <template #actions>
-                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border rounded-full
-                                cursor-pointer size-8">
+                            <label class="file-select flex items-center justify-center bg-selection-surface border border-selection-border
+                                rounded-full cursor-pointer size-8">
                                 <input
                                     v-model="selectedFolders"
                                     type="checkbox"
@@ -210,9 +211,9 @@
                             />
                         </template>
                         <template #metadata>
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">Folder</span>
+                            <span class="min-w-0 first:shrink-0 truncate">Folder</span>
                             ·
-                            <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap first:shrink-0">{{ formatFileTime(folder.created_at) }}</span>
+                            <span class="min-w-0 first:shrink-0 truncate">{{ formatFileTime(folder.created_at) }}</span>
                         </template>
                     </ItemGridCard>
                 </ItemGrid>

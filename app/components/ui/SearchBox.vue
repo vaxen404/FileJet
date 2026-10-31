@@ -1,14 +1,14 @@
 <template>
-    <div class="search-box w-128 h-control flex items-center bg-surface py-0 px-3 border border-divider
-        rounded-control gap-2 transition-colors duration-200 ease-[ease] min-w-0
+    <div class="search-box w-128 h-10 max-mobile:h-11 pointer-coarse:h-11 flex items-center bg-surface py-0 px-3
+        border border-divider rounded-lg gap-2 transition-colors duration-200 min-w-0
         focus-within:border-highlight">
         <Icon
             name="lucide:search"
-            class="search-icon block shrink-0 text-muted text-control-icon size-control-icon"
+            class="block shrink-0 text-muted text-lg size-4.5"
         />
 
-        <input class="bg-transparent border-0 outline-none text-content text-control-size font-medium leading-normal
-            min-w-0 p-0 size-full"
+        <input class="bg-transparent border-0 outline-none text-content text-sm font-medium leading-normal min-w-0 p-0
+            size-full"
             type="search"
             :aria-label="placeholder || 'Search'"
             :value="modelValue"

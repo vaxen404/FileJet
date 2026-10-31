@@ -2,7 +2,12 @@
     <div class="shared-page flex min-h-0 w-full flex-1 flex-col overflow-hidden">
         <div class="mb-3 flex shrink-0 flex-col gap-3">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <SearchBox v-model="searchQuery" placeholder="Search shared items..." aria-label="Search shared items" class="min-w-0 max-w-128 [flex:1_1_18rem] max-tablet:max-w-none" />
+                <SearchBox
+                    v-model="searchQuery"
+                    placeholder="Search shared items..."
+                    aria-label="Search shared items"
+                    class="min-w-0 max-w-128 [flex:1_1_18rem] max-tablet:max-w-none"
+                />
                 <div class="flex items-center gap-3 max-mobile:w-full max-mobile:justify-between">
                     <span class="text-xs text-muted">{{ entries.length }} {{ entries.length === 1 ? 'link' : 'links' }}</span>
                     <button type="button" :disabled="busy" class="shared-button" @click="loadShares">
@@ -14,7 +19,8 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <ItemFilters v-model="activeCategory" :options="filterOptions" />
                 <div class="shared-status-controls flex min-w-0 flex-wrap items-center gap-2">
-                    <select v-model="statusFilter" aria-label="Filter links by status" class="h-control cursor-pointer border border-divider bg-surface px-3 text-control-size text-label outline-none focus:border-accent">
+                    <select v-model="statusFilter" aria-label="Filter links by status" class="h-10 max-mobile:h-11 pointer-coarse:h-11 cursor-pointer border border-divider bg-surface px-3
+                        text-sm text-label outline-none focus:border-accent">
                         <option value="all">All statuses</option>
                         <option value="active">Active</option>
                         <option value="expired">Expired</option>
@@ -46,7 +52,15 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="file-table-heading w-14">
-                                    <input type="checkbox" class="file-checkbox" aria-label="Select all links on this page" :checked="allSelected" :indeterminate="partiallySelected" :disabled="busy" @change="toggleSelectAll">
+                                    <input
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        aria-label="Select all links on this page"
+                                        :checked="allSelected"
+                                        :indeterminate="partiallySelected"
+                                        :disabled="busy"
+                                        @change="toggleSelectAll"
+                                    >
                                 </th>
                                 <th scope="col" class="file-table-heading w-[27%]">Name</th>
                                 <th scope="col" class="file-table-heading">Share link</th>
@@ -65,11 +79,19 @@
                                 @contextmenu.prevent.stop="openContextMenu($event, item)"
                             >
                                 <td class="item-selection-cell file-table-cell">
-                                    <input v-model="selectedIds" type="checkbox" class="file-checkbox" :value="item.id" :disabled="busy" :aria-label="`Select share link for ${item.name}`">
+                                    <input
+                                        v-model="selectedIds"
+                                        type="checkbox"
+                                        class="file-checkbox"
+                                        :value="item.id"
+                                        :disabled="busy"
+                                        :aria-label="`Select share link for ${item.name}`"
+                                    >
                                 </td>
                                 <td class="item-name-cell file-table-cell h-19">
                                     <div class="flex min-w-0 items-center gap-3">
-                                        <span class="grid size-10 shrink-0 place-items-center rounded-md border border-accent/25 bg-accent/12 text-xl text-accent"><Icon :name="itemIcon(item)" /></span>
+                                        <span class="grid size-10 shrink-0 place-items-center rounded-md border border-accent/25 bg-accent/12 text-xl
+                                            text-accent"><Icon :name="itemIcon(item)" /></span>
                                         <div class="min-w-0">
                                             <button
                                                 v-if="item.isAvailable"
@@ -87,22 +109,66 @@
                                     </div>
                                 </td>
                                 <td data-label="Share link" class="item-meta-cell file-table-cell">
-                                    <input :value="item.url" :aria-label="`Share link for ${item.name}`" readonly type="text" class="h-9 w-full min-w-0 border border-divider bg-canvas/60 px-3 text-xs text-label outline-none focus:border-accent" @focus="($event.target as HTMLInputElement).select()">
+                                    <input :value="item.url" :aria-label="`Share link for ${item.name}`" readonly type="text" class="h-9 w-full min-w-0 border border-divider bg-canvas/60 px-3 text-xs text-label outline-none
+                                        focus:border-accent" @focus="($event.target as HTMLInputElement).select()">
                                 </td>
                                 <td data-label="Access" class="item-meta-cell file-table-cell">
                                     <div class="flex items-center gap-2">
-                                        <span class="rounded-md px-2 py-1 text-xs" :class="itemStatus(item) === 'active' ? 'bg-accent/10 text-accent' : itemStatus(item) === 'expired' ? 'bg-warning/10 text-warning' : 'bg-control text-muted'">{{ statusLabels[itemStatus(item)] }}</span>
-                                        <Icon v-if="item.hasPassword" name="solar:lock-password-linear" size="16" class="shrink-0 text-muted" title="Password protected" aria-label="Password protected" />
+                                        <span
+                                            class="rounded-md px-2 py-1 text-xs"
+                                            :class="itemStatus(item) === 'active' ? 'bg-accent/10 text-accent' : itemStatus(item) === 'expired' ? 'bg-warning/10 text-warning' : 'bg-control text-muted'"
+                                        >{{ statusLabels[itemStatus(item)] }}</span>
+                                        <Icon
+                                            v-if="item.hasPassword"
+                                            name="solar:lock-password-linear"
+                                            size="16"
+                                            class="shrink-0 text-muted"
+                                            title="Password protected"
+                                            aria-label="Password protected"
+                                        />
                                     </div>
                                 </td>
-                                <td data-label="Expires" class="item-meta-cell file-table-cell text-xs text-label" :title="item.expiresAt ? `${item.expiresAt} (UTC)` : 'No expiration'">{{ item.expiresAt ? formatDate(item.expiresAt) : 'Never' }}</td>
+                                <td
+                                    data-label="Expires"
+                                    class="item-meta-cell file-table-cell text-xs text-label"
+                                    :title="item.expiresAt ? `${item.expiresAt} (UTC)` : 'No expiration'"
+                                >{{ item.expiresAt ? formatDate(item.expiresAt) : 'Never' }}</td>
                                 <td class="item-actions-cell file-table-cell">
                                     <div class="flex items-center justify-end gap-1">
-                                        <button type="button" :disabled="busy || !item.isAvailable" :aria-label="`Copy link for ${item.name}`" title="Copy link" class="shared-icon" @click="copyLink(item)"><Icon name="solar:copy-linear" size="18" /></button>
-                                        <a v-if="item.isAvailable" :href="item.url" target="_blank" rel="noopener noreferrer" :aria-label="`Open public link for ${item.name}`" title="Open public link" class="shared-icon"><Icon name="solar:arrow-right-up-linear" size="18" /></a>
+                                        <button
+                                            type="button"
+                                            :disabled="busy || !item.isAvailable"
+                                            :aria-label="`Copy link for ${item.name}`"
+                                            title="Copy link"
+                                            class="shared-icon"
+                                            @click="copyLink(item)"
+                                        ><Icon name="solar:copy-linear" size="18" /></button>
+                                        <a
+                                            v-if="item.isAvailable"
+                                            :href="item.url"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            :aria-label="`Open public link for ${item.name}`"
+                                            title="Open public link"
+                                            class="shared-icon"
+                                        ><Icon name="solar:arrow-right-up-linear" size="18" /></a>
                                         <span v-else class="shared-icon pointer-events-none opacity-35" aria-hidden="true"><Icon name="solar:arrow-right-up-linear" size="18" /></span>
-                                        <button type="button" :disabled="busy || !item.isAvailable" :aria-label="`Share settings for ${item.name}`" title="Share settings" class="shared-icon" @click="openShareSettings(item)"><Icon name="solar:tuning-2-linear" size="18" /></button>
-                                        <button type="button" :disabled="busy" :aria-label="`Remove share link for ${item.name}`" title="Remove link" class="shared-icon text-danger! hover:enabled:bg-danger/10!" @click="removeLink(item)"><Icon :name="removingId === item.id ? 'solar:refresh-linear' : 'solar:link-broken-linear'" size="18" :class="{ 'animate-spin': removingId === item.id }" /></button>
+                                        <button
+                                            type="button"
+                                            :disabled="busy || !item.isAvailable"
+                                            :aria-label="`Share settings for ${item.name}`"
+                                            title="Share settings"
+                                            class="shared-icon"
+                                            @click="openShareSettings(item)"
+                                        ><Icon name="solar:tuning-2-linear" size="18" /></button>
+                                        <button
+                                            type="button"
+                                            :disabled="busy"
+                                            :aria-label="`Remove share link for ${item.name}`"
+                                            title="Remove link"
+                                            class="shared-icon text-danger! hover:enabled:bg-danger/10!"
+                                            @click="removeLink(item)"
+                                        ><Icon :name="removingId === item.id ? 'solar:refresh-linear' : 'solar:link-broken-linear'" size="18" :class="{ 'animate-spin': removingId === item.id }" /></button>
                                         <ItemMenu
                                             :ref="menu => setShareMenuRef(item.id, menu)"
                                             :type="item.itemType"
@@ -123,7 +189,8 @@
 
         <Pagination v-if="!loadError && !isLoading && filteredItems.length" v-model="currentPage" :total-pages="totalPages" />
         <Transition name="dock">
-            <div v-if="selectedEntries.length" role="region" aria-label="Selected share links" class="selection-region mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-divider bg-surface px-4 py-3">
+            <div v-if="selectedEntries.length" role="region" aria-label="Selected share links" class="selection-region mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border
+                border-divider bg-surface px-4 py-3">
                 <span class="text-sm text-secondary" aria-live="polite">{{ selectedEntries.length }} selected</span>
                 <div class="flex items-center gap-2">
                     <button type="button" :disabled="busy" class="shared-button" @click="selectedIds = []">Deselect all</button>
@@ -266,9 +333,11 @@ const clearFilters = () => {
     statusFilter.value = 'all'
 }
 
-const itemIcon = (item: SharedListItem) => item.itemType === 'folder'
-    ? 'solar:folder-bold'
-    : item.itemType === 'note' ? 'solar:notebook-bold' : getFileIcon(item.mimeType, item.name)
+const itemIcon = (item: SharedListItem) => {
+    if (item.itemType === 'folder') return 'solar:folder-bold'
+    if (item.itemType === 'note') return 'solar:notebook-bold'
+    return getFileIcon(item.mimeType, item.name)
+}
 
 const itemLocation = (item: SharedListItem) => ({
     path: `/${{ file: 'files', folder: 'folders', note: 'notes' }[item.itemType]}/${encodeURIComponent(item.itemId)}`,
@@ -376,9 +445,13 @@ await loadShares()
 @reference "../../../assets/css/tailwind.css";
 
 .shared-button {
-    @apply inline-flex h-control cursor-pointer items-center justify-center gap-2 rounded-control border border-control-border bg-control px-3 text-control-size text-secondary hover:enabled:bg-raised disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex h-10 max-mobile:h-11 pointer-coarse:h-11 cursor-pointer items-center justify-center;
+    @apply gap-2 rounded-lg border border-control-border bg-control px-3 text-sm text-secondary;
+    @apply hover:enabled:bg-raised disabled:cursor-not-allowed disabled:opacity-40;
 }
 .shared-icon {
-    @apply inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-control text-label no-underline hover:enabled:bg-raised hover:bg-raised hover:text-foreground disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-label;
+    @apply no-underline hover:bg-raised hover:text-foreground disabled:cursor-not-allowed disabled:opacity-35;
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
 }
 </style>

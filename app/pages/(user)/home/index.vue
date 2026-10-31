@@ -1,9 +1,9 @@
 <template>
     <div class="dashboard-page flex flex-col gap-3 size-full">
-        <section class="stats-grid grid grid-cols-[repeat(3,_1fr)] max-mobile:grid-cols-1 gap-3 shrink-0">
+        <section class="stats-grid grid grid-cols-3 max-mobile:grid-cols-1 gap-3 shrink-0">
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
-                <div class="stat-icon purple-bg flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem]
-                    text-[1.6rem] size-[3.4rem]">
+                <div class="stat-icon flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem] text-[1.6rem]
+                    size-[3.4rem]">
                     <Icon
                         name="solar:document-linear"
                         aria-hidden="true"
@@ -18,8 +18,8 @@
             </div>
 
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
-                <div class="stat-icon blue-bg flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem]
-                    text-[1.6rem] size-[3.4rem]">
+                <div class="stat-icon flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem] text-[1.6rem]
+                    size-[3.4rem]">
                     <Icon
                         name="solar:folder-linear"
                         aria-hidden="true"
@@ -34,8 +34,8 @@
             </div>
 
             <div class="stat-card min-h-32 flex items-center gap-4 p-4 bg-surface border border-divider rounded-3xl">
-                <div class="stat-icon flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem]
-                    text-[1.6rem] size-[3.4rem]">
+                <div class="stat-icon flex items-center justify-center text-accent bg-accent/12 rounded-[0.675rem] text-[1.6rem]
+                    size-[3.4rem]">
                     <Icon
                         name="solar:notebook-linear"
                         aria-hidden="true"
@@ -66,13 +66,14 @@
 
                     <div
                         class="files-list flex-1 min-h-0 pt-0 pr-[1.4rem] pb-2 pl-[1.4rem] overflow-y-auto overflow-x-hidden
-                        [scrollbar-width:thin] [scrollbar-color:var(--color-scrollbar)_transparent] files-empty:flex files-empty:flex-col"
+                            [scrollbar-width:thin] [scrollbar-color:var(--color-scrollbar)_transparent] files-empty:flex
+                            files-empty:flex-col"
                         :class="{ 'files-list-empty': files.length === 0 }"
                     >
                         <div
                             v-if="files.length === 0"
                             class="empty-files flex-1 min-h-48 flex flex-col justify-center items-center gap-[0.45rem] text-muted
-                            text-center"
+                                text-center"
                         >
                             <div class="empty-files-icon mb-2 flex items-center justify-center text-3xl leading-[inherit] text-accent
                                 size-[3.2rem]">
@@ -89,7 +90,7 @@
                             <NuxtLink
                                 to="/files"
                                 class="empty-files-link mt-[0.35rem] flex items-center gap-1 text-accent text-[0.825rem] font-medium
-                                no-underline hover:text-accent"
+                                    no-underline hover:text-accent"
                             >
                                 Open Files
                                 <Icon class="text-[0.825rem] text-muted" name="solar:arrow-right-linear" />
@@ -121,14 +122,14 @@
                                             v-model="editingFileName"
                                             type="text"
                                             class="file-name-input w-full min-w-0 py-1 px-2 text-foreground bg-control border border-primary rounded-md
-                                            text-sm font-semibold outline-none leading-normal focus-visible:border-accent"
+                                                text-sm font-semibold outline-none leading-normal focus-visible:border-accent"
                                             :readonly="isSavingRename"
                                             @keydown.enter.prevent="saveRename(file)"
                                             @keydown.esc.prevent="cancelRename"
                                             @blur="saveRename(file)"
                                             @click.stop
                                         />
-                                        <strong class="text-foreground text-sm font-semibold overflow-hidden text-ellipsis whitespace-nowrap leading-normal" v-else>{{ file.name }}</strong>
+                                        <strong class="text-foreground text-sm font-semibold leading-normal truncate" v-else>{{ file.name }}</strong>
                                         <span class="text-muted text-xs font-normal leading-normal"
                                             >{{ getFileType(file.original_name) }} •
                                             {{ formatFileTime(file.created_at) }}</span
@@ -198,8 +199,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 w-full self-stretch min-h-0 flex flex-col
-                    pb-4">
+                <div class="dashboard-card quick-card bg-surface border border-divider rounded-3xl overflow-hidden flex-1 w-full self-stretch
+                    min-h-0 flex flex-col pb-4">
                     <div class="card-header flex items-center justify-between p-4 shrink-0">
                         <h2 class="m-0 text-foreground text-lg font-semibold leading-tight">Quick Actions</h2>
                     </div>
@@ -209,10 +210,10 @@
                             @click="navigateTo('/files')"
                             type="button"
                             class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
-                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
+                                border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform] duration-200
+                                hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
-                            <div class="quick-action-icon upload-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
+                            <div class="quick-action-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
                                 text-on-primary bg-primary size-[3.4rem]">
                                 <Icon name="solar:upload-linear" />
                             </div>
@@ -224,8 +225,8 @@
                             @click="navigateTo('/folders')"
                             type="button"
                             class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
-                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
+                                border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform] duration-200
+                                hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
                             <div class="quick-action-icon folder-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
                                 text-accent bg-accent/12 border border-accent/25 size-[3.4rem]">
@@ -238,8 +239,8 @@
                         <button
                             type="button"
                             class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
-                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
+                                border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform] duration-200
+                                hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
                             <div class="quick-action-icon note-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
                                 text-accent bg-accent/12 border border-accent/25 size-[3.4rem]">
@@ -252,8 +253,8 @@
                         <button
                             type="button"
                             class="quick-action-card min-h-28 flex items-center gap-3 p-4 text-foreground bg-subtle border
-                            border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform]
-                            duration-200 ease-[ease] hover:bg-raised hover:border-hover-border hover:-translate-y-px"
+                                border-raised rounded-3xl cursor-pointer transition-[background,border-color,transform] duration-200
+                                hover:bg-raised hover:border-hover-border hover:-translate-y-px"
                         >
                             <div class="quick-action-icon inbox-icon flex items-center justify-center shrink-0 rounded-md text-[1.65rem]
                                 text-on-primary bg-primary border border-primary size-[3.4rem]">
