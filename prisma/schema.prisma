@@ -71,6 +71,7 @@ model request_uploads {
   file_id String? @db.Uuid
   name String @db.VarChar(255)
   sender_name String @default("") @db.VarChar(100)
+  sender_note String @default("") @db.VarChar(1000)
   size BigInt
   status String @default("pending") @db.VarChar(20)
   storage_key String?
@@ -82,6 +83,22 @@ model request_uploads {
 
   @@index([request_id, created_at])
   @@index([request_id, status])
+}
+
+model upload_sessions {
+  id String @id @db.Uuid
+  user_id String @db.Uuid
+  request_id String? @db.Uuid
+  access_hash String @db.VarChar(64)
+  manifest Json @db.JsonB
+  offsets Json @db.JsonB
+  total_size BigInt
+  result Json? @db.JsonB
+  expires_at DateTime @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id, expires_at])
+  @@index([expires_at])
 }
 
 model folders {

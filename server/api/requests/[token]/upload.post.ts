@@ -12,7 +12,7 @@ export default defineEventHandler(async event => {
     assertShareOrigin(event)
     enforceRateLimit(event, 'inbox-public-upload', 10, 60000)
     const request = await publicFileRequest(event)
-    const { parts, senderName } = await readInboxUpload(event, request.max_file_size)
+    const { parts, senderName, senderNote } = await readInboxUpload(event, request.max_file_size)
     const totalSize = validateRequestFiles(parts, request.max_file_size)
     const savedKeys: string[] = []
     let committed = false
@@ -29,7 +29,7 @@ export default defineEventHandler(async event => {
                 const { storageKey } = await saveFileToStorage(request.user_id, part)
                 savedKeys.push(storageKey)
                 await tx.request_uploads.create({ data: {
-                    request_id: request.id, name: part.filename, sender_name: senderName, size: BigInt(part.data.length),
+                    request_id: request.id, name: part.filename, sender_name: senderName, sender_note: senderNote, size: BigInt(part.data.length),
                     status: 'pending', storage_key: storageKey, mime_type: part.type || null
                 } })
             }

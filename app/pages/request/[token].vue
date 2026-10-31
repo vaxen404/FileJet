@@ -12,6 +12,8 @@
                 <div v-if="uploadedCount" role="status" class="mt-6 rounded-xl border border-accent/30 bg-accent/10 p-5 text-center"><Icon name="solar:check-circle-linear" size="34" class="text-accent" /><h2 class="mt-2 font-semibold">Files sent successfully</h2><p class="mt-2 text-sm text-label">{{ uploadedCount }} {{ uploadedCount === 1 ? 'file has' : 'files have' }} been delivered.</p><button type="button" class="inbox-button mt-4" @click="sendMore">Send more files</button></div>
                 <form v-else class="mt-6 flex flex-col gap-4" @submit.prevent="upload">
                     <label class="flex flex-col gap-2 text-sm text-label">Your name <span class="text-xs text-muted">Optional · shown to the recipient</span><input v-model="senderName" maxlength="100" autocomplete="name" class="inbox-input" :disabled="sending"></label>
+                    <label class="flex flex-col gap-2 text-sm text-label">Note to the recipient <span class="text-xs text-muted">Optional · up to 1000 characters</span><textarea v-model="senderNote" maxlength="1000" rows="3" class="inbox-input resize-y" :disabled="sending" placeholder="Tell the recipient about these files…" /></label>
+                    <p v-if="senderDraftSaved" class="text-xs text-muted">Your name and note are saved on this browser until you send the files. <button type="button" class="underline" :disabled="sending" @click="clearSenderDraft">Discard draft</button></p>
                     <div class="rounded-xl border border-dashed p-6 text-center" :class="dragging ? 'border-accent bg-accent/10' : 'border-control-border bg-canvas'" @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="drop">
                         <Icon name="solar:cloud-upload-linear" size="36" class="text-accent" />
                         <p class="mt-3 text-sm font-medium">Add files or drop them here</p>
@@ -37,6 +39,8 @@
 import type { PublicFileRequest } from '~~/shared/types/inbox'
 import { formatFileSize } from '~/utils/file'
 import { getAccentColor } from '~/utils/appearance'
+import { browserDraftStorage, readFormDraft, writeFormDraft } from '~/utils/formDraft'
+import { parseSender } from '~~/shared/utils/sender'
 definePageMeta({ layout: false })
 useHead({ title: 'Send files · FileJet', meta: [{ name: 'robots', content: 'noindex, nofollow' }, { name: 'referrer', content: 'no-referrer' }] })
 const { resolvedTheme } = useTheme()
@@ -52,7 +56,22 @@ const route = useRoute(), inputId = useId()
 const token = computed(() => String(route.params.token))
 const { data: request, pending, error, refresh } = await useFetch<PublicFileRequest>(() => `/api/requests/${encodeURIComponent(token.value)}`)
 const requestErrorMessage = computed(() => (error.value?.data as { message?: string } | undefined)?.message || 'This request may be closed, expired, or removed. Ask the sender for a new link.')
-const files = ref<File[]>([]), senderName = ref(''), uploadError = ref('')
+const files = ref<File[]>([]), senderName = ref(''), senderNote = ref(''), uploadError = ref('')
+const senderDraftSaved = ref(false)
+const senderDraftKey = computed(() => `filejet:sender-draft:${token.value}`)
+let senderDraftReady = false
+const clearSenderDraft = () => { senderName.value = ''; senderNote.value = ''; writeFormDraft(browserDraftStorage(), senderDraftKey.value, null); senderDraftSaved.value = false }
+onMounted(() => {
+    const saved = readFormDraft<{ senderName: string; senderNote: string }>(browserDraftStorage(), senderDraftKey.value, (value): value is { senderName: string; senderNote: string } => {
+        try { if (!value || typeof value !== 'object') return false; parseSender(value); return true } catch { return false }
+    })
+    if (saved) { senderName.value = saved.senderName ?? ''; senderNote.value = saved.senderNote ?? ''; senderDraftSaved.value = true }
+    senderDraftReady = true
+})
+watch([senderName, senderNote], () => {
+    if (!senderDraftReady) return
+    senderDraftSaved.value = writeFormDraft(browserDraftStorage(), senderDraftKey.value, senderName.value || senderNote.value ? { senderName: senderName.value, senderNote: senderNote.value } : null)
+}, { flush: 'sync' })
 const sending = ref(false), dragging = ref(false), progress = ref(0), uploadedCount = ref(0), fileInput = ref<HTMLInputElement | null>(null)
 let activeUpload: XMLHttpRequest | null = null
 const addFiles = (selected: File[]) => {
@@ -74,6 +93,7 @@ const upload = async () => {
     if (sending.value || !files.value.length) return
     const body = new FormData()
     body.append('senderName', senderName.value)
+    body.append('senderNote', senderNote.value)
     for (const file of files.value) body.append('files', file)
     sending.value = true; uploadError.value = ''; progress.value = 0
     try {
@@ -94,7 +114,7 @@ const upload = async () => {
             xhr.onabort = () => reject(new Error('Upload cancelled.'))
             xhr.send(body)
         })
-        uploadedCount.value = result.uploadedCount; files.value = []
+        uploadedCount.value = result.uploadedCount; files.value = []; clearSenderDraft()
     } catch (error: any) { uploadError.value = error.message || 'Could not send files.' }
     finally { sending.value = false; activeUpload = null }
 }

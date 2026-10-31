@@ -8,6 +8,7 @@
                 <button ref="closeButton" type="button" class="inbox-icon" aria-label="Close preview" @click="emit('close')"><Icon name="solar:close-circle-linear" size="25" /></button>
             </header>
             <section class="preview-content relative min-h-0 flex-1 overflow-auto bg-canvas p-4" :aria-busy="loading">
+                <aside v-if="upload?.senderName || upload?.senderNote" class="mb-4 rounded-lg border border-divider bg-surface p-3 text-sm"><p class="text-muted">From {{ upload.senderName || 'Anonymous sender' }} <span class="text-xs">(self-reported)</span></p><p v-if="upload.senderNote" class="mt-2 whitespace-pre-wrap wrap-anywhere text-content">{{ upload.senderNote }}</p></aside>
                 <p v-if="loading" role="status" class="absolute inset-x-4 top-4 z-10 rounded-lg bg-surface/90 p-3 text-center text-sm text-muted">Loading preview…</p>
                 <div v-if="errorMessage" role="alert" class="flex min-h-64 flex-col items-center justify-center gap-3 text-center"><Icon name="solar:danger-triangle-linear" size="34" class="text-muted" /><p class="max-w-96 text-sm leading-6 text-label">{{ errorMessage }}</p><button type="button" class="inbox-button" @click="openPreview">Try again</button></div>
                 <template v-else>
@@ -77,6 +78,6 @@ onBeforeUnmount(() => { generation++; controller?.abort(); dialog.value?.close()
 .inbox-preview-dialog { margin: auto; width: min(68rem, calc(100% - 2rem)); height: min(52rem, calc(100dvh - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); padding: 0; overflow: hidden; border: 1px solid var(--color-divider); border-radius: 1rem; background: var(--color-surface); color: var(--color-foreground); }
 .inbox-preview-dialog[open] { display: flex; flex-direction: column; }
 .inbox-preview-dialog::backdrop { background: #000a; }
-.preview-content:has(> img) { display: flex; align-items: center; justify-content: center; }
+.preview-content:has(> img) { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 @media (max-width: 480px) { .inbox-preview-dialog { width: calc(100% - 1rem); height: calc(100dvh - 1rem); max-height: calc(100dvh - 1rem); } }
 </style>

@@ -21,7 +21,7 @@ export default defineEventHandler(async event => {
         request: fileRequestView(event, request, folder?.name, uploads.filter(item => item.status === 'pending').length),
         uploads: uploads.map(item => ({
             id: item.id, requestId: id, requestTitle: request.title, fileId: item.file_id,
-            name: item.name, senderName: item.sender_name, size: item.size.toString(), createdAt: item.created_at.toISOString(),
+            name: item.name, senderName: item.sender_name, senderNote: item.sender_note, size: item.size.toString(), createdAt: item.created_at.toISOString(),
             status: item.status, reviewedAt: item.reviewed_at?.toISOString() ?? null, mimeType: item.mime_type
         }))
     }

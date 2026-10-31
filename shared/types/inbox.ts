@@ -22,6 +22,7 @@ export interface ReceivedFile {
     fileId: string | null
     name: string
     senderName: string
+    senderNote: string
     size: string
     mimeType: string | null
     status: 'pending' | 'approved' | 'rejected'
