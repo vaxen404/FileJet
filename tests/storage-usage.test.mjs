@@ -52,6 +52,7 @@ function apiFixture(options = {}) {
             { user_id: other, item_type: 'file', mime_type: 'image/png', size: 9999n }]
     }
     data.request_uploads = []
+    data.file_versions = []
     const grouped = (table, query) => {
         calls.push({ table, query })
         const rows = data[table].filter(row => row.user_id === (query.where.user_id ?? query.where.request?.user_id)
@@ -68,6 +69,7 @@ function apiFixture(options = {}) {
     const tx = {
         users: { findUnique: async query => { calls.push({ table: 'users', query }); return options.missing ? null : { storage_limit: 1000n } } },
         files: { groupBy: async query => grouped('files', query) },
+        file_versions: { groupBy: async query => grouped('file_versions', query) },
         notes: { aggregate: async query => {
             calls.push({ table: 'notes', query })
             return { _sum: { size: data.notes.filter(row => row.user_id === query.where.user_id).reduce((sum, row) => sum + row.size, 0n) } }

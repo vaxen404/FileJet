@@ -64,6 +64,11 @@ try {
         }
 
         const committed = new Set(rows.map(row => row.storage_key))
+        const versionTable = await client.query("SELECT to_regclass('file_versions') AS present")
+        if (versionTable.rows[0]?.present) {
+            const versions = await client.query('SELECT storage_key FROM file_versions WHERE storage_key = ANY($1::text[])', [journal.keys])
+            for (const row of versions.rows) committed.add(row.storage_key)
+        }
 
         for (const key of journal.keys) {
             if (committed.has(key)) continue

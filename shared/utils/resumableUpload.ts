@@ -2,7 +2,7 @@ export const UPLOAD_CHUNK_SIZE = 1024 * 1024
 export const UPLOAD_LIFETIME = 24 * 60 * 60 * 1000
 export interface UploadFileManifest { name: string; type: string; size: number; path: string; hashes: string[] }
 export type UploadKind = 'files' | 'folders' | 'notes' | 'inbox'
-export interface UploadManifest { kind: UploadKind; folderId: string | null; requestToken?: string; senderName: string; senderNote: string; files: UploadFileManifest[] }
+export interface UploadManifest { kind: UploadKind; folderId: string | null; requestToken?: string; replaceFileId?: string; expectedRevision?: number; senderName: string; senderNote: string; files: UploadFileManifest[] }
 export interface UploadSessionView { id: string; offsets: number[]; expiresAt: string; completed: boolean; result: Record<string, unknown> | null }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export function parseUploadManifest(value: unknown): UploadManifest {
@@ -16,6 +16,7 @@ export function parseUploadManifest(value: unknown): UploadManifest {
     const files = body.files as UploadFileManifest[]
     const maxFiles = kind === 'folders' ? 2000 : kind === 'notes' ? 10 : 6
     if (!Array.isArray(files) || !files.length || files.length > maxFiles) fail(`Choose between 1 and ${maxFiles} files.`)
+    if (body.replaceFileId !== undefined && (kind !== 'files' || files.length !== 1 || typeof body.replaceFileId !== 'string' || !uuid.test(body.replaceFileId) || !Number.isSafeInteger(body.expectedRevision) || Number(body.expectedRevision) < 1)) fail('Invalid file version target.')
     const names = new Set<string>()
     let total = 0
     for (const file of files) {
@@ -34,5 +35,5 @@ export function parseUploadManifest(value: unknown): UploadManifest {
         names.add(name); total += file.size
     }
     if (total > (kind === 'inbox' ? 50 * 1024 ** 2 : 1024 ** 3)) fail(kind === 'inbox' ? 'Upload up to 50 MB at a time.' : 'Upload up to 1 GB at a time.')
-    return { kind, folderId: folderId as string | null, requestToken: kind === 'inbox' ? body.requestToken as string : undefined, senderName: '', senderNote: '', files: files.map(file => ({ name: file.name, path: file.path, type: file.type, size: file.size, hashes: file.hashes })) }
+    return { kind, folderId: folderId as string | null, requestToken: kind === 'inbox' ? body.requestToken as string : undefined, ...(body.replaceFileId ? { replaceFileId: body.replaceFileId as string, expectedRevision: body.expectedRevision as number } : {}), senderName: '', senderNote: '', files: files.map(file => ({ name: file.name, path: file.path, type: file.type, size: file.size, hashes: file.hashes })) }
 }

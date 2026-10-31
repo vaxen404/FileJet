@@ -85,6 +85,7 @@ export default defineEventHandler(async event => {
                             original_name: item.original_name,
                             mime_type: item.mime_type,
                             size: item.size,
+                            revision: item.revision,
                             storage_key: item.storage_key
                         }
                     })
@@ -234,6 +235,7 @@ export default defineEventHandler(async event => {
                                 original_name: file.original_name,
                                 mime_type: file.mime_type,
                                 size: file.size,
+                                revision: file.revision,
                                 storage_key: file.storage_key
                             }
                         })

@@ -7,6 +7,7 @@ interface ResumeRecord { id: string; key: string; expiresAt: number; label: stri
 interface UploadOptions {
     kind: UploadKind; scope: string; label: string; folderId?: string | null; requestToken?: string
     senderName?: string; senderNote?: string; signal?: AbortSignal
+    replaceFileId?: string; expectedRevision?: number
     onProgress?: (loaded: number, total: number, finishing: boolean) => void
 }
 const prefix = (scope: string) => `filejet:upload:${scope}:`
@@ -90,7 +91,7 @@ export async function uploadResumably(files: File[], options: UploadOptions): Pr
         }
     }
     try {
-        const manifest: UploadManifest = { kind: options.kind, folderId: options.folderId ?? null, requestToken: options.requestToken, ...parseSender(options), files: [] }
+        const manifest: UploadManifest = { kind: options.kind, folderId: options.folderId ?? null, requestToken: options.requestToken, ...(options.replaceFileId ? { replaceFileId: options.replaceFileId, expectedRevision: options.expectedRevision } : {}), ...parseSender(options), files: [] }
         for (const file of files) {
             const hashes: string[] = []
             for (let offset = 0; offset < file.size; offset += UPLOAD_CHUNK_SIZE) {

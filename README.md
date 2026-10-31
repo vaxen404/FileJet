@@ -83,6 +83,12 @@ QR codes are generated in the browser and contain the existing public link. The 
 - A deleted default destination does not block submissions: choose an available destination when approving. Approved files removed from the live library remain in Inbox history as removed.
 - Up to 50 requests can be kept per account. Apply the Inbox migrations, including `202610310003_upload_resume_sender_note`, and regenerate the Prisma client when updating an existing installation. Previously saved Inbox files retain approved status.
 
+### File version history
+
+Open a file's details and use **Version history → Upload new version** to replace its contents while keeping its ID, filename, favorites, and share links. Replacements use resumable uploads and must have the same extension. The previous contents become an owner-only saved version. Download, restore, or permanently delete saved versions from this panel; restoring creates a new current revision and preserves the outgoing contents. Concurrent changes require refreshing the history before retrying.
+
+Saved versions count toward storage, including while the file is in Trash. Restoring from Trash keeps history; permanent deletion of a file or its containing trashed folder removes its saved versions and releases their bytes. A file can retain up to 50 saved versions. Apply `202611010001_file_versions` and regenerate Prisma when updating. With a development server on port 3018 (or `FILEJET_TEST_URL`), run `node --env-file=.env tests/file-versions.integration.mjs` for isolated HTTP/database tests; temporary accounts are cleaned up afterward.
+
 ### Quick preview and interrupted uploads
 
 - In Files, Notes, Favorites, or a folder, focus a file/card or list row and press **Space** for a preview without navigating away. **Esc** closes the preview and restores focus. Text/code, images, PDF, and supported audio/video are previewed; HTML/SVG are shown as escaped text. Unsupported formats offer an explicit download. Space keeps its normal behavior in search fields, editors, checkboxes, buttons, and media controls.

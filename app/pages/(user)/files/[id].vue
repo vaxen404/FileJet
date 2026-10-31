@@ -360,6 +360,7 @@
                     />
                 </div>
             </section>
+            <FileVersionHistory :file-id="file.id" :revision="file.revision" :name="displayFileName" @changed="versionChanged" />
         </aside>
     </div>
     <div
@@ -409,6 +410,7 @@ definePageMeta({
 
 interface FileData {
     id: string
+    revision: number
     user_id: string
     folder_id: string | null
     name: string
@@ -681,7 +683,7 @@ const handleFavorite = async (item: FileData) => {
     }
 }
 
-const previewUrl = computed(() => `/api/files/${encodeURIComponent(fileId)}/preview`)
+const previewUrl = computed(() => `/api/files/${encodeURIComponent(fileId)}/preview?revision=${file.value?.revision ?? 1}`)
 
 const isImage = computed(() => file.value?.mime_type?.startsWith('image/') ?? false)
 
@@ -822,13 +824,18 @@ const metadataRows = computed(() => {
     return rows
 })
 
-if (isText.value) {
+const loadTextPreview = async () => {
+    previewError.value = ''
+    if (!isText.value) return
     try {
         textContent.value = await $fetch<string>(previewUrl.value, { responseType: 'text' })
     } catch {
         handlePreviewError()
     }
 }
+await loadTextPreview()
+watch(previewUrl, loadTextPreview)
+const versionChanged = async () => { await refresh(); await fetchAll() }
 </script>
 
 <style scoped>

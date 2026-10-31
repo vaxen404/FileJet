@@ -48,6 +48,11 @@ export default defineEventHandler(async event => {
     }
     return prisma.$transaction(async tx => {
         const user = await lockStorageUser(tx, userId)
+        if (manifest.replaceFileId) {
+            const file = await tx.files.findFirst({ where: { id: manifest.replaceFileId, user_id: userId } })
+            if (!file) throwError(404, 'File not found.')
+            if (file.revision !== manifest.expectedRevision) throwError(409, 'This file changed. Refresh its history before trying again.')
+        }
         if (manifest.folderId && manifest.kind !== 'inbox' && !await tx.folders.findFirst({ where: { id: manifest.folderId, user_id: userId } })) throwError(404, 'Destination folder not found.')
         const where = { user_id: userId, result: { equals: Prisma.DbNull }, expires_at: { gt: new Date() } }
         const active = await tx.upload_sessions.aggregate({ where, _sum: { total_size: true }, _count: true })

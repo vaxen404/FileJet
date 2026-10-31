@@ -11,6 +11,7 @@ import { throwError } from './error'
 import { isUuid } from './validation'
 import { assertRequestOpen } from './inboxValidation'
 import { noteSchema } from '../../shared/schemas/note'
+import { replaceVersionedFile } from './fileVersions'
 import { UPLOAD_CHUNK_SIZE, type UploadManifest, type UploadSessionView } from '../../shared/utils/resumableUpload'
 
 export const accessHash = (key: string) => createHash('sha256').update(key).digest('hex')
@@ -108,6 +109,19 @@ export async function finishUpload(id: string, userId: string) {
         if (session.result) return session.result as Record<string, unknown>
         const manifest = manifestOf(session), offsets = session.offsets as number[]
         if (manifest.files.some((file, index) => offsets[index] !== file.size)) throwError(409, 'The upload is incomplete. Resume it before finishing.')
+        if (manifest.replaceFileId) {
+            const incoming = manifest.files[0]!, path = stagedPath(id, 0)
+            if (!incoming.size) { await mkdir(dirname(path), { recursive: true }); const handle = await open(path, 'a', 0o600); await handle.close() }
+            const content = await stat(path).catch(() => null)
+            if (!content?.isFile() || content.size !== incoming.size) throwError(409, 'The replacement file is incomplete.')
+            const storageKey = `${userId}/${id}-0`, finalPath = storagePath(storageKey)
+            await mkdir(dirname(finalPath), { recursive: true })
+            await link(path, finalPath).catch(error => { if (error.code !== 'EEXIST') throw error })
+            const file = await replaceVersionedFile(tx, userId, manifest.replaceFileId, manifest.expectedRevision!, { name: incoming.name, mimeType: incoming.type || null, size: BigInt(incoming.size), storageKey })
+            const result = { success: true, fileId: file.id, revision: file.revision }
+            await tx.upload_sessions.update({ where: { id }, data: { result } })
+            return result
+        }
         await destination(tx, userId, manifest.kind === 'inbox' ? null : manifest.folderId)
         if (session.request_id) {
             await tx.$queryRaw`SELECT id FROM file_requests WHERE id = ${session.request_id}::uuid FOR UPDATE`

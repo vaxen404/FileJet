@@ -1,3 +1,4 @@
+import { removeFileVersions } from '~~/server/utils/fileVersions'
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
@@ -116,6 +117,13 @@ export default defineEventHandler(async event => {
 
                         storageKeys.add(key)
                     }
+                }
+
+                const versionedIds = selectedItems.filter(entry => entry.item_type === 'file' && entry.revision > 1).map(entry => entry.item_id)
+                if (versionedIds.length) {
+                    const history = await removeFileVersions(tx, session.userId, versionedIds)
+                    totalSize += history.size
+                    for (const key of history.keys) storageKeys.add(key)
                 }
 
                 const user = await tx.users.findUnique({
