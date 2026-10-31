@@ -6,6 +6,7 @@ import ts from 'typescript'
 import { createError } from 'h3'
 import { getFileReturnPage } from '../app/utils/fileNavigation.ts'
 import { getInboxPreview, inboxPreviewRange } from '../shared/utils/inboxPreview.ts'
+import * as vue from 'vue'
 
 const rejects = (fn, status) => assert.throws(fn, error => error.statusCode === status)
 const openRequest = { is_open: true, expires_at: null, received_count: 0, max_files: 3 }
@@ -299,4 +300,19 @@ test('pending previews are inline, bounded and sandboxed without saving or autom
     const invalid=previewFixture({mime:'application/pdf',size:100,range:'bytes=101-'})
     assert.equal(await invalid.run(),'');assert.equal(invalid.status,416)
     await assert.rejects(previewFixture({mime:'application/zip',name:'archive.zip'}).run,{statusCode:415})
+})
+
+test('Inbox destinations use the Folders-page root list and display names without nested paths', async () => {
+    const roots = ['server', 'Baltaş', 'deneme', 'javascript'].map((name, index) => ({ id: `root-${index}`, name, parent_folder_id: null }))
+    const calls = []
+    const source = readFileSync(new URL('../app/composables/ui/useInboxFolders.ts', import.meta.url), 'utf8')
+    const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
+    const module = { exports: {} }
+    new Function('module', 'exports', 'ref', 'computed', '$fetch', code)(module, module.exports, vue.ref, vue.computed, async url => { calls.push(url); return { folders: roots } })
+    const folders = module.exports.useInboxFolders()
+    await folders.loadFolders()
+    assert.deepEqual(calls, ['/api/folders'])
+    assert.deepEqual(folders.folderOptions.value, roots.map(folder => ({ id: folder.id, label: folder.name })))
+    assert.equal(folders.loadingFolders.value, false)
+    assert.equal(folders.folderError.value, '')
 })

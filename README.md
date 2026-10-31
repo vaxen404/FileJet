@@ -68,6 +68,7 @@ QR codes are generated in the browser and contain the existing public link. The 
 ### Inbox and file requests
 
 - Use **Inbox → Create inbox** to create a named inbox and choose a default approval destination. Open an inbox card to view only the files sent to that inbox; **Edit inbox** updates its name, description, default destination, limits, and expiration while retaining the upload link.
+- Inbox destination selectors show the same top-level folders as the **Folders** page, plus **Files (root)**. Nested project folders and dependency directories are not listed.
 - Share a link or download its QR code; senders can upload without an account and cannot browse the recipient's files.
 - Set a per-file limit (up to 25 MB), a total file count (up to 1000), and an optional expiration date. Requests default to 10 MB per file, 100 files, and seven days.
 - Upload up to six files and 50 MB per submission. New files stay pending in Inbox until the recipient approves them. Pending bytes count toward the recipient's storage quota but do not appear in Files, folders, favorites, or public shares.
