@@ -360,6 +360,7 @@
                     />
                 </div>
             </section>
+            <ItemTagsEditor :item-id="file.id" item-type="file" :tags="file.tags" @changed="file.tags = $event" />
             <FileVersionHistory :file-id="file.id" :revision="file.revision" :name="displayFileName" @changed="versionChanged" />
         </aside>
     </div>
@@ -409,6 +410,7 @@ definePageMeta({
 })
 
 interface FileData {
+    tags?: string[]
     id: string
     revision: number
     user_id: string

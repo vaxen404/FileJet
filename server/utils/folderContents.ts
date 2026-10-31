@@ -51,17 +51,18 @@ export async function getFolderTree(userId: string, rootId: string) {
     return [...ids]
 }
 
-export async function getFolderContents(userId: string, folderId: string) {
+export async function getFolderContents(userId: string, folderId: string, includeTags = false) {
     const [folders, files, notes] = await Promise.all([
         prisma.folders.findMany({
             where: { user_id: userId, parent_folder_id: folderId },
-            select: { id: true, name: true, created_at: true, updated_at: true }
+            select: { id: true, tags: true, name: true, created_at: true, updated_at: true }
         }),
         prisma.files.findMany({
             where: { user_id: userId, folder_id: folderId },
             select: {
                 id: true,
                 name: true,
+                tags: true,
                 original_name: true,
                 mime_type: true,
                 size: true,
@@ -71,7 +72,7 @@ export async function getFolderContents(userId: string, folderId: string) {
         }),
         prisma.notes.findMany({
             where: { user_id: userId, folder_id: folderId },
-            select: { id: true, title: true, size: true, created_at: true, updated_at: true }
+            select: { id: true, tags: true, title: true, size: true, created_at: true, updated_at: true }
         })
     ])
 
@@ -84,11 +85,10 @@ export async function getFolderContents(userId: string, folderId: string) {
             name: item.title,
             size: item.size.toString()
         }))
-    ].map(item => ({
-        ...item,
-        created_at: item.created_at?.toISOString() ?? null,
-        updated_at: item.updated_at?.toISOString() ?? null
-    }))
+    ].map(item => {
+        const { tags, ...visible } = item
+        return { ...visible, ...(includeTags ? { tags } : {}), created_at: item.created_at?.toISOString() ?? null, updated_at: item.updated_at?.toISOString() ?? null }
+    })
 
     return { items, counts: { files: files.length, folders: folders.length, notes: notes.length } }
 }

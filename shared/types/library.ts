@@ -1,6 +1,7 @@
 import type { ShareState } from './share'
 
 export interface LibraryItem {
+    tags?: string[]
     id: string
     type: 'file' | 'folder' | 'note'
     name: string
@@ -12,6 +13,7 @@ export interface LibraryItem {
 }
 
 export interface NoteDetails {
+    tags?: string[]
     id: string
     user_id: string
     folder_id: string | null
@@ -25,6 +27,7 @@ export interface NoteDetails {
 }
 
 export interface FolderDetails {
+    tags?: string[]
     id: string
     name: string
     parent_folder_id: string | null

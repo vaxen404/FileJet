@@ -1,3 +1,4 @@
+import { lockStorageUser } from '~~/server/utils/storage'
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
@@ -28,6 +29,7 @@ export default defineEventHandler(async event => {
         const noteIds = [...new Set<string>(ids)]
 
         const trashIds = await prisma.$transaction(async tx => {
+            await lockStorageUser(tx, session.userId)
             const notes = await tx.notes.findMany({
                 where: {
                     user_id: session.userId,
@@ -46,6 +48,7 @@ export default defineEventHandler(async event => {
                     user_id: session.userId,
                     item_id: note.id,
                     item_type: 'note',
+                    tags: note.tags,
                     name: note.title,
                     content: note.content,
                     size: note.size,

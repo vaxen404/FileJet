@@ -27,6 +27,7 @@ model users {
 }
 
 model files {
+  tags String[] @default([]) @db.VarChar(32)
   revision Int @default(1)
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id       String    @db.Uuid
@@ -119,6 +120,7 @@ model upload_sessions {
 }
 
 model folders {
+  tags String[] @default([]) @db.VarChar(32)
   // Partial unique indexes for root/child names are maintained in migration SQL.
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id          String    @db.Uuid
@@ -136,6 +138,7 @@ model folders {
 }
 
 model notes {
+  tags String[] @default([]) @db.VarChar(32)
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id    String    @db.Uuid
   folder_id  String?   @db.Uuid
@@ -186,6 +189,7 @@ model shared_items {
 
 
 model trash {
+  tags String[] @default([]) @db.VarChar(32)
   revision Int @default(1)
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id       String    @db.Uuid

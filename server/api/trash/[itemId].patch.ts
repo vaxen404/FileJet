@@ -81,6 +81,7 @@ export default defineEventHandler(async event => {
                             id: item.item_id,
                             user_id: session.userId,
                             folder_id: item.folder_id,
+                            tags: item.tags,
                             name: item.name,
                             original_name: item.original_name,
                             mime_type: item.mime_type,
@@ -129,6 +130,7 @@ export default defineEventHandler(async event => {
                             id: item.item_id,
                             user_id: session.userId,
                             folder_id: item.folder_id,
+                            tags: item.tags,
                             title: item.name,
                             content: item.content,
                             size: item.size
@@ -200,6 +202,7 @@ export default defineEventHandler(async event => {
                                 data: {
                                     id: folder.item_id,
                                     user_id: session.userId,
+                                    tags: folder.tags,
                                     name: folder.name,
                                     parent_folder_id: parentId
                                 }
@@ -231,6 +234,7 @@ export default defineEventHandler(async event => {
                                 id: file.item_id,
                                 user_id: session.userId,
                                 folder_id: file.folder_id,
+                                tags: file.tags,
                                 name: file.name,
                                 original_name: file.original_name,
                                 mime_type: file.mime_type,
@@ -253,6 +257,7 @@ export default defineEventHandler(async event => {
                                 id: note.item_id,
                                 user_id: session.userId,
                                 folder_id: note.folder_id,
+                                tags: note.tags,
                                 title: note.name,
                                 content: note.content,
                                 size: note.size

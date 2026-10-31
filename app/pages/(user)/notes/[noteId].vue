@@ -5,6 +5,8 @@
         :title="note.title"
         :summary="formatFileSize(note.size)"
         :item-id="note.id"
+        :tags="note.tags"
+        @tags-changed="note.tags = $event"
         item-type="note"
         :metadata="metadataRows"
         :share="note.share"

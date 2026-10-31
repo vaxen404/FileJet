@@ -24,7 +24,8 @@
                     :options="filterOptions"
                 />
 
-                <SortDropdown v-model="sortMode" />
+                <TagFilter v-model="activeTag" :items="files" />
+                    <SortDropdown v-model="sortMode" />
             </div>
         </div>
 
@@ -183,6 +184,7 @@
                                             </span>
                                         </div>
                                     </div>
+                                <ItemTags :tags="file.tags" />
                                 </td>
 
                                 <td data-label="Type" class="item-meta-cell h-[4.2rem] file-table-cell">{{ getFileType(file.original_name) }}</td>
@@ -211,7 +213,7 @@
 
             <template #grid>
                 <ItemGrid>
-                    <ItemGridCard
+                    <ItemGridCard :tags="file.tags"
                         v-for="file in paginatedFiles"
                         :key="file.id"
                                 :data-preview-id="file.id" tabindex="0" aria-keyshortcuts="Space"
@@ -370,6 +372,11 @@ if (error.value) {
     openToast(error.value, 'error')
 }
 
+const activeTag = ref('')
+const matchesTaggedSearch = (name: string, tags: string[] | undefined, value: string) => {
+    const query = value.trim().normalize('NFKC').toLowerCase(), values = tags ?? []
+    return (!activeTag.value || values.some(tag => tag.toLowerCase() === activeTag.value)) && (query.startsWith('#') ? values.some(tag => tag.toLowerCase() === query.slice(1)) : [name, ...values].some(text => text.toLowerCase().includes(query)))
+}
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 const activeCategory = ref('All')
@@ -413,7 +420,7 @@ const filteredFiles = computed(() => {
             activeCategory.value === 'All' ||
             getFileCategory(file.original_name) === activeCategory.value
 
-        const matchesSearch = file.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+        const matchesSearch = matchesTaggedSearch(file.name, file.tags, searchQuery.value)
 
         return matchesCategory && matchesSearch
     })
@@ -599,4 +606,5 @@ watch([searchQuery, activeCategory, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 const quickPreviewItems = computed(() => paginatedFiles.value.map(file => ({ id: file.id, type: 'file' as const, name: file.original_name || file.name, mime_type: file.mime_type, size: file.size })))
+watch(activeTag, () => { currentPage.value = 1; selectedFiles.value = [] })
 </script>

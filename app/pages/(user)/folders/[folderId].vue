@@ -5,6 +5,8 @@
         :title="folder.name"
         :summary="formatFileSize(folder.totalSize)"
         :item-id="folder.id"
+        :tags="folder.tags"
+        @tags-changed="folder.tags = $event"
         item-type="folder"
         :metadata="metadataRows"
         :share="folder.share"

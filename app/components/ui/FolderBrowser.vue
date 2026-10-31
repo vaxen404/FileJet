@@ -9,6 +9,7 @@
                 placeholder="Search this folder..."
             />
             <div class="contents-controls flex items-center flex-wrap gap-2">
+                <TagFilter v-if="!readOnly" v-model="activeTag" :items="items" />
                 <SortDropdown v-model="sort" />
                 <ViewSwitcher v-model="view" />
                 <slot name="controls" />
@@ -83,6 +84,7 @@
                                             size-[2.7rem]"><Icon :name="icon(item)" /></span>
                                         <strong class="min-w-0 flex-1 truncate" :title="item.name">{{ item.name }}</strong>
                                     </div>
+                                <ItemTags :tags="item.tags" />
                                 </td>
                                 <td data-label="Type" class="item-meta-cell p-3 border-b border-b-divider">{{ item.type }}</td>
                                 <td data-label="Size" class="item-meta-cell p-3 border-b border-b-divider">
@@ -117,7 +119,7 @@
             </template>
             <template #grid>
                 <ItemGrid class="group-[.is-read-only]/folder-browser:grid-cols-[repeat(auto-fill,_minmax(min(100%,_14rem),_1fr))]">
-                    <ItemGridCard
+                    <ItemGridCard :tags="item.tags"
                         v-for="item in paginatedItems"
                         :key="item.id"
                                 :data-preview-id="item.id" tabindex="0" aria-keyshortcuts="Space"
@@ -243,12 +245,17 @@ const emit = defineEmits<{
     moved: []
 }>()
 
+const activeTag = ref('')
+const matchesTaggedSearch = (name: string, tags: string[] | undefined, value: string) => {
+    const query = value.trim().normalize('NFKC').toLowerCase(), values = tags ?? []
+    return (!activeTag.value || values.some(tag => tag.toLowerCase() === activeTag.value)) && (query.startsWith('#') ? values.some(tag => tag.toLowerCase() === query.slice(1)) : [name, ...values].some(text => text.toLowerCase().includes(query)))
+}
 const search = ref('')
 const view = ref<'grid' | 'list'>('grid')
 const sort = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
 
 const filtered = computed(() =>
-    props.items.filter(item => item.name.toLowerCase().includes(search.value.trim().toLowerCase()))
+    props.items.filter(item => matchesTaggedSearch(item.name, item.tags, search.value))
 )
 
 const { sortedItems } = useSort(
@@ -295,7 +302,7 @@ const icon = (item: LibraryItem) =>
           ? 'solar:notebook-bold'
           : getFileIcon(item.mime_type ?? null, item.original_name)
 
-watch([search, sort, view], () => {
+watch([search, activeTag, sort, view], () => {
     currentPage.value = 1
 })
 watch(totalPages, total => {
@@ -308,4 +315,5 @@ watch(
         selected.value = selected.value.filter(id => available.has(id))
     }
 )
+watch(activeTag, () => { selected.value = []; currentPage.value = 1 })
 </script>

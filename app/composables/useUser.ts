@@ -8,6 +8,7 @@ interface UserData {
 }
 
 interface FileData {
+    tags?: string[]
     id: string
     user_id: string
     folder_id: string | null
@@ -21,6 +22,7 @@ interface FileData {
 }
 
 interface FolderData {
+    tags?: string[]
     id: string
     user_id: string
     parent_folder_id: string | null
@@ -30,6 +32,7 @@ interface FolderData {
 }
 
 interface NoteData {
+    tags?: string[]
     id: string
     user_id: string
     folder_id: string | null

@@ -83,6 +83,10 @@ QR codes are generated in the browser and contain the existing public link. The 
 - A deleted default destination does not block submissions: choose an available destination when approving. Approved files removed from the live library remain in Inbox history as removed.
 - Up to 50 requests can be kept per account. Apply the Inbox migrations, including `202610310003_upload_resume_sender_note`, and regenerate the Prisma client when updating an existing installation. Previously saved Inbox files retain approved status.
 
+### Tags
+
+Files, folders, and notes have an owner-only **Tags** panel in their detail view. Add or remove up to 12 tags of 32 characters each; duplicate case variants are combined. Tags appear on cards and list rows. Use **All tags** to filter a collection or type `#tag` in search for an exact tag match; regular search also matches tags. Favorites and folder contents support the same filters. Tags survive moving items and Trash/restore operations and are omitted from public share responses. Apply `202611010002_item_tags` when updating.
+
 ### File version history
 
 Open a file's details and use **Version history → Upload new version** to replace its contents while keeping its ID, filename, favorites, and share links. Replacements use resumable uploads and must have the same extension. The previous contents become an owner-only saved version. Download, restore, or permanently delete saved versions from this panel; restoring creates a new current revision and preserves the outgoing contents. Concurrent changes require refreshing the history before retrying.

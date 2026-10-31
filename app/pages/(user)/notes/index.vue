@@ -8,6 +8,7 @@
                 />
 
                 <div class="toolbar-actions flex items-center flex-wrap gap-2 min-w-0">
+                    <TagFilter v-model="activeTag" :items="notes" />
                     <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
                     <UploadButton
@@ -139,6 +140,7 @@
                                             </span>
                                         </div>
                                     </div>
+                                <ItemTags :tags="note.tags" />
                                 </td>
 
                                 <td data-label="Type" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Note</td>
@@ -174,7 +176,7 @@
 
             <template #grid>
                 <ItemGrid>
-                    <ItemGridCard
+                    <ItemGridCard :tags="note.tags"
                         v-for="note in paginatedNotes"
                         :key="note.id"
                                 :data-preview-id="note.id" tabindex="0" aria-keyshortcuts="Space"
@@ -284,6 +286,11 @@ if (error.value) {
     openToast(error.value, 'error')
 }
 
+const activeTag = ref('')
+const matchesTaggedSearch = (name: string, tags: string[] | undefined, value: string) => {
+    const query = value.trim().normalize('NFKC').toLowerCase(), values = tags ?? []
+    return (!activeTag.value || values.some(tag => tag.toLowerCase() === activeTag.value)) && (query.startsWith('#') ? values.some(tag => tag.toLowerCase() === query.slice(1)) : [name, ...values].some(text => text.toLowerCase().includes(query)))
+}
 const searchQuery = ref('')
 const viewMode = ref<'list' | 'grid'>('grid')
 const sortMode = ref<'newest' | 'oldest' | 'name-asc' | 'name-desc'>('newest')
@@ -293,7 +300,7 @@ const filteredNotes = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
 
     return notes.value.filter(note => {
-        return note.title.toLowerCase().includes(query)
+        return matchesTaggedSearch(note.title, note.tags, query)
     })
 })
 
@@ -483,8 +490,9 @@ watch(totalPages, total => {
     currentPage.value = Math.min(currentPage.value, Math.max(1, total))
 })
 
-watch([searchQuery, sortMode, viewMode], () => {
+watch([searchQuery, activeTag, sortMode, viewMode], () => {
     currentPage.value = 1
 })
 const quickPreviewItems = computed(() => paginatedNotes.value.map(note => ({ id: note.id, type: 'note' as const, name: note.title, size: note.size })))
+watch(activeTag, () => { currentPage.value = 1; selectedNotes.value = [] })
 </script>

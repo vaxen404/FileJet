@@ -19,7 +19,7 @@ export default defineEventHandler(async event => {
     if (!folder) throwError(404, 'Folder not found.')
 
     const [contents, tree, parent, share] = await Promise.all([
-        getFolderContents(session.userId, id),
+        getFolderContents(session.userId, id, true),
         getFolderTree(session.userId, id),
         folder.parent_folder_id
             ? prisma.folders.findFirst({

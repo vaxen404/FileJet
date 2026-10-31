@@ -18,7 +18,8 @@
                     :options="filterOptions"
                 />
 
-                <SortDropdown v-model="sortMode" />
+                <TagFilter v-model="activeTag" :items="favorites.map(item => ({ tags: getItemTags(item) }))" />
+                    <SortDropdown v-model="sortMode" />
             </div>
         </div>
 
@@ -116,6 +117,7 @@
                                             >
                                         </div>
                                     </div>
+                                <ItemTags :tags="getItemTags(item)" />
                                 </td>
                                 <td data-label="Type" class="item-meta-cell favorite-type h-[4.2rem] text-secondary text-[0.85rem] capitalize file-table-cell">{{ getItemType(item) }}</td>
                                 <td data-label="Size" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">{{ getItemSize(item) }}</td>
@@ -144,7 +146,7 @@
 
             <template #grid>
                 <ItemGrid>
-                    <ItemGridCard
+                    <ItemGridCard :tags="getItemTags(item)"
                         v-for="item in paginatedItems"
                         :key="item.id"
                                 :data-preview-id="item.id" tabindex="0" aria-keyshortcuts="Space"
@@ -261,6 +263,11 @@ if (error.value) {
     openToast(error.value, 'error')
 }
 
+const activeTag = ref('')
+const matchesTaggedSearch = (name: string, tags: string[] | undefined, value: string) => {
+    const query = value.trim().normalize('NFKC').toLowerCase(), values = tags ?? []
+    return (!activeTag.value || values.some(tag => tag.toLowerCase() === activeTag.value)) && (query.startsWith('#') ? values.some(tag => tag.toLowerCase() === query.slice(1)) : [name, ...values].some(text => text.toLowerCase().includes(query)))
+}
 const searchQuery = ref('')
 const viewMode = ref<'list' | 'grid'>('grid')
 const activeCategory = ref('All')
@@ -290,7 +297,7 @@ const filteredFavorites = computed(() => {
     return favorites.value.filter(item => {
         const category = categories[getItemType(item)]
         const matchesCategory = activeCategory.value === 'All' || activeCategory.value === category
-        const matchesSearch = getItemName(item).toLowerCase().includes(query)
+        const matchesSearch = matchesTaggedSearch(getItemName(item), getItemTags(item), query)
 
         return matchesCategory && matchesSearch
     })
@@ -508,4 +515,6 @@ watch([searchQuery, activeCategory, viewMode, sortMode], () => {
     currentPage.value = 1
 })
 const quickPreviewItems = computed(() => paginatedItems.value.map(item => ({ id: item.id, resourceId: getItemId(item), type: getItemType(item), name: getItemName(item), mime_type: item.files?.mime_type, size: item.files?.size ?? item.notes?.size })))
+function getItemTags(item: FavoriteItem) { return item.files?.tags ?? item.folders?.tags ?? item.notes?.tags ?? [] }
+watch(activeTag, () => { currentPage.value = 1; selectedFavorites.value = [] })
 </script>

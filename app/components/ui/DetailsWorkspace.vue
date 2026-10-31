@@ -162,6 +162,7 @@
                     />
                 </div>
             </section>
+            <ItemTagsEditor :item-id="itemId" :item-type="itemType" :tags="tags" @changed="$emit('tagsChanged', $event)" />
         </aside>
     </div>
 </template>
@@ -170,6 +171,7 @@
 import type { ShareState } from '~~/shared/types/share'
 
 const props = defineProps<{
+    tags?: string[]
     title: string
     summary: string
     itemId: string
@@ -190,6 +192,7 @@ defineEmits<{
     delete: []
     back: []
     shareChanged: [state: ShareState]
+    tagsChanged: [tags: string[]]
 }>()
 
 const navigateTabs = async (event: KeyboardEvent) => {

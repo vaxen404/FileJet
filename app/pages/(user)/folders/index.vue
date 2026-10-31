@@ -8,6 +8,7 @@
                 />
 
                 <div class="toolbar-actions flex flex-row items-center gap-2 flex-wrap min-w-0">
+                    <TagFilter v-model="activeTag" :items="folders" />
                     <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />
                     <UploadButton
@@ -145,6 +146,7 @@
                                             </span>
                                         </div>
                                     </div>
+                                <ItemTags :tags="folder.tags" />
                                 </td>
 
                                 <td data-label="Type" class="item-meta-cell h-[4.2rem] text-secondary text-[0.85rem] file-table-cell">Folder</td>
@@ -178,7 +180,7 @@
 
             <template #grid>
                 <ItemGrid>
-                    <ItemGridCard
+                    <ItemGridCard :tags="folder.tags"
                         v-for="folder in paginatedFolders"
                         :key="folder.id"
                         :title="folder.name"
@@ -284,6 +286,11 @@ const openContextMenu = (event: MouseEvent, id: string) => {
     folderMenus.get(id)?.openAt(event.clientX, event.clientY)
 }
 
+const activeTag = ref('')
+const matchesTaggedSearch = (name: string, tags: string[] | undefined, value: string) => {
+    const query = value.trim().normalize('NFKC').toLowerCase(), values = tags ?? []
+    return (!activeTag.value || values.some(tag => tag.toLowerCase() === activeTag.value)) && (query.startsWith('#') ? values.some(tag => tag.toLowerCase() === query.slice(1)) : [name, ...values].some(text => text.toLowerCase().includes(query)))
+}
 const searchQuery = ref('')
 const viewMode = ref<'list' | 'grid'>('grid')
 
@@ -301,9 +308,7 @@ const handleDrop = (event: DragEvent) => {
 
 const filteredFolders = computed(() => {
     return folders.value.filter(folder => {
-        const matchesSearch = folder.name
-            .toLowerCase()
-            .includes(searchQuery.value.trim().toLowerCase())
+        const matchesSearch = matchesTaggedSearch(folder.name, folder.tags, searchQuery.value)
 
         return matchesSearch
     })
@@ -430,7 +435,8 @@ watch(totalPages, total => {
     currentPage.value = Math.min(currentPage.value, Math.max(1, total))
 })
 
-watch([searchQuery, sortMode, viewMode], () => {
+watch([searchQuery, activeTag, sortMode, viewMode], () => {
     currentPage.value = 1
 })
+watch(activeTag, () => { currentPage.value = 1; selectedFolders.value = [] })
 </script>

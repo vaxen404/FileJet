@@ -1,0 +1,2 @@
+<template><div v-if="tags?.length" class="mt-1 flex min-w-0 flex-wrap gap-1" aria-label="Tags"><span v-for="tag in tags.slice(0, 3)" :key="tag" class="max-w-32 truncate rounded-md bg-accent/10 px-1.5 py-0.5 text-[0.65rem] leading-4 text-accent" :title="tag">#{{ tag }}</span><span v-if="tags.length > 3" class="text-xs text-muted" :title="tags.slice(3).join(', ')">+{{ tags.length - 3 }}</span></div></template>
+<script setup lang="ts">defineProps<{ tags?: string[] }>()</script>
