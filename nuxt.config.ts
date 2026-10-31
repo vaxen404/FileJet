@@ -1,4 +1,4 @@
-import tailwindcss from '@tailwindcss/vite'
+﻿import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
@@ -17,7 +17,8 @@ export default defineNuxtConfig({
 
     app: {
         head: {
-            viewport: 'width=device-width, initial-scale=1, viewport-fit=cover'
+            viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+            style: [{ key: 'css-layer-order', innerHTML: '@layer theme, base, components, utilities;' }]
         }
     },
 
@@ -54,3 +55,4 @@ export default defineNuxtConfig({
         }
     ]
 })
+
