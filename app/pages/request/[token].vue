@@ -40,6 +40,7 @@ import type { PublicFileRequest } from '~~/shared/types/inbox'
 import { formatFileSize } from '~/utils/file'
 import { getAccentColor } from '~/utils/appearance'
 import { browserDraftStorage, readFormDraft, writeFormDraft } from '~/utils/formDraft'
+import { uploadResumably } from '~/utils/resumableUpload'
 import { parseSender } from '~~/shared/utils/sender'
 definePageMeta({ layout: false })
 useHead({ title: 'Send files · FileJet', meta: [{ name: 'robots', content: 'noindex, nofollow' }, { name: 'referrer', content: 'no-referrer' }] })
@@ -73,7 +74,7 @@ watch([senderName, senderNote], () => {
     senderDraftSaved.value = writeFormDraft(browserDraftStorage(), senderDraftKey.value, senderName.value || senderNote.value ? { senderName: senderName.value, senderNote: senderNote.value } : null)
 }, { flush: 'sync' })
 const sending = ref(false), dragging = ref(false), progress = ref(0), uploadedCount = ref(0), fileInput = ref<HTMLInputElement | null>(null)
-let activeUpload: XMLHttpRequest | null = null
+let activeUpload: AbortController | null = null
 const addFiles = (selected: File[]) => {
     if (sending.value || !request.value) return
     uploadError.value = ''
@@ -91,30 +92,15 @@ const removeAllFiles = () => { if (!sending.value) { files.value = []; uploadErr
 const sendMore = async () => { await refresh(); uploadedCount.value = 0 }
 const upload = async () => {
     if (sending.value || !files.value.length) return
-    const body = new FormData()
-    body.append('senderName', senderName.value)
-    body.append('senderNote', senderNote.value)
-    for (const file of files.value) body.append('files', file)
+    activeUpload = new AbortController()
     sending.value = true; uploadError.value = ''; progress.value = 0
     try {
-        const result = await new Promise<{ uploadedCount: number }>((resolve, reject) => {
-            const xhr = new XMLHttpRequest()
-            activeUpload = xhr
-            xhr.open('POST', `/api/requests/${encodeURIComponent(token.value)}/upload`)
-            xhr.timeout = 180000
-            xhr.upload.onprogress = event => { if (event.lengthComputable) progress.value = Math.round(event.loaded / event.total * 100) }
-            xhr.onload = () => {
-                let response: any
-                try { response = JSON.parse(xhr.responseText) } catch { reject(new Error('Could not send files. Please try again.')); return }
-                if (xhr.status >= 200 && xhr.status < 300) resolve(response)
-                else reject(new Error(response.message || 'Could not send files. Please try again.'))
-            }
-            xhr.onerror = () => reject(new Error('Connection lost. Please try again.'))
-            xhr.ontimeout = () => reject(new Error('Upload timed out. Please try again.'))
-            xhr.onabort = () => reject(new Error('Upload cancelled.'))
-            xhr.send(body)
+        const result = await uploadResumably(files.value, {
+            kind: 'inbox', requestToken: token.value, scope: `request:${token.value}`, label: 'Inbox files',
+            senderName: senderName.value, senderNote: senderNote.value, signal: activeUpload.signal,
+            onProgress: (loaded, total, finishing) => { progress.value = finishing ? 100 : total ? Math.floor(loaded / total * 100) : 0 }
         })
-        uploadedCount.value = result.uploadedCount; files.value = []; clearSenderDraft()
+        uploadedCount.value = Number(result.uploadedCount); files.value = []; clearSenderDraft()
     } catch (error: any) { uploadError.value = error.message || 'Could not send files.' }
     finally { sending.value = false; activeUpload = null }
 }

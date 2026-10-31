@@ -68,6 +68,7 @@ QR codes are generated in the browser and contain the existing public link. The 
 ### Inbox and file requests
 
 - Use **Inbox → Create inbox** to create a named inbox and choose a default approval destination. Open an inbox card to view only the files sent to that inbox; **Edit inbox** updates its name, description, default destination, limits, and expiration while retaining the upload link.
+- Unsaved create/edit forms are kept in this browser for seven days, separately for each account and inbox. Reopen the form to restore it, or choose **Discard draft**. Saving successfully clears its draft.
 - Inbox destination selectors show the same top-level folders as the **Folders** page, plus **Files (root)**. Nested project folders and dependency directories are not listed.
 - Share a link or download its QR code; senders can upload without an account and cannot browse the recipient's files.
 - Set a per-file limit (up to 25 MB), a total file count (up to 1000), and an optional expiration date. Requests default to 10 MB per file, 100 files, and seven days.
@@ -77,10 +78,17 @@ QR codes are generated in the browser and contain the existing public link. The 
 - Use row checkboxes, **Select page**, or **Select all matching** to select pending files across pages. **Approve selected / Reject selected** act on that selection; **Approve all / Reject all** act on all pending files in the inbox, across pages and filters. Bulk approval uses one destination folder and handles duplicate names within the group. Changing the search or review filter clears the selection.
 - Bulk review is atomic: if any selected file is unavailable, already reviewed, or belongs to another inbox, no selected files are changed. Rejection removes stored content only after the database transaction commits.
 - **Reject** permanently removes pending content and releases its storage space. Review statuses can be filtered; simultaneous or repeated reviews cannot save or release the same file twice.
-- Each inbox has its own received file list with search and pagination, including an optional, self-reported sender name. Refresh to check for new uploads; open **Sharing & settings** for its upload link, QR code, limits, and close/remove actions.
+- Each inbox has its own received file list with search and pagination. Senders can optionally enter a name (100 characters) and note (1000 characters); both are self-reported and visible only to the recipient. Notes appear in the received list and pending preview and are included in search. The sender form keeps its name/note draft on this browser until successful delivery or explicit discard.
 - Close or reopen requests, or remove their links and Inbox history. Removing an inbox deletes its pending content and releases its quota; approved files stay in their destination folders. Expired and full links cannot accept new files.
 - A deleted default destination does not block submissions: choose an available destination when approving. Approved files removed from the live library remain in Inbox history as removed.
-- Up to 50 requests can be kept per account. Apply the `202610310001_file_requests` and `202610310002_inbox_approval` migrations and regenerate the Prisma client when updating an existing installation. Previously saved Inbox files retain approved status.
+- Up to 50 requests can be kept per account. Apply the Inbox migrations, including `202610310003_upload_resume_sender_note`, and regenerate the Prisma client when updating an existing installation. Previously saved Inbox files retain approved status.
+
+### Quick preview and interrupted uploads
+
+- In Files, Notes, Favorites, or a folder, focus a file/card or list row and press **Space** for a preview without navigating away. **Esc** closes the preview and restores focus. Text/code, images, PDF, and supported audio/video are previewed; HTML/SVG are shown as escaped text. Unsupported formats offer an explicit download. Space keeps its normal behavior in search fields, editors, checkboxes, buttons, and media controls.
+- File, folder, note, and public Inbox uploads use resumable 1 MiB parts. Network failures retry automatically; offline transfers wait for the connection. If you refresh or leave the page, select the **same files and destination in the same browser** within 24 hours to resume. The browser stores upload credentials and fingerprints, not the file contents; reselection is required after a refresh.
+- File contents are checked per part. Retrying a part or completing a transfer twice cannot create duplicate files or charge quota twice. Changed file contents, different destinations, and different sender metadata start a separate upload.
+- The unfinished-upload notice offers **Discard unfinished uploads**. Expired staging files are also reclaimed on server startup and every 15 minutes. Keep `storage/.uploads` persistent alongside the rest of storage when restarting the app.
 
 ### Trash
 
@@ -258,6 +266,8 @@ File paths resolve relative to the process working directory as `storage/<userId
 ## 💾 Limits and storage behavior
 
 - Regular file uploads accept **1–6 files per request**.
+- Resumable library transfers accept up to **1 GiB per file and per batch**. Folder transfers accept up to **2000 files** with paths at most 20 segments deep. Inbox limits remain six files, 25 MB per file at most, and 50 MB per submission.
+- An account can have up to **20 unfinished transfers**. Their planned bytes are checked together against available quota before staging starts; completed files/notes or pending Inbox submissions are charged only once when finalized. Incomplete staging does not appear in library storage categories.
 - TXT/Markdown note imports accept up to **10 notes per request**, with a **5 MiB limit per note**.
 - Storage quotas are enforced per user. Items in Trash continue to count toward usage until permanently deleted.
 - Dashboard storage categories include files in every folder and items in Trash, with notes counted under Documents. Sizes use B, KB, MB, or GB, and category totals add up to the displayed usage.

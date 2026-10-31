@@ -1,9 +1,10 @@
 /// <reference lib="dom.asynciterable" />
 
+import { uploadResumably } from '~/utils/resumableUpload'
 import type { TrashMoveOptions, TrashMoveResult } from '~~/shared/types/trash'
 
 export const useFolderActions = () => {
-    const { syncTrash } = useUser()
+    const { syncTrash, user, fetchUser } = useUser()
     const { notifyTrashed } = useTrashActions()
     const activeRequests = ref(0)
     const activeUploads = ref(0)
@@ -89,65 +90,12 @@ export const useFolderActions = () => {
         startLoading()
 
         try {
-            const formData = new FormData()
-
-            files.forEach(file => {
-                formData.append('files', file)
-                formData.append('paths', file.webkitRelativePath || file.name)
+            if (!user.value) await fetchUser()
+            if (!user.value) throw new Error('You need to be logged in.')
+            await uploadResumably(files, {
+                kind: 'folders', folderId: parentFolderId, scope: user.value.id, label: 'Folder',
+                onProgress: (loaded, total) => uploads.set(uploadId, { loaded, total })
             })
-
-            await new Promise<void>((resolve, reject) => {
-                const xhr = new XMLHttpRequest()
-
-                xhr.open(
-                    'POST',
-                    parentFolderId
-                        ? `/api/folders?folderId=${encodeURIComponent(parentFolderId)}`
-                        : '/api/folders'
-                )
-                xhr.responseType = 'json'
-                xhr.setRequestHeader('Accept', 'application/json')
-
-                xhr.upload.onprogress = event => {
-                    uploads.set(uploadId, {
-                        loaded: event.loaded,
-                        total: event.lengthComputable && event.total > 0 ? event.total : null
-                    })
-                }
-
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve()
-
-                        return
-                    }
-
-                    const response = xhr.response
-
-                    const message =
-                        response?.data?.message ||
-                        response?.message ||
-                        response?.statusMessage ||
-                        'Folder upload failed'
-
-                    reject(new Error(String(message)))
-                }
-
-                xhr.onerror = () => {
-                    reject(new Error('Folder upload failed'))
-                }
-
-                xhr.onabort = () => {
-                    reject(new Error('Folder upload cancelled'))
-                }
-
-                xhr.ontimeout = () => {
-                    reject(new Error('Folder upload timed out'))
-                }
-
-                xhr.send(formData)
-            })
-
             await onSuccess?.()
         } finally {
             uploads.delete(uploadId)

@@ -22,6 +22,7 @@ logs
 /tests/*
 !/tests/inbox.test.mjs
 !/tests/storage-usage.test.mjs
+!/tests/product-features.test.mjs
 
 
 # Misc

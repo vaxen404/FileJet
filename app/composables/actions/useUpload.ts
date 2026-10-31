@@ -1,4 +1,6 @@
+import { uploadResumably } from '~/utils/resumableUpload'
 export const useUpload = (url: string, label: string) => {
+    const currentUser = useAuthUser()
     const uploads = reactive(
         new Map<symbol, { loaded: number; total: number | null; transferred: boolean }>()
     )
@@ -25,55 +27,21 @@ export const useUpload = (url: string, label: string) => {
         return total > 0 ? Math.min(99, Math.max(0, Math.floor((loaded / total) * 100))) : null
     })
 
-    const upload = async (files: FileList | File[], onSuccess?: () => Promise<void>) => {
+    const upload = async (files: FileList | File[], onSuccess?: () => Promise<void>, options?: { folderId?: string }) => {
         if (!files.length) return
 
         const id = Symbol()
         uploads.set(id, { loaded: 0, total: null, transferred: false })
 
         try {
-            const formData = new FormData()
-            Array.from(files).forEach(file => formData.append('files', file))
-            await new Promise<void>((resolve, reject) => {
-                const xhr = new XMLHttpRequest()
-                xhr.upload.onprogress = event => {
-                    const total = event.lengthComputable && event.total > 0 ? event.total : null
-                    uploads.set(id, {
-                        loaded: event.loaded,
-                        total,
-                        transferred: total !== null && event.loaded >= total
-                    })
-                }
-                xhr.upload.onload = () => {
-                    const state = uploads.get(id)!
-                    uploads.set(id, {
-                        ...state,
-                        loaded: state.total ?? state.loaded,
-                        transferred: true
-                    })
-                }
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        const state = uploads.get(id)!
-                        uploads.set(id, { ...state, transferred: true })
-                        resolve()
-                    } else
-                        reject(
-                            new Error(
-                                xhr.response?.message ||
-                                    xhr.response?.data?.message ||
-                                    xhr.response?.statusMessage ||
-                                    `${label} upload failed.`
-                            )
-                        )
-                }
-                xhr.onerror = () => reject(new Error(`${label} upload failed.`))
-                xhr.onabort = () => reject(new Error(`${label} upload cancelled.`))
-                xhr.ontimeout = () => reject(new Error(`${label} upload timed out.`))
-                xhr.open('POST', url)
-                xhr.responseType = 'json'
-                xhr.setRequestHeader('Accept', 'application/json')
-                xhr.send(formData)
+            const endpoint = new URL(url, window.location.origin)
+            const total = Array.from(files).reduce((sum, file) => sum + file.size, 0)
+            uploads.set(id, { loaded: 0, total, transferred: false })
+            if (!currentUser.value) throw new Error('You need to be logged in.')
+            await uploadResumably(Array.from(files), {
+                kind: endpoint.pathname === '/api/notes/upload' ? 'notes' : endpoint.pathname === '/api/folders' ? 'folders' : 'files',
+                folderId: options?.folderId ?? endpoint.searchParams.get('folderId'), scope: currentUser.value.id, label,
+                onProgress: (loaded, total, transferred) => uploads.set(id, { loaded, total, transferred })
             })
             await onSuccess?.()
         } finally {
