@@ -145,6 +145,7 @@
                     tabindex="0"
                 >
                     <slot name="edit" />
+                    <ItemTagsEditor embedded :item-id="itemId" :item-type="itemType" :tags="tags" @changed="$emit('tagsChanged', $event)" />
                 </div>
                 <div
                     v-show="activeTab === 'share'"
@@ -162,7 +163,6 @@
                     />
                 </div>
             </section>
-            <ItemTagsEditor :item-id="itemId" :item-type="itemType" :tags="tags" @changed="$emit('tagsChanged', $event)" />
         </aside>
     </div>
 </template>

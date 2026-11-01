@@ -24,8 +24,10 @@
                     :options="filterOptions"
                 />
 
-                <TagFilter v-model="activeTag" :items="files" />
+                <div class="browse-sort-controls ml-auto flex max-w-full flex-wrap items-center justify-end gap-2">
+                    <TagFilter v-model="activeTag" :items="files" />
                     <SortDropdown v-model="sortMode" />
+                </div>
             </div>
         </div>
 

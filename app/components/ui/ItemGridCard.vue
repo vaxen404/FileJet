@@ -25,11 +25,11 @@
             <slot name="title">
                 <strong class="file-name-input grid-name-input" :title="title">{{ title }}</strong>
             </slot>
-            <ItemTags :tags="tags" />
             <div class="file-metadata flex items-center gap-[0.175rem] text-muted text-xs font-normal leading-normal min-w-0">
                 <slot name="metadata" />
             </div>
         </div>
+        <div v-if="tags?.length" class="mt-auto"><ItemTags :tags="tags" /></div>
     </div>
 </template>
 

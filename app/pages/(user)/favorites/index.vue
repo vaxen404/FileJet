@@ -18,8 +18,10 @@
                     :options="filterOptions"
                 />
 
-                <TagFilter v-model="activeTag" :items="favorites.map(item => ({ tags: getItemTags(item) }))" />
+                <div class="browse-sort-controls ml-auto flex max-w-full flex-wrap items-center justify-end gap-2">
+                    <TagFilter v-model="activeTag" :items="favorites.map(item => ({ tags: getItemTags(item) }))" />
                     <SortDropdown v-model="sortMode" />
+                </div>
             </div>
         </div>
 

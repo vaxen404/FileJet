@@ -344,6 +344,7 @@
                         </button>
                     </div>
                 </div>
+                <ItemTagsEditor v-show="activeTab === 'edit'" embedded :item-id="file.id" item-type="file" :tags="file.tags" @changed="file.tags = $event" />
                 <div
                     v-show="activeTab === 'share'"
                     id="file-share-panel"
@@ -360,8 +361,7 @@
                     />
                 </div>
             </section>
-            <ItemTagsEditor :item-id="file.id" item-type="file" :tags="file.tags" @changed="file.tags = $event" />
-            <FileVersionHistory :file-id="file.id" :revision="file.revision" :name="displayFileName" @changed="versionChanged" />
+            <FileVersionHistory v-show="activeTab !== 'share'" :file-id="file.id" :revision="file.revision" :name="displayFileName" @changed="versionChanged" />
         </aside>
     </div>
     <div
