@@ -20,6 +20,9 @@
             >
                 <slot name="actions" />
             </div>
+            <div v-if="tags?.length" class="pointer-events-none absolute inset-x-2 bottom-2 z-1">
+                <ItemTags :tags="tags" overlay />
+            </div>
         </div>
         <div class="file-details p-0 flex flex-col min-w-0">
             <slot name="title">
@@ -29,7 +32,6 @@
                 <slot name="metadata" />
             </div>
         </div>
-        <div v-if="tags?.length" class="mt-auto"><ItemTags :tags="tags" /></div>
     </div>
 </template>
 

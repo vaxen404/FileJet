@@ -93,7 +93,7 @@ Deduplication uses an HttpOnly first-party browser cookie and per-link HMAC keys
 
 ### Tags
 
-Files, folders, and notes have an owner-only **Tags** editor in the **Edit** tab. Add or remove up to 12 tags of 32 characters each; duplicate case variants are combined. Cards show compact tag badges below the size/date information; tags also appear on list rows. Use **All tags**, next to the sorting control, to filter a collection or type `#tag` in search for an exact tag match; regular search also matches tags. Favorites and folder contents support the same filters. Tags survive moving items and Trash/restore operations and are omitted from public share responses. Apply `202611010002_item_tags` when updating.
+Files, folders, and notes have an owner-only **Tags** editor in the **Edit** tab. Add or remove up to 12 tags of 32 characters each; duplicate case variants are combined. Cards show `#tag` badges over the bottom-left corner of the preview; tags also appear on list rows. Use **All tags**, next to the sorting control, to filter a collection or type `#tag` in search for an exact tag match; regular search also matches tags. Favorites and folder contents support the same filters. Tags survive moving items and Trash/restore operations and are omitted from public share responses. Apply `202611010002_item_tags` when updating.
 
 ### File version history
 
