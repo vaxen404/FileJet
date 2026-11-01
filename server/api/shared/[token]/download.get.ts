@@ -1,3 +1,4 @@
+import { recordShareActivity } from '~~/server/utils/shareStatistics'
 import { throwError } from '~~/server/utils/error'
 import { getSharedTarget } from '../../../utils/sharedTarget'
 import { createFolderArchive } from '../../../utils/folderArchive'
@@ -22,6 +23,7 @@ export default defineEventHandler(async event => {
             'X-Content-Type-Options': 'nosniff'
         })
 
+        await recordShareActivity(event, sharedItem, 'download', target.id)
         return archive.data
     }
 
@@ -33,6 +35,7 @@ export default defineEventHandler(async event => {
             'X-Content-Type-Options': 'nosniff'
         })
 
+        await recordShareActivity(event, sharedItem, 'download', target.id)
         return target.item.content
     }
 
@@ -93,5 +96,6 @@ export default defineEventHandler(async event => {
         'X-Content-Type-Options': 'nosniff'
     })
 
+    await recordShareActivity(event, sharedItem, 'download', target.id)
     return sendStream(event, createReadStream(filePath))
 })

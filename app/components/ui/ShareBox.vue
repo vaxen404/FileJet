@@ -165,6 +165,7 @@
                     </button>
                 </div>
             </form>
+            <ShareStatistics v-if="state.url" :key="state.url" :item-id="itemId" :item-type="itemType" />
         </div>
         <button
             v-if="errorMessage && isLoading === false && loadFailed"

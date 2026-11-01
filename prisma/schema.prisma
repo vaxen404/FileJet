@@ -183,10 +183,32 @@ model shared_items {
   access_version String @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   users users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  daily_stats share_daily_stats[]
+  event_keys share_event_keys[]
 
   @@unique([user_id, item_type, item_id])
 }
 
+
+model share_daily_stats {
+  share_id String @db.Uuid
+  day DateTime @db.Date
+  views BigInt @default(0)
+  downloads BigInt @default(0)
+  last_viewed_at DateTime? @db.Timestamptz(6)
+  last_downloaded_at DateTime? @db.Timestamptz(6)
+  share shared_items @relation(fields: [share_id], references: [id], onDelete: Cascade)
+  @@id([share_id, day])
+}
+
+model share_event_keys {
+  share_id String @db.Uuid
+  key String @db.VarChar(64)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  share shared_items @relation(fields: [share_id], references: [id], onDelete: Cascade)
+  @@id([share_id, key])
+  @@index([created_at])
+}
 
 model trash {
   tags String[] @default([]) @db.VarChar(32)

@@ -30,6 +30,8 @@ export default defineNuxtConfig({
     },
 
     nitro: {
+        // Keep Prisma's import.meta.url bound to the Node entrypoint on Windows too.
+        inlineDynamicImports: true,
         esbuild: {
             options: {
                 target: 'es2020'

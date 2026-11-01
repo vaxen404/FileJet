@@ -569,6 +569,15 @@ watch(
         immediate: true
     }
 )
+const recordedViews = new Set<string>()
+onMounted(() => {
+    watch(sharedItem, item => {
+        if (!item || recordedViews.has(token.value)) return
+        const value = token.value
+        recordedViews.add(value)
+        void $fetch<{ success: boolean }>(`/api/shared/${encodeURIComponent(value)}/view`, { method: 'POST' }).catch(() => recordedViews.delete(value))
+    }, { immediate: true })
+})
 </script>
 
 <style scoped>

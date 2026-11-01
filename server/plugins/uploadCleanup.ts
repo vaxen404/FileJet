@@ -1,10 +1,11 @@
+import { cleanupShareActivityKeys } from '../utils/shareStatistics'
 import { cleanupExpiredUploads } from '../utils/resumableUpload'
 export default defineNitroPlugin(nitro => {
     let running = false
     const clean = async () => {
         if (running) return
         running = true
-        try { await cleanupExpiredUploads() } catch (error) { console.error('[EXPIRED UPLOAD CLEANUP]', error) }
+        try { await cleanupExpiredUploads(); await cleanupShareActivityKeys() } catch (error) { console.error('[EXPIRED UPLOAD CLEANUP]', error) }
         finally { running = false }
     }
     const timer = setInterval(clean, 15 * 60 * 1000)

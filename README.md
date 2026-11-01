@@ -83,6 +83,14 @@ QR codes are generated in the browser and contain the existing public link. The 
 - A deleted default destination does not block submissions: choose an available destination when approving. Approved files removed from the live library remain in Inbox history as removed.
 - Up to 50 requests can be kept per account. Apply the Inbox migrations, including `202610310003_upload_resume_sender_note`, and regenerate the Prisma client when updating an existing installation. Previously saved Inbox files retain approved status.
 
+### Sharing statistics
+
+Open an item's **Share** tab to see lifetime views, download starts, the last view, and daily totals for the last 30 UTC days. Counters start after installing `202611010003_share_statistics`; earlier activity cannot be reconstructed. Counts belong to the link and are removed when the link is revoked.
+
+Public page views are recorded only after share access succeeds. Owner visits, preview requests, HEAD/range requests, invalid passwords, expired links, and items outside a shared folder do not inflate the counters. Repeat views from one browser within 30 minutes and repeat downloads of the same target within one minute count once; different items downloaded through a folder share count separately. A download count represents an accepted start, not proof that the recipient saved the entire file.
+
+Deduplication uses an HttpOnly first-party browser cookie and per-link HMAC keys, with no stored IP addresses or user agents. DNT/GPC opt-outs are respected. Expired deduplication keys are cleaned after two days while aggregate totals remain. Statistics failures never prevent public file delivery.
+
 ### Tags
 
 Files, folders, and notes have an owner-only **Tags** panel in their detail view. Add or remove up to 12 tags of 32 characters each; duplicate case variants are combined. Tags appear on cards and list rows. Use **All tags** to filter a collection or type `#tag` in search for an exact tag match; regular search also matches tags. Favorites and folder contents support the same filters. Tags survive moving items and Trash/restore operations and are omitted from public share responses. Apply `202611010002_item_tags` when updating.
