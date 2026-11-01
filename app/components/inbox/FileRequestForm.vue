@@ -8,16 +8,16 @@
                 </div>
                 <label class="request-field">Title<input ref="titleInput" v-model="title" required maxlength="120" placeholder="e.g. Project documents" class="inbox-input"></label>
                 <label class="request-field">Description <span class="text-muted">(optional)</span><textarea v-model="description" maxlength="1000" rows="3" placeholder="Tell people what to send…" class="inbox-input resize-y" /></label>
-                <label class="request-field">Default FileJet folder
-                    <select v-model="folderId" v-memo="[folderOptions, folderId, loadingFolders]" class="inbox-input" :disabled="loadingFolders"><option value="">Files (root)</option><option v-for="folder in folderOptions" :key="folder.id" :value="folder.id">{{ folder.label }}</option></select>
-                </label>
+                <div class="request-field"><span>Default FileJet folder</span>
+                    <FormSelect v-model="folderId" label="Default FileJet folder" :options="destinationOptions" :disabled="loadingFolders || saving" />
+                </div>
                 <p class="text-xs leading-5 text-muted">You can choose a different destination each time you approve a file.</p>
                 <p v-if="folderError" role="alert" class="text-sm text-danger">{{ folderError }} <button type="button" class="underline" @click="loadFolders">Try again</button></p>
                 <div class="grid grid-cols-2 gap-4 max-mobile:grid-cols-1">
                     <label class="request-field">Limit per file (MB)<input v-model.number="maxSize" type="number" required :min="1 / 1048576" max="25" step="any" class="inbox-input"></label>
                     <label class="request-field">Total file limit<input v-model.number="maxFiles" type="number" required :min="Math.max(1, inbox?.receivedCount ?? 1)" max="1000" step="1" class="inbox-input"></label>
                 </div>
-                <label class="request-field">Link expires<select v-model="expiryDays" class="inbox-input"><option v-if="inbox" :value="-1">{{ inbox.expiresAt ? `Keep current date (${new Date(inbox.expiresAt).toLocaleString()})` : 'Keep no expiration' }}</option><option :value="1">In 1 day</option><option :value="7">In 7 days</option><option :value="30">In 30 days</option><option :value="0">Never</option></select></label>
+                <div class="request-field"><span>Link expires</span><FormSelect v-model="expiryDays" label="Link expires" :options="expiryOptions" :disabled="saving" /></div>
                 <p class="rounded-lg border border-divider bg-canvas p-3 text-xs leading-5 text-muted">Incoming files stay in Inbox until you approve them. Pending files use your storage space. Anyone with the link can upload without seeing your files.</p>
                 <p v-if="errorMessage" role="alert" class="text-sm text-danger">{{ errorMessage }}</p>
                 <div v-if="draftStored" class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted" role="status"><span>{{ draftRestored ? 'Draft restored.' : 'Draft saved on this browser.' }}</span><button type="button" class="underline" :disabled="saving" @click="discardDraft">Discard draft</button></div>
@@ -63,6 +63,11 @@ watch([title, description, folderId, maxSize, maxFiles, expiryDays], () => {
     draftRestored.value = false
 }, { flush: 'sync' })
 const { folders, folderOptions, loadingFolders, folderError, loadFolders } = useInboxFolders()
+const destinationOptions = computed(() => [{ value: '', label: 'Files (root)' }, ...folderOptions.value.map(folder => ({ value: folder.id, label: folder.label }))])
+const expiryOptions = computed(() => [
+    ...(props.inbox ? [{ value: -1, label: props.inbox.expiresAt ? `Keep current date (${new Date(props.inbox.expiresAt).toLocaleString()})` : 'Keep no expiration' }] : []),
+    { value: 1, label: 'In 1 day' }, { value: 7, label: 'In 7 days' }, { value: 30, label: 'In 30 days' }, { value: 0, label: 'Never' }
+])
 const close = () => { if (!saving.value) emit('close') }
 let pointerStartedOutside = false
 const isOutsideDialog = (event: MouseEvent) => {
