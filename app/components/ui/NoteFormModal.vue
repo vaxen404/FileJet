@@ -70,22 +70,8 @@
                             </div>
 
                             <div class="form-field flex flex-col gap-2">
-                                <div class="field-header flex items-center justify-between gap-2 text-sm leading-normal">
-                                    <label for="note-form-content"> Content </label>
-
-                                    <span class="text-muted text-xs leading-[inherit]">{{ content.length }} characters</span>
-                                </div>
-
-                                <textarea class="w-full min-w-0 p-3 text-content bg-input border border-control-border rounded-md text-sm
-                                    leading-normal outline-none resize-y min-h-32 focus:border-accent disabled:opacity-60
-                                    disabled:cursor-wait"
-                                    id="note-form-content"
-                                    v-model="content"
-                                    placeholder="Start writing your note..."
-                                    rows="8"
-                                    required
-                                    :disabled="isLoading"
-                                />
+                                <MarkdownEditor id="note-form-content" v-model="content" :disabled="isLoading" />
+                                <span class="text-muted text-xs">{{ content.length }} characters</span>
                             </div>
                         </div>
 
@@ -202,7 +188,7 @@ watch(
 
 const trapFocus = (event: KeyboardEvent) => {
     const fields = dialog.value?.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), textarea:not(:disabled)'
+        'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), a[href]'
     )
 
     if (!fields?.length) {
@@ -211,8 +197,10 @@ const trapFocus = (event: KeyboardEvent) => {
         return
     }
 
-    const first = fields[0]!
-    const last = fields[fields.length - 1]!
+    const visible = Array.from(fields).filter(field => field.getClientRects().length)
+    if (!visible.length) { event.preventDefault(); return }
+    const first = visible[0]!
+    const last = visible[visible.length - 1]!
 
     if (event.shiftKey && document.activeElement === first) {
         event.preventDefault()

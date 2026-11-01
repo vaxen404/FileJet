@@ -38,7 +38,7 @@ The application is self-hosted. PostgreSQL stores users and item metadata, while
 - Nested folders, folder uploads in supported browsers, renaming, and moving items.
 - File downloads, folder ZIP downloads, and ZIP downloads of selected items.
 - Image, audio, video, PDF, and text previews for supported formats.
-- Notes with editing, TXT/Markdown import, and download.
+- Notes with Markdown editing and preview, TXT/Markdown import, and download. Headings, emphasis, lists, links, images, quotes, tables, and code blocks render in note details, Space previews, and public shares. Write/Preview keeps the original Markdown source; raw HTML is displayed as text.
 - Favorites, search, filtering, sorting, pagination, and grid/list views.
 
 ### Desktop and mobile interface

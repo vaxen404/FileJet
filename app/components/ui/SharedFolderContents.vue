@@ -97,10 +97,14 @@
                     :src="resourceUrl('preview', selected)"
                     :title="selected.name"
                 />
+                <div v-else-if="selected.type === 'note'" class="min-h-0 flex-1 overflow-auto p-5">
+                    <p v-if="loadingText" role="status" class="text-sm text-muted">Loading preview…</p>
+                    <MarkdownContent v-else :content="textContent" />
+                </div>
                 <pre
                     class="flex-1 min-h-0 w-full object-contain border-0 p-5 m-0 overflow-auto whitespace-pre-wrap
                         wrap-anywhere"
-                    v-else-if="selected.type === 'note' || selected.mime_type?.startsWith('text/')"
+                    v-else-if="selected.mime_type?.startsWith('text/')"
                 >{{
                     loadingText ? 'Loading preview...' : textContent
                 }}</pre>

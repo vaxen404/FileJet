@@ -34,11 +34,10 @@
                 </span>
             </div>
 
-            <div
+            <MarkdownContent
                 v-if="note.content"
-                class="note-reading-content w-full min-w-0 m-0 text-content text-sm leading-normal whitespace-pre-wrap
-                    wrap-anywhere"
-                v-text="note.content"
+                class="note-reading-content w-full min-w-0 m-0"
+                :content="note.content"
             />
 
             <div
@@ -77,14 +76,10 @@
                 required
                 :disabled="busy"
             />
-            <label class="text-foreground text-sm leading-[inherit] font-medium" for="note-content">Content</label>
-            <textarea class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 flex-1 min-h-24
-                resize-none leading-[1.7] focus:outline-none focus:border-accent"
+            <MarkdownEditor class="flex-1 overflow-auto"
                 id="note-content"
                 v-model="draftContent"
-                required
                 :disabled="busy"
-                spellcheck="true"
             />
             <p
                 v-if="saveError"

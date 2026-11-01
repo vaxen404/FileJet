@@ -279,7 +279,7 @@
                         >Download Note</a
                     >
                 </div>
-                <pre class="text-preview m-0 whitespace-pre-wrap break-words font-mono text-[0.9rem] leading-[1.7]">{{ sharedItem.item.content }}</pre>
+                <MarkdownContent :content="sharedItem.item.content" />
             </div>
 
             <div
