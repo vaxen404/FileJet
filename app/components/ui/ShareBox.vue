@@ -46,8 +46,8 @@
                         bg-raised px-3 text-sm font-medium text-content cursor-pointer hover:text-foreground
                         disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-2
                         focus-visible:outline-accent focus-visible:outline-offset-2"
-                    :disabled="busy || shareExpired"
-                    :aria-expanded="showQrCode && !busy && !shareExpired"
+                    :disabled="busy || shareExpired || state.isLimitReached"
+                    :aria-expanded="showQrCode && !busy && !shareExpired && !state.isLimitReached"
                     :aria-controls="qrPanelId"
                     @click="showQrCode = !showQrCode"
                 >
@@ -57,14 +57,16 @@
             <p class="share-description block mt-0 mr-0 mb-3 ml-0 text-muted text-xs leading-normal">
                 {{
                     state.url
-                        ? shareExpired
+                        ? state.isLimitReached
+                            ? 'Download limit reached. Increase or remove the limit to reopen this link.'
+                            : shareExpired
                             ? 'This link has expired.'
                             : 'Share this link to give access to this item.'
                         : 'Create a share link for this item.'
                 }}
             </p>
 
-            <div v-if="showQrCode && state.url && !busy && !shareExpired" :id="qrPanelId" class="mb-4">
+            <div v-if="showQrCode && state.url && !busy && !shareExpired && !state.isLimitReached" :id="qrPanelId" class="mb-4">
                 <LazyShareQrCode :url="state.url" :item-type="itemType" :has-password="state.hasPassword" />
             </div>
 
@@ -129,6 +131,19 @@
                         required
                         :disabled="busy"
                     />
+                </div>
+                <div class="setting-field flex flex-col gap-2">
+                    <label class="text-content text-sm" :for="`share-limit-${itemId}`">Download limit</label>
+                    <input :id="`share-limit-${itemId}`" v-model="maxDownloads" type="number" min="1" max="1000000" step="1"
+                        placeholder="Unlimited" :disabled="busy"
+                        class="w-full min-w-0 h-10 px-3 text-content bg-input border border-control-border rounded-md text-sm outline-none focus:border-accent disabled:opacity-60" />
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" :disabled="busy" class="text-xs text-accent cursor-pointer disabled:opacity-60" @click="maxDownloads = 1">One download</button>
+                        <button type="button" :disabled="busy" class="text-xs text-accent cursor-pointer disabled:opacity-60" @click="maxDownloads = ''">Unlimited</button>
+                    </div>
+                    <p class="text-xs text-muted leading-relaxed">{{ state.downloadCount ?? 0 }} downloads started{{ state.maxDownloads != null ? ` / ${state.maxDownloads} allowed` : '' }}.
+                        Leave blank for unlimited downloads. Previews do not count. Each download start counts, including retries and downloads by you.
+                        A folder ZIP counts once; downloading a child separately counts once. The link closes when the limit is reached.</p>
                 </div>
                 <p
                     v-if="errorMessage"
@@ -197,6 +212,7 @@ const { openToast } = useToast()
 const state = ref<ShareState>(emptyShareState())
 const passwordEnabled = ref(false)
 const password = ref('')
+const maxDownloads = ref<number | string>('')
 const expiration = ref('never')
 const customExpiration = ref('')
 const isLoading = ref(false)
@@ -232,6 +248,7 @@ const applyState = (value: ShareState) => {
     state.value = { ...value }
     passwordEnabled.value = value.hasPassword
     password.value = ''
+    maxDownloads.value = value.maxDownloads ?? ''
     expiration.value = value.expiresAt ? 'custom' : 'never'
     customExpiration.value = value.expiresAt ? localDate(value.expiresAt) : ''
     copied.value = false
@@ -292,7 +309,12 @@ const settingsPayload = () => {
     )
         throw new Error('Expiration must be in the future.')
 
+    const limit = maxDownloads.value === '' ? null : Number(maxDownloads.value)
+    if (limit !== null && (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000000))
+        throw new Error('Download limit must be between 1 and 1,000,000.')
+
     return {
+        maxDownloads: limit,
         passwordAction,
         ...(passwordAction === 'set' ? { password: password.value } : {}),
         expiresAt

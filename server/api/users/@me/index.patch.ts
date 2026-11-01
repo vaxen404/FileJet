@@ -45,7 +45,7 @@ export default defineEventHandler(async event => {
             where: { id: session.userId },
             data: { username, email },
             select: {
-                id: true, username: true, email: true,
+                id: true, username: true, email: true, role: true,
                 storage_limit: true, storage_used: true, created_at: true
             }
         })
@@ -53,7 +53,7 @@ export default defineEventHandler(async event => {
         return {
             success: true,
             user: {
-                id: user.id, username: user.username, email: user.email,
+                id: user.id, username: user.username, email: user.email, role: user.role,
                 storageLimit: user.storage_limit?.toString() ?? '0',
                 storageUsed: user.storage_used?.toString() ?? '0',
                 createdAt: user.created_at

@@ -7,7 +7,8 @@ const settingsSchema = z
     .object({
         passwordAction: z.enum(['keep', 'set', 'remove']).optional(),
         password: z.string().min(4).max(128).optional(),
-        expiresAt: z.iso.datetime({ offset: true }).nullable().optional()
+        expiresAt: z.iso.datetime({ offset: true }).nullable().optional(),
+        maxDownloads: z.number().int().min(1).max(1000000).nullable().optional()
     })
     .superRefine((value, ctx) => {
         if (value.passwordAction === 'set' && !value.password)
@@ -29,7 +30,10 @@ export async function parseShareSettings(body: unknown, currentExpiration?: Date
         password_hash?: string | null
         expires_at?: Date | null
         access_version?: string
+        max_downloads?: number | null
     } = {}
+
+    if (value.maxDownloads !== undefined) data.max_downloads = value.maxDownloads
 
     if (value.expiresAt !== undefined) {
         const expires = value.expiresAt === null ? null : new Date(value.expiresAt)

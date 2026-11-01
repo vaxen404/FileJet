@@ -38,7 +38,8 @@ import BrandMark from '~/components/ui/BrandMark.vue'
 const route = useRoute()
 const isActive = (path: string) => route.path === path || (path === '/inbox' && route.path.startsWith('/inbox/'))
 
-const navigation = [
+const currentUser = useAuthUser()
+const navigation = computed(() => [
     {
         label: 'MAIN MENU',
         items: [
@@ -56,8 +57,12 @@ const navigation = [
             { label: 'Inbox', to: '/inbox', icon: 'solar:inbox-in-linear', activeIcon: 'solar:inbox-in-bold' },
             { label: 'Trash', to: '/trash', icon: 'material-symbols:delete-outline-rounded', activeIcon: 'material-symbols:delete-rounded' }
         ]
-    }
-]
+    },
+    ...(currentUser.value?.role === 'ADMIN' ? [{
+        label: 'ADMINISTRATION',
+        items: [{ label: 'Admin', to: '/admin', icon: 'solar:shield-user-linear', activeIcon: 'solar:shield-user-bold' }]
+    }] : [])
+])
 </script>
 
 <style scoped>

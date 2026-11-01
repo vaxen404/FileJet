@@ -3,16 +3,20 @@ import { getHeader, getRequestURL, getRouterParam, setHeader, type H3Event } fro
 import { prisma } from './prisma'
 import { isUuid } from './validation'
 import { assertShareAccess, assertShareNotExpired } from './shareSecurity'
+import { shareLimitReached, type ShareDownloadLimit } from './shareLimits'
 
 export function shareState(
     event: H3Event,
-    share: { token: string; password_hash: string | null; expires_at: Date | null } | null
+    share: ({ token: string; password_hash: string | null; expires_at: Date | null } & ShareDownloadLimit) | null
 ) {
     return {
         url: share ? `${getRequestURL(event).origin}/shared/${share.token}` : null,
         hasPassword: !!share?.password_hash,
         expiresAt: share?.expires_at?.toISOString() ?? null,
-        isExpired: !!share?.expires_at && share.expires_at.getTime() <= Date.now()
+        isExpired: !!share?.expires_at && share.expires_at.getTime() <= Date.now(),
+        maxDownloads: share?.max_downloads ?? null,
+        downloadCount: share?.download_count ?? 0,
+        isLimitReached: share ? shareLimitReached(share) : false
     }
 }
 

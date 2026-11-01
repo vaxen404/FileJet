@@ -43,6 +43,9 @@ const dialog = ref<HTMLDialogElement | null>(null)
 const id = useId()
 const initialState = computed<ShareState | undefined>(() => props.item ? {
     url: props.item.url,
+    maxDownloads: props.item.maxDownloads,
+    downloadCount: props.item.downloadCount,
+    isLimitReached: props.item.isLimitReached,
     hasPassword: props.item.hasPassword,
     expiresAt: props.item.expiresAt,
     isExpired: Boolean(props.item.expiresAt && new Date(props.item.expiresAt).getTime() <= Date.now())

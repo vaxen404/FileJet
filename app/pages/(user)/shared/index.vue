@@ -24,6 +24,7 @@
                         <option value="all">All statuses</option>
                         <option value="active">Active</option>
                         <option value="expired">Expired</option>
+                        <option value="limited">Download limit reached</option>
                         <option value="unavailable">Unavailable</option>
                     </select>
                     <SortDropdown v-model="sortMode" class="ml-auto" />
@@ -274,12 +275,13 @@ const handleMenuAction = (action: string, item: SharedListItem) => {
 }
 const now = ref(Date.now())
 const typeLabels = { file: 'File', folder: 'Folder', note: 'Note' }
-const statusLabels = { active: 'Active', expired: 'Expired', unavailable: 'Unavailable' }
+const statusLabels = { active: 'Active', expired: 'Expired', limited: 'Limit reached', unavailable: 'Unavailable' }
 let requestId = 0
 let clock: ReturnType<typeof setInterval> | undefined
 
 const itemStatus = (item: SharedListItem) => {
     if (!item.isAvailable) return 'unavailable'
+    if (item.isLimitReached) return 'limited'
     return item.expiresAt && new Date(item.expiresAt).getTime() <= now.value ? 'expired' : 'active'
 }
 

@@ -1,4 +1,5 @@
 import { recordShareActivity } from '~~/server/utils/shareStatistics'
+import { claimShareDownload } from '~~/server/utils/shareLimits'
 import { throwError } from '~~/server/utils/error'
 import { getSharedTarget } from '../../../utils/sharedTarget'
 import { createFolderArchive } from '../../../utils/folderArchive'
@@ -15,7 +16,12 @@ export default defineEventHandler(async event => {
     enforceRateLimit(event, `shared-download:${sharedItem.token}`, 60, 60 * 1000)
 
     if (target.type === 'folder') {
+        if (getMethod(event) === 'HEAD') {
+            setHeader(event, 'Content-Type', 'application/zip')
+            return ''
+        }
         const archive = await createFolderArchive(sharedItem.user_id, target.id)
+        await claimShareDownload(event, sharedItem)
         setResponseHeaders(event, {
             'Content-Type': 'application/zip',
             'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(archive.name)}`,
@@ -28,6 +34,7 @@ export default defineEventHandler(async event => {
     }
 
     if (target.type === 'note' && 'content' in target.item && 'title' in target.item) {
+        await claimShareDownload(event, sharedItem)
         setResponseHeaders(event, {
             'Content-Type': 'text/plain; charset=utf-8',
             'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(target.item.title.replace(/[/\\\0]/g, '_') + '.txt')}`,
@@ -88,6 +95,8 @@ export default defineEventHandler(async event => {
     const fileName = file.original_name || file.name || 'download'
     const encodedName = encodeURIComponent(fileName)
 
+    await claimShareDownload(event, sharedItem)
+
     setResponseHeaders(event, {
         'Content-Type': 'application/octet-stream',
         'Content-Length': String(fileStat.size),
@@ -97,5 +106,6 @@ export default defineEventHandler(async event => {
     })
 
     await recordShareActivity(event, sharedItem, 'download', target.id)
+    if (getMethod(event) === 'HEAD') return ''
     return sendStream(event, createReadStream(filePath))
 })

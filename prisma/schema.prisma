@@ -7,7 +7,13 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model users {
+  role          UserRole  @default(USER)
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   username      String    @unique @db.VarChar(50)
   email         String?   @unique @db.VarChar(255)
@@ -172,6 +178,8 @@ model favorites {
 }
 
 model shared_items {
+  max_downloads Int?
+  download_count Int @default(0)
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id    String   @db.Uuid
   item_id    String   @db.Uuid

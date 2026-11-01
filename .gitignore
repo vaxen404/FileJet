@@ -23,6 +23,8 @@ logs
 !/tests/inbox.test.mjs
 !/tests/storage-usage.test.mjs
 !/tests/product-features.test.mjs
+!/tests/share-limits-admin.test.mjs
+!/tests/share-limits-admin.integration.mjs
 
 
 # Misc

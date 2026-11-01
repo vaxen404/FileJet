@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Toast from '~/components/ui/Toast.vue'
 
+const route = useRoute()
 const { toasts, runToastAction, resumeToasts, closeToast } = useToast()
 const { confirmation, resolveConfirm } = useConfirm()
 
@@ -11,7 +12,7 @@ onMounted(resumeToasts)
     <NuxtLayout>
         <NuxtPage :transition="{ name: 'page', mode: 'out-in' }" />
     </NuxtLayout>
-    <UploadRecoveryNotice />
+    <UploadRecoveryNotice v-if="route.meta.layout !== 'admin'" />
 
     <ConfirmModal
         :show="Boolean(confirmation)"

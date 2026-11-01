@@ -1,8 +1,9 @@
 import { throwError } from './error'
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { getCookie, setCookie, setHeader, type H3Event } from 'h3'
+import { assertShareDownloadLimit, type ShareDownloadLimit } from './shareLimits'
 
-export interface ShareAccess {
+export interface ShareAccess extends ShareDownloadLimit {
     token: string
     password_hash: string | null
     expires_at: Date | null
@@ -73,6 +74,7 @@ export function assertShareNotExpired(event: H3Event, share: ShareAccess) {
 
     if (shareExpired(share))
         throwError(410, 'This share link has expired.')
+    assertShareDownloadLimit(share)
 }
 
 export function assertShareAccess(event: H3Event, share: ShareAccess) {

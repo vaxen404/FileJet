@@ -3,6 +3,9 @@ export interface ShareState {
     hasPassword: boolean
     expiresAt: string | null
     isExpired: boolean
+    maxDownloads: number | null
+    downloadCount: number
+    isLimitReached: boolean
 }
 
 export type SharedItemType = 'file' | 'folder' | 'note'
@@ -24,5 +27,8 @@ export const emptyShareState = (): ShareState => ({
     url: null,
     hasPassword: false,
     expiresAt: null,
-    isExpired: false
+    isExpired: false,
+    maxDownloads: null,
+    downloadCount: 0,
+    isLimitReached: false
 })

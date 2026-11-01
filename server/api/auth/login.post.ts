@@ -43,6 +43,7 @@ export default defineEventHandler(async event => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
+                role: user.role,
                 storageLimit: user.storage_limit?.toString() ?? '0',
                 storageUsed: user.storage_used?.toString() ?? '0'
             }

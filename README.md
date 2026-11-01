@@ -65,6 +65,29 @@ To share by QR code, open an item's **Share** tab and create a link if needed, t
 
 QR codes are generated in the browser and contain the existing public link. The same password and expiration settings apply; removing the link also revokes access through its QR code. Expired links cannot display a QR code.
 
+### Download limits and administration
+
+In an item's **Share** settings, leave **Download limit** blank for unlimited downloads, enter a maximum from 1 to 1,000,000, or choose **One download**. The counter measures accepted download starts, including repeat requests and owner downloads. It is independent of optional sharing analytics and privacy opt-outs. Previews, page views, password attempts, HEAD requests, and missing files do not consume a download. A folder ZIP consumes one download; each separately downloaded child consumes one. Once the limit is reached, the entire public link (including previews and folder browsing) becomes unavailable. Concurrent requests cannot exceed the limit. Increasing or removing the limit reopens the same link; editing settings does not reset its lifetime download count. A failed connection after delivery starts still consumes its download. Counts begin with this migration; earlier downloads are not backfilled.
+
+Administration has a dedicated layout, sidebar, header and mobile menu independent of the personal workspace. `/admin` shows the instance dashboard; `/admin/users` provides searchable users with server pagination and role/storage quota editing. Authorization reads the current database role on every admin request; hiding navigation is not the access control. Users cannot change their own role through profile settings, admins cannot remove their own admin role, and quota cannot be reduced below current usage. This first version does not create/delete accounts or provide password resets.
+
+Apply the additive migration and regenerate the client when upgrading:
+
+```bash
+npx prisma migrate deploy --config prisma7.config.ts
+npx prisma generate --config prisma7.config.ts
+```
+
+`202611010004_share_limits_admin_roles` adds the `UserRole` enum (`USER`, `ADMIN`) and download-limit fields. Existing accounts default to `USER`; none is automatically promoted. From a trusted shell on the server, assign the first admin to an existing account:
+
+```bash
+npm run admin:promote -- EXISTING_USERNAME
+```
+
+Refresh the app to show **Administration → Admin** in navigation. The command requires the server's database access; there is no public bootstrap endpoint.
+
+Run `npm run test:sharing-admin` against a separate test server on port 3018, or set `FILEJET_TEST_URL`. The HTTP/database tests create and clean up temporary accounts and files. Do not point them at an unrelated deployment.
+
 ### Inbox and file requests
 
 - Use **Inbox → Create inbox** to create a named inbox and choose a default approval destination. Open an inbox card to view only the files sent to that inbox; **Edit inbox** updates its name, description, default destination, limits, and expiration while retaining the upload link.

@@ -27,7 +27,9 @@ export default defineEventHandler(async event => {
                 token: true,
                 created_at: true,
                 expires_at: true,
-                password_hash: true
+                password_hash: true,
+                max_downloads: true,
+                download_count: true
             }
         })
 
@@ -76,6 +78,9 @@ export default defineEventHandler(async event => {
                 hasPassword: Boolean(item.password_hash),
                 expiresAt: item.expires_at?.toISOString() ?? null,
                 isExpired: Boolean(item.expires_at && item.expires_at.getTime() <= Date.now()),
+                maxDownloads: item.max_downloads,
+                downloadCount: item.download_count,
+                isLimitReached: item.max_downloads != null && item.download_count >= item.max_downloads,
                 isAvailable: Boolean(target)
             }
         })

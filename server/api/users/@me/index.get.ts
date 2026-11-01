@@ -18,6 +18,7 @@ export default defineEventHandler(async event => {
                 id: true,
                 username: true,
                 email: true,
+                role: true,
                 storage_limit: true,
                 storage_used: true,
                 created_at: true
@@ -32,6 +33,7 @@ export default defineEventHandler(async event => {
             id: user.id,
             username: user.username,
             email: user.email,
+            role: user.role,
             storageLimit: user.storage_limit?.toString() ?? '0',
             storageUsed: user.storage_used?.toString() ?? '0',
             createdAt: user.created_at

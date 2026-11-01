@@ -113,7 +113,7 @@
                 <h1 class="m-0 text-foreground text-[clamp(1.2rem,_3vw,_1.5rem)] font-semibold leading-[1.35] wrap-anywhere">
                     {{
                         error.statusCode === 410
-                            ? 'Link Expired'
+                            ? 'Link Unavailable'
                             : error.statusCode === 403 || error.statusCode === 401
                               ? 'Access Denied'
                               : error.statusCode === 404
