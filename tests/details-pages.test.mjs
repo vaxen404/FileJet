@@ -1,6 +1,6 @@
 ﻿import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { test } from 'node:test'
+import { test, afterEach } from 'node:test'
 import { createRequire } from 'node:module'
 import { renderToString } from '@vue/server-renderer'
 import ts from 'typescript'
@@ -11,6 +11,10 @@ import { getFileReturnPage } from '../app/utils/fileNavigation.ts'
 import { formatFileSize, formatFileTime, getFileIcon, canCopyFile } from '../app/utils/file.ts'
 import { getDroppedUploadItems } from '../app/utils/folderUpload.ts'
 import { renderMarkdown } from '../app/utils/markdown.ts'
+import { useNoteAutosave } from '../app/composables/ui/useNoteAutosave.ts'
+
+const noteScopes = []
+afterEach(() => { while (noteScopes.length) noteScopes.pop().stop() })
 
 const read = file => readFileSync(new URL('../' + file, import.meta.url), 'utf8')
 const require = createRequire(import.meta.url)
@@ -52,6 +56,11 @@ async function notePage(options = {}) {
         useRouter: () => ({ push: async value => routes.push(value) }),
         useFetch: async () => ({ data: note, refresh: async () => {} }),
         useDetailsHeader: () => {}, useUnsavedChanges: () => {},
+        useNoteAutosave: options => {
+            const scope = vue.effectScope()
+            noteScopes.push(scope)
+            return scope.run(() => useNoteAutosave({ ...options, delay: 60000 }))
+        },
         useNoteActions: () => ({
             isDeleting: saving,
             updateNote: async (id, data) => {

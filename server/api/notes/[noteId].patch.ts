@@ -10,7 +10,7 @@ export default defineEventHandler(async event => {
 
     if (!session) throwError(401, 'You need to be logged in.')
 
-    enforceRateLimit(event, `notes-update:${session.userId}`, 10, 60000)
+    enforceRateLimit(event, `notes-update:${session.userId}`, 120, 60000)
     const id = getRouterParam(event, 'noteId')
 
     if (!id || !isUuid(id)) throwError(400, 'Invalid note ID.')

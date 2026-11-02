@@ -33,6 +33,9 @@
                         v-else-if="isImage"
                         :src="previewUrl"
                         :alt="displayFileName"
+                        :editable="canEditImage" :previous="galleryIndex > 0" :next="galleryIndex >= 0 && galleryIndex < galleryImages.length - 1"
+                        :position="galleryImages.length > 1 ? `${galleryIndex + 1} / ${galleryImages.length}` : undefined"
+                        @edit="imageEditorOpen = true" @navigate="navigateImage"
                         @load="captureImageMetadata"
                         @error="handlePreviewError"
                     />
@@ -366,6 +369,8 @@
             </section>
             <FileVersionHistory v-show="activeTab !== 'share'" :file-id="file.id" :revision="file.revision" :name="displayFileName" @changed="versionChanged" />
         </DetailsActionPanel>
+        <ImageEditDialog v-if="imageEditorOpen" :src="previewUrl" :name="displayFileName" :file-id="file.id"
+            :revision="file.revision" :mime-type="file.mime_type" @close="imageEditorOpen = false" @saved="imageSaved" />
     </div>
     <div
         v-else
@@ -405,6 +410,7 @@ import { canCopyFile, getFileIcon, getFileType, formatFileSize, formatFileTime }
 import { getFileReturnPage } from '~/utils/fileNavigation'
 import { emptyShareState, type ShareState } from '~~/shared/types/share'
 import type { FileTechnicalMetadata } from '~~/shared/types/fileMetadata'
+import { editableImageType } from '~/utils/imageEdit'
 
 definePageMeta({
     middleware: ['auth', 'file-origin'],
@@ -445,6 +451,28 @@ const { deleteFile, renameFile, downloadFile, copyFile, isDeleting } = useFileAc
 const { addFavorite, removeFavorite } = useFavoriteActions()
 const { files, folders, favorites, fetchAll } = useUser()
 const { openToast } = useToast()
+const imageEditorOpen = ref(false)
+const canEditImage = computed(() => !!file.value && !!editableImageType(file.value.original_name, file.value.mime_type))
+const { data: gallery } = await useFetch<{ files?: FileData[]; items?: FileData[] }>(
+    file.value?.folder_id ? `/api/folders/${encodeURIComponent(file.value.folder_id)}` : '/api/files',
+    { key: `image-gallery:${file.value?.folder_id ?? 'root'}`, immediate: file.value?.mime_type?.startsWith('image/') ?? false, lazy: true }
+)
+const galleryImages = computed(() => (gallery.value?.files ?? gallery.value?.items ?? [])
+    .filter(item => item.mime_type?.startsWith('image/')).sort((a, b) => (a.original_name || a.name).localeCompare(b.original_name || b.name, undefined, { numeric: true })))
+const galleryIndex = computed(() => galleryImages.value.findIndex(item => item.id === fileId))
+const navigateImage = (direction: -1 | 1) => {
+    const image = galleryImages.value[galleryIndex.value + direction]
+    if (image) return router.replace({ path: `/files/${image.id}`, query: route.query })
+}
+const imageSaved = async () => {
+    imageEditorOpen.value = false
+    try {
+        await versionChanged()
+        openToast('Image saved. The original is available in version history.', 'success')
+    } catch {
+        openToast('Image saved, but the preview could not be refreshed. Reload to see the new version.', 'error')
+    }
+}
 
 const shareStatus = ref<ShareState>(file.value?.share ?? emptyShareState())
 

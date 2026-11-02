@@ -2,8 +2,8 @@
 import { useMediaQuery } from '@vueuse/core'
 import { limitImageTransform, pinchImage, zoomImageAt, type ImagePoint, type ImageTransform } from '~/utils/imageZoom'
 
-const props = defineProps<{ src: string; alt: string }>()
-const emit = defineEmits<{ load: [event: Event]; error: [event: Event] }>()
+const props = defineProps<{ src: string; alt: string; editable?: boolean; previous?: boolean; next?: boolean; position?: string }>()
+const emit = defineEmits<{ load: [event: Event]; error: [event: Event]; edit: []; navigate: [direction: -1 | 1] }>()
 const viewport = ref<HTMLElement | null>(null)
 const image = ref<HTMLImageElement | null>(null)
 const mounted = ref(false)
@@ -17,12 +17,14 @@ let startTransform: ImageTransform = { scale: 1, x: 0, y: 0 }
 let tap: { point: ImagePoint; time: number } | null = null
 let lastTap: { point: ImagePoint; time: number } | null = null
 let observer: ResizeObserver | null = null
+let swipe: { point: ImagePoint; time: number } | null = null
 
 const reset = () => {
     transform.value = { scale: 1, x: 0, y: 0 }
     pointers.clear()
     startPoints = []
     tap = lastTap = null
+    swipe = null
 }
 const measure = () => {
     const area = viewport.value, element = image.value
@@ -45,6 +47,7 @@ const pointerDown = (event: PointerEvent) => {
     pointers.set(event.pointerId, point(event))
     if (pointers.size > 1) lastTap = null
     tap = pointers.size === 1 ? { point: point(event), time: Date.now() } : null
+    swipe = pointers.size === 1 && transform.value.scale === 1 ? { point: point(event), time: Date.now() } : null
     rebase()
 }
 const pointerMove = (event: PointerEvent) => {
@@ -61,6 +64,12 @@ const pointerMove = (event: PointerEvent) => {
 }
 const pointerEnd = (event: PointerEvent) => {
     if (!pointers.has(event.pointerId)) return
+    const end = point(event), dx = swipe ? end.x - swipe.point.x : 0, dy = swipe ? end.y - swipe.point.y : 0
+    if (event.type === 'pointerup' && swipe && pointers.size === 1 && Date.now() - swipe.time < 1200 && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if ((dx < 0 && props.next) || (dx > 0 && props.previous)) emit('navigate', dx < 0 ? 1 : -1)
+        tap = null
+    }
+    swipe = null
     if (event.type === 'pointerup' && pointers.size === 1 && tap && Date.now() - tap.time < 300) {
         if (lastTap && Date.now() - lastTap.time < 320 && Math.hypot(tap.point.x - lastTap.point.x, tap.point.y - lastTap.point.y) < 24) {
             transform.value = zoomImageAt(transform.value, transform.value.scale > 1 ? 1 : 2.5, tap.point, bounds.value)
@@ -95,6 +104,14 @@ onBeforeUnmount(() => { observer?.disconnect(); pointers.clear() })
         <img ref="image" :src="src" :alt="alt" draggable="false"
             :style="{ transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})` }"
             @load="loaded" @error="emit('error', $event)" />
+        <div v-if="editable || previous || next" class="image-viewer-tools" @pointerdown.stop @pointerup.stop @click.stop>
+            <button v-if="editable" type="button" class="image-tool-button" @click="emit('edit')">Edit image</button>
+            <span v-if="position" class="image-gallery-position">{{ position }}</span>
+        </div>
+        <div v-if="previous || next" class="image-gallery-buttons" @pointerdown.stop @pointerup.stop @click.stop>
+            <button type="button" class="image-tool-button" aria-label="Previous image" :disabled="!previous" @click="emit('navigate', -1)">‹</button>
+            <button type="button" class="image-tool-button" aria-label="Next image" :disabled="!next" @click="emit('navigate', 1)">›</button>
+        </div>
         <div v-if="interactive" class="image-zoom-controls" role="group" aria-label="Image zoom"
             @pointerdown.stop @pointerup.stop @pointercancel.stop @click.stop>
             <button type="button" aria-label="Zoom out" :disabled="transform.scale <= 1" @click="changeZoom(-0.5)">−</button>
@@ -115,4 +132,10 @@ onBeforeUnmount(() => { observer?.disconnect(); pointers.clear() })
 .image-zoom-controls .image-zoom-reset { min-width: 4rem; font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
 .image-zoom-controls button:disabled { opacity: 0.35; cursor: default; }
 .image-zoom-controls button:focus-visible { outline: 2px solid var(--color-accent, #8b7cff); outline-offset: -2px; }
+.image-viewer-tools { position: absolute; inset: 0.75rem 0.75rem auto; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; pointer-events: none; }
+.image-tool-button { min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--color-divider); border-radius: 0.75rem; background: var(--color-surface); color: var(--color-foreground); font-size: 0.8125rem; cursor: pointer; pointer-events: auto; }
+.image-tool-button:disabled { opacity: 0.35; cursor: default; }
+.image-gallery-position { margin-left: auto; padding: 0.5rem 0.75rem; border-radius: 0.75rem; background: var(--color-surface); color: var(--color-foreground); font-size: 0.75rem; }
+.image-gallery-buttons { position: absolute; top: 50%; left: 0.5rem; right: 0.5rem; display: flex; justify-content: space-between; transform: translateY(-50%); pointer-events: none; }
+.image-gallery-buttons button { font-size: 1.75rem; padding: 0 0.75rem; }
 </style>

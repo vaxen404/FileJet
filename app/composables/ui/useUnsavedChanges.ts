@@ -1,10 +1,11 @@
 import { useEventListener } from '@vueuse/core'
 import type { Ref } from 'vue'
 
-export const useUnsavedChanges = (dirty: Ref<boolean>, saving: Ref<boolean>) => {
+export const useUnsavedChanges = (dirty: Ref<boolean>, saving: Ref<boolean>, flush?: () => Promise<boolean>) => {
     const { confirm } = useConfirm()
 
     onBeforeRouteLeave(async () => {
+        if (flush && (dirty.value || saving.value) && await flush()) return true
         if (saving.value) return false
         if (!dirty.value) return true
 

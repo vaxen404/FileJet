@@ -61,10 +61,9 @@
             <div class="editor-heading flex items-center justify-between gap-3 flex-wrap">
                 <label class="text-foreground text-sm leading-[inherit] font-medium" for="note-title">Note title</label>
                 <span
-                    v-if="dirty"
-                    class="unsaved-state text-muted text-[0.8125rem]"
+                    class="autosave-status text-muted text-[0.8125rem]" role="status" aria-live="polite"
                 >
-                    Unsaved changes
+                    {{ saveStatus }}
                 </span>
             </div>
             <input class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0
@@ -74,27 +73,27 @@
                 v-model="draftTitle"
                 maxlength="32"
                 required
-                :disabled="busy"
+                :disabled="isDeleting"
             />
             <MarkdownEditor class="flex-1 overflow-auto"
                 id="note-content"
                 v-model="draftContent"
-                :disabled="busy"
+                :disabled="isDeleting"
             />
             <p
                 v-if="saveError"
                 class="editor-error text-danger m-0"
             >
-                {{ saveError }}
+                {{ saveError }} <button type="button" class="ml-2 underline cursor-pointer" :disabled="isSaving" @click="flush()">Retry save</button>
             </p>
             <div class="editor-actions flex items-center justify-end gap-3 flex-wrap">
                 <button class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
                     hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                     type="button"
-                    :disabled="busy || !dirty"
+                    :disabled="busy"
                     @click="cancel"
                 >
-                    Cancel
+                    {{ dirty ? 'Discard unsaved' : 'Done' }}
                 </button>
                 <button
                     type="submit"
@@ -119,9 +118,9 @@
                     v-model="draftTitle"
                     maxlength="32"
                     required
-                    :disabled="busy"
+                    :disabled="isDeleting"
                 />
-                <p class="text-muted text-[0.8125rem]">Content can be edited in the editor. Save applies both title and content.</p>
+                <p class="text-muted text-[0.8125rem]" role="status" aria-live="polite">{{ saveStatus }} · Changes save automatically.</p>
                 <p
                     v-if="saveError"
                     class="editor-error text-danger text-[0.8125rem] m-0"
@@ -132,10 +131,10 @@
                     <button class="text-content bg-control border border-control-border rounded-md py-2.5 px-3 min-w-0 cursor-pointer
                         hover:enabled:bg-divider disabled:opacity-60 disabled:cursor-not-allowed"
                         type="button"
-                        :disabled="busy"
+                        :disabled="isDeleting"
                         @click="cancel"
                     >
-                        Cancel
+                        {{ dirty ? 'Discard unsaved' : 'Done' }}
                     </button>
                     <button
                         type="submit"
@@ -191,19 +190,23 @@ const { openToast } = useToast()
 await fetchFavorites()
 const activeTab = ref<'details' | 'edit' | 'share'>(route.query.tab === 'edit' ? 'edit' : 'details')
 const isEditing = computed(() => activeTab.value === 'edit')
-const draftTitle = ref(note.value?.title ?? '')
-const draftContent = ref(note.value?.content ?? '')
 const titleInput = ref<HTMLInputElement | null>(null)
-const isSaving = ref(false)
 const isFavoriting = ref(false)
-const saveError = ref('')
 const busy = computed(() => isSaving.value || isDeleting.value || isFavoriting.value)
 
-const dirty = computed(
-    () =>
-        !!note.value &&
-        (draftTitle.value !== note.value.title || draftContent.value !== note.value.content)
-)
+const { draftTitle, draftContent, dirty, isSaving, saveError, saveStatus, flush, discard } = useNoteAutosave({
+    note,
+    blocked: isDeleting,
+    write: async value => (await updateNote(id, value)).note,
+    validate: value => {
+        const result = noteSchema.safeParse(value)
+        return result.success ? null : result.error.issues[0]?.message ?? 'Invalid note.'
+    },
+    saved: value => {
+        const listed = notes.value.find(item => item.id === id)
+        if (listed) Object.assign(listed, value)
+    }
+})
 
 const isFavorite = computed(() => favorites.value.some(item => item.note_id === id))
 
@@ -213,21 +216,13 @@ useDetailsHeader(
     computed(() => note.value?.title ?? 'Note'),
     returnPage
 )
-useUnsavedChanges(dirty, isSaving)
-
-watch(note, (value, previous) => {
-    if (value && !previous) {
-        draftTitle.value = value.title
-        draftContent.value = value.content
-    }
-})
+useUnsavedChanges(dirty, isSaving, flush)
 
 const goBack = () => router.push(returnPage.value.path)
 
 const cancel = () => {
-    draftTitle.value = note.value?.title ?? ''
-    draftContent.value = note.value?.content ?? ''
-    saveError.value = ''
+    if (isSaving.value) return
+    discard()
     activeTab.value = 'details'
 }
 
@@ -240,38 +235,9 @@ const focusTitle = async () => {
 
 const save = async () => {
     if (!note.value || !isEditing.value || busy.value || !dirty.value) return
-
-    const parsed = noteSchema.safeParse({ title: draftTitle.value, content: draftContent.value })
-
-    if (!parsed.success) {
-        saveError.value = parsed.error.issues[0]?.message ?? 'Invalid note.'
-
-        return
-    }
-
-    isSaving.value = true
-    saveError.value = ''
-
-    try {
-        const response = await updateNote(id, {
-            ...parsed.data,
-            expectedUpdatedAt: note.value.updated_at
-        })
-
-        note.value = { ...note.value, ...response.note }
-        draftTitle.value = response.note.title
-        draftContent.value = response.note.content
-        const listed = notes.value.find(item => item.id === id)
-
-        if (listed) Object.assign(listed, response.note)
-
+    if (await flush()) {
         activeTab.value = 'details'
         openToast('Note saved successfully.', 'success')
-    } catch (error: any) {
-        saveError.value = error.data?.message || error.message || 'Could not save note.'
-        openToast(saveError.value, 'error')
-    } finally {
-        isSaving.value = false
     }
 }
 

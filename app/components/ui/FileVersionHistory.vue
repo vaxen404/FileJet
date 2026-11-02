@@ -53,4 +53,5 @@ const remove = async (version: FileVersion) => {
     await work(() => $fetch<{ success: boolean }>(`${base.value}/${version.id}`, { method: 'DELETE' }))
 }
 onMounted(load)
+watch(() => props.revision, load)
 </script>
