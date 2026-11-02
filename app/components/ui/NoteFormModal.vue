@@ -4,7 +4,10 @@
             <div
                 v-if="open"
                 class="note-overlay fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/65"
-                @click.self="closeModal"
+                @pointerdown="backdropPressed = $event.button === 0 && $event.target === $event.currentTarget"
+                @pointerup="backdropPressed = backdropPressed && $event.target === $event.currentTarget"
+                @pointercancel="backdropPressed = false"
+                @click.self="closeFromBackdrop"
             >
                 <div
                     ref="dialog"
@@ -161,6 +164,13 @@ const title = ref('')
 const content = ref('')
 const titleInput = ref<HTMLInputElement | null>(null)
 const dialog = ref<HTMLElement | null>(null)
+let backdropPressed = false
+
+const closeFromBackdrop = () => {
+    const shouldClose = backdropPressed
+    backdropPressed = false
+    if (shouldClose) closeModal()
+}
 
 const isEditing = computed(() => props.mode === 'edit')
 

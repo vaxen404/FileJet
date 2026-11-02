@@ -84,6 +84,10 @@
                 label="Uploading files and folders..."
             />
         </div>
+        <template #mobile-actions>
+            <UploadButton text="Upload Files" mode="file" :disabled="busy || pending" @files="uploadFilesHere" />
+            <UploadButton text="Upload Folder" mode="folder" :disabled="busy || pending" @folder="uploadFolderHere" />
+        </template>
         <template #edit>
             <form
                 class="folder-edit flex flex-col gap-3"
@@ -265,6 +269,7 @@ const saveRename = async () => {
 
         if (listed) listed.name = folder.value.name
 
+        activeTab.value = 'details'
         openToast('Folder renamed successfully.', 'success', { notification: { title: 'Folder renamed', category: 'library', href: '/folders' } })
     } catch (error: any) {
         saveError.value = error.data?.message || error.message || 'Could not rename folder.'

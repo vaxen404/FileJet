@@ -5,7 +5,11 @@
             details-middle:grid-cols-[minmax(0,_1fr)_22rem] details-middle:gap-3 max-preview:h-auto
             max-preview:min-h-full max-preview:grid-cols-1 size-full"
     >
-        <section class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
+        <DetailsMobileBar :title="displayFileName" item-type="file" :is-favorite="isFileFavorite(file.id)"
+            :busy="isDeleting || isSavingRename || isDownloading || isUpdatingFavorite" :inert="mobilePanelOpen"
+            @back="goBack" @select="selectMobileTab" @download="handleDownload(file.id)"
+            @favorite="handleFavorite(file)" @delete="handleDelete(file.id)" />
+        <section :inert="mobilePanelOpen" class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
             <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-3xl overflow-hidden
                 max-preview:flex-none max-preview:h-144 max-phone:h-96">
                 <div
@@ -25,9 +29,8 @@
                         <p class="m-0 text-content text-sm leading-[inherit]">{{ previewError }}</p>
                         <span>Use the Download button to download this file.</span>
                     </div>
-                    <img class="block min-h-0 object-contain rounded-md border-0 size-full"
+                    <ImageViewer class="rounded-md"
                         v-else-if="isImage"
-                        ref="imagePreview"
                         :src="previewUrl"
                         :alt="displayFileName"
                         @load="captureImageMetadata"
@@ -66,7 +69,7 @@
             </div>
         </section>
 
-        <aside class="file-panel min-w-0 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain
+        <DetailsActionPanel v-model="mobilePanelOpen" :title="displayFileName" class="file-panel min-w-0 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain
             max-preview:overflow-visible">
             <section class="file-information flex-none min-w-0 flex flex-col gap-3 p-3.5 bg-surface border border-divider
                 rounded-xl max-preview:flex-none max-phone:p-3">
@@ -362,7 +365,7 @@
                 </div>
             </section>
             <FileVersionHistory v-show="activeTab !== 'share'" :file-id="file.id" :revision="file.revision" :name="displayFileName" @changed="versionChanged" />
-        </aside>
+        </DetailsActionPanel>
     </div>
     <div
         v-else
@@ -494,6 +497,14 @@ const renameTargetName = computed(() => {
 })
 
 const activeTab = ref<DetailTab>('details')
+const mobilePanelOpen = ref(false)
+const selectMobileTab = async (tab: DetailTab) => {
+    await selectTab(tab)
+    mobilePanelOpen.value = true
+}
+watch(activeTab, (tab, previous) => {
+    if (tab === 'details' && previous === 'edit') mobilePanelOpen.value = false
+}, { flush: 'sync' })
 const isRenaming = ref(false)
 const editingFileName = ref(editableFileName.value)
 const nameInput = ref<HTMLInputElement | null>(null)
@@ -704,7 +715,6 @@ const fileExtension = computed(() => {
 
 const textContent = ref('')
 const previewError = ref('')
-const imagePreview = ref<HTMLImageElement | null>(null)
 const videoPreview = ref<HTMLVideoElement | null>(null)
 const mediaDimensions = ref<{ width: number; height: number } | null>(null)
 const mediaDuration = ref<number | null>(null)
@@ -716,7 +726,7 @@ const handlePreviewError = () => {
 }
 
 const captureImageMetadata = (event?: Event) => {
-    const image = (event?.target as HTMLImageElement | null) ?? imagePreview.value
+    const image = event?.target as HTMLImageElement | null
 
     if (image && image.naturalWidth > 0 && image.naturalHeight > 0) {
         mediaDimensions.value = { width: image.naturalWidth, height: image.naturalHeight }
@@ -737,8 +747,6 @@ const captureVideoMetadata = (event?: Event) => {
 }
 
 onMounted(() => {
-    captureImageMetadata()
-
     if ((videoPreview.value?.readyState ?? 0) >= 1) captureVideoMetadata()
 })
 
@@ -830,11 +838,12 @@ const loadTextPreview = async () => {
     previewError.value = ''
     if (!isText.value) return
     try {
-        textContent.value = await $fetch<string>(previewUrl.value, { responseType: 'text' })
+        textContent.value = await requestFetch<string>(previewUrl.value, { responseType: 'text' })
     } catch {
         handlePreviewError()
     }
 }
+const requestFetch = useRequestFetch()
 await loadTextPreview()
 watch(previewUrl, loadTextPreview)
 const versionChanged = async () => { await refresh(); await fetchAll() }

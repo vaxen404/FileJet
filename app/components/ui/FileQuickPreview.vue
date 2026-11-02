@@ -10,7 +10,7 @@
                 <p v-if="loading" role="status" class="text-center text-sm text-muted">Loading preview…</p>
                 <div v-if="errorMessage" role="alert" class="flex min-h-64 flex-col items-center justify-center gap-3 text-center"><p class="text-sm text-label">{{ errorMessage }}</p><button type="button" class="inbox-button" @click="load">Try again</button></div>
                 <template v-else>
-                    <img v-if="kind === 'image'" :key="previewUrl" :src="previewUrl" :alt="item?.name" class="mx-auto max-h-full max-w-full rounded-lg object-contain" @load="loading = false" @error="failed">
+                    <ImageViewer v-if="kind === 'image'" :key="previewUrl" :src="previewUrl" :alt="item?.name ?? ''" class="rounded-lg" @load="loading = false" @error="failed" />
                     <MarkdownContent v-else-if="item?.type === 'note' && !loading" :content="text" />
                     <pre v-else-if="kind === 'text' && !loading" class="m-0 whitespace-pre-wrap wrap-anywhere font-mono text-sm leading-7 text-content">{{ text }}</pre>
                     <iframe v-else-if="kind === 'pdf'" :key="previewUrl" :src="previewUrl" title="PDF preview" class="h-full min-h-80 w-full rounded-lg border-0 bg-white" referrerpolicy="no-referrer" @load="loading = false" />

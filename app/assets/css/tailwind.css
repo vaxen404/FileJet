@@ -7,6 +7,7 @@
 @import "./account-menu.css";
 @import "./themes.css";
 @import "./notifications.css";
+@import "./details-mobile.css";
 
 /* Theme colors stay named so light, dark and accent themes work consistently. */
 

@@ -2,13 +2,18 @@
     <div class="file-page min-w-0 min-h-0 grid grid-cols-[minmax(0,_1fr)_27rem] gap-4
         details-middle:grid-cols-[minmax(0,_1fr)_22rem] details-middle:gap-3 max-preview:h-auto
         max-preview:min-h-full max-preview:grid-cols-1 size-full">
-        <section class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
+        <DetailsMobileBar :title="title" :item-type="itemType" :is-favorite="isFavorite" :busy="busy"
+            :inert="mobilePanelOpen" @back="$emit('back')" @select="selectMobileTab"
+            @download="$emit('download')" @favorite="$emit('favorite')" @delete="$emit('delete')">
+            <template v-if="$slots['mobile-actions']" #actions><slot name="mobile-actions" /></template>
+        </DetailsMobileBar>
+        <section :inert="mobilePanelOpen" class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
             <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-3xl overflow-hidden
                 max-preview:flex-none max-preview:h-144 max-phone:h-96">
                 <slot />
             </div>
         </section>
-        <aside class="file-panel min-w-0 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain
+        <DetailsActionPanel v-model="mobilePanelOpen" :title="title" class="file-panel min-w-0 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain
             max-preview:overflow-visible">
             <section class="file-information flex-none min-w-0 flex flex-col gap-3 p-3.5 bg-surface border border-divider
                 rounded-3xl max-preview:flex-none max-phone:p-3">
@@ -163,7 +168,7 @@
                     />
                 </div>
             </section>
-        </aside>
+        </DetailsActionPanel>
     </div>
 </template>
 
@@ -184,6 +189,20 @@ const props = defineProps<{
 
 const activeTab = defineModel<'details' | 'edit' | 'share'>({ default: 'details' })
 const tabs = ['details', 'edit', 'share'] as const
+const mobilePanelOpen = ref(false)
+const selectMobileTab = async (tab: typeof tabs[number]) => {
+    activeTab.value = tab
+    await nextTick()
+    mobilePanelOpen.value = !(props.itemType === 'note' && tab === 'edit')
+}
+onMounted(() => {
+    if (props.itemType === 'folder' && activeTab.value === 'edit' && window.matchMedia('(max-width: 1100px)').matches) {
+        mobilePanelOpen.value = true
+    }
+})
+watch(activeTab, (tab, previous) => {
+    if (tab === 'details' && previous === 'edit') mobilePanelOpen.value = false
+}, { flush: 'sync' })
 
 defineEmits<{
     download: []

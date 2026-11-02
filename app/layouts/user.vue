@@ -7,6 +7,7 @@ const route = useRoute()
 const navigationDialog = ref<HTMLDialogElement | null>(null)
 const mobileMenuOpen = ref(false)
 const isCompact = useMediaQuery('(max-width: 1100px)')
+const isDetailPage = computed(() => /^\/(files|notes|folders)\/[^/]+\/?$/.test(route.path))
 
 const closeNavigation = () => {
     navigationDialog.value?.close()
@@ -42,7 +43,7 @@ const pageTitle = computed(() => {
 
 <template>
     <div class="user-layout flex gap-5 h-dvh p-5 bg-canvas text-foreground max-laptop:gap-0 max-laptop:p-3
-        max-mobile:p-2">
+        max-mobile:p-2" :class="{ 'is-detail-page': isDetailPage }">
         <div class="desktop-navigation min-h-0 shrink-0 max-laptop:hidden">
             <Sidebar />
         </div>
