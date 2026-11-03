@@ -55,6 +55,7 @@ const navigation = computed(() => [
             { label: 'Favorites', to: '/favorites', icon: 'solar:star-outline', activeIcon: 'solar:star-bold' },
             { label: 'Shared', to: '/shared', icon: 'solar:share-circle-linear', activeIcon: 'solar:share-circle-bold' },
             { label: 'Inbox', to: '/inbox', icon: 'solar:inbox-in-linear', activeIcon: 'solar:inbox-in-bold' },
+            { label: 'Quarantine', to: '/quarantine', icon: 'solar:shield-warning-linear', activeIcon: 'solar:shield-warning-bold' },
             { label: 'Trash', to: '/trash', icon: 'material-symbols:delete-outline-rounded', activeIcon: 'material-symbols:delete-rounded' }
         ]
     },

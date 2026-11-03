@@ -13,6 +13,8 @@ import { assertRequestOpen } from './inboxValidation'
 import { noteSchema } from '../../shared/schemas/note'
 import { replaceVersionedFile } from './fileVersions'
 import { UPLOAD_CHUNK_SIZE, type UploadManifest, type UploadSessionView } from '../../shared/utils/resumableUpload'
+import { scanStoredFile, requireCleanScan } from './fileSecurity'
+import { scanClamPath } from './clamav'
 
 export const accessHash = (key: string) => createHash('sha256').update(key).digest('hex')
 export const stagedPath = (id: string, index: number) => {
@@ -103,6 +105,29 @@ async function destination(tx: Prisma.TransactionClient, userId: string, folderI
     if (!rows.length) throwError(404, 'Destination folder not found.')
 }
 export async function finishUpload(id: string, userId: string) {
+    // Complete parts are immutable: repeated chunk writes are ignored above.
+    // Scan before opening the transaction so large scans do not hold DB locks.
+    const ready = await prisma.upload_sessions.findUnique({ where: { id } })
+    if (!ready || ready.user_id !== userId || ready.expires_at.getTime() <= Date.now()) throwError(410, 'This upload expired.')
+    if (ready.result) return ready.result as Record<string, unknown>
+    const readyManifest = manifestOf(ready)
+    if (readyManifest.files.some((file, index) => (ready.offsets as number[])[index] !== file.size)) throwError(409, 'The upload is incomplete.')
+    for (const [index, file] of readyManifest.files.entries()) {
+        const path = stagedPath(id, index)
+        if (!file.size) {
+            await mkdir(dirname(path), { recursive: true })
+            const handle = await open(path, 'a', 0o600); await handle.close()
+        }
+        const staged = await stat(path, { bigint: true })
+        if (!staged.isFile() || staged.size !== BigInt(file.size)) throwError(409, 'An upload part is unavailable.')
+        if (readyManifest.kind === 'notes') { requireCleanScan(await scanClamPath(path)); continue }
+        const key = `${userId}/${id}-${index}`, target = storagePath(key)
+        await mkdir(dirname(target), { recursive: true })
+        await link(path, target).catch(error => { if (error.code !== 'EEXIST') throw error })
+        const linked = await stat(target, { bigint: true })
+        if (linked.dev !== staged.dev || linked.ino !== staged.ino) throwError(409, 'Upload ID already used. Start a new upload.')
+        requireCleanScan(await scanStoredFile(userId, key))
+    }
     const result = await prisma.$transaction(async tx => {
         await lockStorageUser(tx, userId)
         const session = await lockSession(tx, id)
@@ -179,6 +204,17 @@ export async function finishUpload(id: string, userId: string) {
     await rm(dirname(stagedPath(id, 0)), { recursive: true, force: true }).catch(error => console.error('[UPLOAD STAGING CLEANUP]', error))
     return result
 }
+async function removeUncommittedLink(userId: string, id: string, index: number, tx: Prisma.TransactionClient) {
+    const key = `${userId}/${id}-${index}`, target = storagePath(key)
+    const [staged, linked] = await Promise.all([stagedPath(id, index), target].map(path => stat(path, { bigint: true }).catch(error => {
+        if (error.code !== 'ENOENT') throw error
+        return null
+    })))
+    // A reused client upload ID must never delete an older committed file.
+    if (!staged || !linked || staged.dev !== linked.dev || staged.ino !== linked.ino) return
+    await unlink(target).catch(error => { if (error.code !== 'ENOENT') throw error })
+    await tx.file_scans.deleteMany({ where: { storage_key: key, user_id: userId } })
+}
 export async function cleanupExpiredUploads() {
     const expired = await prisma.upload_sessions.findMany({ where: { expires_at: { lte: new Date() } }, take: 100, select: { id: true } })
     for (const { id } of expired) {
@@ -186,7 +222,9 @@ export async function cleanupExpiredUploads() {
             await tx.$queryRaw`SELECT id FROM upload_sessions WHERE id = ${id}::uuid FOR UPDATE`
             const session = await tx.upload_sessions.findUnique({ where: { id } })
             if (!session || session.expires_at.getTime() > Date.now()) return
-            if (!session.result) for (let i = 0; i < manifestOf(session).files.length; i++) await unlink(storagePath(`${session.user_id}/${id}-${i}`)).catch(error => { if (error.code !== 'ENOENT') throw error })
+            if (!session.result) for (let i = 0; i < manifestOf(session).files.length; i++) {
+                await removeUncommittedLink(session.user_id, id, i, tx)
+            }
             await rm(dirname(stagedPath(id, 0)), { recursive: true, force: true })
             await tx.upload_sessions.delete({ where: { id } })
         }, { timeout: 30000 })
@@ -197,7 +235,7 @@ export async function discardUpload(id: string) {
         const session = await lockSession(tx, id, true)
         if (session.result) return { success: true }
         for (let index = 0; index < manifestOf(session).files.length; index++) {
-            await unlink(storagePath(`${session.user_id}/${id}-${index}`)).catch(error => { if (error.code !== 'ENOENT') throw error })
+            await removeUncommittedLink(session.user_id, id, index, tx)
         }
         await rm(dirname(stagedPath(id, 0)), { recursive: true, force: true })
         await tx.upload_sessions.delete({ where: { id } })

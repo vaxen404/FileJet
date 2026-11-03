@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { realpath, stat } from 'node:fs/promises'
@@ -80,7 +81,7 @@ async function extract(file: StoredFile): Promise<FileTechnicalMetadata> {
         if (!file.storage_key.startsWith(`${file.user_id}/`)) return {}
 
         const [path, ownerRoot] = await Promise.all([
-            realpath(storagePath(file.storage_key)),
+            safeStoragePath(file.user_id, file.storage_key),
             realpath(storagePath(file.user_id))
         ])
 

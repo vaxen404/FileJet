@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { prisma } from '../../../../../utils/prisma'
@@ -10,7 +11,7 @@ export default defineEventHandler(async event => {
     enforceRateLimit(event, `inbox-download:${userId}`, 30, 60000)
     const upload = await prisma.request_uploads.findFirst({ where: { id: uploadId, request_id: id, request: { user_id: userId }, status: 'pending' } })
     if (!upload?.storage_key || !upload.storage_key.startsWith(`${userId}/`)) throwError(404, 'Incoming file not found.')
-    const path = storagePath(upload.storage_key)
+    const path = await safeStoragePath(userId, upload.storage_key)
     const content = await stat(path).catch(() => null)
     if (!content?.isFile()) throwError(404, 'Incoming file not found.')
     setHeader(event, 'Content-Type', 'application/octet-stream')

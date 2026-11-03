@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { prisma } from '../../../utils/prisma'
@@ -10,7 +11,7 @@ export default defineEventHandler(async event => {
     enforceRateLimit(event, `files-preview:${userId}`, 240, 60000)
     const file = await prisma.files.findFirst({ where: { id: fileId, user_id: userId } })
     if (!file || !file.storage_key.startsWith(`${userId}/`)) throwError(404, 'File not found.')
-    const path = storagePath(file.storage_key)
+    const path = await safeStoragePath(userId, file.storage_key)
     const content = await stat(path).catch(() => null)
     if (!content?.isFile()) throwError(404, 'Incoming file not found.')
     const preview = getInboxPreview(file.original_name, file.mime_type)

@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { resolve, sep } from 'node:path'
@@ -36,7 +37,7 @@ export default defineEventHandler(async event => {
         }
 
         const storageRoot = resolve(process.cwd(), 'storage')
-        const filePath = resolve(storageRoot, file.storage_key)
+        const filePath = await safeStoragePath(session.userId, file.storage_key)
 
         if (!filePath.startsWith(storageRoot + sep)) {
             throwError(400, 'Invalid file storage path.')

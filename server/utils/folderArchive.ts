@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { stat, readFile } from 'node:fs/promises'
 import { zipSync, strToU8 } from 'fflate'
 import { prisma } from './prisma'
@@ -92,7 +93,7 @@ export async function createFolderArchive(userId: string, folderId: string) {
             throwError(409, 'Invalid file folder.')
         }
 
-        const filePath = storagePath(file.storage_key)
+        const filePath = await safeStoragePath(userId, file.storage_key)
         const info = await stat(filePath)
 
         if (!info.isFile()) {

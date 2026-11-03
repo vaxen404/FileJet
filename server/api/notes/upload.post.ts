@@ -1,3 +1,4 @@
+import { scanUploadParts } from '~~/server/utils/fileSecurity'
 import { reserveStorage } from '~~/server/utils/storage'
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
@@ -114,6 +115,8 @@ export default defineEventHandler(async event => {
                 size: BigInt(Buffer.byteLength(result.data.content, 'utf-8'))
             })
         }
+
+        await scanUploadParts(fileParts)
 
         const uploadedNotes = await prisma.$transaction(async tx => {
             await reserveStorage(

@@ -75,7 +75,7 @@ export async function uploadResumably(files: File[], options: UploadOptions): Pr
             options.signal?.throwIfAborted()
             if (typeof navigator !== 'undefined' && !navigator.onLine) { update('waiting', job.progress * total / 100); await online(options.signal) }
             try {
-                const response = await fetch(url, { ...init, credentials: 'same-origin', headers: { Accept: 'application/json', 'Upload-Key': record!.key, ...init.headers }, signal: AbortSignal.any([AbortSignal.timeout(90000), ...(options.signal ? [options.signal] : [])]) })
+                const response = await fetch(url, { ...init, credentials: 'same-origin', headers: { Accept: 'application/json', 'Upload-Key': record!.key, ...init.headers }, signal: AbortSignal.any([AbortSignal.timeout(url.endsWith('/complete') ? 330000 : 90000), ...(options.signal ? [options.signal] : [])]) })
                 const body = await response.json()
                 if (response.ok) return body as T
                 const error = Object.assign(new Error(body.message || body.statusMessage || 'Could not upload files.'), { status: response.status, retryAfter: Number(response.headers.get('Retry-After') || 0) })

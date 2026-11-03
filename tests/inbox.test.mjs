@@ -72,6 +72,7 @@ function inboxDetailFixture(userId, id) {
         } }
     }
     const imports = {
+        '~~/server/utils/fileSecurity': { safeStoragePath: async (_owner, key) => '/fixture/' + key, assertCachedClean: async (_owner, key) => '/fixture/' + key },
         '../../utils/prisma': { prisma },
         '../../utils/inbox': {
             inboxOwner: () => { if (!userId) throw createError({ statusCode: 401 }); return userId },
@@ -130,6 +131,7 @@ function reviewFixture(count = 1) {
         files: { findMany: async () => state.files, create: async ({ data }) => { const file = { ...data, id: state.files.length === 1 ? 'approved' : `approved-${state.files.length}` }; state.files.push(file); return file } }
     }
     const imports = {
+        '~~/server/utils/fileSecurity': { safeStoragePath: async (_owner, key) => '/fixture/' + key, assertCachedClean: async (_owner, key) => '/fixture/' + key },
         'node:fs/promises': { stat: async path => ({ isFile: () => !state.missing && path !== state.missingKey, size: 3 }), unlink: async () => {} },
         './storage': { lockStorageUser: async () => {}, reserveStorage: async (_, userId, amount) => { assert.equal(userId, 'owner'); quotaChanges.push(amount); state.used += amount } },
         './files': { storagePath: key => '/fixture/' + key },
@@ -258,6 +260,7 @@ function previewFixture(options = {}) {
     let status = 200
     const upload = { id:'upload',request_id:'inbox',owner:'owner',status:options.status ?? 'pending',name:options.name ?? 'hello.txt',mime_type:options.mime ?? 'text/plain',storage_key:'owner/pending' }
     const imports = {
+        '~~/server/utils/fileSecurity': { safeStoragePath: async (_owner, key) => '/fixture/' + key, assertCachedClean: async (_owner, key) => '/fixture/' + key },
         'node:fs': { createReadStream: (path, range) => ({path,range}) },
         'node:fs/promises': { stat: async () => ({isFile:()=>!options.missing,size:options.size ?? 5}) },
         '../../../../../utils/prisma': { prisma: { request_uploads: { findFirst: async ({where}) => {

@@ -25,6 +25,8 @@ logs
 !/tests/product-features.test.mjs
 !/tests/share-limits-admin.test.mjs
 !/tests/share-limits-admin.integration.mjs
+!/tests/antivirus.test.mjs
+!/tests/antivirus.integration.mjs
 
 
 # Misc

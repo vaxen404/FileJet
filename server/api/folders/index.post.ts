@@ -1,3 +1,4 @@
+import { scanUploadParts } from '~~/server/utils/fileSecurity'
 ﻿import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
@@ -135,6 +136,8 @@ export default defineEventHandler(async event => {
             throwError(400, 'Not enough storage space.')
         }
 
+        const scanProofs = await scanUploadParts(files)
+
         const result = await prisma.$transaction(
             async tx => {
                 await reserveStorage(tx, session.userId, totalSize)
@@ -216,7 +219,7 @@ export default defineEventHandler(async event => {
                         )
                     }
 
-                    const { storageKey } = await saveFileToStorage(session.userId, item.part)
+                    const { storageKey } = await saveFileToStorage(session.userId, item.part, undefined, tx, scanProofs.get(item.part))
 
                     savedKeys.push(storageKey)
 

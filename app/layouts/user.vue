@@ -32,6 +32,7 @@ const pageTitle = computed(() => {
         '/shared': 'Shared',
         '/inbox': 'Inbox',
         '/trash': 'Trash',
+        '/quarantine': 'Quarantine',
         '/settings/preferences': 'Preferences',
         '/settings/personalization': 'Appearance'
     }

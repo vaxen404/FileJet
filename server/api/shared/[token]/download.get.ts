@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { recordShareActivity } from '~~/server/utils/shareStatistics'
 import { claimShareDownload } from '~~/server/utils/shareLimits'
 import { throwError } from '~~/server/utils/error'
@@ -66,7 +67,7 @@ export default defineEventHandler(async event => {
     }
 
     const storageDirectory = resolve(process.cwd(), 'storage')
-    const filePath = resolve(storageDirectory, file.storage_key)
+    const filePath = await safeStoragePath(sharedItem.user_id, file.storage_key)
 
     if (!filePath.startsWith(storageDirectory + sep)) {
         throwError(403, 'Invalid file path', {

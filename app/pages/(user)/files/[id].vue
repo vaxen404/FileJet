@@ -8,7 +8,7 @@
         <DetailsMobileBar :title="displayFileName" item-type="file" :is-favorite="isFileFavorite(file.id)"
             :busy="isDeleting || isSavingRename || isDownloading || isUpdatingFavorite" :inert="mobilePanelOpen"
             @back="goBack" @select="selectMobileTab" @download="handleDownload(file.id)"
-            @favorite="handleFavorite(file)" @delete="handleDelete(file.id)" />
+            @favorite="handleFavorite(file)" @delete="handleDelete(file.id)" @scan="scanFromMenu" />
         <section :inert="mobilePanelOpen" class="file-workspace min-w-0 min-h-0 flex flex-col gap-3">
             <div class="preview-card flex-1 min-h-0 flex bg-surface border border-divider rounded-3xl overflow-hidden
                 max-preview:flex-none max-preview:h-144 max-phone:h-96">
@@ -18,7 +18,16 @@
                     :class="{ 'text-preview': isText && !previewError }"
                 >
                     <div
-                        v-if="previewError"
+                        v-if="scanState && ['infected', 'error', 'scanning'].includes(scanState.status)"
+                        class="preview-message flex flex-col items-center gap-3 max-w-96 text-center text-sm text-content"
+                    >
+                        <Icon name="solar:shield-check-linear" size="3rem" :class="scanState.status === 'infected' ? 'text-danger' : 'text-accent'" />
+                        <strong>{{ scanState.status === 'infected' ? 'Threat detected. This file is quarantined.' : scanState.status === 'scanning' ? 'Scanning this file…' : 'Scan incomplete. File access is blocked.' }}</strong>
+                        <p v-if="scanState.message" class="text-xs leading-5 text-muted">{{ scanState.message }}</p>
+                        <button type="button" class="inbox-button" @click="showVirusProtection">Virus protection</button>
+                    </div>
+                    <div
+                        v-else-if="previewError"
                         class="preview-message flex flex-col items-center gap-3 max-w-96 text-muted text-center text-[0.8125rem]
                             leading-normal"
                     >
@@ -367,6 +376,7 @@
                     />
                 </div>
             </section>
+            <FileScanPanel ref="scanPanel" :file-id="file.id" :revision="file.revision" @status="scanStatusChanged" @changed="scanCompleted" />
             <FileVersionHistory v-show="activeTab !== 'share'" :file-id="file.id" :revision="file.revision" :name="displayFileName" @changed="versionChanged" />
         </DetailsActionPanel>
         <ImageEditDialog v-if="imageEditorOpen" :src="previewUrl" :name="displayFileName" :file-id="file.id"
@@ -411,6 +421,7 @@ import { getFileReturnPage } from '~/utils/fileNavigation'
 import { emptyShareState, type ShareState } from '~~/shared/types/share'
 import type { FileTechnicalMetadata } from '~~/shared/types/fileMetadata'
 import { editableImageType } from '~/utils/imageEdit'
+import type { FileScanState } from '~~/shared/types/fileScan'
 
 definePageMeta({
     middleware: ['auth', 'file-origin'],
@@ -526,6 +537,30 @@ const renameTargetName = computed(() => {
 
 const activeTab = ref<DetailTab>('details')
 const mobilePanelOpen = ref(false)
+const scanPanel = ref<{ scan: () => Promise<void>; $el?: HTMLElement } | null>(null)
+const scanState = ref<FileScanState | null>(null)
+const showVirusProtection = async () => {
+    if (window.matchMedia('(max-width: 1100px)').matches) mobilePanelOpen.value = true
+    await nextTick()
+    scanPanel.value?.$el?.scrollIntoView({ block: 'nearest' })
+}
+const scanStatusChanged = (state: FileScanState) => {
+    const blocked = scanState.value && ['infected', 'error', 'scanning'].includes(scanState.value.status)
+    scanState.value = state
+    if (state.status === 'clean' && blocked) {
+        previewError.value = ''
+        if (isText.value) void loadTextPreview()
+    }
+}
+const scanCompleted = async () => {
+    await refresh()
+    if (scanState.value?.status === 'clean') { previewError.value = ''; await loadTextPreview() }
+}
+const scanFromMenu = async () => {
+    activeTab.value = 'details'
+    await showVirusProtection()
+    scanPanel.value?.scan()
+}
 const selectMobileTab = async (tab: DetailTab) => {
     await selectTab(tab)
     mobilePanelOpen.value = true

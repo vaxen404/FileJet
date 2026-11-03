@@ -1,3 +1,4 @@
+import { scanUploadParts } from '~~/server/utils/fileSecurity'
 import { unlink } from 'node:fs/promises'
 import { prisma } from '../../../utils/prisma'
 import { publicFileRequest } from '../../../utils/inbox'
@@ -16,6 +17,7 @@ export default defineEventHandler(async event => {
     const totalSize = validateRequestFiles(parts, request.max_file_size)
     const savedKeys: string[] = []
     let committed = false
+    const scanProofs = await scanUploadParts(parts)
     try {
         await prisma.$transaction(async tx => {
             // Serialize with other uploads for this owner before checking names and quota.
@@ -26,7 +28,7 @@ export default defineEventHandler(async event => {
             assertRequestOpen(current, parts.length)
             validateRequestFiles(parts, current.max_file_size)
             for (const part of parts) {
-                const { storageKey } = await saveFileToStorage(request.user_id, part)
+                const { storageKey } = await saveFileToStorage(request.user_id, part, undefined, tx, scanProofs.get(part))
                 savedKeys.push(storageKey)
                 await tx.request_uploads.create({ data: {
                     request_id: request.id, name: part.filename, sender_name: senderName, sender_note: senderNote, size: BigInt(part.data.length),

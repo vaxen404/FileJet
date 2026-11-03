@@ -1,3 +1,4 @@
+import { assertCachedClean } from '~~/server/utils/fileSecurity'
 import { stat, unlink } from 'node:fs/promises'
 import type { Prisma } from '~~/src/generated/prisma/client'
 import { lockStorageUser, reserveStorage } from './storage'
@@ -30,7 +31,7 @@ export async function approveInboxUpload(tx: Prisma.TransactionClient, userId: s
         const folders = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM folders WHERE id = ${folderId}::uuid AND user_id = ${userId}::uuid FOR KEY SHARE`
         if (!folders.length) throwError(404, 'Destination folder not found.')
     }
-    const content = await stat(storagePath(upload.storage_key)).catch(() => null)
+    const content = await stat(await assertCachedClean(userId, upload.storage_key, tx)).catch(() => null)
     if (!content?.isFile() || BigInt(content.size) !== upload.size) throwError(409, 'The incoming file is unavailable. You can reject it to release its storage.')
     const existing = await tx.files.findMany({ where: { user_id: userId, folder_id: folderId }, select: { original_name: true } })
     const name = availableRequestFilename(upload.name, new Set(existing.map(file => file.original_name.toLowerCase())))
@@ -82,7 +83,7 @@ export async function approveInboxUploads(tx: Prisma.TransactionClient, userId: 
     }
     // Check every stored file before writing any approval records.
     for (const upload of uploads) {
-        const content = await stat(storagePath(upload.storage_key)).catch(() => null)
+        const content = await stat(await assertCachedClean(userId, upload.storage_key, tx)).catch(() => null)
         if (!content?.isFile() || BigInt(content.size) !== upload.size)
             throwError(409, `The incoming file “${upload.name}” is unavailable. No selected files were approved.`)
     }

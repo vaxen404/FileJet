@@ -6,6 +6,7 @@ import { parseInboxReviewIds } from '../../../../utils/inboxValidation'
 import { approveInboxUploads } from '../../../../utils/inboxReview'
 import { isUuid } from '../../../../utils/validation'
 import { throwError } from '../../../../utils/error'
+import { scanInboxFiles } from '~~/server/utils/fileSecurity'
 
 export default defineEventHandler(async event => {
     assertShareOrigin(event)
@@ -16,5 +17,6 @@ export default defineEventHandler(async event => {
     if (!('folderId' in body) || (body.folderId !== null && (typeof body.folderId !== 'string' || !isUuid(body.folderId))))
         throwError(400, 'Choose Files or a destination folder.')
     const folderId = body.folderId as string | null
+    await scanInboxFiles(userId, id, uploadIds)
     return await prisma.$transaction(tx => approveInboxUploads(tx, userId, id, uploadIds, folderId), { maxWait: 5000, timeout: 60000 })
 })

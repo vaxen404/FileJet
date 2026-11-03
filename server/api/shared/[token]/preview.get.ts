@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { getSharedTarget } from '../../../utils/sharedTarget'
 import { enforceRateLimit } from '../../../utils/rateLimit'
 import { prisma } from '~~/server/utils/prisma'
@@ -38,7 +39,7 @@ export default defineEventHandler(async event => {
             throwError(415, 'File preview is not supported.')
         }
 
-        const filePath = storagePath(file.storage_key)
+        const filePath = await safeStoragePath(sharedItem.user_id, file.storage_key)
         setHeader(event, 'Cache-Control', 'no-store')
         setHeader(event, 'X-Content-Type-Options', 'nosniff')
         setHeader(

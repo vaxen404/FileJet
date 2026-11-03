@@ -12,6 +12,7 @@ const emit = defineEmits<{
     download: []
     favorite: []
     delete: []
+    scan: []
 }>()
 const menuId = useId()
 const menu = ref<HTMLElement | null>(null)
@@ -45,6 +46,9 @@ const run = (action: () => void) => {
             </button>
             <button type="button" :disabled="busy" @click="run(() => emit('download'))">
                 <Icon name="solar:download-linear" /> Download
+            </button>
+            <button v-if="itemType === 'file'" type="button" :disabled="busy" @click="run(() => emit('scan'))">
+                <Icon name="solar:shield-check-linear" /> Scan file
             </button>
             <button type="button" :disabled="busy" @click="run(() => emit('favorite'))">
                 <Icon :name="isFavorite ? 'solar:star-bold' : 'solar:star-linear'" />

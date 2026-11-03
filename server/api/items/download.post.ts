@@ -1,3 +1,4 @@
+import { safeStoragePath } from '~~/server/utils/fileSecurity'
 import { readFile } from 'node:fs/promises'
 import { zipSync, unzipSync, strToU8 } from 'fflate'
 import { prisma } from '~~/server/utils/prisma'
@@ -57,7 +58,7 @@ export default defineEventHandler(async event => {
 
         for (const file of files)
             entries[unique(safe(file.original_name))] = new Uint8Array(
-                await readFile(storagePath(file.storage_key))
+                await readFile(await safeStoragePath(session.userId, file.storage_key))
             )
 
         for (const note of notes) entries[unique(safe(note.title) + '.txt')] = strToU8(note.content)

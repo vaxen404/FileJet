@@ -2,6 +2,11 @@ import { randomUUID } from 'node:crypto'
 import { resolve, dirname, sep } from 'node:path'
 import { mkdir, open, unlink } from 'node:fs/promises'
 import type { MultiPartData } from 'h3'
+import type { Prisma } from '~~/src/generated/prisma/client'
+import { resolveStoragePath as storagePath } from './storagePaths'
+import { recordCleanUpload, requireCleanScan } from './fileSecurity'
+import { scanClamBytes, type ScanVerdict } from './clamav'
+export { resolveStoragePath as storagePath } from './storagePaths'
 
 export type FilePart = MultiPartData & { name: 'files'; filename: string }
 
@@ -19,23 +24,14 @@ export const getFileParts = (formData: MultiPartData[]): FilePart[] => formData.
 export const getTotalUploadSize = (files: FilePart[]): bigint =>
     files.reduce((total, file) => total + BigInt(file.data.length), 0n)
 
-export function storagePath(storageKey: string): string {
-    const root = resolve(process.cwd(), 'storage')
-    const path = resolve(root, storageKey)
-
-    if (!path.startsWith(root + sep)) {
-        throw new Error('Invalid storage path.')
-    }
-
-    return path
-}
-
-export async function saveFileToStorage(userId: string, file: FilePart, key?: string) {
+export async function saveFileToStorage(userId: string, file: FilePart, key?: string, db?: Prisma.TransactionClient, scanned?: ScanVerdict) {
     if (!/^[0-9a-f-]{36}$/i.test(userId)) {
         throw new Error('Invalid storage owner.')
     }
 
     const safeName = file.filename.replace(/[/\\\0]/g, '_')
+    const proof = scanned ?? await scanClamBytes(file.data)
+    requireCleanScan(proof)
     const storageKey = key ?? `${userId}/${randomUUID()}`
 
     if (!storageKey.startsWith(`${userId}/`)) {
@@ -56,6 +52,7 @@ export async function saveFileToStorage(userId: string, file: FilePart, key?: st
         await handle.writeFile(file.data)
         await handle.sync()
         await handle.close()
+        await recordCleanUpload(userId, storageKey, proof, db)
     } catch (error) {
         await handle.close().catch(() => {})
 

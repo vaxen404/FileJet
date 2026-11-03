@@ -1,3 +1,4 @@
+import { safeStoragePath, assertCachedClean } from '~~/server/utils/fileSecurity'
 import { constants } from 'node:fs'
 import { copyFile, stat, unlink, mkdir } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
@@ -31,6 +32,9 @@ export async function replaceVersionedFile(tx: Prisma.TransactionClient, userId:
     return tx.files.update({ where: { id: fileId }, data: { storage_key: incoming.storageKey, size: incoming.size, mime_type: incoming.mimeType, revision: { increment: 1 }, updated_at: new Date(), metadata_checked_at: null, metadata_signature: null } })
 }
 export async function restoreFileVersion(userId: string, fileId: string, versionId: string, revision: number) {
+    const initial = await prisma.file_versions.findFirst({ where: { id: versionId, file_id: fileId, user_id: userId } })
+    if (!initial) throwError(404, 'Version not found.')
+    await safeStoragePath(userId, initial.storage_key)
     let newKey = '', committed = false
     try {
         return await prisma.$transaction(async tx => {
@@ -39,7 +43,7 @@ export async function restoreFileVersion(userId: string, fileId: string, version
             if (!version) throwError(404, 'Version not found.')
             await archiveCurrentFile(tx, file)
             await reserveStorage(tx, userId, version.size)
-            const source = resolveTrashStoragePath(userId, version.storage_key), content = await stat(source).catch(() => null)
+            const source = await assertCachedClean(userId, version.storage_key, tx), content = await stat(source).catch(() => null)
             if (!content?.isFile() || BigInt(content.size) !== version.size) throwError(409, 'This saved version is unavailable.')
             newKey = `${userId}/${randomUUID()}`
             const target = resolveTrashStoragePath(userId, newKey)

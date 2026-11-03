@@ -1,0 +1,18 @@
+services:
+  clamav:
+    image: clamav/clamav:1.4
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3310:3310"
+    volumes:
+      - clamav-signatures:/var/lib/clamav
+      - ./clamd.conf:/etc/clamav/clamd.conf:ro
+    mem_limit: 4g
+    healthcheck:
+      test: ["CMD", "clamdscan", "--ping=1", "--config-file=/etc/clamav/clamd.conf"]
+      interval: 30s
+      timeout: 10s
+      start_period: 180s
+      retries: 5
+volumes:
+  clamav-signatures:
