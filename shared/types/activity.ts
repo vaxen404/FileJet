@@ -1,0 +1,5 @@
+export const activityActions = { created: 'Created', uploaded: 'Uploaded', updated: 'Updated', renamed: 'Renamed', moved: 'Moved', trashed: 'Moved to Trash', restored: 'Restored', deleted: 'Deleted permanently', version_added: 'Added a version', version_restored: 'Restored a version', version_deleted: 'Deleted a version', shared: 'Created a share link', share_updated: 'Updated sharing', unshared: 'Removed sharing', tags_updated: 'Updated tags', scanned: 'Scanned', quarantined: 'Quarantined', scan_failed: 'Scan incomplete', approved: 'Approved incoming file', rejected: 'Rejected incoming file', discarded: 'Discarded upload' } as const
+export type ActivityAction = keyof typeof activityActions
+export type ActivityKind = 'file' | 'folder' | 'note' | 'inbox' | 'batch'
+export interface ActivityEntry { id: string; itemId: string | null; type: ActivityKind; action: ActivityAction; name: string; previousName: string | null; location: string | null; createdAt: string }
+export interface ActivityPage { items: ActivityEntry[]; nextCursor: string | null }

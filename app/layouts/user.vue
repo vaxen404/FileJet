@@ -33,6 +33,7 @@ const pageTitle = computed(() => {
         '/inbox': 'Inbox',
         '/trash': 'Trash',
         '/quarantine': 'Quarantine',
+        '/activity': 'Activity history',
         '/settings/preferences': 'Preferences',
         '/settings/personalization': 'Appearance'
     }

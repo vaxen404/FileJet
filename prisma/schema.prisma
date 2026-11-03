@@ -31,6 +31,23 @@ model users {
   file_requests file_requests[]
   file_versions file_versions[]
   file_scans file_scans[]
+  activity_entries activity_entries[]
+}
+
+model activity_entries {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+  item_id String? @db.Uuid
+  item_type String @db.VarChar(16)
+  action String @db.VarChar(32)
+  name String @db.VarChar(255)
+  previous_name String? @db.VarChar(255)
+  location String? @db.VarChar(255)
+  request_key String? @unique @db.VarChar(180)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  users users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  @@index([user_id, created_at, id])
+  @@index([user_id, item_type, item_id])
 }
 
 model file_scans {

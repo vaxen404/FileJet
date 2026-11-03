@@ -38,6 +38,10 @@ export async function readShareBody(event: H3Event, maxBytes = 8192): Promise<Re
 
         if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error()
 
+        if (typeof value.itemId === 'string' && /^[0-9a-f-]{36}$/i.test(value.itemId) && ['file','folder','note'].includes(value.itemType)) {
+            event.context.activityShareTarget = { itemType: value.itemType, itemId: value.itemId }
+        }
+
         return value
     } catch {
         throwError(400, 'Invalid JSON request body.')

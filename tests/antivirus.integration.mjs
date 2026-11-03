@@ -8,7 +8,7 @@ import pg from 'pg'
 const base = process.env.FILEJET_TEST_URL || 'http://127.0.0.1:3020'
 const db = new pg.Client({ connectionString: process.env.DATABASE_URL })
 const owner = randomUUID(), other = randomUUID(), folder = randomUUID(), clean = randomUUID(), infected = randomUUID(), version = randomUUID(), requestId = randomUUID(), incoming = randomUUID()
-const token = randomUUID(), requestToken = randomUUID(), sessions = []
+const token = randomUUID(), requestToken = randomUUID(), sessions = [], sessionKeys = new Map()
 const root = resolve('storage'), ownerPath = resolve(root, owner)
 const eicar = Buffer.from(['X5O!P%@AP[4', String.fromCharCode(92), 'PZX54(P^)7CC)7}', '$', 'EICAR-STANDARD-ANTIVIRUS-TEST-FILE!', '$', 'H+H*'].join(''))
 const safe = Buffer.from('FileJet clean integration fixture')
@@ -25,6 +25,7 @@ async function api(path, { method = 'GET', body, status = 200, auth = owner, hea
 }
 async function upload(bytes, name, kind = 'files', extra = {}, status = 200) {
     const id = randomUUID(), key = randomUUID() + randomUUID(); sessions.push(id)
+    sessionKeys.set(id, key)
     const manifest = { id, kind, folderId: null, ...extra, files: [{ name, path: kind === 'folders' ? 'Bundle/' + name : name, type: 'text/plain', size: bytes.length, hashes: [createHash('sha256').update(bytes).digest('hex')] }] }
     await api('/api/uploads', { method: 'POST', body: manifest, headers: { 'Upload-Key': key } })
     await api(`/api/uploads/${id}/0`, { method: 'PUT', body: bytes, headers: { 'Content-Type': 'application/octet-stream', 'Upload-Key': key, 'Upload-Offset': '0' } })
@@ -96,8 +97,12 @@ try {
     await upload(eicar, 'clean.txt', 'files', { replaceFileId: clean, expectedRevision: 2 }, 423)
     assert.equal(await count(), before)
     assert.equal((await db.query('SELECT revision FROM files WHERE id=$1', [clean])).rows[0].revision, 2)
+    assert.equal((await api('/api/activity?action=uploaded')).items.length, 0)
     await upload(safe, 'accepted.txt')
     assert.equal(await count(), before + 1)
+    const successfulSession = sessions.at(-1)
+    await api(`/api/uploads/${successfulSession}/complete`, { method: 'POST', headers: { 'Upload-Key': sessionKeys.get(successfulSession) } })
+    assert.equal((await api('/api/activity?action=uploaded')).items.length, 1)
     const completedId = sessions.at(-1), reusedKey = randomUUID() + randomUUID()
     const acceptedId = (await db.query('SELECT id FROM files WHERE user_id=$1 AND original_name=$2', [owner, 'accepted.txt'])).rows[0].id
     await db.query('DELETE FROM upload_sessions WHERE id=$1', [completedId])

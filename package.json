@@ -16,6 +16,7 @@
     "test:sharing-admin": "node tests/share-limits-admin.integration.mjs",
     "test:antivirus": "node tests/antivirus.integration.mjs",
     "test:offline": "node tests/offline-notes.integration.mjs",
+    "test:activity": "node tests/activity.integration.mjs",
     "test:db": "node --env-file=.env --test --test-isolation=none tests/postgres-integrity.test.mjs"
   },
   "dependencies": {
