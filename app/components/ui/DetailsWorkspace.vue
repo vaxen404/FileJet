@@ -168,6 +168,7 @@
                     />
                 </div>
             </section>
+            <slot name="extra" />
         </DetailsActionPanel>
     </div>
 </template>

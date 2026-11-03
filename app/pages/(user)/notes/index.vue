@@ -8,6 +8,7 @@
                 />
 
                 <div class="toolbar-actions flex items-center flex-wrap gap-2 min-w-0">
+                    <a href="/offline-notes.html" class="inbox-button no-underline">Offline notes</a>
                     <TagFilter v-model="activeTag" :items="notes" />
                     <SortDropdown v-model="sortMode" />
                     <ViewSwitcher v-model="viewMode" />

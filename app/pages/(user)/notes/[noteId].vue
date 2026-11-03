@@ -19,6 +19,7 @@
         @delete="remove"
         @share-changed="note.share = $event"
     >
+        <template #extra><OfflineNoteButton :note="note" :disabled="dirty || busy" /></template>
         <article
             v-if="!isEditing"
             class="note-reader flex-1 min-w-0 min-h-0 flex flex-col justify-start gap-4 p-5 overflow-auto

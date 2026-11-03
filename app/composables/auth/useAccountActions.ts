@@ -9,7 +9,7 @@ export const useAccountActions = () => {
 
         const accepted = await confirm({
             title: 'Log out?',
-            message: 'Are you sure you want to log out of your account?',
+            message: 'Log out of your account? Device copies of offline notes, including unsynced drafts, will be removed.',
             confirmText: 'Log out',
             cancelText: 'Stay signed in',
             variant: 'danger'
@@ -20,6 +20,10 @@ export const useAccountActions = () => {
         isSigningOut.value = true
 
         try {
+            if (currentUser.value && typeof window !== 'undefined' && 'indexedDB' in window) {
+                const { loadOfflineStore } = await import('~/utils/offlineNotes')
+                await (await loadOfflineStore()).clearOwner(currentUser.value.id)
+            }
             await $fetch('/api/auth/logout', { method: 'POST' })
         } catch {
             isSigningOut.value = false
