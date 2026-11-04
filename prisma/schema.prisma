@@ -32,6 +32,7 @@ model users {
   file_versions file_versions[]
   file_scans file_scans[]
   activity_entries activity_entries[]
+  note_versions note_versions[]
 }
 
 model activity_entries {
@@ -177,6 +178,7 @@ model folders {
 }
 
 model notes {
+  revision Int @default(1)
   tags String[] @default([]) @db.VarChar(32)
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id    String    @db.Uuid
@@ -190,6 +192,21 @@ model notes {
   folders   folders?    @relation(fields: [folder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notes_folder")
   users     users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notes_user")
   favorites favorites[]
+}
+
+// No note FK: history survives moving the original note into Trash.
+model note_versions {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+  note_id String @db.Uuid
+  revision Int
+  title String @db.VarChar(255)
+  content String
+  size BigInt
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  users users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  @@unique([note_id, revision])
+  @@index([user_id, note_id])
 }
 
 model favorites {

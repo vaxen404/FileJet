@@ -1,4 +1,4 @@
-export interface OfflineNote { id: string; title: string; content: string; updated_at: string | null }
+export interface OfflineNote { id: string; title: string; content: string; updated_at: string | null; revision?: number }
 export interface DeviceNote { id: string; title: string; content: string; pending: boolean; conflict: boolean; error: string }
 interface OfflineStore {
     setOwner: (owner: string) => Promise<void>

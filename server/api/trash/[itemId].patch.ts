@@ -133,6 +133,7 @@ export default defineEventHandler(async event => {
                             tags: item.tags,
                             title: item.name,
                             content: item.content,
+                            revision: item.revision,
                             size: item.size
                         }
                     })
@@ -260,6 +261,7 @@ export default defineEventHandler(async event => {
                                 tags: note.tags,
                                 title: note.name,
                                 content: note.content,
+                                revision: note.revision,
                                 size: note.size
                             }
                         })

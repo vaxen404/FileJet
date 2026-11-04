@@ -1,10 +1,10 @@
 import { computed, onScopeDispose, ref, watch, type Ref } from 'vue'
 
-interface NoteContent { title: string; content: string; updated_at: string | null }
+interface NoteContent { title: string; content: string; updated_at: string | null; revision?: number }
 
 export const useNoteAutosave = <T extends NoteContent>(options: {
     note: Ref<T | undefined>
-    write: (value: { title: string; content: string; expectedUpdatedAt: string | null }) => Promise<NoteContent & Partial<T>>
+    write: (value: { title: string; content: string; expectedUpdatedAt: string | null; expectedRevision?: number }) => Promise<NoteContent & Partial<T>>
     validate: (value: { title: string; content: string }) => string | null
     saved: (value: T) => void
     blocked?: Ref<boolean>
@@ -35,7 +35,7 @@ export const useNoteAutosave = <T extends NoteContent>(options: {
                     const title = draftTitle.value, content = draftContent.value
                     const error = options.validate({ title, content })
                     if (error) return false
-                    const result = await options.write({ title, content, expectedUpdatedAt: options.note.value.updated_at })
+                    const result = await options.write({ title, content, expectedUpdatedAt: options.note.value.updated_at, ...(options.note.value.revision !== undefined ? { expectedRevision: options.note.value.revision } : {}) })
                     options.note.value = { ...options.note.value, ...result }
                     // A response updates the saved baseline, never newer typing.
                     if (draftTitle.value === title) draftTitle.value = result.title

@@ -222,6 +222,7 @@ export default defineEventHandler(async event => {
                             tags: note.tags,
                             title: note.name,
                             content: note.content,
+                            revision: note.revision,
                             size: note.size
                         }
                     })

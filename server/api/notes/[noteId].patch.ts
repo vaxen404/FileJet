@@ -2,7 +2,7 @@
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
 import { isUuid } from '~~/server/utils/validation'
-import { lockStorageUser, reserveStorage } from '~~/server/utils/storage'
+import { lockVersionedNote, writeNoteVersion } from '~~/server/utils/noteVersions'
 import { noteSchema } from '~~/shared/schemas/note'
 
 export default defineEventHandler(async event => {
@@ -19,17 +19,16 @@ export default defineEventHandler(async event => {
     const parsed = noteSchema.safeParse(body)
 
     if (!parsed.success) throwError(400, parsed.error.issues[0]?.message ?? 'Invalid note.')
+    if (body.expectedRevision !== undefined && (!Number.isSafeInteger(body.expectedRevision) || body.expectedRevision < 1)) throwError(400, 'Invalid note revision.')
 
     try {
         const note = await prisma.$transaction(async tx => {
-            await lockStorageUser(tx, session.userId)
-            const existing = await tx.notes.findFirst({ where: { id, user_id: session.userId } })
-
-            if (!existing) throwError(404, 'Note not found.')
+            const existing = await lockVersionedNote(tx, session.userId, id)
+            if (existing.title === parsed.data.title && existing.content === parsed.data.content) return existing
 
             if (
-                body.expectedUpdatedAt !== undefined &&
-                body.expectedUpdatedAt !== (existing.updated_at?.toISOString() ?? null)
+                (body.expectedUpdatedAt !== undefined && body.expectedUpdatedAt !== (existing.updated_at?.toISOString() ?? null)) ||
+                (body.expectedRevision !== undefined && body.expectedRevision !== existing.revision)
             ) {
                 throwError(
                     409,
@@ -51,13 +50,7 @@ export default defineEventHandler(async event => {
             )
                 throwError(409, 'A note with this title already exists.')
 
-            const size = BigInt(Buffer.byteLength(content, 'utf8'))
-            await reserveStorage(tx, session.userId, size - existing.size)
-
-            return tx.notes.update({
-                where: { id, user_id: session.userId },
-                data: { title, content, size, updated_at: new Date() }
-            })
+            return writeNoteVersion(tx, existing, title, content)
         })
 
         return { success: true, note: { ...note, size: note.size.toString() } }

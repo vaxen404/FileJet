@@ -4,6 +4,7 @@ interface NoteData {
     title: string
     content: string
     expectedUpdatedAt?: string | null
+    expectedRevision?: number
 }
 
 export const useNoteActions = () => {
@@ -62,6 +63,7 @@ export const useNoteActions = () => {
                 body: {
                     title: data.title,
                     content: data.content,
+                    ...(data.expectedRevision !== undefined ? { expectedRevision: data.expectedRevision } : {}),
                     ...(data.expectedUpdatedAt !== undefined
                         ? { expectedUpdatedAt: data.expectedUpdatedAt }
                         : {})

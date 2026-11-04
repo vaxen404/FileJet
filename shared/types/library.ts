@@ -13,6 +13,7 @@ export interface LibraryItem {
 }
 
 export interface NoteDetails {
+    revision: number
     tags?: string[]
     id: string
     user_id: string

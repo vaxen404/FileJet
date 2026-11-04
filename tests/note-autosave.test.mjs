@@ -85,3 +85,15 @@ test('discard cancels a pending save and disposal stops background requests', as
     await sleep(50)
     assert.equal(f.calls.length, 0)
 })
+
+test('autosave advances the revision guard after each successful save', async t => {
+    let revision = 3
+    const f = fixture(t, async value => ({ title: value.title, content: value.content, updated_at: 'v' + (revision + 1), revision: ++revision }))
+    f.note.value.revision = 3
+    f.draftContent.value = 'First revision'
+    assert.equal(await f.flush(),true)
+    f.draftContent.value = 'Next revision'
+    assert.equal(await f.flush(),true)
+    assert.deepEqual(f.calls.map(call => call.expectedRevision),[3,4])
+    assert.equal(f.note.value.revision,5)
+})

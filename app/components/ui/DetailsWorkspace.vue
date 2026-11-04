@@ -191,6 +191,7 @@ const props = defineProps<{
 const activeTab = defineModel<'details' | 'edit' | 'share'>({ default: 'details' })
 const tabs = ['details', 'edit', 'share'] as const
 const mobilePanelOpen = ref(false)
+defineExpose({ openDetails: async () => { activeTab.value = 'details'; await nextTick(); if (window.matchMedia('(max-width: 1100px)').matches) mobilePanelOpen.value = true; await nextTick() } })
 const selectMobileTab = async (tab: typeof tabs[number]) => {
     activeTab.value = tab
     await nextTick()

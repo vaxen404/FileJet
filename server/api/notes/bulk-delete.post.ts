@@ -48,6 +48,7 @@ export default defineEventHandler(async event => {
                     user_id: session.userId,
                     item_id: note.id,
                     item_type: 'note',
+                    revision: note.revision,
                     tags: note.tags,
                     name: note.title,
                     content: note.content,

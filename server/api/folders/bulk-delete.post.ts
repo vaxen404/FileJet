@@ -167,6 +167,7 @@ export default defineEventHandler(async event => {
                     tags: note.tags,
                     name: note.title,
                     content: note.content,
+                    revision: note.revision,
                     size: note.size,
                     folder_id: note.folder_id,
                     root_folder_id: getRootId(note.folder_id!)

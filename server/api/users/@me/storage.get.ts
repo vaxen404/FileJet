@@ -11,7 +11,7 @@ export default defineEventHandler(async event => {
     try {
         return await prisma.$transaction(async tx => {
             const where = { user_id: session.userId }
-            const [user, files, notes, trash, pending, versions] = await Promise.all([
+            const [user, files, notes, trash, pending, versions, noteVersions] = await Promise.all([
                 tx.users.findUnique({ where: { id: session.userId }, select: { storage_limit: true } }),
                 tx.files.groupBy({ by: ['mime_type'], where, _sum: { size: true } }),
                 tx.notes.aggregate({ where, _sum: { size: true } }),
@@ -21,10 +21,11 @@ export default defineEventHandler(async event => {
                     _sum: { size: true }
                 }),
                 tx.request_uploads.groupBy({ by: ['mime_type'], where: { status: 'pending', request: where }, _sum: { size: true } }),
-                tx.file_versions.groupBy({ by: ['mime_type'], where, _sum: { size: true } })
+                tx.file_versions.groupBy({ by: ['mime_type'], where, _sum: { size: true } }),
+                tx.note_versions.aggregate({ where, _sum: { size: true } })
             ])
             if (!user) throwError(401, 'Invalid session.')
-            return summarizeStorageUsage({ limit: user.storage_limit, files, notes: notes._sum.size, trash, pending, versions })
+            return summarizeStorageUsage({ limit: user.storage_limit, files, notes: (notes._sum.size ?? 0n) + (noteVersions._sum.size ?? 0n), trash, pending, versions })
         }, { isolationLevel: 'RepeatableRead' })
     } catch (error: any) {
         if (error.statusCode) throw error

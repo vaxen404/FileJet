@@ -1,4 +1,5 @@
 import { removeFileVersions } from '~~/server/utils/fileVersions'
+import { removeNoteVersions } from '~~/server/utils/noteVersions'
 import { prisma } from '~~/server/utils/prisma'
 import { getAuthSession } from '~~/server/utils/auth'
 import { throwError } from '~~/server/utils/error'
@@ -120,6 +121,7 @@ export default defineEventHandler(async event => {
                 }
 
                 const versionedIds = selectedItems.filter(entry => entry.item_type === 'file' && entry.revision > 1).map(entry => entry.item_id)
+                totalSize += await removeNoteVersions(tx, session.userId, selectedItems.filter(entry => entry.item_type === 'note' && entry.revision > 1).map(entry => entry.item_id))
                 if (versionedIds.length) {
                     const history = await removeFileVersions(tx, session.userId, versionedIds)
                     totalSize += history.size

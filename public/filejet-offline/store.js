@@ -37,7 +37,7 @@ function change(owner, id, update) {
         }
     })
 }
-export const cacheNote = (owner, note) => change(owner, note.id, old => old?.pending ? old : { title: note.title, content: note.content, baseUpdatedAt: note.updated_at, pending: false, isNew: false, revision: (old?.revision || 0) + 1, localUpdatedAt: Date.now(), error: '', conflict: false })
+export const cacheNote = (owner, note) => change(owner, note.id, old => old?.pending ? old : { title: note.title, content: note.content, baseUpdatedAt: note.updated_at, baseRevision: note.revision, pending: false, isNew: false, revision: (old?.revision || 0) + 1, localUpdatedAt: Date.now(), error: '', conflict: false })
 export const saveDraft = (owner, id, title, content) => change(owner,id, old => ({ ...(old || { baseUpdatedAt: null, isNew: true }), title, content, pending: true, revision: (old?.revision || 0) + 1, localUpdatedAt: Date.now(), error: '', conflict: false }))
 export const removeNote = (owner,id) => run('notes', 'readwrite', store => store.delete(key(owner,id)))
 export async function clearOwner(owner) {
@@ -55,7 +55,7 @@ async function syncOwned(owner) {
     for (const record of await listNotes(owner)) {
         if (!record.pending || record.conflict) continue
         let response
-        try { response = await fetch('/api/notes/offline-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: record.id, title: record.title, content: record.content, baseUpdatedAt: record.baseUpdatedAt, isNew: record.isNew }), signal: AbortSignal.timeout(30000) }) }
+        try { response = await fetch('/api/notes/offline-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: record.id, title: record.title, content: record.content, baseUpdatedAt: record.baseUpdatedAt, baseRevision: record.baseRevision, isNew: record.isNew }), signal: AbortSignal.timeout(30000) }) }
         catch { throw Error('Offline. Changes are saved on this device; sync will resume when connected.') }
         const data = await response.json().catch(() => ({}))
         if (!response.ok) {
@@ -63,7 +63,7 @@ async function syncOwned(owner) {
             if (response.status === 401 || response.status === 403) throw Error('Sign in again to sync your drafts.')
             continue
         }
-        await change(owner, record.id, current => !current ? null : current.revision === record.revision ? { ...current, title: data.title, content: data.content, pending: false, isNew: false, baseUpdatedAt: data.updated_at, error: '', conflict: false } : { ...current, baseUpdatedAt: data.updated_at, isNew: false })
+        await change(owner, record.id, current => !current ? null : current.revision === record.revision ? { ...current, title: data.title, content: data.content, pending: false, isNew: false, baseUpdatedAt: data.updated_at, baseRevision: data.revision, error: '', conflict: false } : { ...current, baseUpdatedAt: data.updated_at, baseRevision: data.revision, isNew: false })
     }
 }
 export function syncNotes(owner) {

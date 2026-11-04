@@ -1,5 +1,7 @@
 <template>
     <DetailsWorkspace
+        ref="workspace"
+        :inert="restoring"
         v-if="note"
         v-model="activeTab"
         :title="note.title"
@@ -19,7 +21,11 @@
         @delete="remove"
         @share-changed="note.share = $event"
     >
-        <template #extra><OfflineNoteButton :note="note" :disabled="dirty || busy" /></template>
+        <template #mobile-actions><button type="button" :disabled="busy" @click="showHistory"><Icon name="solar:history-linear" /> Version history</button></template>
+        <template #extra>
+            <NoteVersionHistory ref="historyPanel" :note-id="note.id" :revision="note.revision" :title="note.title" :content="note.content" :disabled="dirty || busy" :locked="busy" @changed="versionRestored" @restoring="restoring = $event" />
+            <OfflineNoteButton :note="note" :disabled="dirty || busy" />
+        </template>
         <article
             v-if="!isEditing"
             class="note-reader flex-1 min-w-0 min-h-0 flex flex-col justify-start gap-4 p-5 overflow-auto
@@ -193,11 +199,15 @@ const activeTab = ref<'details' | 'edit' | 'share'>(route.query.tab === 'edit' ?
 const isEditing = computed(() => activeTab.value === 'edit')
 const titleInput = ref<HTMLInputElement | null>(null)
 const isFavoriting = ref(false)
-const busy = computed(() => isSaving.value || isDeleting.value || isFavoriting.value)
+const restoring = ref(false)
+const workspace = ref<{ openDetails: () => Promise<void> } | null>(null)
+const historyPanel = ref<{ $el: HTMLElement } | null>(null)
+const busy = computed(() => isSaving.value || isDeleting.value || isFavoriting.value || restoring.value)
+const autosaveBlocked = computed(() => isDeleting.value || restoring.value)
 
 const { draftTitle, draftContent, dirty, isSaving, saveError, saveStatus, flush, discard } = useNoteAutosave({
     note,
-    blocked: isDeleting,
+    blocked: autosaveBlocked,
     write: async value => (await updateNote(id, value)).note,
     validate: value => {
         const result = noteSchema.safeParse(value)
@@ -210,6 +220,12 @@ const { draftTitle, draftContent, dirty, isSaving, saveError, saveStatus, flush,
 })
 
 const isFavorite = computed(() => favorites.value.some(item => item.note_id === id))
+const showHistory = async () => { await workspace.value?.openDetails(); historyPanel.value?.$el?.scrollIntoView({ block: 'nearest' }) }
+const versionRestored = async () => {
+    await refresh()
+    discard()
+    if (note.value) { const listed = notes.value.find(item => item.id === id); if (listed) Object.assign(listed,note.value) }
+}
 
 useDetailsHeader(
     'note',

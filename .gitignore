@@ -29,6 +29,8 @@ logs
 !/tests/antivirus.integration.mjs
 !/tests/offline-notes.integration.mjs
 !/tests/activity.integration.mjs
+!/tests/note-versions.integration.mjs
+!/tests/note-diff.test.mjs
 
 
 # Misc

@@ -53,6 +53,7 @@ function apiFixture(options = {}) {
     }
     data.request_uploads = []
     data.file_versions = []
+    data.note_versions = []
     const grouped = (table, query) => {
         calls.push({ table, query })
         const rows = data[table].filter(row => row.user_id === (query.where.user_id ?? query.where.request?.user_id)
@@ -70,6 +71,7 @@ function apiFixture(options = {}) {
         users: { findUnique: async query => { calls.push({ table: 'users', query }); return options.missing ? null : { storage_limit: 1000n } } },
         files: { groupBy: async query => grouped('files', query) },
         file_versions: { groupBy: async query => grouped('file_versions', query) },
+        note_versions: { aggregate: async query => { calls.push({ table: 'note_versions', query }); return { _sum: { size: data.note_versions.filter(row => row.user_id === query.where.user_id).reduce((sum,row) => sum + row.size,0n) } } } },
         notes: { aggregate: async query => {
             calls.push({ table: 'notes', query })
             return { _sum: { size: data.notes.filter(row => row.user_id === query.where.user_id).reduce((sum, row) => sum + row.size, 0n) } }
@@ -136,6 +138,13 @@ test('pending Inbox bytes count toward quota once and approval preserves totals 
     assert.equal((await fixture.run()).storageUsed, '435')
     fixture.data.request_uploads.at(-1).status = 'rejected'
     assert.equal((await fixture.run()).storageUsed, '420')
+})
+
+test('saved note revisions count as documents and exclude other accounts', async () => {
+    const fixture = apiFixture()
+    fixture.data.note_versions.push({ user_id: 'owner', size: 40n }, { user_id: 'other', size: 9999n })
+    assert.equal((await fixture.run()).storageUsed,'420')
+    assert.equal((await fixture.run()).categories.documents,'95')
 })
 
 async function pageFixture() {

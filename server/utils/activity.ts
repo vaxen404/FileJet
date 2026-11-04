@@ -41,6 +41,7 @@ export async function captureActivity(event: H3Event): Promise<Capture | null> {
         return { ...base, action: method === 'DELETE' ? 'trashed' : type === 'note' ? 'updated' : 'renamed', targets: await activityTargets(owner,type,[id]) }
     }
     if ((match = /^\/api\/files\/([0-9a-f-]{36})\/versions\/([0-9a-f-]{36})(?:\/(restore))?$/i.exec(path))) return { ...base, action: match[3] ? 'version_restored' : 'version_deleted', targets: await activityTargets(owner,'file',[match[1]!]) }
+    if ((match = /^\/api\/notes\/([0-9a-f-]{36})\/versions\/([0-9a-f-]{36})(?:\/(restore))?$/i.exec(path))) return { ...base, action: match[3] ? 'version_restored' : 'version_deleted', targets: await activityTargets(owner,'note',[match[1]!]) }
     if ((match = /^\/api\/files\/([0-9a-f-]{36})\/scan$/i.exec(path))) return { ...base, action: 'scanned', targets: await activityTargets(owner,'file',[match[1]!]) }
     if ((match = /^\/api\/items\/(file|folder|note)\/([0-9a-f-]{36})\/tags$/i.exec(path))) return { ...base, action: 'tags_updated', targets: await activityTargets(owner,match[1] as ActivityKind,[match[2]!]) }
     if ((match = /^\/api\/shared\/items\/(file|folder|note)\/([0-9a-f-]{36})$/i.exec(path))) return { ...base, action: method === 'DELETE' ? 'unshared' : 'share_updated', targets: await activityTargets(owner,match[1] as ActivityKind,[match[2]!]) }
