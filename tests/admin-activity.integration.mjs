@@ -2,6 +2,7 @@ import 'dotenv/config'
 import assert from 'node:assert/strict'
 import {randomUUID,createHmac} from 'node:crypto'
 import pg from 'pg'
+import argon2 from 'argon2'
 const db=new pg.Client({connectionString:process.env.DATABASE_URL}),base=process.env.FILEJET_TEST_URL||'http://127.0.0.1:3021'
 const admin=randomUUID(),member=randomUUID(),second=randomUUID(),ids=[admin,member,second]
 const prefix='qa_ad_'+admin.slice(0,8), secret='Private note body '+randomUUID(), password='Initial!password2026'
@@ -32,6 +33,25 @@ try{
     await api('/api/admin/users/'+created.id,{method:'PATCH',body:{role:'ADMIN',storageLimit:'31457280'}})
     log=await audit();row=log.items.find(event=>event.userId===created.id&&event.action==='account_updated')
     assert.equal(row.roleBefore,'USER');assert.equal(row.roleAfter,'ADMIN');assert.equal(row.quotaBefore,'20971520');assert.equal(row.quotaAfter,'31457280')
+    const resetPassword='Reset!password2026', settings={role:'ADMIN',storageLimit:'31457280'}
+    const oldHash=(await db.query('SELECT password_hash FROM users WHERE id=$1',[created.id])).rows[0].password_hash
+    await api('/api/admin/users/'+created.id,{method:'PATCH',user:null,body:{...settings,newPassword:resetPassword,confirmPassword:resetPassword},status:401})
+    await api('/api/admin/users/'+created.id,{method:'PATCH',user:member,body:{...settings,newPassword:resetPassword,confirmPassword:resetPassword},status:403})
+    await api('/api/admin/users/'+created.id,{method:'PATCH',body:{...settings,newPassword:resetPassword,confirmPassword:'different'},status:400})
+    assert.equal((await db.query('SELECT password_hash FROM users WHERE id=$1',[created.id])).rows[0].password_hash,oldHash)
+    await api('/api/admin/users/'+created.id,{method:'PATCH',body:{...settings,username:prefix+'_USER_'+member.slice(0,4)},status:409})
+    account.username=prefix+'_renamed'
+    const updated=(await api('/api/admin/users/'+created.id,{method:'PATCH',body:{...settings,username:' '+account.username+' ',email:' '+prefix.toUpperCase()+'@EXAMPLE.COM ',newPassword:resetPassword,confirmPassword:resetPassword}})).user
+    assert.equal(updated.username,account.username);assert.equal(updated.email,prefix+'@example.com')
+    assert.ok(!JSON.stringify(updated).includes(resetPassword));assert.ok(!('password_hash' in updated))
+    let hash=(await db.query('SELECT password_hash FROM users WHERE id=$1',[created.id])).rows[0].password_hash
+    assert.ok(await argon2.verify(hash,resetPassword));assert.equal(await argon2.verify(hash,password),false)
+    await api('/api/auth/login',{method:'POST',user:null,body:{username:account.username,password},status:401})
+    await api('/api/auth/login',{method:'POST',user:null,body:{username:account.username,password:resetPassword}})
+    await api('/api/admin/users/'+created.id,{method:'PATCH',body:{...settings,email:''}})
+    assert.equal((await api('/api/admin/users/'+created.id)).user.email,null)
+    assert.equal((await db.query('SELECT password_hash FROM users WHERE id=$1',[created.id])).rows[0].password_hash,hash)
+    log=await audit();assert.ok(!JSON.stringify(log).includes(resetPassword));assert.ok(!JSON.stringify(log).includes(hash))
     const before=log.items.length
     await api('/api/admin/users/'+created.id,{method:'PATCH',body:{role:'ADMIN',storageLimit:'31457280'}})
     await api('/api/admin/users/'+created.id,{method:'PATCH',body:{role:'USER',storageLimit:'1'},headers:{Origin:'https://foreign.example'},status:403})
@@ -43,7 +63,10 @@ try{
     await db.query(`CREATE FUNCTION ${trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.actor_id = '${admin}'::uuid THEN RAISE EXCEPTION 'QA audit failure'; END IF; RETURN NEW; END $$`)
     await db.query(`CREATE TRIGGER ${trigger} BEFORE INSERT ON admin_events FOR EACH ROW EXECUTE FUNCTION ${trigger}()`)
     try{
-        await api('/api/admin/users/'+created.id,{method:'PATCH',body:{role:'USER',storageLimit:'41943040'},status:500})
+        await api('/api/admin/users/'+created.id,{method:'PATCH',body:{role:'USER',storageLimit:'41943040',username:prefix+'_rollback_name',email:'rollback@example.com',newPassword:'Rollback!password2026',confirmPassword:'Rollback!password2026'},status:500})
+        assert.equal((await db.query('SELECT password_hash FROM users WHERE id=$1',[created.id])).rows[0].password_hash,hash)
+        assert.equal((await api('/api/admin/users/'+created.id)).user.username,account.username)
+        assert.equal((await api('/api/admin/users/'+created.id)).user.email,null)
         assert.equal((await api('/api/admin/users/'+created.id)).user.storageLimit,'31457280')
         assert.equal((await api('/api/admin/users/'+created.id)).user.role,'ADMIN')
         await api('/api/admin/users',{method:'POST',body:{...account,username:prefix+'_rollback'},status:500})

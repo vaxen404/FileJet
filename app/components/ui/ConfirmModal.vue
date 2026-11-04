@@ -5,7 +5,7 @@
                 v-if="show"
                 class="modal-overlay fixed inset-0 z-10000 flex items-center justify-center bg-black/65 p-4
                     backdrop-blur-xs"
-                @click.self="emit('cancel')"
+                v-on="backdrop"
             >
                 <div
                     ref="dialog"
@@ -51,6 +51,8 @@
 </template>
 
 <script setup lang="ts">
+import { modalBackdrop } from '~/utils/modalBackdrop'
+const backdrop = modalBackdrop(() => emit('cancel'))
 const props = withDefaults(defineProps<{
     show: boolean
     title: string

@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <dialog ref="dialog" aria-labelledby="request-qr-title" class="request-qr-dialog" @close="emit('close')" @click.self="emit('close')">
+        <dialog ref="dialog" aria-labelledby="request-qr-title" class="request-qr-dialog" @close="emit('close')" v-on="backdrop">
             <div class="flex flex-col items-center gap-4 p-6 text-center">
                 <div class="flex w-full items-center justify-between gap-3"><h2 id="request-qr-title" class="text-base font-semibold">Scan to send files</h2><button class="inbox-icon" type="button" aria-label="Close QR code" @click="emit('close')"><Icon name="solar:close-circle-linear" size="23" /></button></div>
                 <p class="max-w-full truncate text-sm text-muted">{{ item?.title }}</p>
@@ -13,6 +13,8 @@
     </Teleport>
 </template>
 <script setup lang="ts">
+import { modalBackdrop } from '~/utils/modalBackdrop'
+const backdrop = modalBackdrop(() => emit('close'))
 import QRCode from 'qrcode'
 import type { FileRequestItem } from '~~/shared/types/inbox'
 const props = defineProps<{ item: FileRequestItem | null }>()

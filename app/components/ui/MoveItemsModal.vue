@@ -6,7 +6,7 @@
                 text-foreground bg-surface border border-control-border rounded-[20px] shadow-[0_24px_80px_#0008]
                 backdrop:bg-[#0009]"
             @cancel.prevent="close"
-            @click.self="close"
+            v-on="backdrop"
         >
             <div class="modal-content p-5">
                 <div class="modal-heading flex items-start justify-between gap-4">
@@ -156,6 +156,8 @@
 </template>
 
 <script setup lang="ts">
+import { modalBackdrop } from '~/utils/modalBackdrop'
+const backdrop = modalBackdrop(() => close())
 import type { DestinationFolder, SelectionItem } from '~~/shared/schemas/selection'
 
 const props = defineProps<{

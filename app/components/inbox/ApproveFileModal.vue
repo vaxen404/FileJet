@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <dialog ref="dialog" aria-labelledby="approve-file-title" class="approve-dialog" @cancel.prevent="close" @click.self="close" @close="emit('close')">
+        <dialog ref="dialog" aria-labelledby="approve-file-title" class="approve-dialog" @cancel.prevent="close" v-on="backdrop" @close="emit('close')">
             <form class="flex flex-col gap-4 p-6" @submit.prevent="save">
                 <h2 id="approve-file-title" class="text-lg font-semibold text-foreground">{{ uploads.length > 1 ? `Approve & save ${uploads.length} files` : 'Approve & save file' }}</h2>
                 <ul aria-label="Files to approve" class="text-sm leading-6 text-foreground"><li v-for="file in uploads.slice(0, 3)" :key="file.id" class="truncate">{{ file.name }}</li><li v-if="uploads.length > 3" class="text-muted">and {{ uploads.length - 3 }} more files</li></ul>
@@ -16,6 +16,8 @@
     </Teleport>
 </template>
 <script setup lang="ts">
+import { modalBackdrop } from '~/utils/modalBackdrop'
+const backdrop = modalBackdrop(() => close())
 import type { ReceivedFile } from '~~/shared/types/inbox'
 const props = defineProps<{ requestId: string; uploads: ReceivedFile[]; defaultFolderId: string | null }>()
 const emit = defineEmits<{ close: []; saved: [count: number] }>()

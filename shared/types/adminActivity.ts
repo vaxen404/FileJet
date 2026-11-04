@@ -1,5 +1,5 @@
 import type { ActivityEntry } from './activity'
-export const adminActionLabels = { account_created: 'Account created', account_updated: 'Role / quota updated', account_deleted: 'Account deleted' } as const
+export const adminActionLabels = { account_created: 'Account created', account_updated: 'Account updated', account_deleted: 'Account deleted' } as const
 export type AdminAction = keyof typeof adminActionLabels
 export interface AdminEvent {
     id: string; actorId: string | null; actorName: string; userId: string; username: string; action: AdminAction

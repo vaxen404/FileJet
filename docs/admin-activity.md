@@ -4,17 +4,19 @@ The admin console now includes account creation/details/deletion, user activity 
 
 ## History
 
-Open **Admin → Activity history**. **User activity** lists the existing successful file/folder/note events, with account, type, action, current/previous item name and destination. **Admin actions** lists account creation, role/quota changes and account deletion, with the administrator's name and before/after values.
+Open **Admin → Activity history**. **User activity** lists the existing successful file/folder/note events, with account, type, action, current/previous item name and destination. **Admin actions** lists account creation, account updates and account deletion, with the administrator's name and before/after role/quota values.
 
 Search names, filter the target account or administrator, select an action/type and date range, or open history from account details. Date controls use the browser's local day boundaries. The overview chart uses UTC days. History loads in pages of up to 50 and uses timestamp/UUID cursors.
 
-Each account creation, role/quota change or deletion writes its admin event inside the same database transaction. A failed event insert rolls back the account mutation. Failed requests and no-op updates do not create events. Snapshot names and role/quota values remain when an account is deleted; the actor relation becomes null if that administrator is later deleted. There is no admin-history edit/delete API.
+Each account creation, profile/password/role/quota change or deletion writes its admin event inside the same database transaction. A failed event insert rolls back the account mutation. Failed requests and no-op updates do not create events. Snapshot names and role/quota values remain when an account is deleted; the actor relation becomes null if that administrator is later deleted. There is no admin-history edit/delete API.
 
 Admin history contains only account/action metadata. It excludes note contents, passwords/hashes, public share tokens, upload keys, storage paths and IP addresses. User activity starts from when the activity feature was installed; historical admin actions cannot be reconstructed. User library events disappear with account deletion; the administrative deletion event remains.
 
 ## Account management
 
 **Add user** accepts an initial password, optional email, role and quota. User details show account metadata, storage categories (including file and note versions), content counts, recent library metadata and recent account activity. Deletion requires the exact username and a confirmation; self-deletion is blocked, as is removing the final administrator. Filesystem cleanup runs after database deletion, with a durable retry job on failures.
+
+**Users → Edit** opens a modal for username, email, role, quota and an optional password reset. Leave both password fields blank to preserve the existing hash; a reset requires matching passwords of 8–100 characters and does not require the user's old password. Password values/hashes are never included in the response or admin history. Closing clears the password fields. Backdrop dismissal requires both the press and release outside the modal, so dragging from an input to the backdrop keeps it open. Saving temporarily blocks dismissal; Cancel, the close button and Escape dismiss otherwise.
 
 ## Deployment
 

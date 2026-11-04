@@ -50,7 +50,7 @@
                 class="preview-overlay fixed inset-3 flex flex-col bg-canvas border border-divider rounded-xl z-1100
                     overflow-hidden"
                 @keydown.esc="selected = null"
-                @click.self="selected = null"
+                v-on="backdrop"
             >
                 <div class="preview-heading flex items-center gap-3 min-w-0 flex-wrap justify-between p-5">
                     <h2 class="m-0 text-[1.1rem] wrap-anywhere">{{ selected.name }}</h2>
@@ -120,6 +120,8 @@
 </template>
 
 <script setup lang="ts">
+import { modalBackdrop } from '~/utils/modalBackdrop'
+const backdrop = modalBackdrop(() => { selected.value = null })
 import type { LibraryItem } from '~~/shared/types/library'
 
 const props = defineProps<{ token: string; rootId: string; rootName: string }>()

@@ -48,6 +48,18 @@ test('MiB quota inputs support browser number coercion and reject invalid or ove
     for (const value of [-1, 'NaN', 'Infinity', '1e20', '1.1234567', '99999999999999999999']) assert.throws(() => adminQuotaBytes(value))
 })
 
+test('admin account editing normalizes optional identity and accepts only matching password resets', () => {
+    const base = { role: 'USER', storageLimit: '10485760' }
+    const result = adminUserUpdateSchema.parse({ ...base, username: ' NewName ', email: ' NAME@EXAMPLE.COM ', newPassword: 'New-password-123', confirmPassword: 'New-password-123' })
+    assert.equal(result.username, 'NewName')
+    assert.equal(result.email, 'name@example.com')
+    assert.equal(adminUserUpdateSchema.parse({ ...base, email: '' }).email, null)
+    assert.equal(adminUserUpdateSchema.parse(base).newPassword, undefined)
+    for (const patch of [{ username: 'ab' }, { email: 'invalid' }, { newPassword: '' }, { newPassword: 'short', confirmPassword: 'short' }, { newPassword: 'New-password-123' }, { confirmPassword: 'New-password-123' }, { newPassword: 'New-password-123', confirmPassword: 'different' }, { newPassword: 'x'.repeat(101), confirmPassword: 'x'.repeat(101) }, { password_hash: 'injected' }]) {
+        assert.equal(adminUserUpdateSchema.safeParse({ ...base, ...patch }).success, false)
+    }
+})
+
 test('deleted-account cleanup confines targets to the owner, retains failed work and safely retries', async () => {
     const userId = '11111111-1111-4111-8111-111111111111', uploadId = '22222222-2222-4222-8222-222222222222'
     let removed = false, fail = true, ownerExists = false

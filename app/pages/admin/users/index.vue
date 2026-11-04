@@ -4,38 +4,58 @@
             <div>
                 <p class="mb-2 text-xs font-medium text-accent">Account management</p>
                 <h1 class="text-2xl font-semibold tracking-tight text-foreground">Users</h1>
-                <p class="mt-1 text-sm text-muted">Manage account roles and storage limits.</p>
+                <p class="mt-1 text-sm text-muted">Manage accounts, passwords, roles and storage limits.</p>
             </div>
             <div class="flex gap-2"><button class="admin-button" :disabled="pending || saving" @click="refreshUsers()">Refresh</button><NuxtLink to="/admin/users/new" class="admin-button bg-primary! text-on-primary! no-underline">Add user</NuxtLink></div>
         </div>
 
         <p v-if="error" role="alert" class="rounded-xl border border-danger-border bg-danger-surface p-4 text-sm text-danger">Could not load administration data. Try Refresh.</p>
-        <section v-if="selected" class="rounded-xl border border-accent/40 bg-surface p-5">
-            <form class="space-y-4" @submit.prevent="saveUser">
-                <div>
-                    <h2 class="text-sm font-semibold text-foreground">Edit {{ selected.username }}</h2>
-                    <p class="mt-1 text-xs text-muted">Currently using {{ formatFileSize(selected.storageUsed) }}. Your own administrator role cannot be removed.</p>
-                </div>
-                <div class="grid grid-cols-2 gap-4 max-mobile:grid-cols-1">
-                    <label class="space-y-2 text-sm text-content">
-                        <span class="block">Role</span>
-                        <select v-model="draftRole" class="admin-input" :disabled="saving || selected.id === currentUser?.id">
-                            <option value="USER">User</option><option value="ADMIN">Administrator</option>
-                        </select>
-                    </label>
-                    <label class="space-y-2 text-sm text-content">
-                        <span class="block">Storage limit (MiB)</span>
-                        <input v-model="draftQuota" type="number" min="0" step="any" required class="admin-input" :disabled="saving" />
-                        <span class="block text-xs text-muted">1,024 MiB = 1 GiB. The limit must cover current usage.</span>
-                    </label>
-                </div>
-                <p v-if="saveError" role="alert" class="text-sm text-danger">{{ saveError }}</p>
-                <div class="flex gap-2">
-                    <button type="submit" class="admin-button bg-primary! text-on-primary!" :disabled="saving">{{ saving ? 'Saving...' : 'Save changes' }}</button>
-                    <button type="button" class="admin-button" :disabled="saving" @click="selected = null">Cancel</button>
-                </div>
-            </form>
-        </section>
+        <Teleport to="body">
+            <dialog ref="editDialog" aria-labelledby="edit-user-title" aria-describedby="edit-user-description"
+                class="m-auto w-[min(36rem,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-control-border bg-surface p-0 text-foreground shadow-2xl backdrop:bg-black/65"
+                v-on="backdrop" @cancel.prevent="closeEditor" @close="closeEditor">
+                <form v-if="selected" class="space-y-5 p-5 max-phone:p-4" :aria-busy="saving" @submit.prevent="saveUser">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <h2 id="edit-user-title" class="text-lg font-semibold wrap-anywhere">Edit {{ selected.username }}</h2>
+                            <p id="edit-user-description" class="mt-1 text-xs leading-5 text-muted">Currently using {{ formatFileSize(selected.storageUsed) }}. Update this account below.</p>
+                        </div>
+                        <button type="button" class="admin-button shrink-0 px-2!" aria-label="Close user editor" :disabled="saving" @click="closeEditor"><Icon name="solar:close-circle-linear" size="22" /></button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 max-mobile:grid-cols-1">
+                        <label class="space-y-2 text-sm text-content"><span class="block">Username</span><input ref="usernameInput" v-model="draftUsername" type="text" required minlength="3" maxlength="50" autocomplete="off" class="admin-input" :disabled="saving" /></label>
+                        <label class="space-y-2 text-sm text-content"><span class="block">Email <span class="text-xs text-muted">(optional)</span></span><input v-model="draftEmail" type="email" maxlength="255" autocomplete="off" class="admin-input" :disabled="saving" /></label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 max-mobile:grid-cols-1">
+                        <label class="space-y-2 text-sm text-content">
+                            <span class="block">Role</span>
+                            <select v-model="draftRole" class="admin-input" :disabled="saving || selected.id === currentUser?.id">
+                                <option value="USER">User</option><option value="ADMIN">Administrator</option>
+                            </select>
+                            <span v-if="selected.id === currentUser?.id" class="block text-xs text-muted">Your own administrator role cannot be removed.</span>
+                        </label>
+                        <label class="space-y-2 text-sm text-content">
+                            <span class="block">Storage limit (MiB)</span>
+                            <input v-model="draftQuota" type="number" min="0" step="any" required class="admin-input" :disabled="saving" />
+                            <span class="block text-xs text-muted">1,024 MiB = 1 GiB. The limit must cover current usage.</span>
+                        </label>
+                    </div>
+                    <fieldset class="space-y-3 border-t border-divider pt-4" :disabled="saving">
+                        <legend class="pr-2 text-sm font-medium text-foreground">Change password</legend>
+                        <p class="text-xs leading-5 text-muted">Leave both fields blank to keep the current password. You can set a new password without the user's current password.</p>
+                        <div class="grid grid-cols-2 gap-4 max-mobile:grid-cols-1">
+                            <label class="space-y-2 text-sm text-content"><span class="block">New password</span><input v-model="draftPassword" type="password" minlength="8" maxlength="100" autocomplete="new-password" class="admin-input" /><span class="block text-xs text-muted">At least 8 characters.</span></label>
+                            <label class="space-y-2 text-sm text-content"><span class="block">Confirm new password</span><input v-model="draftConfirmPassword" type="password" :required="Boolean(draftPassword)" maxlength="100" autocomplete="new-password" class="admin-input" /></label>
+                        </div>
+                    </fieldset>
+                    <p v-if="saveError" role="alert" class="text-sm text-danger">{{ saveError }}</p>
+                    <div class="flex flex-wrap justify-end gap-2 border-t border-divider pt-4">
+                        <button type="button" class="admin-button" :disabled="saving" @click="closeEditor">Cancel</button>
+                        <button type="submit" class="admin-button bg-primary! text-on-primary!" :disabled="saving">{{ saving ? 'Saving...' : 'Save changes' }}</button>
+                    </div>
+                </form>
+            </dialog>
+        </Teleport>
 
         <section class="overflow-hidden rounded-xl border border-divider bg-surface">
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-divider p-4">
@@ -74,6 +94,8 @@
 <script setup lang="ts">
 import { formatFileSize } from '~/utils/file'
 import { adminQuotaBytes } from '~/utils/adminQuota'
+import { modalBackdrop } from '~/utils/modalBackdrop'
+import { adminUserUpdateSchema } from '~~/shared/schemas/admin'
 
 definePageMeta({ layout: 'admin', middleware: ['auth', 'admin'] })
 useHead({ title: 'Users · FileJet Admin' })
@@ -85,6 +107,9 @@ const searchDraft = ref('')
 const { data, error, pending, refresh: refreshUsers } = await useFetch('/api/admin/users', { query: { page, search } })
 type AdminUser = NonNullable<typeof data.value>['users'][number]
 const selected = ref<AdminUser | null>(null)
+const editDialog = ref<HTMLDialogElement | null>(null)
+const usernameInput = ref<HTMLInputElement | null>(null)
+const draftUsername = ref(''), draftEmail = ref(''), draftPassword = ref(''), draftConfirmPassword = ref('')
 const draftRole = ref<'USER' | 'ADMIN'>('USER')
 const draftQuota = ref('')
 const originalQuota = ref('')
@@ -92,8 +117,27 @@ const saving = ref(false)
 const saveError = ref('')
 const totalPages = computed(() => Math.max(1, Math.ceil((data.value?.total ?? 0) / 25)))
 const applySearch = () => { page.value = 1; search.value = searchDraft.value.trim() }
+const closeEditor = () => {
+    if (saving.value) return
+    selected.value = null
+    draftPassword.value = draftConfirmPassword.value = ''
+    saveError.value = ''
+    editDialog.value?.close()
+}
+const backdrop = modalBackdrop(closeEditor)
+watch(selected, async user => {
+    if (!user) return
+    await nextTick()
+    if (selected.value !== user || !editDialog.value?.isConnected) return
+    if (!editDialog.value.open) editDialog.value.showModal()
+    usernameInput.value?.focus()
+}, { flush: 'post' })
 const editUser = (user: AdminUser) => {
+    if (saving.value) return
     selected.value = user
+    draftUsername.value = user.username
+    draftEmail.value = user.email ?? ''
+    draftPassword.value = draftConfirmPassword.value = ''
     draftRole.value = user.role
     draftQuota.value = originalQuota.value = String(Number(user.storageLimit) / 1048576)
     saveError.value = ''
@@ -107,11 +151,18 @@ const saveUser = async () => {
         try { storageLimit = adminQuotaBytes(quota) }
         catch (error) { saveError.value = (error as Error).message; return }
     }
+    const body = {
+        username: draftUsername.value, email: draftEmail.value, role: draftRole.value, storageLimit,
+        ...(draftPassword.value || draftConfirmPassword.value ? { newPassword: draftPassword.value, confirmPassword: draftConfirmPassword.value } : {})
+    }
+    const validation = adminUserUpdateSchema.safeParse(body)
+    if (!validation.success) { saveError.value = validation.error.issues[0]?.message ?? 'Invalid user settings.'; return }
     saving.value = true
     try {
-        const result = await $fetch(`/api/admin/users/${selected.value.id}`, { method: 'PATCH', body: { role: draftRole.value, storageLimit } })
-        if (currentUser.value?.id === result.user.id) currentUser.value = { ...currentUser.value, role: result.user.role, storageLimit: result.user.storageLimit }
-        selected.value = null
+        const result = await $fetch(`/api/admin/users/${selected.value.id}`, { method: 'PATCH', body })
+        if (currentUser.value?.id === result.user.id) currentUser.value = { ...currentUser.value, ...result.user }
+        saving.value = false
+        closeEditor()
         openToast('User settings saved.', 'success')
         await refreshUsers()
     } catch (error: any) { saveError.value = error?.data?.message || 'Could not save user settings.' }

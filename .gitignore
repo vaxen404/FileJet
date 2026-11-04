@@ -32,6 +32,7 @@ logs
 !/tests/note-versions.integration.mjs
 !/tests/note-diff.test.mjs
 !/tests/admin-activity.integration.mjs
+!/tests/modal-backdrop.test.mjs
 
 
 # Misc

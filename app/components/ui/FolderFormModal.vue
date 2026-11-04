@@ -6,7 +6,7 @@
                 text-foreground bg-surface border border-control-border rounded-2xl shadow-[0_24px_80px_#0006]
                 backdrop:bg-[#0009]"
             @cancel.prevent="close"
-            @click.self="close"
+            v-on="backdrop"
         >
             <form class="p-6" @submit.prevent="save">
                 <div class="modal-header flex items-center gap-3">
@@ -92,6 +92,8 @@
 </template>
 
 <script setup lang="ts">
+import { modalBackdrop } from '~/utils/modalBackdrop'
+const backdrop = modalBackdrop(() => close())
 import { folderNameSchema } from '~~/shared/schemas/folder'
 
 const props = withDefaults(

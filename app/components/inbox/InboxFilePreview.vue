@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <dialog ref="dialog" aria-labelledby="inbox-preview-title" class="inbox-preview-dialog" @cancel.prevent="emit('close')" @close="emit('close')" @click.self="emit('close')">
+        <dialog ref="dialog" aria-labelledby="inbox-preview-title" class="inbox-preview-dialog" @cancel.prevent="emit('close')" @close="emit('close')" v-on="backdrop">
             <header class="flex shrink-0 flex-wrap items-center gap-3 border-b border-divider p-4">
                 <Icon name="solar:document-linear" size="25" class="shrink-0 text-accent" />
                 <div class="min-w-0 flex-1"><h2 id="inbox-preview-title" class="truncate text-base font-semibold text-foreground" :title="upload?.name">{{ upload?.name }}</h2><p class="mt-1 text-xs text-muted">{{ upload ? formatFileSize(upload.size) : '' }} · Pending approval</p></div>
@@ -27,6 +27,8 @@
 </template>
 
 <script setup lang="ts">
+import { modalBackdrop } from '~/utils/modalBackdrop'
+const backdrop = modalBackdrop(() => emit('close'))
 import type { ReceivedFile } from '~~/shared/types/inbox'
 import { getInboxPreview } from '~~/shared/utils/inboxPreview'
 import { formatFileSize } from '~/utils/file'
