@@ -47,7 +47,8 @@ const currentUser = useAuthUser()
 const { isSigningOut, requestLogout } = useAccountActions()
 const navigation = [
     { to: '/admin', label: 'Overview', icon: 'solar:widget-2-linear' },
-    { to: '/admin/users', label: 'Users', icon: 'solar:users-group-rounded-linear' }
+    { to: '/admin/users', label: 'Users', icon: 'solar:users-group-rounded-linear' },
+    { to: '/admin/activity', label: 'Activity history', icon: 'solar:history-linear' }
 ]
 const active = (path: string) => path === '/admin' ? route.path === path : route.path === path || route.path.startsWith(path + '/')
 </script>

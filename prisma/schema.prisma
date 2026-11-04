@@ -12,6 +12,13 @@ enum UserRole {
   ADMIN
 }
 
+// Kept after account deletion so filesystem cleanup survives crashes and retries.
+model user_deletion_jobs {
+  user_id String @id @db.Uuid
+  upload_ids String[] @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
 model users {
   role          UserRole  @default(USER)
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -33,6 +40,25 @@ model users {
   file_scans file_scans[]
   activity_entries activity_entries[]
   note_versions note_versions[]
+  admin_events admin_events[]
+}
+
+model admin_events {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actor_id String? @db.Uuid
+  actor_username String @db.VarChar(50)
+  target_user_id String @db.Uuid
+  target_username String @db.VarChar(50)
+  action String @db.VarChar(32)
+  role_before UserRole?
+  role_after UserRole?
+  quota_before BigInt?
+  quota_after BigInt?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  users users? @relation(fields: [actor_id], references: [id], onDelete: SetNull)
+  @@index([created_at, id])
+  @@index([actor_id, created_at])
+  @@index([target_user_id, created_at])
 }
 
 model activity_entries {

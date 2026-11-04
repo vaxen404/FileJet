@@ -4,7 +4,10 @@ import { readFileSync } from 'node:fs'
 import { createError } from 'h3'
 import ts from 'typescript'
 import { parse, compileScript, compileTemplate } from '@vue/compiler-sfc'
-import { adminUserUpdateSchema } from '../shared/schemas/admin.ts'
+import { adminUserUpdateSchema, adminUserCreateSchema, adminUserDeleteSchema } from '../shared/schemas/admin.ts'
+import { adminQuotaBytes } from '../app/utils/adminQuota.ts'
+import { isUuid } from '../server/utils/validation.ts'
+import * as paths from 'node:path'
 
 const read = name => readFileSync(new URL('../' + name, import.meta.url), 'utf8')
 function load(name, imports) {
@@ -23,6 +26,57 @@ test('admin settings reject privilege injection, invalid roles, negative quotas 
     ]) assert.equal(adminUserUpdateSchema.safeParse(value).success, false)
     assert.equal(adminUserUpdateSchema.safeParse({ role: 'USER', storageLimit: '9223372036854775807' }).success, true)
     assert.equal(adminUserUpdateSchema.safeParse({ role: 'ADMIN', storageLimit: '0' }).success, true)
+})
+
+test('account creation normalizes identity, requires matching strong passwords and rejects privileged injected fields', () => {
+    const valid = { username: ' NewUser ', email: ' EMAIL@EXAMPLE.COM ', password: 'safe-password-123', confirmPassword: 'safe-password-123', role: 'USER', storageLimit: '10485760' }
+    const result = adminUserCreateSchema.parse(valid)
+    assert.equal(result.username, 'NewUser')
+    assert.equal(result.email, 'email@example.com')
+    assert.equal(adminUserCreateSchema.parse({ ...valid, email: '' }).email, null)
+    for (const patch of [{ username: 'ab' }, { email: 'invalid' }, { password: 'short' }, { confirmPassword: 'different' }, { role: 'ROOT' }, { storageLimit: '-1' }, { storage_used: 0 }, { id: 'injected' }, { password_hash: 'injected' }]) {
+        assert.equal(adminUserCreateSchema.safeParse({ ...valid, ...patch }).success, false)
+    }
+    assert.equal(adminUserDeleteSchema.safeParse({ confirmUsername: 'NewUser' }).success, true)
+    assert.equal(adminUserDeleteSchema.safeParse({ confirmUsername: '', id: 'injected' }).success, false)
+})
+
+test('MiB quota inputs support browser number coercion and reject invalid or overflowing values', () => {
+    assert.equal(adminQuotaBytes(125), '131072000')
+    assert.equal(adminQuotaBytes('0.5'), '524288')
+    assert.equal(adminQuotaBytes('0'), '0')
+    for (const value of [-1, 'NaN', 'Infinity', '1e20', '1.1234567', '99999999999999999999']) assert.throws(() => adminQuotaBytes(value))
+})
+
+test('deleted-account cleanup confines targets to the owner, retains failed work and safely retries', async () => {
+    const userId = '11111111-1111-4111-8111-111111111111', uploadId = '22222222-2222-4222-8222-222222222222'
+    let removed = false, fail = true, ownerExists = false
+    const touched = []
+    const tx = { $queryRaw: async () => [], users: { findUnique: async () => ownerExists ? { id: userId } : null },
+        user_deletion_jobs: { findUnique: async () => removed ? null : { user_id: userId, upload_ids: [uploadId] }, delete: async () => { removed = true } } }
+    const cleanup = load('server/utils/userDeletion.ts', {
+        'node:path': paths,
+        'node:fs/promises': { rm: async path => { touched.push(path); if (fail) throw new Error('Temporary filesystem error') } },
+        './prisma': { prisma: { $transaction: async run => run(tx) } }, './validation': { isUuid }
+    })
+    const targets = cleanup.deletedUserStoragePaths(userId, [uploadId])
+    assert.deepEqual(targets, [paths.resolve('storage', userId), paths.resolve('storage', '.uploads', uploadId)])
+    assert.throws(() => cleanup.deletedUserStoragePaths('../foreign', [uploadId]))
+    assert.throws(() => cleanup.deletedUserStoragePaths(userId, ['../foreign']))
+    const originalError = console.error
+    console.error = () => {}
+    try {
+        assert.equal(await cleanup.cleanupDeletedUser(userId), false)
+        assert.equal(removed, false)
+        fail = false; ownerExists = true; touched.length = 0
+        assert.equal(await cleanup.cleanupDeletedUser(userId), false)
+        assert.equal(touched.length, 0)
+        ownerExists = false
+        assert.equal(await cleanup.cleanupDeletedUser(userId), true)
+        assert.equal(removed, true)
+        assert.deepEqual(touched, targets)
+        assert.equal(await cleanup.cleanupDeletedUser(userId), true)
+    } finally { console.error = originalError }
 })
 
 test('admin authorization checks the database role on every request, including already issued sessions', async () => {
@@ -58,7 +112,7 @@ test('download limits are independent of analytics; HEAD does not consume a down
 })
 
 test('admin and sharing forms compile with their actual Vue script bindings', () => {
-    for (const filename of ['app/pages/admin/index.vue', 'app/pages/admin/users.vue', 'app/layouts/admin.vue', 'app/components/admin/AdminNavigation.vue', 'app/components/ui/ShareBox.vue', 'app/components/layout/Sidebar.vue']) {
+    for (const filename of ['app/pages/admin/index.vue', 'app/pages/admin/activity.vue', 'app/pages/admin/users/index.vue', 'app/pages/admin/users/new.vue', 'app/pages/admin/users/[id].vue', 'app/layouts/admin.vue', 'app/components/admin/AdminNavigation.vue', 'app/components/admin/AdminActivityList.vue', 'app/components/ui/ShareBox.vue', 'app/components/layout/Sidebar.vue']) {
         const { descriptor } = parse(read(filename))
         const script = compileScript(descriptor, { id: 'limits-admin' })
         assert.deepEqual(compileTemplate({ source: descriptor.template.content, filename, id: 'limits-admin', compilerOptions: { bindingMetadata: script.bindings } }).errors, [])

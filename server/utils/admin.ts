@@ -7,7 +7,7 @@ import { throwError } from './error'
 export async function requireAdmin(event: H3Event, db: Pick<Prisma.TransactionClient, 'users'> = prisma) {
     const session = getAuthSession(event)
     if (!session) throwError(401, 'You need to be logged in.')
-    const user = await db.users.findUnique({ where: { id: session.userId }, select: { id: true, role: true } })
+    const user = await db.users.findUnique({ where: { id: session.userId }, select: { id: true, role: true, username: true } })
     if (!user) throwError(401, 'Invalid session.')
     if (user.role !== 'ADMIN') throwError(403, 'Administrator access required.')
     return user

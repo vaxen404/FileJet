@@ -43,7 +43,7 @@ import { useMediaQuery } from '@vueuse/core'
 import AdminNavigation from '~/components/admin/AdminNavigation.vue'
 
 const route = useRoute()
-const pageTitle = computed(() => route.path.startsWith('/admin/users') ? 'Users' : 'Overview')
+const pageTitle = computed(() => route.path.startsWith('/admin/users') ? 'Users' : route.path.startsWith('/admin/activity') ? 'Activity history' : 'Overview')
 const { resolvedTheme, setTheme } = useTheme()
 const { preferencesLoaded } = usePreferences()
 const toggleTheme = () => setTheme(resolvedTheme.value === 'dark' ? 'light' : 'dark')

@@ -6,7 +6,7 @@
                 <h1 class="text-2xl font-semibold tracking-tight text-foreground">Admin dashboard</h1>
                 <p class="mt-2 text-sm text-muted">Accounts, storage and shared content across FileJet.</p>
             </div>
-            <button type="button" :disabled="pending" class="flex min-h-10 items-center gap-2 rounded-xl border border-control-border bg-surface px-4 text-sm text-content cursor-pointer hover:bg-control disabled:opacity-50" @click="refresh()">
+            <button type="button" :disabled="pending || activityPending" class="flex min-h-10 items-center gap-2 rounded-xl border border-control-border bg-surface px-4 text-sm text-content cursor-pointer hover:bg-control disabled:opacity-50" @click="refreshOverview">
                 <Icon name="solar:refresh-linear" size="17" aria-hidden="true" /> {{ pending ? 'Refreshing…' : 'Refresh' }}
             </button>
         </div>
@@ -25,6 +25,15 @@
                     <p class="mt-2 text-xs leading-5 text-muted">{{ stat.description }}</p>
                 </section>
             </div>
+
+            <p v-if="activityError" role="alert" class="rounded-xl border border-danger-border bg-danger-surface p-4 text-sm text-danger">Could not load activity summary. Select Refresh to try again.</p>
+            <section v-if="activity" class="rounded-2xl border border-divider bg-surface p-6 max-mobile:p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3"><div><h2 class="text-sm font-semibold text-foreground">Activity overview</h2><p class="mt-1 text-xs text-muted">Successful changes across FileJet.</p></div><NuxtLink to="/admin/activity" class="text-sm text-accent no-underline hover:underline">Open history →</NuxtLink></div>
+                <dl class="my-5 grid grid-cols-3 gap-3 max-mobile:grid-cols-1"><div class="rounded-xl bg-control/60 p-4"><dt class="text-xs text-muted">User changes · last 24 hours</dt><dd class="mt-2 text-2xl font-semibold text-foreground">{{ activity.changes24h.toLocaleString() }}</dd></div><div class="rounded-xl bg-control/60 p-4"><dt class="text-xs text-muted">Active accounts · last 24 hours</dt><dd class="mt-2 text-2xl font-semibold text-foreground">{{ activity.activeAccounts24h.toLocaleString() }}</dd></div><div class="rounded-xl bg-control/60 p-4"><dt class="text-xs text-muted">Admin actions · last 24 hours</dt><dd class="mt-2 text-2xl font-semibold text-foreground">{{ activity.adminActions24h.toLocaleString() }}</dd></div></dl>
+                <h3 class="text-xs font-medium text-muted">User changes · last 7 days (UTC)</h3><div class="mt-4 grid h-32 grid-cols-7 items-end gap-3" role="img" :aria-label="activity.days.map(day=>`${day.day}: ${day.count} changes`).join('; ')"><div v-for="day in activity.days" :key="day.day" class="flex h-full min-w-0 flex-col items-center justify-end gap-1"><span class="text-xs text-content">{{ day.count }}</span><div class="w-full max-w-20 rounded-t-md" :class="day.count?'bg-accent':'bg-control'" :style="{height:`${Math.max(4,day.count/activityMax*75)}%`}" /><span class="text-[0.65rem] text-muted">{{ day.day.slice(5) }}</span></div></div>
+            </section>
+
+            <div v-if="activity" class="grid grid-cols-2 gap-5 max-[1000px]:grid-cols-1"><section class="rounded-2xl border border-divider bg-surface p-6 max-mobile:p-4"><div class="mb-5 flex items-center justify-between gap-2"><h2 class="text-sm font-semibold text-foreground">Recent user activity</h2><NuxtLink to="/admin/activity" class="text-xs text-accent no-underline hover:underline">View all</NuxtLink></div><AdminActivityList :user-items="activity.recent" /></section><section class="rounded-2xl border border-divider bg-surface p-6 max-mobile:p-4"><div class="mb-5 flex items-center justify-between gap-2"><h2 class="text-sm font-semibold text-foreground">Recent admin actions</h2><NuxtLink to="/admin/activity?source=admin" class="text-xs text-accent no-underline hover:underline">View all</NuxtLink></div><AdminActivityList :admin-items="activity.adminRecent" /></section></div>
 
             <div class="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-5 max-[900px]:grid-cols-1">
                 <section class="rounded-2xl border border-divider bg-surface p-6 max-mobile:p-5">
@@ -77,7 +86,11 @@ import { formatFileSize } from '~/utils/file'
 
 definePageMeta({ layout: 'admin', middleware: ['auth', 'admin'] })
 useHead({ title: 'Admin dashboard · FileJet' })
-const { data, pending, error, refresh } = await useFetch('/api/admin', { key: 'admin-overview' })
+const [{ data, pending, error, refresh },{ data: activity, pending: activityPending, error: activityError, refresh: refreshActivity }] = await Promise.all([
+    useFetch('/api/admin', { key: 'admin-overview' }), useFetch('/api/admin/activity/summary',{key:'admin-activity-summary'})
+])
+const activityMax = computed(()=>Math.max(1,...(activity.value?.days.map(day=>day.count)??[])))
+const refreshOverview = () => Promise.all([refresh(),refreshActivity()])
 const storagePercent = computed(() => {
     const limit = Number(data.value?.storageLimit ?? 0)
     return limit > 0 ? Math.min(100, Math.max(0, Number(data.value?.storageUsed ?? 0) / limit * 100)) : 0

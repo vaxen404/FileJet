@@ -6,6 +6,7 @@ import { assertShareOrigin } from '../../../utils/shares'
 import { readShareBody } from '../../../utils/shareBody'
 import { isUuid } from '../../../utils/validation'
 import { adminUserUpdateSchema } from '../../../../shared/schemas/admin'
+import { writeAdminEvent } from '../../../utils/adminEvents'
 
 export default defineEventHandler(async event => {
     assertShareOrigin(event)
@@ -19,7 +20,7 @@ export default defineEventHandler(async event => {
     return prisma.$transaction(async tx => {
         // Serialize role changes and re-check the actor after acquiring the lock.
         await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('filejet-admin-users'))::text`
-        await requireAdmin(event, tx)
+        const currentActor = await requireAdmin(event, tx)
         await tx.$queryRaw`SELECT id FROM users WHERE id = ${id}::uuid FOR UPDATE`
         const user = await tx.users.findUnique({ where: { id }, select: adminUserSelect })
         if (!user) throwError(404, 'User not found.')
@@ -30,6 +31,7 @@ export default defineEventHandler(async event => {
         const limit = BigInt(parsed.data.storageLimit)
         if (limit < (user.storage_used ?? 0n)) throwError(400, 'Storage limit cannot be lower than current usage.')
         const updated = await tx.users.update({ where: { id }, data: { role: parsed.data.role, storage_limit: limit }, select: adminUserSelect })
+        if (user.role !== updated.role || user.storage_limit !== updated.storage_limit) await writeAdminEvent(tx, currentActor, 'account_updated', updated, user)
         return { user: adminUserView(updated) }
     })
 })

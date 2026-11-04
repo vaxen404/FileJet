@@ -31,6 +31,7 @@ logs
 !/tests/activity.integration.mjs
 !/tests/note-versions.integration.mjs
 !/tests/note-diff.test.mjs
+!/tests/admin-activity.integration.mjs
 
 
 # Misc
